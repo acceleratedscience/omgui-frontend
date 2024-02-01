@@ -1,66 +1,92 @@
 <template>
     <div id="col-scroll" ref="colScroll">
         <div id="col-wrap">
-            <template v-for="(files, level) in levels" :key="level">
+            <template v-for="(column, level) in levels" :key="level">
                 <div class="column" ref="columns">
-                    <!-- <div class="column" :ref="level == levels.length - 1 ? 'lastCol' : null"> -->
-                    <div class="col-name" :class="{ root: level == 0 }" @click="resetCol(level)">
-                        {{ /*(level == 0 ? '' : '/') + */ files['_info']['title'] }}
-                    </div>
-
-                    <!-- Hidden directories -->
+                    <!-- Column header -->
                     <div
-                        v-for="(dir_hidden, key) in files['dirs_hidden']"
-                        :key="key"
-                        class="dir hidden"
-                        :title="dir_hidden.filename"
-                        @click="(e) => fetchNextLevel(e, dir_hidden.path, level + 1)"
+                        class="col-header"
+                        :class="{ root: level == 0 }"
+                        :title="column['_meta']['name']"
+                        @click="resetCol(level)"
                     >
-                        {{ dir_hidden.filename }}
+                        {{ column['_meta']['name'] }}
                     </div>
 
-                    <!-- Directories -->
-                    <div
-                        v-for="(dir, key) in files['dirs']"
-                        :key="key"
-                        class="dir"
-                        :title="dir.filename"
-                        @click="(e) => fetchNextLevel(e, dir.path, level + 1)"
-                    >
-                        {{ dir.filename }}
+                    <!-- File preview -->
+                    <div v-if="column._type == 'file'" id="file-preview">
+                        <b>{{ column._meta.name }}</b>
+                        <small>
+                            <i>{{ column.size }}</i>
+                            <div class="soft">
+                                Created: {{ column.time_created }}<br />
+                                Last edit: {{ column.time_edited }}
+                            </div>
+                        </small>
                     </div>
 
-                    <!-- Hidden files -->
-                    <div
-                        v-for="(file_hidden, key) in files['files_hidden']"
-                        :key="key"
-                        class="file hidden"
-                        :title="file_hidden.filename"
-                    >
-                        &#9737;&nbsp; {{ file_hidden.filename }}
-                    </div>
+                    <!-- Directory listing -->
+                    <template v-else>
+                        <!-- Hidden directories -->
+                        <div
+                            v-for="(dir_hidden, key) in column['dirs_hidden']"
+                            :key="key"
+                            class="dir hidden"
+                            :title="dir_hidden.filename"
+                            @click="(e) => fetchNextLevel(e, dir_hidden.path, level + 1)"
+                        >
+                            {{ dir_hidden.filename }}
+                        </div>
 
-                    <!-- Files -->
-                    <div
-                        v-for="(file, key) in files['files']"
-                        :key="key"
-                        class="file"
-                        :title="file.filename"
-                    >
-                        &#9737;&nbsp; {{ file.filename }}
-                    </div>
+                        <!-- Directories -->
+                        <div
+                            v-for="(dir, key) in column['dirs']"
+                            :key="key"
+                            class="dir"
+                            :title="dir.filename"
+                            @click="(e) => fetchNextLevel(e, dir.path, level + 1)"
+                        >
+                            {{ dir.filename }}
+                        </div>
 
-                    <!-- Empty -->
-                    <div v-if="files['_info']['empty']" class="empty">Empty directory</div>
+                        <!-- Hidden files -->
+                        <div
+                            v-for="(file_hidden, key) in column['files_hidden']"
+                            :key="key"
+                            class="file hidden"
+                            :title="file_hidden.filename"
+                            @click="(_) => previewFile(file_hidden, level + 1)"
+                        >
+                            &#9737;&nbsp; {{ file_hidden.filename }}
+                        </div>
+
+                        <!-- Files -->
+                        <div
+                            v-for="(file, key) in column['files']"
+                            :key="key"
+                            class="file"
+                            :title="file.filename"
+                            @click="(_) => previewFile(file, level + 1)"
+                        >
+                            &#9737;&nbsp; {{ file.filename }}
+                        </div>
+
+                        <!-- Empty -->
+                        <div v-if="column['_meta']['empty']" class="empty">Empty directory</div>
+                    </template>
                 </div>
                 <div v-if="level < levels.length - 1" class="col-split"></div>
             </template>
+            <!-- <div class="column filler">
+                <div class="col-header"></div>
+            </div> -->
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue'
+import { prettyDate, prettySize, timeAgo } from '@/utils/helpers'
 
 // Api
 import { FileSystemApi } from '@/api/ApiService'
@@ -73,7 +99,6 @@ const colScroll = ref(null)
 const columns = ref(null)
 const lastCol = computed(() => columns.value[columns.value.length - 1])
 const secondLastCol = computed(() => columns.value[columns.value.length - 2])
-console.log(columns, lastCol)
 
 onMounted(async () => {
     // Initialize levels array.
@@ -86,10 +111,22 @@ onMounted(async () => {
 //
 //
 
+// Preview file information in rightmost column.
+async function previewFile(file, level) {
+    file.size = prettySize(file._meta.size)
+    file.time_created = timeAgo(file._meta.time_created)
+    file.time_edited = timeAgo(file._meta.time_edited)
+    levels.value.splice(level) // Remove all levels after this one.
+    levels.value[level] = file
+
+    await nextTick()
+    deselectCol(-2)
+}
+
 // Load the next level of files and add column.
 async function fetchNextLevel(e = null, path = '', level = 0) {
     const files = await fetchWorkspaceFiles(path)
-    console.log(22, files)
+    // console.log(22, files)
     if (files) {
         levels.value.splice(level) // Remove all levels after this one.
         levels.value[level] = files // Add new level.
@@ -105,7 +142,7 @@ async function fetchNextLevel(e = null, path = '', level = 0) {
         await nextTick()
 
         // In case you clicked on the parent folder.
-        deselectLastCol()
+        deselectCol(-1)
 
         // Scroll to the right
         const lastColWidth = lastCol.value.clientWidth
@@ -121,14 +158,14 @@ async function resetCol(level) {
     levels.value.splice(level + 1) // Remove all levels after this one.
 
     await nextTick()
-
-    deselectLastCol()
-    // colScroll.value.scrollLeft = colScroll.value.scrollWidth - lastCol.value.clientWidth
+    deselectCol(-1)
 }
 
-// Remove selection state of the last column.
-function deselectLastCol() {
-    lastCol.value.querySelectorAll('.dir').forEach((dir) => dir.classList.remove('sel'))
+// Remove dir/file selection state of a column.
+// Accepts negative level to count from the right.
+function deselectCol(level) {
+    level = (level + columns.value.length) % columns.value.length
+    columns.value[level].querySelectorAll('.dir').forEach((dir) => dir.classList.remove('sel'))
 }
 
 // Return structured content of a directory.
@@ -184,6 +221,10 @@ async function fetchWorkspaceFiles(path = '') {
     padding-right: 40px;
     flex: none;
 }
+// #col-wrap .column.filler {
+//     min-width: 0;
+//     flex: 0px 0 1;
+// }
 
 // Column split (tab in between column titles)
 #col-wrap .col-split {
@@ -206,7 +247,7 @@ async function fetchWorkspaceFiles(path = '') {
 }
 
 // Column name
-#col-wrap .col-name {
+#col-wrap .col-header {
     height: 32px;
     line-height: 32px;
     font-size: 12px;
@@ -220,22 +261,28 @@ async function fetchWorkspaceFiles(path = '') {
     background: #fff;
     border-bottom: solid 1px #eee;
     cursor: pointer;
+    box-sizing: border-box;
     // background: linear-gradient(rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+
+    // Truncate
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
-#col-wrap .col-name.root {
+#col-wrap .col-header.root {
     border: none;
 }
-#col-wrap .col-name.root::after {
+#col-wrap .col-header.root::after {
     content: 'Workspace';
     opacity: 0.5;
     font-weight: 400;
     padding-left: 5px;
 }
-#col-wrap .col-name.root::before {
+#col-wrap .col-header.root::before {
     content: '';
     display: block;
     position: absolute;
-    bottom: -1px;
+    bottom: 0;
     width: calc(100% - 16px);
     height: 0;
     border-bottom: solid 1px #eee;
@@ -278,4 +325,21 @@ async function fetchWorkspaceFiles(path = '') {
     font-style: italic;
     cursor: default;
 }
+
+/**
+ * File Preview
+ */
+
+#file-preview {
+    background: #fafafa;
+    padding: 16px;
+    margin: 0 8px;
+}
+#file-preview b {
+    display: block;
+}
+#file-preview .soft {
+    margin-top: 8px;
+}
 </style>
+@/util/general
