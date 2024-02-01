@@ -55,7 +55,7 @@
                             :key="key"
                             class="file hidden"
                             :title="file_hidden.filename"
-                            @click="(_) => previewFile(file_hidden, level + 1)"
+                            @click="(e) => previewFile(e, file_hidden, level + 1)"
                         >
                             &#9737;&nbsp; {{ file_hidden.filename }}
                         </div>
@@ -66,7 +66,7 @@
                             :key="key"
                             class="file"
                             :title="file.filename"
-                            @click="(_) => previewFile(file, level + 1)"
+                            @click="(e) => previewFile(e, file, level + 1)"
                         >
                             &#9737;&nbsp; {{ file.filename }}
                         </div>
@@ -112,15 +112,19 @@ onMounted(async () => {
 //
 
 // Preview file information in rightmost column.
-async function previewFile(file, level) {
+async function previewFile(e, file, level) {
+    // Remove selection state of clicked column.
+    deselectCol(level - 1)
+    e.target.classList.add('sel')
+
+    // Prepare file object for display.
     file.size = prettySize(file._meta.size)
     file.time_created = timeAgo(file._meta.time_created)
     file.time_edited = timeAgo(file._meta.time_edited)
+
+    // Display preview into rightmost column.
     levels.value.splice(level) // Remove all levels after this one.
     levels.value[level] = file
-
-    await nextTick()
-    deselectCol(-2)
 }
 
 // Load the next level of files and add column.
@@ -134,9 +138,10 @@ async function fetchNextLevel(e = null, path = '', level = 0) {
 
     // When triggered from tapping a dir name, highlight the dir.
     if (e) {
-        // Remove selection state of clicked column
-        const dirs = e.target.parentElement.querySelectorAll('.dir')
-        dirs.forEach((dir) => dir.classList.remove('sel'))
+        // Remove selection state of clicked column.
+        // const dirs = e.target.parentElement.querySelectorAll('.dir') # trash
+        // dirs.forEach((dir) => dir.classList.remove('sel')) # trash
+        deselectCol(level - 1)
         e.target.classList.add('sel')
 
         await nextTick()
@@ -165,7 +170,9 @@ async function resetCol(level) {
 // Accepts negative level to count from the right.
 function deselectCol(level) {
     level = (level + columns.value.length) % columns.value.length
-    columns.value[level].querySelectorAll('.dir').forEach((dir) => dir.classList.remove('sel'))
+    columns.value[level]
+        .querySelectorAll('.dir, .file')
+        .forEach((elm) => elm.classList.remove('sel'))
 }
 
 // Return structured content of a directory.
@@ -302,6 +309,7 @@ async function fetchWorkspaceFiles(path = '') {
     margin: 0 8px;
     border-radius: 2px;
     cursor: pointer;
+    position: relative;
 
     // Truncate
     white-space: nowrap;
@@ -312,13 +320,32 @@ async function fetchWorkspaceFiles(path = '') {
 #col-wrap .file:hover {
     background: #eee;
 }
+#col-wrap .dir:hover::after,
+#col-wrap .dir.sel::after {
+    content: '\25B6';
+    color: var(--ibm-black);
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 8px;
+    // background: red;
+}
 #col-wrap .dir.sel,
 #col-wrap .file.sel {
     color: #fff;
     background: var(--ibm-blue);
 }
+#col-wrap .dir.sel::after,
+#col-wrap .file.sel::after {
+    color: #fff;
+}
 #col-wrap .hidden {
-    opacity: 0.3;
+    color: rgba(0, 0, 0, 0.3);
 }
 #col-wrap .empty {
     opacity: 0.3;
