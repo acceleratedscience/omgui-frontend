@@ -1,6 +1,7 @@
 <template>
     <div id="col-scroll" ref="colScroll">
         <div id="col-wrap">
+            <!-- Directory columns -->
             <template v-for="(column, level) in levels" :key="level">
                 <div class="column" ref="columns">
                     <!-- Column header -->
@@ -13,70 +14,76 @@
                         {{ column['_meta']['name'] }}
                     </div>
 
-                    <!-- File preview -->
-                    <div v-if="column._type == 'file'" id="file-preview">
-                        <b>{{ column._meta.name }}</b>
-                        <small>
-                            <i>{{ column.size }}</i>
-                            <div class="soft">
-                                Created: {{ column.time_created }}<br />
-                                Last edit: {{ column.time_edited }}
-                            </div>
-                        </small>
+                    <!-- Hidden directories -->
+                    <div
+                        v-for="(dir_hidden, key) in column['dirs_hidden']"
+                        :key="key"
+                        class="dir hidden"
+                        :title="dir_hidden.filename"
+                        @click="(e) => fetchNextLevel(e, dir_hidden.path, level + 1)"
+                    >
+                        {{ dir_hidden.filename }}
                     </div>
 
-                    <!-- Directory listing -->
-                    <template v-else>
-                        <!-- Hidden directories -->
-                        <div
-                            v-for="(dir_hidden, key) in column['dirs_hidden']"
-                            :key="key"
-                            class="dir hidden"
-                            :title="dir_hidden.filename"
-                            @click="(e) => fetchNextLevel(e, dir_hidden.path, level + 1)"
-                        >
-                            {{ dir_hidden.filename }}
-                        </div>
+                    <!-- Directories -->
+                    <div
+                        v-for="(dir, key) in column['dirs']"
+                        :key="key"
+                        class="dir"
+                        :title="dir.filename"
+                        @click="(e) => fetchNextLevel(e, dir.path, level + 1)"
+                    >
+                        {{ dir.filename }}
+                    </div>
 
-                        <!-- Directories -->
-                        <div
-                            v-for="(dir, key) in column['dirs']"
-                            :key="key"
-                            class="dir"
-                            :title="dir.filename"
-                            @click="(e) => fetchNextLevel(e, dir.path, level + 1)"
-                        >
-                            {{ dir.filename }}
-                        </div>
+                    <!-- Hidden files -->
+                    <div
+                        v-for="(file_hidden, key) in column['files_hidden']"
+                        :key="key"
+                        class="file hidden"
+                        :title="file_hidden.filename"
+                        @click="(e) => previewFile(e, file_hidden, level + 1)"
+                    >
+                        &#9737;&nbsp; {{ file_hidden.filename }}
+                    </div>
 
-                        <!-- Hidden files -->
-                        <div
-                            v-for="(file_hidden, key) in column['files_hidden']"
-                            :key="key"
-                            class="file hidden"
-                            :title="file_hidden.filename"
-                            @click="(e) => previewFile(e, file_hidden, level + 1)"
-                        >
-                            &#9737;&nbsp; {{ file_hidden.filename }}
-                        </div>
+                    <!-- Files -->
+                    <div
+                        v-for="(file, key) in column['files']"
+                        :key="key"
+                        class="file"
+                        :title="file.filename"
+                        @click="(e) => previewFile(e, file, level + 1)"
+                    >
+                        &#9737;&nbsp; {{ file.filename }}
+                    </div>
 
-                        <!-- Files -->
-                        <div
-                            v-for="(file, key) in column['files']"
-                            :key="key"
-                            class="file"
-                            :title="file.filename"
-                            @click="(e) => previewFile(e, file, level + 1)"
-                        >
-                            &#9737;&nbsp; {{ file.filename }}
-                        </div>
-
-                        <!-- Empty -->
-                        <div v-if="column['_meta']['empty']" class="empty">Empty directory</div>
-                    </template>
+                    <!-- Empty directory -->
+                    <div v-if="column['_meta']['empty']" class="empty">Empty directory</div>
                 </div>
-                <div v-if="level < levels.length - 1" class="col-split"></div>
+                <div v-if="levels && level < levels.length - 1" class="col-split"></div>
             </template>
+
+            <!-- File preview column -->
+            <div v-if="filePreview" class="column">
+                <!-- Column header -->
+                <div class="col-header" :title="filePreview['_meta']['name']">
+                    {{ filePreview['_meta']['name'] }}
+                </div>
+
+                <!-- File preview -->
+                <div id="file-preview">
+                    <b>{{ filePreview._meta.name }}</b>
+                    <small>
+                        <i>{{ filePreview.disp_size }}</i>
+                        <div class="soft">
+                            Created: {{ filePreview.disp_time_created }}<br />
+                            Last edit: {{ filePreview.disp_time_edited }}
+                        </div>
+                    </small>
+                </div>
+            </div>
+
             <!-- <div class="column filler">
                 <div class="col-header"></div>
             </div> -->
@@ -86,19 +93,52 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue'
-import { prettyDate, prettySize, timeAgo } from '@/utils/helpers'
+import type { ComputedRef } from 'vue'
+import { prettySize, timeAgo } from '@/utils/helpers'
 
 // Api
 import { FileSystemApi } from '@/api/ApiService'
-const pinia = {}
-const router = {}
-const fileSystemApi = new FileSystemApi(pinia, router)
+const fileSystemApi = new FileSystemApi()
 
-let levels = ref(null)
-const colScroll = ref(null)
-const columns = ref(null)
-const lastCol = computed(() => columns.value[columns.value.length - 1])
-const secondLastCol = computed(() => columns.value[columns.value.length - 2])
+type Dir = {
+    _meta: {
+        name: string
+        size: number
+        time_created: number
+        time_edited: number
+    }
+
+    filename: string
+    path: string
+}
+type File = Dir & {
+    disp_size: string
+    disp_time_created: string
+    disp_time_edited: string
+}
+type Level = {
+    _meta: {
+        name: string
+        empty: boolean
+        empty_hidden: boolean
+    }
+
+    dirs: Dir[]
+    dirs_hidden: Dir[]
+    files: File[]
+    files_hidden: File[]
+}
+
+const levels = ref<Level[] | null>(null)
+const filePreview = ref<File | null>(null)
+const colScroll = ref<HTMLDivElement | null>(null)
+const columns = ref<HTMLDivElement[] | null>(null)
+const lastCol: ComputedRef<HTMLDivElement | undefined> = computed(() =>
+    columns.value ? columns.value[columns.value.length - 1] : undefined,
+)
+const secondLastCol: ComputedRef<HTMLDivElement | undefined> = computed(() =>
+    columns.value ? columns.value[columns.value.length - 2] : undefined,
+)
 
 onMounted(async () => {
     // Initialize levels array.
@@ -112,37 +152,49 @@ onMounted(async () => {
 //
 
 // Preview file information in rightmost column.
-async function previewFile(e, file, level) {
+async function previewFile(e: MouseEvent | undefined = undefined, file: File, level: number) {
     // Remove selection state of clicked column.
     deselectCol(level - 1)
-    e.target.classList.add('sel')
+    if (e) (e.target as Element).classList.add('sel')
 
     // Prepare file object for display.
-    file.size = prettySize(file._meta.size)
-    file.time_created = timeAgo(file._meta.time_created)
-    file.time_edited = timeAgo(file._meta.time_edited)
+    file.disp_size = prettySize(file._meta.size)
+    file.disp_time_created = timeAgo(file._meta.time_created)
+    file.disp_time_edited = timeAgo(file._meta.time_edited)
 
     // Display preview into rightmost column.
-    levels.value.splice(level) // Remove all levels after this one.
-    levels.value[level] = file
+    // levels.value.splice(level) // Remove all levels after this one.
+    // levels.value[level] = file
+    console.log(44, file)
+    filePreview.value = file
+}
+
+// Remove file preview.
+function hidePreviewFile() {
+    filePreview.value = null
 }
 
 // Load the next level of files and add column.
-async function fetchNextLevel(e = null, path = '', level = 0) {
+async function fetchNextLevel(
+    e: MouseEvent | undefined = undefined,
+    path: string = '',
+    level: number = 0,
+) {
     const files = await fetchWorkspaceFiles(path)
-    // console.log(22, files)
+    console.log(22, files)
     if (files) {
-        levels.value.splice(level) // Remove all levels after this one.
-        levels.value[level] = files // Add new level.
+        hidePreviewFile() // Remove file preview.
+        if (levels.value) {
+            levels.value.splice(level) // Remove all levels after this one.
+            levels.value[level] = files // Add new level.
+        }
     }
 
     // When triggered from tapping a dir name, highlight the dir.
     if (e) {
         // Remove selection state of clicked column.
-        // const dirs = e.target.parentElement.querySelectorAll('.dir') # trash
-        // dirs.forEach((dir) => dir.classList.remove('sel')) # trash
         deselectCol(level - 1)
-        e.target.classList.add('sel')
+        ;(e.target as Element).classList.add('sel')
 
         await nextTick()
 
@@ -150,17 +202,17 @@ async function fetchNextLevel(e = null, path = '', level = 0) {
         deselectCol(-1)
 
         // Scroll to the right
-        const lastColWidth = lastCol.value.clientWidth
+        const lastColWidth = lastCol.value ? lastCol.value.clientWidth : 0
         const secondLastColWidth = secondLastCol.value ? secondLastCol.value.clientWidth : 0
-        const maxScroll = colScroll.value.scrollWidth - lastColWidth - secondLastColWidth
-        colScroll.value.scrollLeft = maxScroll
+        const maxScroll = colScroll.value ? colScroll.value.scrollWidth - lastColWidth - secondLastColWidth : 0 // prettier-ignore
+        if (colScroll.value) colScroll.value.scrollLeft = maxScroll
     }
 }
 
 // Focus on a selected column and remove selected state from its children.
-async function resetCol(level) {
+async function resetCol(level: number) {
     console.log('resetCol', columns, lastCol)
-    levels.value.splice(level + 1) // Remove all levels after this one.
+    if (levels.value) levels.value.splice(level + 1) // Remove all levels after this one.
 
     await nextTick()
     deselectCol(-1)
@@ -168,7 +220,8 @@ async function resetCol(level) {
 
 // Remove dir/file selection state of a column.
 // Accepts negative level to count from the right.
-function deselectCol(level) {
+function deselectCol(level: number) {
+    if (!columns.value) return
     level = (level + columns.value.length) % columns.value.length
     columns.value[level]
         .querySelectorAll('.dir, .file')
@@ -339,6 +392,7 @@ async function fetchWorkspaceFiles(path = '') {
 #col-wrap .file.sel {
     color: #fff;
     background: var(--ibm-blue);
+    padding-right: 23px;
 }
 #col-wrap .dir.sel::after,
 #col-wrap .file.sel::after {

@@ -1,8 +1,8 @@
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] // prettier-ignore
+// const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] // prettier-ignore
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] // prettier-ignore
 
 // Return timestamp as "10 days ago"
-export function timeAgo(dateParam) {
+export function timeAgo(dateParam: Date | string | number) {
     if (!dateParam) {
         return null
     }
@@ -10,8 +10,8 @@ export function timeAgo(dateParam) {
     const date = typeof dateParam === 'object' ? dateParam : new Date(dateParam)
     const DAY_IN_MS = 86400000 // 24 * 60 * 60 * 1000
     const today = new Date()
-    const yesterday = new Date(today - DAY_IN_MS)
-    const seconds = Math.round((today - date) / 1000)
+    const yesterday = new Date(today.getTime() - DAY_IN_MS)
+    const seconds = Math.round((today.getTime() - date.getTime()) / 1000)
     const minutes = Math.round(seconds / 60)
     const isToday = today.toDateString() === date.toDateString()
     const isYesterday = yesterday.toDateString() === date.toDateString()
@@ -26,54 +26,51 @@ export function timeAgo(dateParam) {
     } else if (minutes < 60) {
         return `${minutes} minutes ago`
     } else if (isToday) {
-        return prettyDate(date, 'Today') // Today at 10:20
+        return _prettyDate(date, 'Today') // Today at 10:20
     } else if (isYesterday) {
-        return prettyDate(date, 'Yesterday') // Yesterday at 10:20
+        return _prettyDate(date, 'Yesterday') // Yesterday at 10:20
     } else if (isThisYear) {
-        return prettyDate(date, false, true) // Jan 10 at 10:20
+        return _prettyDate(date, null, true) // Jan 10 at 10:20
     }
 
-    return prettyDate(date) // Jan 10, 2017 at 10:20
+    return _prettyDate(date) // Jan 10, 2017 at 10:20
 }
 
 // Return timestamp as "Jan 10, 2024 at 10:20"
-export function prettyDate(date, prefomattedDate = false, hideYear = false) {
+export function _prettyDate(
+    date: Date,
+    prefomattedDate: string | null = null,
+    hideYear: boolean = false,
+) {
     const day = date.getDate()
     const month = MONTHS_SHORT[date.getMonth()]
     const year = date.getFullYear()
     const hours = date.getHours()
-    let minutes = date.getMinutes()
+    const minutes = date.getMinutes()
+    let minutes_str = minutes.toString()
 
     if (minutes < 10) {
         // Adding leading zero to minutes
-        minutes = `0${minutes}`
+        minutes_str = `0${minutes}`
     }
 
     if (prefomattedDate) {
         // Today at 10:20
         // Yesterday at 10:20
-        return `${prefomattedDate} at ${hours}:${minutes}`
+        return `${prefomattedDate} at ${hours}:${minutes_str}`
     }
 
     if (hideYear) {
         // Jan 10 at 10:20
-        return `${month} ${day} at ${hours}:${minutes}`
+        return `${month} ${day} at ${hours}:${minutes_str}`
     }
 
     // 10. January 2017. at 10:20
-    return `${month} ${day}, ${year} at ${hours}:${minutes}`
+    return `${month} ${day}, ${year} at ${hours}:${minutes_str}`
 }
 
-// export function prettyDate(timestamp) {
-//     // Python timestamps are in seconds, JavaScript timestamps are in milliseconds.
-//     timestamp = timestamp < 9999999999 ? timestamp * 1000 : timestamp
-
-//     const date = timestamp ? new Date(timestamp) : new Date()
-//     const formattedDate = `${MONTHS_SHORT[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`
-//     return formattedDate
-// }
-
-export function prettySize(bytes) {
+// Return a human-readable file size.
+export function prettySize(bytes: number) {
     if (bytes < 500) {
         // 0 - 99 Bytes
         return bytes + ' Bytes'
@@ -91,8 +88,8 @@ export function prettySize(bytes) {
         return _round(bytes / 1000000000000) + ' TB'
     }
 
-    function _round(value, decimals = 2) {
+    function _round(bytes: number, decimals = 2) {
         const multiplier = Math.pow(10, decimals)
-        return Number(Math.round(value * multiplier) / multiplier)
+        return Number(Math.round(bytes * multiplier) / multiplier)
     }
 }
