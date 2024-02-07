@@ -1,9 +1,9 @@
-<!-- This file will import svgs as images, but currentColor won't work like that -->
 <template>
+    <!-- This file will import svgs as images, but currentColor won't work like that -->
     <img v-if="!loadError" :src="source" :alt="filename" />
 </template>
 
-<script>
+<script lang="ts">
 export default {
     props: ['filename'],
     data() {

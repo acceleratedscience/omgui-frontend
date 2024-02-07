@@ -2,7 +2,7 @@
     <div class="svg-wrap" v-html="svgContent"></div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from 'axios'
 
 export default {
@@ -10,8 +10,8 @@ export default {
     data() {
         return {
             svgContent: '',
-            width: null,
-            height: null,
+            // width: null,
+            // height: null,
         }
     },
     async created() {
@@ -23,17 +23,17 @@ export default {
             console.error('Failed to load SVG', error)
         }
     },
-    methods: {
-        storeSvgDimensions(svgString) {
-            const parser = new DOMParser()
-            const doc = parser.parseFromString(svgString, 'image/svg+xml')
-            const svgElement = doc.documentElement
-            const width = svgElement.getAttribute('width')
-            const height = svgElement.getAttribute('height')
-            this.width = width
-            this.height = height
-        },
-    },
+    // methods: {
+    //     storeSvgDimensions(svgString) {
+    //         const parser = new DOMParser()
+    //         const doc = parser.parseFromString(svgString, 'image/svg+xml')
+    //         const svgElement = doc.documentElement
+    //         const width = svgElement.getAttribute('width')
+    //         const height = svgElement.getAttribute('height')
+    //         this.width = width
+    //         this.height = height
+    //     },
+    // },
 }
 </script>
 

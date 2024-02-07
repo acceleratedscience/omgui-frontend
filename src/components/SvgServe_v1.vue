@@ -1,5 +1,5 @@
-<!-- This file relies on svgs being stored as vue components -->
 <template>
+    <!-- This file relies on svgs being stored as vue components -->
     <img src="@/assets/svg/icn-mol.svg" />
     <div v-if="loadError" class="error-msg">
         <p>Failed to load SVG</p>
