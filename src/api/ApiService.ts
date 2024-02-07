@@ -9,16 +9,35 @@
 // Modules
 import axios from 'axios'
 
-const API_URL = 'http://127.0.0.1:5000/'
+// Constants
+const API_URL = 'http://127.0.0.1:5000/api/v1/'
+
+// Type declarations
+type AxiosError = {
+    response: {
+        status: number
+        statusText: string
+        data?: any
+    }
+    code: string
+}
 
 //
 //
 //
 //
+
+interface ApiService {
+    apiClient: any
+    setupInterceptors: () => void
+}
 
 class ApiService {
+    // apiClient: any
+    // setupInterceptors!: () => void // ! Is to avoid typescript strict mode error, since we can be sure setupInterceptors will be defined.
+
     // apiName is just for debugging.
-    constructor(apiName) {
+    constructor(apiName: string) {
         // Create axios instance for API.
         this.apiClient = axios.create({
             baseURL: API_URL,
@@ -42,32 +61,33 @@ class ApiService {
 ApiService.prototype.setupInterceptors = async function () {
     // Intercept requests
     this.apiClient.interceptors.request.use(
-        async (req) => {
+        async (req: object) => {
             // Request interceptor go here
             // Attach auth tokens etc.
             return req
         },
         // Do nothing with request errors
-        (error) => Promise.reject(error),
+        (error: object) => Promise.reject(error),
     )
 
     // Intercept responses
     this.apiClient.interceptors.response.use(
-        async (res) => {
+        async (res: object) => {
             // Response interceptors here
             // Store guest authTokens, handle errors, etc.
             return res
         },
 
         // Handle response errors
-        async (err) => {
+        async (err: AxiosError) => {
             return _handleError(err)
         },
     )
 
     // Catch errors and return { status, error }
-    function _handleError(err) {
-        let { code, response } = err
+    function _handleError(err: AxiosError) {
+        let { response } = err
+        const { code } = err
         if (response) {
             // Regular http error (might still have data)
             const { status, data } = response
@@ -100,8 +120,8 @@ export class FileSystemApi extends ApiService {
     //
     //
 
-    workspace(path) {
-        return this.apiClient.post('/workspace', { path })
+    get_workspace_files(path: string = '') {
+        return this.apiClient.post('/get-workspace-files', { path })
     }
 
     test() {

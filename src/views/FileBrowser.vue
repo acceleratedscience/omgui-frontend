@@ -22,7 +22,8 @@
                         :title="dir_hidden.filename"
                         @click="(e) => fetchNextLevel(e, dir_hidden.path, level + 1)"
                     >
-                        {{ dir_hidden.filename }}
+                        <div>{{ dir_hidden.filename }}</div>
+                        <SvgServe filename="icn-caret-right" :key="dir_hidden.filename" />
                     </div>
 
                     <!-- Directories -->
@@ -33,7 +34,8 @@
                         :title="dir.filename"
                         @click="(e) => fetchNextLevel(e, dir.path, level + 1)"
                     >
-                        {{ dir.filename }}
+                        <div>{{ dir.filename }}</div>
+                        <SvgServe filename="icn-caret-right" :key="dir.filename" />
                     </div>
 
                     <!-- Hidden files -->
@@ -41,10 +43,16 @@
                         v-for="(file_hidden, key) in column['files_hidden']"
                         :key="key"
                         class="file hidden"
+                        :data-type="file_hidden._meta.type"
+                        :data-ext="file_hidden._meta.ext"
                         :title="file_hidden.filename"
                         @click="(e) => previewFile(e, file_hidden, level + 1)"
                     >
-                        &#9737;&nbsp; {{ file_hidden.filename }}
+                        <SvgServe
+                            :filename="'icn-' + file_hidden._meta.type"
+                            :key="file_hidden._meta.type"
+                        />
+                        <div>{{ file_hidden.filename }}</div>
                     </div>
 
                     <!-- Files -->
@@ -52,20 +60,26 @@
                         v-for="(file, key) in column['files']"
                         :key="key"
                         class="file"
+                        :data-type="file._meta.type"
+                        :data-ext="file._meta.ext"
                         :title="file.filename"
                         @click="(e) => previewFile(e, file, level + 1)"
                     >
-                        &#9737;&nbsp; {{ file.filename }}
+                        <SvgServe :filename="'icn-' + file._meta.type" :key="file._meta.type" />
+                        <div>{{ file.filename }}</div>
                     </div>
 
                     <!-- Empty directory -->
                     <div v-if="column['_meta']['empty']" class="empty">Empty directory</div>
                 </div>
-                <div v-if="levels && level < levels.length - 1" class="col-split"></div>
+                <div
+                    v-if="(levels && level < levels.length - 1) || filePreview"
+                    class="col-split"
+                ></div>
             </template>
 
             <!-- File preview column -->
-            <div v-if="filePreview" class="column">
+            <div v-if="filePreview" class="column file-preview">
                 <!-- Column header -->
                 <div class="col-header" :title="filePreview['_meta']['name']">
                     {{ filePreview['_meta']['name'] }}
@@ -83,22 +97,24 @@
                     </small>
                 </div>
             </div>
-
-            <!-- <div class="column filler">
-                <div class="col-header"></div>
-            </div> -->
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+// Vue
 import { ref, onMounted, computed, nextTick } from 'vue'
 import type { ComputedRef } from 'vue'
-import { prettySize, timeAgo } from '@/utils/helpers'
 
 // Api
 import { FileSystemApi } from '@/api/ApiService'
 const fileSystemApi = new FileSystemApi()
+
+// Components
+import SvgServe from '@/components/SvgServe.vue'
+
+// Utils
+import { prettySize, timeAgo } from '@/utils/helpers'
 
 type Dir = {
     _meta: {
@@ -112,6 +128,10 @@ type Dir = {
     path: string
 }
 type File = Dir & {
+    _meta: {
+        type: string
+        ext: string
+    }
     disp_size: string
     disp_time_created: string
     disp_time_edited: string
@@ -155,7 +175,7 @@ onMounted(async () => {
 async function previewFile(e: MouseEvent | undefined = undefined, file: File, level: number) {
     // Remove selection state of clicked column.
     deselectCol(level - 1)
-    if (e) (e.target as Element).classList.add('sel')
+    if (e) (e.currentTarget as Element).classList.add('sel')
 
     // Prepare file object for display.
     file.disp_size = prettySize(file._meta.size)
@@ -163,9 +183,7 @@ async function previewFile(e: MouseEvent | undefined = undefined, file: File, le
     file.disp_time_edited = timeAgo(file._meta.time_edited)
 
     // Display preview into rightmost column.
-    // levels.value.splice(level) // Remove all levels after this one.
-    // levels.value[level] = file
-    console.log(44, file)
+    if (levels.value) levels.value.splice(level) // Remove all levels after this one.
     filePreview.value = file
 }
 
@@ -180,8 +198,10 @@ async function fetchNextLevel(
     path: string = '',
     level: number = 0,
 ) {
+    // Store currentTarget because it will be removed after event propagation.
+    const currentTarget = e ? (e.currentTarget as Element) : null
+
     const files = await fetchWorkspaceFiles(path)
-    console.log(22, files)
     if (files) {
         hidePreviewFile() // Remove file preview.
         if (levels.value) {
@@ -191,22 +211,22 @@ async function fetchNextLevel(
     }
 
     // When triggered from tapping a dir name, highlight the dir.
-    if (e) {
+    if (currentTarget) {
         // Remove selection state of clicked column.
         deselectCol(level - 1)
-        ;(e.target as Element).classList.add('sel')
+        currentTarget.classList.add('sel')
 
         await nextTick()
 
         // In case you clicked on the parent folder.
         deselectCol(-1)
-
-        // Scroll to the right
-        const lastColWidth = lastCol.value ? lastCol.value.clientWidth : 0
-        const secondLastColWidth = secondLastCol.value ? secondLastCol.value.clientWidth : 0
-        const maxScroll = colScroll.value ? colScroll.value.scrollWidth - lastColWidth - secondLastColWidth : 0 // prettier-ignore
-        if (colScroll.value) colScroll.value.scrollLeft = maxScroll
     }
+
+    // Scroll to the right
+    const lastColWidth = lastCol.value ? lastCol.value.clientWidth : 0
+    const secondLastColWidth = secondLastCol.value ? secondLastCol.value.clientWidth : 0
+    const maxScroll = colScroll.value ? colScroll.value.scrollWidth - lastColWidth - secondLastColWidth : 0 // prettier-ignore
+    if (colScroll.value) colScroll.value.scrollLeft = maxScroll
 }
 
 // Focus on a selected column and remove selected state from its children.
@@ -230,7 +250,7 @@ function deselectCol(level: number) {
 
 // Return structured content of a directory.
 async function fetchWorkspaceFiles(path = '') {
-    const { status, data, statusText } = await fileSystemApi.workspace(path)
+    const { status, data, statusText } = await fileSystemApi.get_workspace_files(path)
     if (status !== 200) {
         console.error(statusText)
         return
@@ -274,17 +294,16 @@ async function fetchWorkspaceFiles(path = '') {
     // max-width: 200px;
     border-right: solid 1px #eee;
 }
-#col-wrap .column:last-child {
+#col-wrap .column:last-child.file-preview {
+    flex-basis: 300px;
+}
+#col-wrap .column:last-child:not(.file-preview) {
     // min-width: 0; // This makes sure the last column is also truncated.
     min-width: 200px;
     margin-right: 0;
     padding-right: 40px;
     flex: none;
 }
-// #col-wrap .column.filler {
-//     min-width: 0;
-//     flex: 0px 0 1;
-// }
 
 // Column split (tab in between column titles)
 #col-wrap .col-split {
@@ -363,44 +382,51 @@ async function fetchWorkspaceFiles(path = '') {
     border-radius: 2px;
     cursor: pointer;
     position: relative;
-
+    display: flex;
+    gap: 8px;
+}
+#col-wrap .dir > div:not(.svg-wrap),
+#col-wrap .file > div:not(.svg-wrap),
+#col-wrap .empty {
     // Truncate
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
-#col-wrap .dir:hover,
-#col-wrap .file:hover {
-    background: #eee;
+
+// Icons
+#col-wrap .file .svg-wrap,
+#col-wrap .dir .svg-wrap {
+    width: 16px;
+    height: 16px;
+    flex: 16px 0 0;
 }
-#col-wrap .dir:hover::after,
-#col-wrap .dir.sel::after {
-    content: '\25B6';
-    color: var(--ibm-black);
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
-    text-align: center;
-    padding: 0;
-    position: absolute;
-    top: 0;
-    right: 0;
-    font-size: 8px;
-    // background: red;
+#col-wrap .dir > div:not(.svg-wrap) {
+    flex: 1;
 }
+#col-wrap .dir .svg-wrap {
+    color: var(--black-30);
+}
+#col-wrap .dir {
+    padding-right: 3px;
+}
+
+// Selected state
 #col-wrap .dir.sel,
 #col-wrap .file.sel {
     color: #fff;
     background: var(--ibm-blue);
-    padding-right: 23px;
 }
-#col-wrap .dir.sel::after,
-#col-wrap .file.sel::after {
+#col-wrap .dir.sel .svg-wrap {
     color: #fff;
 }
+
+// Hidden files
 #col-wrap .hidden {
     color: rgba(0, 0, 0, 0.3);
 }
+
+// Empty files
 #col-wrap .empty {
     opacity: 0.3;
     font-style: italic;
@@ -422,5 +448,21 @@ async function fetchWorkspaceFiles(path = '') {
 #file-preview .soft {
     margin-top: 8px;
 }
+
+/**
+ * Hover states
+ */
+
+@media (hover: hover) {
+    // Files & folders
+    #col-wrap .dir:not(.sel):hover,
+    #col-wrap .file:not(.sel):hover {
+        background: #eee;
+    }
+
+    // Arrow after directory names
+    #col-wrap .dir:not(.sel):hover .svg-wrap {
+        color: var(--ibm-black);
+    }
+}
 </style>
-@/util/general

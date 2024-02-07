@@ -1,36 +1,69 @@
 <script setup lang="ts">
+// Modules
 import { computed } from 'vue'
+// import { useRoute } from 'vue-router'
+
+// Stores
+import { useMainStore } from '@/stores/main'
+const mainStore = useMainStore()
 
 // When requesting a "raw" module, we want to show it without the
 // application wrapper. Because the router takes a moment before
 // it can tell us if we are on a module path, we instead check the
 // URL directly to avoid flash-loading the application wrapper.
 const isRawModule = computed(() => {
-    const pathItems = window.location.href.split('/').reverse()
-    if (pathItems[0] == '') {
-        pathItems.shift()
-    }
-    const isModulePath = pathItems[1] == 'module'
+    const basePaths = ['svg'] // First part of the URL that will trigger raw module loading.
+    const pathItems = window.location.pathname.split('/')
+    const isModulePath = basePaths.includes(pathItems[1])
     return isModulePath
 })
 </script>
 
 <template>
-    <!-- Load a raw module -->
+    <template v-if="!isRawModule">
+        <!-- Dev only: toggle headless links -->
+        <a
+            href="#"
+            @click.prevent="mainStore.setHeadless(true)"
+            style="position: fixed; top: 10px; right: 10px"
+            >headless</a
+        >
+        <a
+            href="#"
+            @click.prevent="mainStore.unsetHeadless(true)"
+            style="position: fixed; top: 30px; right: 10px"
+            >normal</a
+        >
+    </template>
+
+    <!-- When loading SVG -->
     <template v-if="isRawModule">
+        <RouterView v-slot="{ Component }">
+            <component v-if="Component" :is="Component" />
+        </RouterView>
+    </template>
+
+    <!-- Load a raw module -->
+    <div v-else-if="mainStore.isHeadless()" id="headless-wrap">
         <RouterView v-slot="{ Component }">
             <component v-if="Component" :is="Component" />
             <div v-else>Loading module...</div>
         </RouterView>
-    </template>
+    </div>
 
     <!-- Load the full application -->
     <div v-else id="main-wrap">
         <header>
             <nav>
-                <RouterLink to="/">Browse</RouterLink> &nbsp;&nbsp;|&nbsp;&nbsp;
-                <RouterLink to="/a">Module A</RouterLink> &nbsp;&nbsp;|&nbsp;&nbsp;
-                <RouterLink to="/b">Module B</RouterLink>
+                <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <RouterLink :to="{ name: 'filebrowser' }">File Browser</RouterLink>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <RouterLink :to="{ name: 'molviewer' }">Molecule Viewer</RouterLink>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <RouterLink :to="{ name: 'module-a' }">Module A</RouterLink
+                >&nbsp;&nbsp;|&nbsp;&nbsp;
+                <RouterLink :to="{ name: 'module-b' }">Module B</RouterLink>
             </nav>
         </header>
         <div id="body">
@@ -40,6 +73,16 @@ const isRawModule = computed(() => {
 </template>
 
 <style scoped lang="scss">
+/**
+ * Headless
+ */
+#headless-wrap {
+    padding: 20px;
+}
+
+/**
+  * Normal
+  */
 #main-wrap {
     display: flex;
     flex-direction: column;

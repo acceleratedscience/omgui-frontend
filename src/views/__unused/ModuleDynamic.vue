@@ -10,11 +10,6 @@ import { defineAsyncComponent, ref } from 'vue'
 
 export default {
     props: ['moduleName'],
-    // computed: {
-    //     dynamicComponent() {
-    //         return defineAsyncComponent(() => import(`../views/${this.moduleName}.vue`))
-    //     },
-    // },
     setup(props) {
         const loadError = ref(false)
         const dynamicComponent = defineAsyncComponent(() =>

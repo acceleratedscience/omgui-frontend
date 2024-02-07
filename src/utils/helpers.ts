@@ -2,9 +2,9 @@
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] // prettier-ignore
 
 // Return timestamp as "10 days ago"
-export function timeAgo(dateParam: Date | string | number) {
+export function timeAgo(dateParam: Date | string | number): string {
     if (!dateParam) {
-        return null
+        return ''
     }
 
     const date = typeof dateParam === 'object' ? dateParam : new Date(dateParam)
@@ -41,7 +41,7 @@ export function _prettyDate(
     date: Date,
     prefomattedDate: string | null = null,
     hideYear: boolean = false,
-) {
+): string {
     const day = date.getDate()
     const month = MONTHS_SHORT[date.getMonth()]
     const year = date.getFullYear()
