@@ -80,6 +80,7 @@ function storeScreenWidth() {
 		mainStore.setScreenWidth(window.innerWidth)
 	}
 }
+import User from '@/components/User.vue';
 </script>
 
 <template>
@@ -121,6 +122,8 @@ function storeScreenWidth() {
 
 	<!-- Load the full application -->
 	<div v-else ref="$mainWrap" id="main-wrap">
+	<div v-else id="main-wrap">
+		<User />
 		<header>
 			<nav>
 				<RouterLink :to="{ name: 'home' }">Home</RouterLink>
