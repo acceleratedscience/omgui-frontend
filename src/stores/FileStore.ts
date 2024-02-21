@@ -8,7 +8,7 @@ import { defineStore } from 'pinia'
 
 // Type declarations
 type ErrCode = null | 'not_found' | 'no_permission' | 'is_dir' | 'decode' | 'io' | 'unknown' // From open_file() in API, see helpers -> general.py
-type FileState = {
+type State = {
 	_data: string
 	_path: string
 	_pathFull: string
@@ -27,7 +27,7 @@ const EXT_MAP: ExtMap = {
 }
 
 export const useFileStore = defineStore('fileStore', {
-	state: (): FileState => ({
+	state: (): State => ({
 		_data: '', // Content of file
 		_path: '', // Path of file relative to the workspace
 		_pathFull: '', // Path of file relative to the system

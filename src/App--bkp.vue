@@ -29,7 +29,7 @@ const isRawPath = computed(() => {
 			type="checkbox"
 			@click="mainStore.toggleHeadless(true)"
 			style="position: fixed; top: 2px; left: 2px; z-index: 10"
-			:checked="!mainStore.isHeadless"
+			:checked="!mainStore.headless"
 		/>
 	</template>
 
@@ -44,7 +44,7 @@ const isRawPath = computed(() => {
 
 	<!-- Load a headless module (wrapper + loader) -->
 	<div
-		v-else-if="mainStore.isHeadless"
+		v-else-if="mainStore.headless"
 		id="headless-wrap"
 		:class="{ 'file-browser': fileStore.isDir }"
 	>

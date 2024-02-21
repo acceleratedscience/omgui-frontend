@@ -6,7 +6,7 @@ const mainStore = useMainStore()
 
 <template>
 	<main>
-		<template v-if="mainStore.isHeadless">
+		<template v-if="mainStore.headless">
 			<h1>You're in Headless Mode</h1>
 			<a href="#" @click.prevent="mainStore.unsetHeadless(true)">Exit headless mode</a>
 			<br /><br />

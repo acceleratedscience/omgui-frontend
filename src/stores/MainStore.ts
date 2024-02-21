@@ -6,20 +6,30 @@
 import { defineStore } from 'pinia'
 import router from '@/router'
 
+// Type declarations
+type State = {
+	_headless: boolean
+	_workspace: string | null
+}
+
 export const useMainStore = defineStore('mainStore', {
-	state: () => ({
-		headless: false, // Causes the modules to display without the application wrapper
+	state: (): State => ({
+		_headless: false, // Causes the modules to display without the application wrapper
+		_workspace: null, // The current workspace
 	}),
 	getters: {
-		isHeadless(): boolean {
-			return this.headless
+		headless(): boolean {
+			return this._headless
+		},
+		workspace(): string | null {
+			return this._workspace
 		},
 	},
 	actions: {
 		// Turn headless mode ON
 		setHeadless(updateRoute: boolean = false) {
 			// console.log('setHeadless', updateRoute)
-			this.headless = true
+			this._headless = true
 			if (updateRoute) {
 				const path = router.currentRoute.value.path.replace(/^\/headless/, '')
 				router.replace('/headless' + path)
@@ -29,7 +39,7 @@ export const useMainStore = defineStore('mainStore', {
 		// Turn headless mode OFF
 		unsetHeadless(updateRoute: boolean = false) {
 			// console.log('unsetHeadless', updateRoute)
-			this.headless = false
+			this._headless = false
 			if (updateRoute) {
 				const path = router.currentRoute.value.path.replace(/^\/headless/, '')
 				router.replace(path)
@@ -38,11 +48,16 @@ export const useMainStore = defineStore('mainStore', {
 
 		// Toggle headless mode
 		toggleHeadless(updateRoute: boolean = false) {
-			if (this.headless) {
+			if (this._headless) {
 				this.unsetHeadless(updateRoute)
 			} else {
 				this.setHeadless(updateRoute)
 			}
+		},
+
+		// Set current workspace
+		setWorkspace(workspace: string | null) {
+			this._workspace = workspace
 		},
 	},
 })

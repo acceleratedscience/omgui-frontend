@@ -5,8 +5,11 @@ import { computed } from 'vue'
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
+import { useApiStore } from '@/stores/ApiStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
+const apiStore = useApiStore()
+const fileSystemApi = apiStore.loadApi('fileSystem')
 
 // While currently not used in the application, we preserve the
 // option to load certain paths as "raw", i.e. without the application
@@ -20,6 +23,19 @@ const isRawPath = computed(() => {
 	const isRaw = basePaths.includes(pathItems[1])
 	return isRaw
 })
+
+// Store the name of your current workspace.
+if (fileSystemApi) {
+	fileSystemApi
+		.get_workspace_name()
+		.then((result: { data: string; status: number; statusText: string }) => {
+			if (result.status != 200) {
+				console.error('Failed to get workspace name:', result.statusText)
+				return
+			}
+			mainStore.setWorkspace(result.data)
+		})
+}
 </script>
 
 <template>
@@ -29,7 +45,7 @@ const isRawPath = computed(() => {
 			type="checkbox"
 			@click="mainStore.toggleHeadless(true)"
 			style="position: fixed; top: 2px; left: 2px; z-index: 10"
-			:checked="!mainStore.isHeadless"
+			:checked="!mainStore.headless"
 		/>
 	</template>
 
@@ -45,7 +61,7 @@ const isRawPath = computed(() => {
 
 	<!-- Load a headless module (wrapper + loader) -->
 	<div
-		v-else-if="mainStore.isHeadless"
+		v-else-if="mainStore.headless"
 		id="headless-wrap"
 		:class="{ 'file-browser': fileStore.isDir }"
 	>
@@ -115,13 +131,10 @@ const isRawPath = computed(() => {
 	box-sizing: border-box;
 	height: 100%;
 	overflow-x: hidden;
-	// left: 40px;
-	// top: 40px;
 }
 header {
 	width: 100%;
 	min-height: 40px;
-	// border-bottom: solid 1px #eee;
 	margin-bottom: 20px;
 	flex: 0 0 auto;
 	// background: yellow;
@@ -141,8 +154,8 @@ nav {
 	// background: orange;
 }
 #body.file-browser {
-	overflow-x: hidden; // %%
-	overflow-y: auto; // %%
+	overflow-x: hidden;
+	overflow-y: auto;
 	margin: 0 -40px;
 }
 </style>

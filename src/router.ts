@@ -92,7 +92,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
 	const mainStore = useMainStore()
 	const exitHeadless = from.path.replace(/^\/headless/, '') == to.path
-	if (!mainStore.isHeadless && !exitHeadless && (from.meta.headless || to.meta.headless)) {
+	if (!mainStore.headless && !exitHeadless && (from.meta.headless || to.meta.headless)) {
 		mainStore.setHeadless()
 	}
 	if (!exitHeadless && from.meta.headless && !to.meta.headless) {
