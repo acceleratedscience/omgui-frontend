@@ -1,12 +1,6 @@
 <template>
 	<div id="col-scroll-x" ref="colScroll">
 		<div id="col-wrap">
-			<!-- Filler column left -->
-			<div class="column filler-left">
-				<div class="col-header"></div>
-				<div class="col-body"></div>
-			</div>
-
 			<!-- Directory columns -->
 			<template v-for="(column, level) in levels" :key="level">
 				<div class="column" ref="columns">
@@ -20,67 +14,65 @@
 						{{ column['_meta']['name'] }}
 					</div>
 
-					<div class="col-body">
-						<!-- Hidden directories -->
-						<div
-							v-for="(dir_hidden, key) in column['dirs_hidden']"
-							:key="key"
-							class="dir hidden"
-							:title="dir_hidden.filename"
-							@click="(e) => fetchNextLevel(e, dir_hidden.path, level + 1)"
-						>
-							<div>{{ dir_hidden.filename }}</div>
-							<SvgServe filename="icn-caret-right" :key="dir_hidden.filename" />
-						</div>
-
-						<!-- Directories -->
-						<div
-							v-for="(dir, key) in column['dirs']"
-							:key="key"
-							class="dir"
-							:title="dir.filename"
-							@click="(e) => fetchNextLevel(e, dir.path, level + 1)"
-						>
-							<div>{{ dir.filename }}</div>
-							<SvgServe filename="icn-caret-right" :key="dir.filename" />
-						</div>
-
-						<!-- Hidden files -->
-						<div
-							v-for="(file_hidden, key) in column['files_hidden']"
-							:key="key"
-							class="file hidden"
-							:data-type="file_hidden._meta.type"
-							:data-ext="file_hidden._meta.ext"
-							:title="file_hidden.filename"
-							@click="(e) => previewFile(e, file_hidden, level + 1)"
-							@dblclick="openFile(file_hidden)"
-						>
-							<SvgServe
-								:filename="'icn-' + file_hidden._meta.type"
-								:key="file_hidden._meta.type"
-							/>
-							<div>{{ file_hidden.filename }}</div>
-						</div>
-
-						<!-- Files -->
-						<div
-							v-for="(file, key) in column['files']"
-							:key="key"
-							class="file"
-							:data-type="file._meta.type"
-							:data-ext="file._meta.ext"
-							:title="file.filename"
-							@click="(e) => previewFile(e, file, level + 1)"
-							@dblclick="openFile(file)"
-						>
-							<SvgServe :filename="'icn-' + file._meta.type" :key="file._meta.type" />
-							<div>{{ file.filename }}</div>
-						</div>
-
-						<!-- Empty directory -->
-						<div v-if="column['_meta']['empty']" class="empty">Empty directory</div>
+					<!-- Hidden directories -->
+					<div
+						v-for="(dir_hidden, key) in column['dirs_hidden']"
+						:key="key"
+						class="dir hidden"
+						:title="dir_hidden.filename"
+						@click="(e) => fetchNextLevel(e, dir_hidden.path, level + 1)"
+					>
+						<div>{{ dir_hidden.filename }}</div>
+						<SvgServe filename="icn-caret-right" :key="dir_hidden.filename" />
 					</div>
+
+					<!-- Directories -->
+					<div
+						v-for="(dir, key) in column['dirs']"
+						:key="key"
+						class="dir"
+						:title="dir.filename"
+						@click="(e) => fetchNextLevel(e, dir.path, level + 1)"
+					>
+						<div>{{ dir.filename }}</div>
+						<SvgServe filename="icn-caret-right" :key="dir.filename" />
+					</div>
+
+					<!-- Hidden files -->
+					<div
+						v-for="(file_hidden, key) in column['files_hidden']"
+						:key="key"
+						class="file hidden"
+						:data-type="file_hidden._meta.type"
+						:data-ext="file_hidden._meta.ext"
+						:title="file_hidden.filename"
+						@click="(e) => previewFile(e, file_hidden, level + 1)"
+						@dblclick="openFile(file_hidden)"
+					>
+						<SvgServe
+							:filename="'icn-' + file_hidden._meta.type"
+							:key="file_hidden._meta.type"
+						/>
+						<div>{{ file_hidden.filename }}</div>
+					</div>
+
+					<!-- Files -->
+					<div
+						v-for="(file, key) in column['files']"
+						:key="key"
+						class="file"
+						:data-type="file._meta.type"
+						:data-ext="file._meta.ext"
+						:title="file.filename"
+						@click="(e) => previewFile(e, file, level + 1)"
+						@dblclick="openFile(file)"
+					>
+						<SvgServe :filename="'icn-' + file._meta.type" :key="file._meta.type" />
+						<div>{{ file.filename }}</div>
+					</div>
+
+					<!-- Empty directory -->
+					<div v-if="column['_meta']['empty']" class="empty">Empty directory</div>
 				</div>
 				<div
 					v-if="(levels && level < levels.length - 1) || filePreview"
@@ -107,12 +99,6 @@
 					</small>
 				</div>
 			</div>
-
-			<!-- Filler column left -->
-			<div class="column filler-right">
-				<div class="col-header"></div>
-				<div class="col-body"></div>
-			</div>
 		</div>
 	</div>
 </template>
@@ -123,8 +109,9 @@ import { ref, onMounted, computed, nextTick } from 'vue'
 import type { ComputedRef } from 'vue'
 import { useRouter } from 'vue-router'
 
-// Stores
-import { useApiStore } from '@/stores/ApiStore'
+// Api
+import { FileSystemApi } from '@/api/ApiService'
+const fileSystemApi = new FileSystemApi()
 
 // Components
 import SvgServe from '@/components/SvgServe.vue'
@@ -166,10 +153,9 @@ type Level = {
 	files_hidden: File[]
 }
 
-// Definitions
+// Router
 const router = useRouter()
-const apiStore = useApiStore()
-const fileSystemApi = apiStore.loadApi('fileSystem')
+
 const levels = ref<Level[] | null>(null)
 const filePreview = ref<File | null>(null)
 const colScroll = ref<HTMLDivElement | null>(null)
@@ -275,7 +261,6 @@ function deselectCol(level: number) {
 
 // Return structured content of a directory.
 async function fetchWorkspaceFiles(path = '') {
-	if (!fileSystemApi) return
 	const { status, data, statusText } = await fileSystemApi.get_workspace_files(path)
 	if (status !== 200) {
 		console.error(statusText)
@@ -294,16 +279,16 @@ async function fetchWorkspaceFiles(path = '') {
 // Horizontal scroll
 #col-scroll-x {
 	overflow-x: auto;
+	margin: 0 -40px;
 	scroll-behavior: smooth;
 	height: 100%;
-	// margin: 0 -40px;
 	// width: 100vw;
 	// border: solid 1px red;
 }
 #col-wrap {
 	display: flex;
 	flex-direction: row;
-	// padding-left: 24px;
+	padding-left: 24px;
 	height: 100%;
 	// height: 100vh;
 	// border: solid 1px green;
@@ -316,20 +301,23 @@ async function fetchWorkspaceFiles(path = '') {
 	flex: 200px 0 0;
 	height: 100%;
 	overflow-y: auto;
+	padding-bottom: 40px;
 	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
 	// border: solid 1px blue;
 }
-#col-wrap .column.file-preview {
+#col-wrap .column:not(:last-child) {
+	// max-width: 200px;
+	border-right: solid 1px #eee;
+}
+#col-wrap .column:last-child.file-preview {
 	flex-basis: 300px;
 }
-#col-wrap .column:not(.file-preview) {
-	min-width: 0; // This makes sure the last column is also truncated.
-	// min-width: 200px;
+#col-wrap .column:last-child:not(.file-preview) {
+	// min-width: 0; // This makes sure the last column is also truncated.
+	min-width: 200px;
 	margin-right: 0;
-	// padding-right: 40px;
-	// flex: none;
+	padding-right: 40px;
+	flex: none;
 }
 
 // Column split (tab in between column titles)
@@ -342,8 +330,6 @@ async function fetchWorkspaceFiles(path = '') {
 	width: 1px;
 	margin-left: -1px;
 	background: #fff;
-	border-bottom: solid 1px #eee;
-	box-sizing: border-box;
 }
 #col-wrap .col-split::after {
 	content: '/';
@@ -354,19 +340,22 @@ async function fetchWorkspaceFiles(path = '') {
 	// background: pink;
 }
 
-// Column header
+// Column name
 #col-wrap .col-header {
 	height: 32px;
 	line-height: 32px;
 	font-size: 12px;
 	font-weight: 600;
 	padding: 0 16px;
+	margin-bottom: 8px;
 	font-style: italic;
+	position: sticky;
+	top: 0;
+	z-index: 1;
 	background: #fff;
 	border-bottom: solid 1px #eee;
 	cursor: pointer;
 	box-sizing: border-box;
-	flex: 0 0 auto;
 	// background: linear-gradient(rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
 
 	// Truncate
@@ -374,59 +363,24 @@ async function fetchWorkspaceFiles(path = '') {
 	text-overflow: ellipsis;
 	overflow: hidden;
 }
+#col-wrap .col-header.root {
+	border: none;
+}
 #col-wrap .col-header.root::after {
 	content: 'Workspace';
 	opacity: 0.5;
 	font-weight: 400;
 	padding-left: 5px;
 }
-// #col-wrap .col-header.root::before {
-// 	content: '';
-// 	display: block;
-// 	position: absolute;
-// 	bottom: 0;
-// 	width: calc(100% - 16px);
-// 	height: 0;
-// 	border-bottom: solid 1px #eee;
-// }
-
-// Column body (scrolls)
-#col-wrap .col-body {
-	padding-top: 8px;
-	padding-bottom: 40px;
-	overflow-y: auto;
-	height: 100%;
-	// border: solid 1px red;
+#col-wrap .col-header.root::before {
+	content: '';
+	display: block;
+	position: absolute;
+	bottom: 0;
+	width: calc(100% - 16px);
+	height: 0;
+	border-bottom: solid 1px #eee;
 }
-
-// Column fillers
-#col-wrap .column.filler-left {
-	flex: 0 0 24px;
-	border-right: none;
-	// background: pink;
-}
-#col-wrap .column.filler-right {
-	flex: 1 1 auto;
-	border-right: none;
-	// background: pink;
-}
-#col-wrap .column.filler-left .col-header,
-#col-wrap .column.filler-right .col-header {
-	padding: 0;
-}
-#col-wrap .column:not(.filler-left):not(.filler-right) .col-body {
-	border-right: solid 1px #eee;
-}
-
-// Tiny hack to make sure scrollbar border is not
-// displaying as a double line next to the column border.
-// #col-wrap .column:not(:last-child) {
-// 	overflow-x: hidden;
-// }
-// #col-wrap .column:not(:last-child) .col-header,
-// #col-wrap .column:not(:last-child) .col-body {
-// 	margin-right: -1px;
-// }
 
 /**
  * Files
@@ -502,8 +456,7 @@ async function fetchWorkspaceFiles(path = '') {
 #file-preview {
 	background: #fafafa;
 	padding: 16px;
-	margin: 8px;
-	min-width: 200px;
+	margin: 0 8px;
 }
 #file-preview b {
 	display: block;

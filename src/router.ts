@@ -1,5 +1,6 @@
 // Modules
 import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteLocationNormalized } from 'vue-router'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
@@ -9,15 +10,31 @@ import HomeView from '@/views/HomeView.vue'
 
 const routes = [
 	{
-		path: '/',
+		path: '/home',
 		name: 'home',
 		component: HomeView,
 	},
 	{
-		path: '/filebrowser',
+		path: '/~/:path(.*)?',
 		name: 'filebrowser',
-		component: () => import(/* webpackChunkName: 'filebrowser' */ `@/modules/FileBrowser.vue`),
+		component: () => import(/* webpackChunkName: 'filebrowser' */ `@/views/ModuleDispatch.vue`),
+		// redirect: (to: RouteLocationNormalized) => {
+		// 	if (to.path == '/~') {
+		// 		return {
+		// 			path: `/~/`,
+		// 		}
+		// 	}
+		// },
 	},
+	{
+		path: '/',
+		redirect: '/~/',
+	},
+	// {
+	// 	path: '/filebrowser',
+	// 	name: 'filebrowser',
+	// 	component: () => import(/* webpackChunkName: 'filebrowser' */ `@/modules/FileBrowser.vue`),
+	// },
 	{
 		path: '/molviewer',
 		name: 'molviewer',

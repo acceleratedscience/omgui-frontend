@@ -3,93 +3,99 @@ const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 
 // Return timestamp as "10 days ago"
 export function timeAgo(dateParam: Date | string | number): string {
-    if (!dateParam) {
-        return ''
-    }
+	if (!dateParam) {
+		return ''
+	}
 
-    const date = typeof dateParam === 'object' ? dateParam : new Date(dateParam)
-    const DAY_IN_MS = 86400000 // 24 * 60 * 60 * 1000
-    const today = new Date()
-    const yesterday = new Date(today.getTime() - DAY_IN_MS)
-    const seconds = Math.round((today.getTime() - date.getTime()) / 1000)
-    const minutes = Math.round(seconds / 60)
-    const isToday = today.toDateString() === date.toDateString()
-    const isYesterday = yesterday.toDateString() === date.toDateString()
-    const isThisYear = today.getFullYear() === date.getFullYear()
+	const date = typeof dateParam === 'object' ? dateParam : new Date(dateParam)
+	const DAY_IN_MS = 86400000 // 24 * 60 * 60 * 1000
+	const today = new Date()
+	const yesterday = new Date(today.getTime() - DAY_IN_MS)
+	const seconds = Math.round((today.getTime() - date.getTime()) / 1000)
+	const minutes = Math.round(seconds / 60)
+	const isToday = today.toDateString() === date.toDateString()
+	const isYesterday = yesterday.toDateString() === date.toDateString()
+	const isThisYear = today.getFullYear() === date.getFullYear()
 
-    if (seconds < 5) {
-        return 'now'
-    } else if (seconds < 60) {
-        return `${seconds} seconds ago`
-    } else if (seconds < 90) {
-        return 'about a minute ago'
-    } else if (minutes < 60) {
-        return `${minutes} minutes ago`
-    } else if (isToday) {
-        return _prettyDate(date, 'Today') // Today at 10:20
-    } else if (isYesterday) {
-        return _prettyDate(date, 'Yesterday') // Yesterday at 10:20
-    } else if (isThisYear) {
-        return _prettyDate(date, null, true) // Jan 10 at 10:20
-    }
+	if (seconds < 5) {
+		return 'now'
+	} else if (seconds < 60) {
+		return `${seconds} seconds ago`
+	} else if (seconds < 90) {
+		return 'about a minute ago'
+	} else if (minutes < 60) {
+		return `${minutes} minutes ago`
+	} else if (isToday) {
+		return _prettyDate(date, 'Today') // Today at 10:20
+	} else if (isYesterday) {
+		return _prettyDate(date, 'Yesterday') // Yesterday at 10:20
+	} else if (isThisYear) {
+		return _prettyDate(date, null, true) // Jan 10 at 10:20
+	}
 
-    return _prettyDate(date) // Jan 10, 2017 at 10:20
+	return _prettyDate(date) // Jan 10, 2017 at 10:20
 }
 
 // Return timestamp as "Jan 10, 2024 at 10:20"
 export function _prettyDate(
-    date: Date,
-    prefomattedDate: string | null = null,
-    hideYear: boolean = false,
+	date: Date,
+	prefomattedDate: string | null = null,
+	hideYear: boolean = false,
 ): string {
-    const day = date.getDate()
-    const month = MONTHS_SHORT[date.getMonth()]
-    const year = date.getFullYear()
-    const hours = date.getHours()
-    const minutes = date.getMinutes()
-    let minutes_str = minutes.toString()
+	const day = date.getDate()
+	const month = MONTHS_SHORT[date.getMonth()]
+	const year = date.getFullYear()
+	const hours = date.getHours()
+	const minutes = date.getMinutes()
+	let minutes_str = minutes.toString()
 
-    if (minutes < 10) {
-        // Adding leading zero to minutes
-        minutes_str = `0${minutes}`
-    }
+	if (minutes < 10) {
+		// Adding leading zero to minutes
+		minutes_str = `0${minutes}`
+	}
 
-    if (prefomattedDate) {
-        // Today at 10:20
-        // Yesterday at 10:20
-        return `${prefomattedDate} at ${hours}:${minutes_str}`
-    }
+	if (prefomattedDate) {
+		// Today at 10:20
+		// Yesterday at 10:20
+		return `${prefomattedDate} at ${hours}:${minutes_str}`
+	}
 
-    if (hideYear) {
-        // Jan 10 at 10:20
-        return `${month} ${day} at ${hours}:${minutes_str}`
-    }
+	if (hideYear) {
+		// Jan 10 at 10:20
+		return `${month} ${day} at ${hours}:${minutes_str}`
+	}
 
-    // 10. January 2017. at 10:20
-    return `${month} ${day}, ${year} at ${hours}:${minutes_str}`
+	// 10. January 2017. at 10:20
+	return `${month} ${day}, ${year} at ${hours}:${minutes_str}`
 }
 
 // Return a human-readable file size.
 export function prettySize(bytes: number) {
-    if (bytes < 500) {
-        // 0 - 99 Bytes
-        return bytes + ' Bytes'
-    } else if (_round(bytes / 1000) < 1000) {
-        // 1 - 999 KB
-        return _round(bytes / 1000, 0) + ' KB'
-    } else if (_round(bytes / 1000000) < 1000) {
-        // 1 - 999 MB
-        return _round(bytes / 1000000) + ' MB'
-    } else if (_round(bytes / 1000000000) < 1000) {
-        // 1 - 999 GB
-        return _round(bytes / 1000000000) + ' GB'
-    } else {
-        // 1 - infinite TB
-        return _round(bytes / 1000000000000) + ' TB'
-    }
+	if (bytes < 500) {
+		// 0 - 99 Bytes
+		return bytes + ' Bytes'
+	} else if (_round(bytes / 1000) < 1000) {
+		// 1 - 999 KB
+		return _round(bytes / 1000, 0) + ' KB'
+	} else if (_round(bytes / 1000000) < 1000) {
+		// 1 - 999 MB
+		return _round(bytes / 1000000) + ' MB'
+	} else if (_round(bytes / 1000000000) < 1000) {
+		// 1 - 999 GB
+		return _round(bytes / 1000000000) + ' GB'
+	} else {
+		// 1 - infinite TB
+		return _round(bytes / 1000000000000) + ' TB'
+	}
 
-    function _round(bytes: number, decimals = 2) {
-        const multiplier = Math.pow(10, decimals)
-        return Number(Math.round(bytes * multiplier) / multiplier)
-    }
+	function _round(bytes: number, decimals = 2) {
+		const multiplier = Math.pow(10, decimals)
+		return Number(Math.round(bytes * multiplier) / multiplier)
+	}
+}
+
+// Capitalize the first letter of a string.
+export function capitalize(str: string) {
+	if (!str) return ''
+	return str.charAt(0).toUpperCase() + str.slice(1)
 }
