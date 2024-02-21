@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Vue
-import { defineAsyncComponent, ref, shallowRef, watch } from 'vue'
+import { defineAsyncComponent, ref, shallowRef, watch, onBeforeUnmount } from 'vue'
 import type { Component } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -10,6 +10,9 @@ import { useFileStore } from '@/stores/FileStore'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
+
+// Type declarations
+type RouteType = 'dir' | 'file' | 'error' | null
 
 // Definitions
 const route = useRoute()
@@ -23,42 +26,43 @@ const fileSystemApi = apiStore.loadApi('fileSystem')
 // Open file and load appropriate module.
 const loadError = ref(false as boolean)
 const dynamicModule = shallowRef(null as Component | null)
+parseRoute()
 
-openItem()
+// const prevRouteName = ref(null as string | null)
+let prevRouteType: RouteType = null
 
 // Update file or clear store when route changes.
-watch(
-	() => route.path,
-	() => {
-		if (route.name == 'filebrowser') {
-			openItem()
-		} else {
-			fileStore.clear()
-			dynamicModule.value = null
-		}
-	},
-)
+watch(() => route.path, parseRoute)
+
+// Clear store when unmounting.
+onBeforeUnmount(() => {
+	fileStore.clear()
+})
 
 //
 //
 
 // Display a file or directory with the appropriate module.
-async function openItem() {
-	const filePath: string = route.path.replace(/(\/headless)?\/~(\/)?/, '')
+async function parseRoute() {
+	const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
 	const file = await fetchFile(filePath)
 	fileStore.loadItem(file)
 	if (file.isDir) {
 		// Directory
-		loadModule('FileBrowser')
+		if (prevRouteType != 'dir') loadModule('FileBrowser') // Condition is to prevent flash while unnecessarily re-rendering the component.
+		prevRouteType = 'dir'
 	} else if (file.errCode) {
 		// Error
-		loadModule(null)
+		if (prevRouteType != 'error') loadModule(null)
+		prevRouteType = 'error'
 	} else {
 		// File
-		loadModule(fileStore.moduleName)
+		if (prevRouteType != 'file') loadModule(fileStore.moduleName)
+		prevRouteType = 'file'
 	}
 }
 
+// Load the dynamic module.
 function loadModule(moduleName: string | null) {
 	loadError.value = false
 	if (!moduleName) {

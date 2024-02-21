@@ -17,24 +17,13 @@ const routes = [
 	{
 		path: '/~/:path(.*)?',
 		name: 'filebrowser',
-		component: () => import(/* webpackChunkName: 'filebrowser' */ `@/views/ModuleDispatch.vue`),
-		// redirect: (to: RouteLocationNormalized) => {
-		// 	if (to.path == '/~') {
-		// 		return {
-		// 			path: `/~/`,
-		// 		}
-		// 	}
-		// },
+		component: () =>
+			import(/* webpackChunkName: 'module-dispatch' */ `@/views/ModuleDispatch.vue`),
 	},
 	{
 		path: '/',
 		redirect: '/~/',
 	},
-	// {
-	// 	path: '/filebrowser',
-	// 	name: 'filebrowser',
-	// 	component: () => import(/* webpackChunkName: 'filebrowser' */ `@/modules/FileBrowser.vue`),
-	// },
 	{
 		path: '/molviewer',
 		name: 'molviewer',

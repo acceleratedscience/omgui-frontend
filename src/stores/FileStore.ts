@@ -107,6 +107,7 @@ export const useFileStore = defineStore('fileStore', {
 		// 	this._errCode = null
 		// },
 		clear() {
+			console.log('* clearing file store *')
 			this._data = ''
 			this._path = ''
 			this._errCode = null

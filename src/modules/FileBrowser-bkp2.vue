@@ -26,17 +26,8 @@
 							v-for="(dir_hidden, key) in column['dirs_hidden']"
 							:key="key"
 							class="dir hidden"
-							:class="{ sel: dir_hidden.sel }"
 							:title="dir_hidden.filename"
-							@click="
-								() =>
-									fetchNextLevel(
-										dir_hidden.path,
-										dir_hidden.filename,
-										level + 1,
-										true,
-									)
-							"
+							@click="(e) => fetchNextLevel(e, dir_hidden.path, level + 1)"
 						>
 							<div>{{ dir_hidden.filename }}</div>
 							<SvgServe filename="icn-caret-right" :key="dir_hidden.filename" />
@@ -47,9 +38,8 @@
 							v-for="(dir, key) in column['dirs']"
 							:key="key"
 							class="dir"
-							:class="{ sel: dir.sel }"
 							:title="dir.filename"
-							@click="() => fetchNextLevel(dir.path, dir.filename, level + 1, true)"
+							@click="(e) => fetchNextLevel(e, dir.path, level + 1)"
 						>
 							<div>{{ dir.filename }}</div>
 							<SvgServe filename="icn-caret-right" :key="dir.filename" />
@@ -60,11 +50,10 @@
 							v-for="(file_hidden, key) in column['files_hidden']"
 							:key="key"
 							class="file hidden"
-							:class="{ sel: file_hidden.sel }"
 							:data-type="file_hidden._meta.type"
 							:data-ext="file_hidden._meta.ext"
 							:title="file_hidden.filename"
-							@click="() => previewFile(file_hidden, level + 1)"
+							@click="(e) => previewFile(e, file_hidden, level + 1)"
 							@dblclick="openFile(file_hidden)"
 						>
 							<SvgServe
@@ -79,11 +68,10 @@
 							v-for="(file, key) in column['files']"
 							:key="key"
 							class="file"
-							:class="{ sel: file.sel }"
 							:data-type="file._meta.type"
 							:data-ext="file._meta.ext"
 							:title="file.filename"
-							@click="() => previewFile(file, level + 1)"
+							@click="(e) => previewFile(e, file, level + 1)"
 							@dblclick="openFile(file)"
 						>
 							<SvgServe :filename="'icn-' + file._meta.type" :key="file._meta.type" />
@@ -131,9 +119,9 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import type { ComputedRef } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 // Stores
 import { useApiStore } from '@/stores/ApiStore'
@@ -155,7 +143,6 @@ type Dir = {
 
 	filename: string
 	path: string
-	sel: boolean // Selection state, not from API
 }
 type File = Dir & {
 	_meta: {
@@ -181,13 +168,8 @@ type Level = {
 
 // Definitions
 const router = useRouter()
-const route = useRoute()
 const apiStore = useApiStore()
 const fileSystemApi = apiStore.loadApi('fileSystem')
-
-//
-//
-
 const levels = ref<Level[] | null>(null)
 const filePreview = ref<File | null>(null)
 const colScroll = ref<HTMLDivElement | null>(null)
@@ -203,54 +185,18 @@ onMounted(async () => {
 	// Initialize levels array.
 	levels.value = levels.value ? levels.value : []
 
-	// Parse the route and load the appropriate files.
-	parseRoute()
-
-	// Update UI when going back/forward in the browser history.
-	window.addEventListener('popstate', parseRoute)
-})
-
-onUnmounted(() => {
-	// Remove event listener.
-	window.removeEventListener('popstate', parseRoute)
+	// Load root level
+	fetchNextLevel()
 })
 
 //
 //
-
-// Parse the route and load the appropriate files.
-async function parseRoute() {
-	// Fetch root level
-	await fetchNextLevel()
-
-	// Fetch consecutive levels & mark selection state.
-	const path = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
-	const pathArr = path.split('/').filter((item) => !!item)
-	for (const [i, dirName] of pathArr.entries()) {
-		const dirPath = pathArr.slice(0, i + 1).join('/')
-		await fetchNextLevel(dirPath, dirName, i + 1)
-	}
-
-	// Select and preview the file in focus.
-	const filename = route.hash.replace(/^#/, '')
-	if (levels.value && filename && filename.length > 0) {
-		const thisLevel = levels.value[levels.value.length - 1]
-		const files = thisLevel.files.concat(thisLevel.files_hidden)
-		const file = files.filter((file) => file.filename === filename)[0]
-		previewFile(file, levels.value.length)
-	}
-}
 
 // Preview file information in rightmost column.
-async function previewFile(file: File, level: number) {
-	// Update the URL.
-	const re = new RegExp('/?' + file.filename + '$')
-	const previewPath = file.path.replace(re, '')
-	router.push('/~/' + previewPath + '#' + file.filename)
-
-	// Update selection state.
-	deselectCol(level - 1) // Remove selection state of clicked column.
-	file.sel = true // Set current file as selected.
+async function previewFile(e: MouseEvent | undefined = undefined, file: File, level: number) {
+	// Remove selection state of clicked column.
+	deselectCol(level - 1)
+	if (e) (e.currentTarget as Element).classList.add('sel')
 
 	// Prepare file object for display.
 	file.disp_size = prettySize(file._meta.size)
@@ -273,22 +219,13 @@ function openFile(file: File) {
 
 // Load the next level of files and add column.
 async function fetchNextLevel(
+	e: MouseEvent | undefined = undefined,
 	path: string = '',
-	filename: string = '',
 	level: number = 0,
-	fromClick: boolean = false,
 ) {
-	// Update the URL.
-	if (fromClick) {
-		router.push('/~/' + path)
-	}
+	// Store currentTarget because it will be removed after event propagation.
+	const currentTarget = e ? (e.currentTarget as Element) : null
 
-	// Update selection state.
-	if (level > 0) {
-		markSelected(level - 1, 'dir', filename)
-	}
-
-	// Load next level.
 	const files = await fetchWorkspaceFiles(path)
 	if (files) {
 		hidePreviewFile() // Remove file preview.
@@ -298,45 +235,42 @@ async function fetchNextLevel(
 		}
 	}
 
-	// Scroll to the right.
+	// When triggered from tapping a dir name, highlight the dir.
+	if (currentTarget) {
+		// Remove selection state of clicked column.
+		deselectCol(level - 1)
+		currentTarget.classList.add('sel')
+
+		await nextTick()
+
+		// In case you clicked on the parent folder.
+		deselectCol(-1)
+	}
+
+	// Scroll to the right
 	const lastColWidth = lastCol.value ? lastCol.value.clientWidth : 0
 	const secondLastColWidth = secondLastCol.value ? secondLastCol.value.clientWidth : 0
 	const maxScroll = colScroll.value ? colScroll.value.scrollWidth - lastColWidth - secondLastColWidth : 0 // prettier-ignore
 	if (colScroll.value) colScroll.value.scrollLeft = maxScroll
 }
 
-// Set selection state of clicked file or directory.
-function markSelected(level: number, type: 'dir' | 'file', filename: string) {
-	// Remove selection state from all items in this column.
-	deselectCol(level)
-
-	// Set selection state for the clicked item.
-	if (levels.value) {
-		const thisLevel = levels.value[level]
-		const items =
-			type == 'dir'
-				? thisLevel.dirs.concat(thisLevel.dirs_hidden)
-				: thisLevel.files.concat(thisLevel.files_hidden)
-		const item = items.filter((item) => item.filename === filename)[0]
-		item.sel = true
-	}
-}
-
 // Focus on a selected column and remove selected state from its children.
 async function resetCol(level: number) {
+	console.log('resetCol', columns, lastCol)
 	if (levels.value) levels.value.splice(level + 1) // Remove all levels after this one.
-	deselectCol(level)
-	hidePreviewFile()
+
+	await nextTick()
+	deselectCol(-1)
 }
 
 // Remove dir/file selection state of a column.
 // Accepts negative level to count from the right.
 function deselectCol(level: number) {
-	if (!levels.value) return
-	levels.value[level].dirs.forEach((dir) => (dir.sel = false))
-	levels.value[level].dirs_hidden.forEach((dir_hidden) => (dir_hidden.sel = false))
-	levels.value[level].files.forEach((file) => (file.sel = false))
-	levels.value[level].files_hidden.forEach((file_hidden) => (file_hidden.sel = false))
+	if (!columns.value) return
+	level = (level + columns.value.length) % columns.value.length
+	columns.value[level]
+		.querySelectorAll('.dir, .file')
+		.forEach((elm) => elm.classList.remove('sel'))
 }
 
 // Return structured content of a directory.
@@ -595,3 +529,4 @@ async function fetchWorkspaceFiles(path = '') {
 	}
 }
 </style>
+@/util/helpers

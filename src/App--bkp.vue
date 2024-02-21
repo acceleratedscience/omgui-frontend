@@ -35,12 +35,11 @@ const isRawPath = computed(() => {
 
 	<!-- Load a raw component (no wrapper or loader) -->
 	<template v-if="isRawPath">
-		<router-view />
-		<!-- <RouterView v-slot="{ Component }">
+		<RouterView v-slot="{ Component }">
 			<KeepAlive>
 				<component v-if="Component" :is="Component" />
 			</KeepAlive>
-		</RouterView> -->
+		</RouterView>
 	</template>
 
 	<!-- Load a headless module (wrapper + loader) -->
@@ -49,13 +48,12 @@ const isRawPath = computed(() => {
 		id="headless-wrap"
 		:class="{ 'file-browser': fileStore.isDir }"
 	>
-		<router-view />
-		<!-- <RouterView v-slot="{ Component }">
+		<RouterView v-slot="{ Component }">
 			<KeepAlive>
 				<component v-if="Component" :is="Component" />
 				<div v-else>Loading module...</div>
 			</KeepAlive>
-		</RouterView> -->
+		</RouterView>
 	</div>
 
 	<!-- Load the full application -->
@@ -82,12 +80,11 @@ const isRawPath = computed(() => {
 			</nav>
 		</header>
 		<div id="body" :class="{ 'file-browser': fileStore.isDir }">
-			<router-view />
-			<!-- <RouterView v-slot="{ Component }">
+			<RouterView v-slot="{ Component }">
 				<KeepAlive>
 					<component :is="Component" />
 				</KeepAlive>
-			</RouterView> -->
+			</RouterView>
 		</div>
 	</div>
 </template>
