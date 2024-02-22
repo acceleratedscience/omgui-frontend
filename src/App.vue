@@ -5,11 +5,17 @@ import { computed } from 'vue'
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
+// import { usePopStateStore } from '@/stores/PopStateStore--trash' // trash
 import { useApiStore } from '@/stores/ApiStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
+// const popStateStore = usePopStateStore() // trash
 const apiStore = useApiStore()
 const fileSystemApi = apiStore.loadApi('fileSystem')
+
+// // Enable popstate callbacks // trash
+// import usePopState from '@/utils/popstate'
+// usePopState(popStateStore.setPopState)
 
 // While currently not used in the application, we preserve the
 // option to load certain paths as "raw", i.e. without the application
@@ -44,7 +50,7 @@ if (fileSystemApi) {
 		<input
 			type="checkbox"
 			@click="mainStore.toggleHeadless(true)"
-			style="position: fixed; top: 2px; left: 2px; z-index: 10"
+			style="position: fixed; top: 2px; right: 2px; z-index: 10"
 			:checked="!mainStore.headless"
 		/>
 	</template>

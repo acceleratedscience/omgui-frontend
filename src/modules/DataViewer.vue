@@ -5,8 +5,8 @@ const fileStore = useFileStore()
 </script>
 
 <template>
-	<!-- <router-link to="/~/sample.csv">sample</router-link> |
-	<router-link to="/~/foo.csv">foo</router-link> -->
+	<router-link to="/~/sample.csv">sample</router-link> |
+	<router-link to="/~/foo.csv">foo</router-link>
 	<main id="module">This is the dataviewer component</main>
 	<div v-if="fileStore.data" id="file-content">{{ fileStore.data }}</div>
 	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>

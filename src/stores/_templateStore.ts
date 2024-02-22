@@ -5,18 +5,23 @@
 import { defineStore } from 'pinia'
 // import router from '@/router'
 
+// Type declarations
+type State = {
+	_foo: number
+}
+
 export const useSampleStore = defineStore('sampleStore', {
-	state: () => ({
-		foo: 0,
+	state: (): State => ({
+		_foo: 0,
 	}),
 	getters: {
-		getFoo(): number {
+		foo(): number {
 			return this.foo
 		},
 	},
 	actions: {
 		setFoo(nr: number = 1) {
-			this.foo = nr
+			this._foo = nr
 		},
 	},
 })

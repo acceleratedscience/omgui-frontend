@@ -131,11 +131,14 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, watch, onUpdated } from 'vue'
 import type { ComputedRef } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 // Stores
+import { useMainStore } from '@/stores/MainStore'
+import { useFileStore } from '@/stores/FileStore'
+// import { usePopStateStore } from '@/stores/PopStateStore--trash' // trash
 import { useApiStore } from '@/stores/ApiStore'
 
 // Components
@@ -182,12 +185,16 @@ type Level = {
 // Definitions
 const router = useRouter()
 const route = useRoute()
+const mainStore = useMainStore()
+const fileStore = useFileStore()
+// const popStateStore = usePopStateStore() // trash
 const apiStore = useApiStore()
 const fileSystemApi = apiStore.loadApi('fileSystem')
 
 //
 //
 
+const mounted = ref(false)
 const levels = ref<Level[] | null>(null)
 const filePreview = ref<File | null>(null)
 const colScroll = ref<HTMLDivElement | null>(null)
@@ -200,6 +207,8 @@ const secondLastCol: ComputedRef<HTMLDivElement | undefined> = computed(() =>
 )
 
 onMounted(async () => {
+	mounted.value = true
+
 	// Initialize levels array.
 	levels.value = levels.value ? levels.value : []
 
@@ -210,16 +219,33 @@ onMounted(async () => {
 	window.addEventListener('popstate', parseRoute)
 })
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
+	mounted.value = false
+
 	// Remove event listener.
 	window.removeEventListener('popstate', parseRoute)
 })
+
+// trash
+// watch(
+// 	() => route.path,
+// 	() => {
+// 		console.log('x x x x x')
+// 		// parseRoute()
+// 	},
+// )
 
 //
 //
 
 // Parse the route and load the appropriate files.
 async function parseRoute() {
+	console.log('parseRoute')
+	// When going back or forward in the history while
+	// leaving the fileBrowser module, the popstate
+	// triggers parseRoute before the listener is removed.
+	// Hence we need to catch this.
+
 	// Fetch root level
 	await fetchNextLevel()
 
@@ -237,16 +263,19 @@ async function parseRoute() {
 		const thisLevel = levels.value[levels.value.length - 1]
 		const files = thisLevel.files.concat(thisLevel.files_hidden)
 		const file = files.filter((file) => file.filename === filename)[0]
-		previewFile(file, levels.value.length)
+		previewFile(file, levels.value.length, false)
 	}
 }
 
 // Preview file information in rightmost column.
-async function previewFile(file: File, level: number) {
+async function previewFile(file: File, level: number, updateUrl: boolean = true) {
 	// Update the URL.
-	const re = new RegExp('/?' + file.filename + '$')
-	const previewPath = file.path.replace(re, '')
-	router.push('/~/' + previewPath + '#' + file.filename)
+	if (updateUrl) {
+		const re = new RegExp('/?' + file.filename + '$')
+		const previewPath = file.path.replace(re, '')
+		const headless = mainStore.headless ? '/headless' : ''
+		router.push(headless + '/~/' + previewPath + '#' + file.filename)
+	}
 
 	// Update selection state.
 	deselectCol(level - 1) // Remove selection state of clicked column.
@@ -278,6 +307,14 @@ async function fetchNextLevel(
 	level: number = 0,
 	fromClick: boolean = false,
 ) {
+	// When you go back and forward in the history, going from the
+	//  filebrowser module to a file viewer module, parseRoute will
+	// be be called and it will start fetching files for every level
+	// of the path before the component has unmounted. There's no way
+	// to prevent this, so all we can do is to abort it as soon as
+	// the component is unmounted.
+	if (!mounted.value) return
+
 	// Update the URL.
 	if (fromClick) {
 		router.push('/~/' + path)
@@ -318,7 +355,9 @@ function markSelected(level: number, type: 'dir' | 'file', filename: string) {
 				? thisLevel.dirs.concat(thisLevel.dirs_hidden)
 				: thisLevel.files.concat(thisLevel.files_hidden)
 		const item = items.filter((item) => item.filename === filename)[0]
-		item.sel = true
+		// console.log(333, items, item)
+		// console.log('*', level, type, filename) %%
+		if (item) item.sel = true
 	}
 }
 

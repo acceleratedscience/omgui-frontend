@@ -1,9 +1,9 @@
 // Modules
 import { createRouter, createWebHistory } from 'vue-router'
-import type { RouteLocationNormalized } from 'vue-router'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
+// import { usePopStateStore } from '@/stores/PopStateStore' // trash
 
 // Components
 import HomeView from '@/views/HomeView.vue'
@@ -96,10 +96,22 @@ router.beforeEach((to, from, next) => {
 		mainStore.setHeadless()
 	}
 	if (!exitHeadless && from.meta.headless && !to.meta.headless) {
-		next({ path: `/headless${to.path}`, replace: true })
+		next({ path: `/headless${to.path}` }) // , replace: true // trash
 	} else {
 		next()
 	}
 })
+
+// trash
+// router.afterEach((to) => {
+// 	console.log('after', to.path)
+// 	// console.log('@@', to.path)
+// 	const popStateStore = usePopStateStore()
+// 	if (popStateStore.popstate) {
+// 		console.log('after: pop state!', to.path)
+// 		popStateStore.execute()
+// 		popStateStore.unsetPopState()
+// 	}
+// })
 
 export default router
