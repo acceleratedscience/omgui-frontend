@@ -261,7 +261,7 @@ function deselectCol(level: number) {
 
 // Return structured content of a directory.
 async function fetchWorkspaceFiles(path = '') {
-	const { status, data, statusText } = await fileSystemApi.get_workspace_files(path)
+	const { status, data, statusText } = await fileSystemApi.getWorkspaceFiles(path)
 	if (status !== 200) {
 		console.error(statusText)
 		return
@@ -482,4 +482,4 @@ async function fetchWorkspaceFiles(path = '') {
 	}
 }
 </style>
-@/util/helpers
+@/util/helpers getWorkspaceFiles

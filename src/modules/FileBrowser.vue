@@ -2,7 +2,7 @@
 	<div id="col-scroll-x" ref="colScroll">
 		<div id="col-wrap">
 			<!-- Filler column left -->
-			<div class="column filler-left">
+			<div class="column filler-left" :class="{ headless: mainStore.headless }">
 				<div class="col-header"></div>
 				<div class="col-body"></div>
 			</div>
@@ -64,7 +64,7 @@
 							:data-type="file_hidden._meta.type"
 							:data-ext="file_hidden._meta.ext"
 							:title="file_hidden.filename"
-							@click="() => previewFile(file_hidden, level + 1)"
+							@click="() => previewFile(file_hidden, level + 1, true)"
 							@dblclick="openFile(file_hidden)"
 						>
 							<SvgServe
@@ -83,7 +83,7 @@
 							:data-type="file._meta.type"
 							:data-ext="file._meta.ext"
 							:title="file.filename"
-							@click="() => previewFile(file, level + 1)"
+							@click="() => previewFile(file, level + 1, true)"
 							@dblclick="openFile(file)"
 						>
 							<SvgServe :filename="'icn-' + file._meta.type" :key="file._meta.type" />
@@ -131,7 +131,7 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, onMounted, onBeforeUnmount, computed, watch, onUpdated } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, watch, onUpdated, nextTick } from 'vue'
 import type { ComputedRef } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -263,14 +263,14 @@ async function parseRoute() {
 		const thisLevel = levels.value[levels.value.length - 1]
 		const files = thisLevel.files.concat(thisLevel.files_hidden)
 		const file = files.filter((file) => file.filename === filename)[0]
-		previewFile(file, levels.value.length, false)
+		previewFile(file, levels.value.length)
 	}
 }
 
 // Preview file information in rightmost column.
-async function previewFile(file: File, level: number, updateUrl: boolean = true) {
+async function previewFile(file: File, level: number, fromClick: boolean = false) {
 	// Update the URL.
-	if (updateUrl) {
+	if (!fromClick) {
 		const re = new RegExp('/?' + file.filename + '$')
 		const previewPath = file.path.replace(re, '')
 		const headless = mainStore.headless ? '/headless' : ''
@@ -289,6 +289,9 @@ async function previewFile(file: File, level: number, updateUrl: boolean = true)
 	// Display preview into rightmost column.
 	if (levels.value) levels.value.splice(level) // Remove all levels after this one.
 	filePreview.value = file
+
+	// Scroll to the right.
+	if (fromClick) scrollRight()
 }
 
 // Remove file preview.
@@ -308,7 +311,7 @@ async function fetchNextLevel(
 	fromClick: boolean = false,
 ) {
 	// When you go back and forward in the history, going from the
-	//  filebrowser module to a file viewer module, parseRoute will
+	// filebrowser module to a file viewer module, parseRoute will
 	// be be called and it will start fetching files for every level
 	// of the path before the component has unmounted. There's no way
 	// to prevent this, so all we can do is to abort it as soon as
@@ -335,11 +338,20 @@ async function fetchNextLevel(
 		}
 	}
 
+	// Scroll to the right -- trash
+	// const lastColWidth = lastCol.value ? lastCol.value.clientWidth : 0
+	// const secondLastColWidth = secondLastCol.value ? secondLastCol.value.clientWidth : 0
+	// const maxScroll = colScroll.value ? colScroll.value.scrollWidth - lastColWidth - secondLastColWidth : 0 // prettier-ignore
+	// console.log(111, lastColWidth, secondLastColWidth, maxScroll)
+	// if (colScroll.value) colScroll.value.scrollLeft = maxScroll
+
 	// Scroll to the right.
-	const lastColWidth = lastCol.value ? lastCol.value.clientWidth : 0
-	const secondLastColWidth = secondLastCol.value ? secondLastCol.value.clientWidth : 0
-	const maxScroll = colScroll.value ? colScroll.value.scrollWidth - lastColWidth - secondLastColWidth : 0 // prettier-ignore
-	if (colScroll.value) colScroll.value.scrollLeft = maxScroll
+	if (fromClick) scrollRight()
+}
+
+async function scrollRight() {
+	await nextTick()
+	if (colScroll.value) colScroll.value.scrollLeft = 9999999999999
 }
 
 // Set selection state of clicked file or directory.
@@ -381,7 +393,7 @@ function deselectCol(level: number) {
 // Return structured content of a directory.
 async function fetchWorkspaceFiles(path = '') {
 	if (!fileSystemApi) return
-	const { status, data, statusText } = await fileSystemApi.get_workspace_files(path)
+	const { status, data, statusText } = await fileSystemApi.getWorkspaceFiles(path)
 	if (status !== 200) {
 		console.error(statusText)
 		return
@@ -509,6 +521,9 @@ async function fetchWorkspaceFiles(path = '') {
 	flex: 0 0 24px;
 	border-right: none;
 	// background: pink;
+}
+#col-wrap .column.filler-left.headless {
+	flex-basis: 0;
 }
 #col-wrap .column.filler-right {
 	flex: 1 1 auto;

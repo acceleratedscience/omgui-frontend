@@ -120,18 +120,23 @@ export class FileSystemApi extends ApiService {
 	//
 	//
 
-	get_workspace_name() {
+	getWorkspaceName() {
 		return this.apiClient.get('/get-workspace-name')
 	}
 
 	// Get list of files in workspace or workspace directory.
-	get_workspace_files(path: string = '') {
+	getWorkspaceFiles(path: string = '') {
 		return this.apiClient.post('/get-workspace-files', { path })
 	}
 
 	// Get file content from path.
-	get_file(path: string = '') {
+	getFile(path: string = '') {
 		return this.apiClient.post('/get-file', { path })
+	}
+
+	execCommand(command: string) {
+		console.log('exec:', command)
+		return this.apiClient.post('/exec-command', { command })
 	}
 
 	test() {

@@ -50,6 +50,11 @@ const routes = [
 		component: () => import(/* webpackChunkName: 'textviewer' */ '@/modules/TextViewer.vue'),
 	},
 	{
+		path: '/commandline',
+		name: 'commandline',
+		component: () => import(/* webpackChunkName: 'commandline' */ '@/modules/CommandLine.vue'),
+	},
+	{
 		path: '/module-a',
 		name: 'module-a',
 		component: () => import(/* webpackChunkName: 'module-a' */ '@/modules/ModuleA.vue'),

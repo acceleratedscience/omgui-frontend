@@ -79,7 +79,7 @@ function loadModule(moduleName: string | null) {
 // Return file contents from API.
 async function fetchFile(path = '') {
 	if (!fileSystemApi) return
-	const { status, data, statusText } = await fileSystemApi.get_file(path)
+	const { status, data, statusText } = await fileSystemApi.getFile(path)
 	if (status !== 200) {
 		console.error(statusText)
 		return

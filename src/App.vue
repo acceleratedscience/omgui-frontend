@@ -33,7 +33,7 @@ const isRawPath = computed(() => {
 // Store the name of your current workspace.
 if (fileSystemApi) {
 	fileSystemApi
-		.get_workspace_name()
+		.getWorkspaceName()
 		.then((result: { data: string; status: number; statusText: string }) => {
 			if (result.status != 200) {
 				console.error('Failed to get workspace name:', result.statusText)
@@ -97,6 +97,8 @@ if (fileSystemApi) {
 				<RouterLink :to="{ name: 'jsonviewer' }">JSON Viewer</RouterLink>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
 				<RouterLink :to="{ name: 'textviewer' }">Text Viewer</RouterLink>
+				&nbsp;&nbsp;|&nbsp;&nbsp;
+				<RouterLink :to="{ name: 'commandline' }">Command Line</RouterLink>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
 				<RouterLink :to="{ name: 'module-a' }">Module A</RouterLink
 				>&nbsp;&nbsp;|&nbsp;&nbsp;
