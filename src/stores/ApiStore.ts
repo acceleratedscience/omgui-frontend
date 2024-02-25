@@ -23,7 +23,9 @@ type State = {
 export const useApiStore = defineStore('apiStore', {
 	state: (): State => ({
 		apiInstances: {
+			main: null,
 			fileSystem: null,
+			molecules: null,
 		},
 	}),
 	actions: {

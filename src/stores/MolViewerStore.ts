@@ -3,17 +3,9 @@
  */
 
 import { defineStore } from 'pinia'
-// import router from '@/router'
-
-import {
-	mol as defaultMol,
-	molSdf as defaultMolSdf,
-	molSvg as defaultMolSvg,
-} from '@/utils/temp-mol-data'
 
 // Type declarations
 type State = {
-	_identifier: string | null
 	_mol: object | null
 	_sdf: string | null
 	_svg: string | null
@@ -21,15 +13,11 @@ type State = {
 
 export const useMolViewerStore = defineStore('molViewerStore', {
 	state: (): State => ({
-		_identifier: null,
-		_mol: defaultMol,
-		_sdf: defaultMolSdf,
-		_svg: defaultMolSvg,
+		_mol: null,
+		_sdf: null,
+		_svg: null,
 	}),
 	getters: {
-		identifier(): string | null {
-			return this._identifier
-		},
 		mol(): object | null {
 			return this._mol
 		},
@@ -41,13 +29,17 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 	},
 	actions: {
-		setIdentifier(identifier: string) {
-			this._identifier = identifier
-		},
-		setMol(mol: object, sdf: string, svg: string) {
+		setMolData(mol: object) {
 			this._mol = mol
-			this._sdf = sdf
+		},
+		setMolVizData(svg: string, sdf: string) {
 			this._svg = svg
+			this._sdf = sdf
+		},
+		clearMol() {
+			this._mol = null
+			this._sdf = null
+			this._svg = null
 		},
 	},
 })

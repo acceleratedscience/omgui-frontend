@@ -20,10 +20,13 @@ type ExtMap = {
 }
 
 // Maps file extensions to module names.
+// Controls which module is used to view a filetype.
 const EXT_MAP: ExtMap = {
 	default: 'TextViewer',
 	csv: 'DataViewer',
 	txt: 'TextViewer',
+	json: 'JsonViewer',
+	'mol.json': 'MolViewer',
 }
 
 export const useFileStore = defineStore('fileStore', {
@@ -61,9 +64,29 @@ export const useFileStore = defineStore('fileStore', {
 			}
 		},
 
+		// The file's secondary extension (e.g. .mol.json).
+		ext2(): string | null {
+			const hasExt2 = this._path.split('.').length >= 3
+			if (hasExt2) {
+				const splitPath = this._path.split('.')
+				splitPath.pop() // Remove the primary extension
+				return splitPath.pop() || null
+			} else {
+				return null
+			}
+		},
+
 		// The filename of the module we'll use to view the file.
 		moduleName(): string {
-			return this.ext ? EXT_MAP[this.ext] || EXT_MAP.default : EXT_MAP.default
+			if (this.ext) {
+				if (this.ext2) {
+					return EXT_MAP[`${this.ext2}.${this.ext}`] || EXT_MAP.default
+				} else {
+					return EXT_MAP[this.ext] || EXT_MAP.default
+				}
+			} else {
+				return EXT_MAP.default
+			}
 		},
 
 		// Indicates whether we recognize the file's extension.

@@ -120,6 +120,10 @@ if (fileSystemApi) {
 /**
  * Headless
  */
+#headless-wrap {
+	background: white;
+	height: 100%;
+}
 #headless-wrap:not(.file-browser) {
 	padding: 20px;
 }

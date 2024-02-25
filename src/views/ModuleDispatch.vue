@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Vue
-import { defineAsyncComponent, ref, shallowRef, watch, onBeforeUnmount } from 'vue'
+import { defineAsyncComponent, ref, shallowRef, watch, onBeforeUnmount, computed } from 'vue'
 import type { Component } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -27,6 +27,13 @@ const fileSystemApi = apiStore.loadApi('fileSystem')
 const loadError = ref(false as boolean)
 const dynamicModule = shallowRef(null as Component | null)
 parseRoute()
+
+const showBreadCrumbs = computed(() => {
+	if (fileStore.isDir) return false
+	if (!fileStore.data) return false
+	if (fileStore.moduleName == 'MolViewer') return false
+	return true
+})
 
 // const prevRouteName = ref(null as string | null)
 let prevRouteType: RouteType = null
@@ -90,7 +97,7 @@ async function fetchFile(path = '') {
 </script>
 
 <template>
-	<BreadCrumbs v-if="!fileStore.isDir" :path="fileStore.path" />
+	<BreadCrumbs v-if="showBreadCrumbs" :path="fileStore.path" />
 	<p v-if="fileStore.invalidExt" class="error-msg">
 		We don't recognize this file's extension ({{ fileStore.ext }})
 	</p>

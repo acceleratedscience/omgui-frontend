@@ -4,14 +4,14 @@ import { ref } from 'vue'
 // APIs
 import { useApiStore } from '@/stores/ApiStore'
 const apiStore = useApiStore()
-const fileSystemApi = apiStore.loadApi('fileSystem')
+const mainApi = apiStore.loadApi('main')
 
 const command = ref<string>('')
 const output = ref<string>('')
 
 async function submitCommand() {
 	output.value = ''
-	const response = await fileSystemApi?.execCommand(command.value)
+	const response = await mainApi?.execCommand(command.value)
 	if (response.status != 200) {
 		// console.error('Failed to execute command:', response.statusText)
 		output.value = response.data

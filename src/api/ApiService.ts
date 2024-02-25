@@ -109,6 +109,25 @@ ApiService.prototype.setupInterceptors = async function () {
 }
 
 /**
+ * Main API
+ */
+
+export class MainApi extends ApiService {
+	constructor() {
+		super('MainApi')
+	}
+
+	//
+	//
+
+	// Execute command.
+	execCommand(command: string) {
+		console.log('exec:', command)
+		return this.apiClient.post('/exec-command', { command })
+	}
+}
+
+/**
  * File System API
  */
 
@@ -134,12 +153,28 @@ export class FileSystemApi extends ApiService {
 		return this.apiClient.post('/get-file', { path })
 	}
 
-	execCommand(command: string) {
-		console.log('exec:', command)
-		return this.apiClient.post('/exec-command', { command })
-	}
-
 	test() {
 		return this.apiClient(`/test`)
+	}
+}
+
+/**
+ * Molecule API
+ */
+
+export class MoleculesApi extends ApiService {
+	constructor() {
+		super('MoleculesApi')
+	}
+
+	//
+	//
+
+	getMolData(identifier: string) {
+		return this.apiClient.post(`/get-mol-data`, { identifier })
+	}
+
+	getMolVizData(inchi: string) {
+		return this.apiClient.post(`/get-mol-viz-data`, { inchi })
 	}
 }

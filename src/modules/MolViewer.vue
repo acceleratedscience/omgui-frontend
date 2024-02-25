@@ -1,11 +1,29 @@
 <template>
-	<div id="mol-render">
-		<div class="container-2d" v-html="molViewerStore.svg"></div>
-		<div class="container-3d" ref="$container3d"></div>
+	<!-- Input screen -->
+	<div v-if="!isFile && !props.identifier">
+		<h2>Display any molecule</h2>
+		<p>
+			Accepted identifiers are: <b>InChI</b> or <b>SMILES</b>.<br />
+			When a molecule is listed on PubChem, you can also use its <b>name</b>,
+			<b>InChIKey</b> or <b>PID</b>.
+		</p>
+		<form @submit.prevent="displayMol">
+			Loading: {{ loading }}<br />
+			<input type="text" v-model="ipIdentifier" />
+			<button :disabled="!!loading">{{ loading ? 'Loading...' : 'Display' }}</button>
+			<div v-if="loadingError" class="error-msg">{{ loadingError }}</div>
+		</form>
 	</div>
 
-	<div id="grid">
-		<!-- <div class="grid grid-1"></div>
+	<!-- Molecule viewer -->
+	<template v-else>
+		<div id="mol-render" :class="{ headless: mainStore.headless }">
+			<div class="container-2d" v-html="molViewerStore.svg"></div>
+			<div class="container-3d" ref="$container3d"></div>
+		</div>
+
+		<div id="grid">
+			<!-- <div class="grid grid-1"></div>
 			<div class="grid grid-2"></div>
 			<div class="grid grid-3"></div>
 			<div class="grid grid-4"></div>
@@ -18,127 +36,142 @@
 			<div class="grid grid-11"></div>
 			<div class="grid grid-12"></div> -->
 
-		<!-- Left -->
-		<div class="col-left">
-			<!-- <div id="breadcrumbs">Molecules &nbsp;&rsaquo;&nbsp; Ibuprofen.json</div> -->
-			<div id="title-wrap">
-				<div class="icn-mol"></div>
-				<h1 id="data-name" data-val="{{ molName }}" :class="{ loading: fetchingData }">
-					{{ molName }}
-				</h1>
+			<!-- Left -->
+			<div class="col-left">
+				<BreadCrumbs v-if="isFile" :path="fileStore.path" />
+				<div id="title-wrap">
+					<div class="icn-mol" :class="{ loading: loading }"></div>
+					<h1 id="data-name" data-val="{{ molName }}" :class="{ loading: loading }">
+						{{ molName }}
+					</h1>
 
-				<!-- <div id="btn-bookmark" class="icn-star"></div> -->
-			</div>
-			<div id="identification">
-				<div>
-					<b>InChI: </b> <span id="data-inchi">{{ mol.identifiers.inchi }}</span>
+					<!-- <div id="btn-bookmark" class="icn-star"></div> -->
 				</div>
-				<div>
-					<b>InChIKey: </b> <span id="data-inchikey">{{ mol.identifiers.inchikey }}</span>
-				</div>
-				<div>
-					<b>Canonical SMILES: </b>
-					<span id="data-canonical-smiles">{{ mol.identifiers.canonical_smiles }}</span>
-				</div>
-				<div>
-					<b>Isomeric SMILES: </b>
-					<span id="data-isomeric-smiles">{{ mol.identifiers.isomeric_smiles }}</span>
-				</div>
-				<div>
-					<b>Formula: </b>
-					<span id="data-isomeric-smiles">{{ mol.identifiers.formula }}</span>
-				</div>
-				<div>
-					<b>PubChem CID: </b>
-					<a
-						v-if="mol.identifiers.cid"
-						id="data-cid"
-						:href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`"
-						target="_blank"
-						>{{ mol.identifiers.cid }}</a
-					>
-					<span
-						v-if="fetchingData"
-						id="fetching-pubchem"
-						:class="{ error: fetchingDataError }"
-						>Fetching</span
-					>
-					<span v-else-if="fetchingDataError" class="error"
-						>Failed to connect - <a href="#" @click="enrichMolData">retry</a></span
-					>
-				</div>
-			</div>
 
-			<br />
-			<hr />
-			<br />
+				<router-link to="/molviewer/aspirin">aspirin</router-link> |
+				<router-link to="/molviewer/ibuprofen">ibuprofen</router-link>
 
-			<div id="synonyms">
-				<h2>Synonyms</h2>
-				<div class="flip-v">
-					<a
-						href="#"
-						ref="$synonymsToggle"
-						class="toggle-expand hide"
-						@click.prevent="toggleExpand"
-						><span></span
-					></a>
-					<div class="cloak">
-						<div
-							ref="$synonymsWrap"
-							class="synonyms-wrap"
-							:style="{ height: synonymsHeight }"
-						>
-							<div v-for="(synonym, i) in mol.synonyms" :key="i" :title="synonym">
-								{{ synonym }}
+				<template v-if="mol">
+					<div id="identification">
+						<div>
+							<b>InChI: </b>
+							<span id="data-inchi">{{ mol?.identifiers?.inchi }}</span>
+						</div>
+						<div>
+							<b>InChIKey: </b>
+							<span id="data-inchikey">{{ mol?.identifiers?.inchikey }}</span>
+						</div>
+						<div>
+							<b>Canonical SMILES: </b>
+							<span id="data-canonical-smiles">{{
+								mol?.identifiers?.canonical_smiles
+							}}</span>
+						</div>
+						<div>
+							<b>Isomeric SMILES: </b>
+							<span id="data-isomeric-smiles">{{
+								mol?.identifiers?.isomeric_smiles
+							}}</span>
+						</div>
+						<div>
+							<b>Formula: </b>
+							<span id="data-isomeric-smiles">{{ mol?.identifiers?.formula }}</span>
+						</div>
+						<div>
+							<b>PubChem CID: </b>
+							<a
+								v-if="mol?.identifiers?.cid"
+								id="data-cid"
+								:href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`"
+								target="_blank"
+								>{{ mol.identifiers.cid }}</a
+							>
+							<span
+								v-if="loading"
+								id="fetching-pubchem"
+								:class="{ error: !!loadingError }"
+								>Fetching</span
+							>
+							<span v-else-if="!!loadingError" class="error"
+								>Failed to connect -
+								<a href="#" @click="(e) => fetchMolData()">retry</a></span
+							>
+						</div>
+					</div>
+
+					<br />
+					<hr />
+					<br />
+
+					<div id="synonyms">
+						<h2>Synonyms</h2>
+						<div class="flip-v">
+							<a href="#" class="toggle-expand hide" @click.prevent="toggleExpand"
+								><span></span
+							></a>
+							<div class="cloak">
+								<div class="synonyms-wrap" :style="{ height: synonymsHeight }">
+									<div
+										v-for="(synonym, i) in mol?.synonyms"
+										:key="i"
+										:title="synonym"
+									>
+										{{ synonym }}
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
 
-			<br />
-			<hr />
-			<br />
+					<br />
+					<hr />
+					<br />
 
-			<div id="parameters">
-				<h2>Parameters</h2>
-				<div class="param-wrap" :style="{ height: paramsHeight }">
-					<div
-						v-for="(val, key) in mol.properties"
-						:key="key"
-						:title="mol.property_sources.prop || null"
-						:class="{ empty: !val && val !== 0 }"
-					>
-						<div class="key">{{ key }}:</div>
-						<div class="filler"></div>
-						<div class="val">{{ val || val === 0 ? val : '-' }}</div>
+					<div id="parameters">
+						<h2>Parameters</h2>
+						<div class="param-wrap" :style="{ height: paramsHeight }">
+							<div
+								v-for="(val, key) in mol?.properties"
+								:key="key"
+								:title="mol.property_sources.prop || null"
+								:class="{ empty: !val && val !== 0 }"
+							>
+								<div class="key">{{ key }}:</div>
+								<div class="filler"></div>
+								<div class="val">{{ val || val === 0 ? val : '-' }}</div>
+							</div>
+						</div>
 					</div>
-				</div>
+
+					<br />
+					<hr />
+					<br />
+
+					<div id="analysis">
+						<h2>Analysis</h2>
+						Comin soon...
+					</div>
+
+					<br />
+					<hr />
+					<br />
+
+					<a
+						id="show-json"
+						class="toggle-expand te-show"
+						href="#"
+						@click.prevent="toggleExpand"
+					>
+						JSON
+					</a>
+					<pre style="tab-size: 30px">{{ mol }}</pre>
+				</template>
 			</div>
 
-			<br />
-			<hr />
-			<br />
-
-			<div id="analysis">
-				<h2>Analysis</h2>
-				Comin soon...
-			</div>
-
-			<br />
-			<hr />
-			<br />
-
-			<a class="toggle-expand te-show" id="show-json" href="#" @click.prevent="toggleExpand">
-				JSON
-			</a>
-			<pre style="tab-size: 30px">{{ mol }}</pre>
+			<!-- Right -->
+			<div class="col-right"></div>
 		</div>
-
-		<!-- Right -->
-		<div class="col-right"></div>
-	</div>
+	</template>
 
 	<!-- <pre>{{ molViewerStore.mol }}</pre> -->
 	<!-- <pre>{{ molViewerStore.sdf }}</pre> -->
@@ -150,33 +183,42 @@ import Miew from 'miew'
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
 // Vue
-import { ref, onMounted, onBeforeUnmount, computed, watch, onUpdated, nextTick } from 'vue'
+import { ref, onMounted, onBeforeMount, computed, watch, onUpdated, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
 // Stores
-// import { useMainStore } from '@/stores/MainStore'
+import { useMainStore } from '@/stores/MainStore'
+import { useFileStore } from '@/stores/FileStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
+const mainStore = useMainStore()
 const molViewerStore = useMolViewerStore()
+const fileStore = useFileStore()
+
+// API
+import { useApiStore } from '@/stores/ApiStore'
+const apiStore = useApiStore()
+const moleculesApi = apiStore.loadApi('molecules')
+
+// Components
+import BreadCrumbs from '@/components/BreadCrumbs.vue'
 
 // Temp
 // import { mol, molSdf, molXyz, molPdb } from '@/utils/temp-mol-data'
 
 const props = defineProps<{
-	identifier: string
+	identifier?: string
 }>()
-
-// console.log(77, props.identifier)
 
 //
 //
 
 // Definitions
 const $container3d = ref<Element | null>(null)
-const $synonymsWrap = ref<Element | null>(null)
-const $parametersWrap = ref<Element | null>(null)
-const $synonymsToggle = ref<Element | null>(null)
-
-const fetchingData = ref<Boolean>(false)
-const fetchingDataError = ref<Boolean>(false)
+const loading = ref<Boolean>(false)
+const loadingError = ref<String | false>(false)
+const router = useRouter()
+const route = useRoute()
+const ipIdentifier = ref('')
 
 // const fetchingData = computed(() => {
 // 	return mol.value?.identifiers?.cid
@@ -185,77 +227,142 @@ const fetchingDataError = ref<Boolean>(false)
 const mol = computed(() => molViewerStore.mol)
 
 const molName = computed(() => {
-	return mol.value?.identifiers?.name || 'Unnamed Molecule'
+	return mol.value?.identifiers?.name
+		? mol.value.identifiers.name
+		: loading
+			? 'Loading'
+			: 'Unnamed Molecule'
 })
 
 const synonymsHeight = computed(() => {
-	const count = mol.value.synonyms ? mol.value.synonyms.length : 0
+	const count = mol.value?.synonyms ? mol.value.synonyms.length : 0
 	const height = Math.ceil(count / 4) * 22
 	return `${height}px`
 })
 
 const paramsHeight = computed(() => {
-	const count = mol.value.properties ? Object.keys(mol.value.properties).length : 0
+	const count = mol.value?.properties ? Object.keys(mol.value.properties).length : 0
 	const height = Math.ceil(count / 3) * 22
 	return `${height}px`
 })
 
-//
-//
-
-molViewerStore.setIdentifier(props.identifier)
-
-onMounted(() => {
-	// init3DViewer()
-	// setHeightSynonyms()
-	// setHeightParameters()
+// The molviewer can be loaded directly or via a file path.
+const isFile = computed(() => {
+	return route.name == 'filebrowser' || route.name == 'headless-filebrowser'
 })
 
 //
 //
+
+onMounted(async () => {
+	// When toggling headless mode, we need to re-render the 3D molecule.
+	if (molViewerStore.mol && molViewerStore.sdf) {
+		init3DViewer()
+	}
+})
+
+onBeforeMount(async () => {
+	// When toggling headless mode, we don't wanna reload the molecule.
+	if (molViewerStore.mol && molViewerStore.sdf) return
+
+	if (isFile.value) {
+		// A molecule file is opened --> fetch viz data.
+		if (fileStore.data) {
+			try {
+				const molData = JSON.parse(fileStore.data)
+				molViewerStore.setMolData(molData, null, null)
+				fetchMolVizData()
+			} catch (err) {
+				console.error(err)
+			}
+		}
+	} else if (props.identifier) {
+		// Find mol by identifier --> load mol + viz data.
+		fetchMolData()
+	}
+})
+
+watch(
+	() => props.identifier,
+	(newVal) => {
+		clearMolData()
+		if (newVal) {
+			fetchMolData(newVal)
+		}
+	},
+)
+
+function clearMolData() {
+	if ($container3d.value) $container3d.value.innerHTML = ''
+	molViewerStore.clearMol()
+}
+
+//
+//
+
+// Display a molecule based on user input identifier.
+async function displayMol() {
+	if (ipIdentifier.value) {
+		const success = await fetchMolData(ipIdentifier.value)
+		if (success) {
+			router.push({ name: 'molviewer', params: { identifier: ipIdentifier.value } })
+		}
+	}
+}
 
 /**
  * Connect to the /enrich API endpoint to fetch
  * additional data about the molecule.
  */
-async function enrichMolData() {
+async function fetchMolData(identifier: string | null = null) {
+	console.log('fetchMolData')
+	let success = false
+	loading.value = true
+	loadingError.value = false
+	identifier = identifier || props.identifier || null
+
 	try {
-		fetchingData.value = true
-		fetchingDataError.value = false
-
-		// Fetch
-		const response = await fetch(`/enrich`, {
-			method: 'POST',
-			body: document.getElementById('data-inchi').innerText,
-		})
-
-		if (response.ok) {
+		const response = await moleculesApi.getMolData(identifier)
+		if (response.status == 200) {
 			// Update HTML
-			const html = await response.text()
-			if (html) {
-				const dump = document.createElement('html')
-				dump.innerHTML = html
-				grid = dump.querySelector('#grid')
-				document.getElementById('grid').innerHTML = grid.innerHTML
-			}
+			molViewerStore.setMolData(response.data)
+			fetchMolVizData()
+			success = true
 		} else {
-			// Handle errors
-			fetchingDataError.value = true
+			// Handle API errors.
+			loadingError.value = response.statusText
+			console.error(loadingError.value, response)
 		}
 
-		// Remove loading from molecule name.
-		document.getElementById('data-name').classList.remove('loading')
-
-		// Re-initialize UI elements.
-		enableToggles()
-		setHeightSynonyms()
-		setHeightParameters()
+		loading.value = false
 	} catch (err) {
-		console.error('Something went wrong fetching the enriched molecule data.', err)
+		// Catch-all error.
+		loadingError.value = 'Something went wrong fetching the molecule data.'
+		console.error(loadingError.value, err)
+	}
+	return success
+}
+
+async function fetchMolVizData() {
+	const inchi = molViewerStore.mol?.identifiers?.inchi
+	if (!inchi) return
+	try {
+		const response = await moleculesApi.getMolVizData(inchi)
+		if (response.status == 200) {
+			molViewerStore.setMolVizData(response.data.svg, response.data.sdf)
+			init3DViewer()
+		} else {
+			console.error(response.statusText)
+		}
+	} catch (err) {
+		// Catch-all error.
+		loadingError.value = 'Something went wrong fetching the molecule`s visualization data.'
+		console.error(loadingError.value, err)
 	}
 }
 
 async function init3DViewer() {
+	console.log(11, 'init3DViewer')
 	if (!$container3d.value || !molViewerStore.sdf) return
 
 	// Using 3DMol library - 3dmol.org
@@ -333,36 +440,6 @@ function render3d_3DMol($container: Element, sdf: string) {
 	// }
 }
 
-// Set height for synonyms wrapper.
-// This makes sure they are divided in 4 neat columns.
-function setHeightSynonyms() {
-	if (!$synonymsWrap.value || !$synonymsToggle.value) return
-
-	const count = $synonymsWrap.value.childElementCount
-	const height = Math.ceil(count / 4) * 22
-	$synonymsWrap.value.setAttribute('style', `max-height: ${height}px`)
-
-	// Set cloak min height - TO DO FIX THIS
-	// const $cloak = document.querySelector('#synonyms .cloak')
-	// const minHeight = Math.min(110, height)
-	// $cloak.setAttribute('style', `min-height: ${minHeight}px`)
-
-	// Display number of synonyms in the toggle.
-	if (count) {
-		$synonymsToggle.value.classList.remove('hide')
-		$synonymsToggle.value.querySelector('span').innerText = ' ' + count
-	}
-}
-
-// Set height for parameters wrapper.
-// This makes sure they are divided in 4 neat columns.
-function setHeightParameters() {
-	if (!$parametersWrap.value) return
-	const count = $parametersWrap.value.children.length
-	const height = Math.ceil(count / 3) * 22
-	$parametersWrap.value.setAttribute('style', `max-height: ${height}px`)
-}
-
 function toggleExpand(e: Event) {
 	;(e.currentTarget as Element).classList.toggle('expand')
 }
@@ -406,6 +483,9 @@ function toggleExpand(e: Event) {
 	background: url(data:image/svg+xml;utf8,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M7.30117%2019.79H16.6986L21.3981%2011.645L16.6986%203.5H7.30117L2.60165%2011.645L7.30117%2019.79ZM0.869873%2011.645L6.43487%2021.29H17.5649L23.1299%2011.645L17.5649%202H6.43487L0.869873%2011.645Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M5.19983%2011.6461L8.58983%205.75111L9.89015%206.49888L6.50015%2012.3939L5.19983%2011.6461Z%22%20fill%3D%22%23333333%22%2F%3E%3C%2Fsvg%3E)
 		center center no-repeat;
 }
+.icn-mol.loading {
+	animation: rotate 3s infinite linear;
+}
 
 /**
  * Grid
@@ -437,7 +517,7 @@ function toggleExpand(e: Event) {
 
 #mol-render {
 	width: calc(100% + 32px);
-	height: 400px;
+	height: 300px;
 	margin: -16px;
 	margin-bottom: 40px;
 	box-sizing: border-box;
@@ -445,6 +525,9 @@ function toggleExpand(e: Event) {
 	gap: 4px;
 	grid-column-start: 1;
 	grid-column-end: 12;
+}
+#mol-render.headless {
+	margin-bottom: 20px;
 }
 #mol-render > div {
 	width: 50%;
@@ -496,10 +579,6 @@ function toggleExpand(e: Event) {
 /**
  * Header
  */
-#breadcrumbs {
-	opacity: 0.3;
-	font-size: var(--font-size-small);
-}
 #title-wrap {
 	display: flex;
 	margin-bottom: 16px;
