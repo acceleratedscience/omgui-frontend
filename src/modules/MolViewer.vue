@@ -1,6 +1,6 @@
 <template>
 	<!-- Input screen -->
-	<div v-if="!isFile && !props.identifier">
+	<div v-if="!isFile && (!props.identifier || loadingError)">
 		<h2>Display any molecule</h2>
 		<p>
 			Accepted identifiers are: <b>InChI</b> or <b>SMILES</b>.<br />
@@ -22,20 +22,7 @@
 			<div class="container-3d" ref="$container3d"></div>
 		</div>
 
-		<div id="grid">
-			<!-- <div class="grid grid-1"></div>
-			<div class="grid grid-2"></div>
-			<div class="grid grid-3"></div>
-			<div class="grid grid-4"></div>
-			<div class="grid grid-5"></div>
-			<div class="grid grid-6"></div>
-			<div class="grid grid-7"></div>
-			<div class="grid grid-8"></div>
-			<div class="grid grid-9"></div>
-			<div class="grid grid-10"></div>
-			<div class="grid grid-11"></div>
-			<div class="grid grid-12"></div> -->
-
+		<div id="content-wrap" style="border: solid 1px red">
 			<!-- Left -->
 			<div class="col-left">
 				<BreadCrumbs v-if="isFile" :path="fileStore.path" />
@@ -45,11 +32,21 @@
 						{{ molName }}
 					</h1>
 
-					<!-- <div id="btn-bookmark" class="icn-star"></div> -->
+					<div id="btn-bookmark" class="icn-star" :class="{ hide: loading }"></div>
 				</div>
 
 				<router-link to="/molviewer/aspirin">aspirin</router-link> |
-				<router-link to="/molviewer/ibuprofen">ibuprofen</router-link>
+				<router-link to="/molviewer/ibuprofen">ibuprofen</router-link><br /><br />
+
+				<!-- <div id="parameters" v-if="mol">
+					<div class="param-wrap" style="height: auto">
+						<div v-for="i in 3" :key="i" :class="{ empty: i / 2 == Math.round(i / 2) }">
+							<div class="key">Key:</div>
+							<div class="filler"></div>
+							<div class="val">Value</div>
+						</div>
+					</div>
+				</div> -->
 
 				<template v-if="mol">
 					<div id="identification">
@@ -169,7 +166,7 @@
 			</div>
 
 			<!-- Right -->
-			<div class="col-right"></div>
+			<div class="col-right">Hello world</div>
 		</div>
 	</template>
 
@@ -315,7 +312,6 @@ async function displayMol() {
  * additional data about the molecule.
  */
 async function fetchMolData(identifier: string | null = null) {
-	console.log('fetchMolData')
 	let success = false
 	loading.value = true
 	loadingError.value = false
@@ -332,6 +328,7 @@ async function fetchMolData(identifier: string | null = null) {
 			// Handle API errors.
 			loadingError.value = response.statusText
 			console.error(loadingError.value, response)
+			ipIdentifier.value = props.identifier || ''
 		}
 
 		loading.value = false
@@ -339,6 +336,7 @@ async function fetchMolData(identifier: string | null = null) {
 		// Catch-all error.
 		loadingError.value = 'Something went wrong fetching the molecule data.'
 		console.error(loadingError.value, err)
+		ipIdentifier.value = props.identifier || ''
 	}
 	return success
 }
@@ -356,8 +354,7 @@ async function fetchMolVizData() {
 		}
 	} catch (err) {
 		// Catch-all error.
-		loadingError.value = 'Something went wrong fetching the molecule`s visualization data.'
-		console.error(loadingError.value, err)
+		console.error('Something went wrong fetching the molecule`s visualization data.', err)
 	}
 }
 
@@ -491,24 +488,17 @@ function toggleExpand(e: Event) {
  * Grid
  */
 
-#grid {
-	/* Grid */
-	display: grid;
-	row-gap: 8px;
-	column-gap: 8px;
-	grid-template-columns: repeat(12, 80px);
+#content-wrap {
+	display: flex;
 }
 
-#grid .col-left {
-	grid-column-start: 1;
-	/* grid-column-end: 9; */
-	grid-column-end: 13;
+#content-wrap .col-left {
+	flex: 1 1;
 }
-#grid .col-right {
-	grid-column-start: 10;
-	grid-column-end: 13;
-	background: #fafafa;
-	display: none;
+#content-wrap .col-right {
+	flex: 0 0 200px;
+	background: pink;
+	opacity: 0.5;
 }
 
 /**
@@ -595,6 +585,9 @@ function toggleExpand(e: Event) {
 	width: 40px;
 	height: 40px;
 }
+#title-wrap .icn-star.hide {
+	display: none;
+}
 #title-wrap .icn-mol {
 	margin-left: -8px;
 }
@@ -672,7 +665,7 @@ function toggleExpand(e: Event) {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: wrap;
-	margin-right: -40px;
+	// margin-right: -40px;
 	height: 200px;
 }
 #parameters .param-wrap > div {
@@ -715,7 +708,7 @@ function toggleExpand(e: Event) {
 #parameters .param-wrap > div .filler::before {
 	content: '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .';
 	opacity: 0.3;
-	white-space: nowrap;
+	// white-space: nowrap;
 }
 
 /**/
@@ -739,59 +732,5 @@ pre {
 }
 .toggle-expand.te-show.expand::before {
 	content: 'Hide ';
-}
-
-.grid {
-	background: rgba(255, 0, 0, 0.2);
-	height: 50px;
-	display: none;
-}
-.grid-1 {
-	grid-column-start: 1;
-	grid-column-end: 2;
-}
-.grid-2 {
-	grid-column-start: 2;
-	grid-column-end: 3;
-}
-.grid-3 {
-	grid-column-start: 3;
-	grid-column-end: 4;
-}
-.grid-4 {
-	grid-column-start: 4;
-	grid-column-end: 5;
-}
-.grid-5 {
-	grid-column-start: 5;
-	grid-column-end: 6;
-}
-.grid-6 {
-	grid-column-start: 6;
-	grid-column-end: 7;
-}
-.grid-7 {
-	grid-column-start: 7;
-	grid-column-end: 8;
-}
-.grid-8 {
-	grid-column-start: 8;
-	grid-column-end: 9;
-}
-.grid-9 {
-	grid-column-start: 9;
-	grid-column-end: 10;
-}
-.grid-10 {
-	grid-column-start: 10;
-	grid-column-end: 11;
-}
-.grid-11 {
-	grid-column-start: 11;
-	grid-column-end: 12;
-}
-.grid-12 {
-	grid-column-start: 12;
-	grid-column-end: 13;
 }
 </style>
