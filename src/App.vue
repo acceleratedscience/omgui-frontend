@@ -139,6 +139,14 @@ if (fileSystemApi) {
 	box-sizing: border-box;
 	height: 100%;
 	overflow-x: hidden;
+
+	// Centered layout
+	padding: 80px;
+	padding-top: 40px;
+	max-width: 1360px;
+	background: #fff;
+	margin: 0 auto;
+	box-shadow: 0 0 300px rgba(0, 0, 0, 0.05);
 }
 header {
 	width: 100%;

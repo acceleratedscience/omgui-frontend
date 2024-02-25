@@ -15,7 +15,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "3dmol": "^2.0.6",
     "axios": "^1.6.7",
+    "miew": "^0.10.1",
     "pinia": "^2.1.7",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5"

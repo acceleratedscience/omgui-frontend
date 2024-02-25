@@ -25,8 +25,9 @@ const routes = [
 		redirect: '/~/',
 	},
 	{
-		path: '/molviewer',
+		path: '/molviewer/:identifier?',
 		name: 'molviewer',
+		props: true,
 		component: () => import(/* webpackChunkName: 'molviewer' */ '@/modules/MolViewer.vue'),
 	},
 	{

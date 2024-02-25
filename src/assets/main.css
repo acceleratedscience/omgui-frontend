@@ -13,6 +13,8 @@
 	--black-30: rgba(0, 0, 0, 0.3);
 	--black-60: rgba(0, 0, 0, 0.6);
 
+	--soft-bg: #fafafa;
+
 	--highlight: #fff7cc;
 	--highlight-border: #e5deb8; /* Equivalent of 10% black overlay */
 	--blue: var(--ibm-blue);
@@ -31,6 +33,7 @@
 
 #app {
 	height: 100%;
+	background: var(--soft-bg);
 	/* min-width: min-content; */
 }
 .error-msg {

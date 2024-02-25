@@ -18,6 +18,7 @@ async function submitCommand() {
 		return
 	}
 	output.value = response.data
+	command.value = ''
 }
 </script>
 
