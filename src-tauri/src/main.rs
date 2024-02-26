@@ -20,7 +20,7 @@ fn main() {
             }
         })
         .invoke_handler(tauri::generate_handler![get_user])
-        .build(tauri::generate_context!("./tauri.conf.json"))
+        .build(tauri::generate_context!())
         .unwrap();
 
     loop {
