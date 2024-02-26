@@ -37,7 +37,7 @@ a:hover {
  * Buttons
  */
 
-button {
+/* button {
 	height: 40px;
 	background: var(--ibm-blue);
 	border: none;
@@ -64,7 +64,7 @@ button.tertiary {
 }
 button.tertiary:hover {
 	border-color: var(--ibm-blue-dark);
-}
+} */
 
 /**
  * Dropdowns

@@ -15,9 +15,13 @@ import * as ApiService from '@/api/ApiService'
 import { capitalize } from '@/utils/helpers'
 
 // Type declarations
-import type { FileSystemApi } from '@/api/ApiService'
+import type { MainApi, FileSystemApi, MoleculesApi } from '@/api/ApiService'
 type State = {
-	apiInstances: Record<string, FileSystemApi | null> // <-- Other APIs need to be added here
+	apiInstances: {
+		main: MainApi | null
+		fileSystem: FileSystemApi | null
+		molecules: MoleculesApi | null
+	} // <-- Other APIs need to be added here
 }
 
 export const useApiStore = defineStore('apiStore', {
@@ -29,12 +33,14 @@ export const useApiStore = defineStore('apiStore', {
 		},
 	}),
 	actions: {
-		loadApi(name: any) {
-			if (!this.apiInstances[name]) {
+		loadApi(name: string) {
+			if (!this.apiInstances[name as keyof typeof this.apiInstances]) {
 				const apiClassName: string = capitalize(name) + 'Api'
-				this.apiInstances[name] = new (ApiService as any)[apiClassName]()
+				this.apiInstances[name as keyof typeof this.apiInstances] = new (ApiService as any)[
+					apiClassName
+				]()
 			}
-			return this.apiInstances[name]
+			return this.apiInstances[name as keyof typeof this.apiInstances]
 		},
 	},
 })

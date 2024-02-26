@@ -99,3 +99,53 @@ export function capitalize(str: string) {
 	if (!str) return ''
 	return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
+// Debounce
+// Limit rate of rapid-fire event, executing only when time limit expires.
+// Usefull for window resize events, etc.
+// Source: https://blog.webdevsimplified.com/2022-03/debounce-vs-throttle/
+//
+// import { debounce } from '@/utils/helpers'
+// const debouncer = debounce(this.resizeHandler, 500)
+// window.addEventListener('resize', debouncer)
+export function debounce(func: Function, delay: number = 300) {
+	let timeout: ReturnType<typeof setTimeout> | null = null
+	return (...args: any[]) => {
+		clearTimeout(timeout as ReturnType<typeof setTimeout>)
+		timeout = setTimeout(() => {
+			func(...args)
+		}, delay)
+	}
+}
+
+// Throttle
+// Limit rate of rapid-fire event, executing only once per time limit
+// Useful for scroll handlers, etc.
+// Source: https://blog.webdevsimplified.com/2022-03/debounce-vs-throttle/
+//
+// import { throttle } from '@/utils/helpers'
+// const throttler = throttle(this.scrollHandler, 500)
+// window.addEventListener('scroll', throttler)
+export function throttle(func: Function, delay: number = 3000) {
+	let wait = false
+	let waitArgs: any[] | null
+	const timeoutFunc = () => {
+		if (waitArgs == null) {
+			wait = false
+		} else {
+			func(...waitArgs)
+			waitArgs = null
+			setTimeout(timeoutFunc, delay)
+		}
+	}
+
+	return (...args: any[]) => {
+		if (wait) {
+			waitArgs = args
+			return
+		}
+		func(...args)
+		wait = true
+		setTimeout(timeoutFunc, delay)
+	}
+}

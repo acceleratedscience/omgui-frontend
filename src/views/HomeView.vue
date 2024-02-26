@@ -26,7 +26,7 @@ const mainStore = useMainStore()
 		</p>
 
 		<br />
-		<button @click.prevent="mainStore.toggleHeadless(true)">Toggle headless</button>
+		<cv-button @click.prevent="mainStore.toggleHeadless(true)">Toggle headless</cv-button>
 	</main>
 </template>
 

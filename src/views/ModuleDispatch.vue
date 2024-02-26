@@ -5,8 +5,13 @@ import type { Component } from 'vue'
 import { useRoute } from 'vue-router'
 
 // Stores
-import { useApiStore } from '@/stores/ApiStore'
 import { useFileStore } from '@/stores/FileStore'
+
+// API
+import { useApiStore } from '@/stores/ApiStore'
+import type { FileSystemApi as FileSystemApiType } from '@/api/ApiService'
+const apiStore = useApiStore()
+const fileSystemApi: FileSystemApiType | null = apiStore.loadApi('fileSystem') as FileSystemApiType | null // prettier-ignore
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
@@ -17,8 +22,6 @@ type RouteType = 'dir' | 'file' | 'error' | null
 // Definitions
 const route = useRoute()
 const fileStore = useFileStore()
-const apiStore = useApiStore()
-const fileSystemApi = apiStore.loadApi('fileSystem')
 
 //
 //

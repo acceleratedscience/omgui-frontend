@@ -21,14 +21,14 @@ const path = computed(() => {
 </script>
 
 <template>
-	<main id="module">This is the JSON viewer component {{ path }}</main>
+	<main id="module">This is the SDF viewer component {{ path }}</main>
 	<pre v-if="fileStore.data" id="file-content">{{ fileStore.data }}</pre>
 	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
 </template>
 
 <style lang="css" scoped>
 #module {
-	background: beige;
+	background: aliceblue;
 	padding: 4px;
 	margin-bottom: 20px;
 }

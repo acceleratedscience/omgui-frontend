@@ -1,0 +1,38 @@
+b {
+	font-weight: 600;
+}
+p {
+	font-size: var(--font-size);
+}
+h1,
+h2,
+h3,
+h4,
+h5 {
+	margin-top: 0;
+	margin-bottom: 10px;
+}
+h1 {
+	font-weight: 300;
+}
+h2 {
+	font-size: 28px;
+	font-weight: 600;
+}
+h3 {
+	font-size: 22px;
+	font-weight: 600;
+}
+h4 {
+	font-size: 16px;
+	font-weight: 600;
+}
+h5 {
+	font-size: 16px;
+	font-weight: 400;
+}
+pre {
+	font-family: 'courier', monospace;
+	tab-size: 2;
+	line-height: var(--line-height);
+}

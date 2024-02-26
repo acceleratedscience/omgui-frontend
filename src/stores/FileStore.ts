@@ -27,6 +27,7 @@ const EXT_MAP: ExtMap = {
 	txt: 'TextViewer',
 	json: 'JsonViewer',
 	'mol.json': 'MolViewer',
+	sdf: 'SdfViewer',
 }
 
 export const useFileStore = defineStore('fileStore', {
@@ -82,6 +83,7 @@ export const useFileStore = defineStore('fileStore', {
 				if (this.ext2) {
 					return EXT_MAP[`${this.ext2}.${this.ext}`] || EXT_MAP.default
 				} else {
+					console.log(11, this.ext)
 					return EXT_MAP[this.ext] || EXT_MAP.default
 				}
 			} else {

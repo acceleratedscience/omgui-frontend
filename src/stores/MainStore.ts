@@ -10,12 +10,16 @@ import router from '@/router'
 type State = {
 	_headless: boolean
 	_workspace: string | null
+	_screenWidth: number | null
+	_contentWidth: number | null
 }
 
 export const useMainStore = defineStore('mainStore', {
 	state: (): State => ({
 		_headless: false, // Causes the modules to display without the application wrapper
 		_workspace: null, // The current workspace
+		_screenWidth: null, // The available width of the viewport
+		_contentWidth: null, // The width of the content area (screen - padding)
 	}),
 	getters: {
 		headless(): boolean {
@@ -23,6 +27,12 @@ export const useMainStore = defineStore('mainStore', {
 		},
 		workspace(): string | null {
 			return this._workspace
+		},
+		screenWidth(): number | null {
+			return this._screenWidth
+		},
+		contentWidth(): number | null {
+			return this._contentWidth
 		},
 	},
 	actions: {
@@ -58,6 +68,16 @@ export const useMainStore = defineStore('mainStore', {
 		// Set current workspace
 		setWorkspace(workspace: string | null) {
 			this._workspace = workspace
+		},
+
+		// Set screen width
+		setScreenWidth(width: number) {
+			this._screenWidth = width
+		},
+
+		// Set content width
+		setContentWidth(width: number) {
+			this._contentWidth = width
 		},
 	},
 })

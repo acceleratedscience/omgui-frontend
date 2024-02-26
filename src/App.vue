@@ -1,21 +1,34 @@
 <script setup lang="ts">
 // Vue
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
-// import { usePopStateStore } from '@/stores/PopStateStore--trash' // trash
-import { useApiStore } from '@/stores/ApiStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
+// import { usePopStateStore } from '@/stores/PopStateStore--trash' // trash
 // const popStateStore = usePopStateStore() // trash
+
+// API
+import { useApiStore } from '@/stores/ApiStore'
+import type { FileSystemApi as FileSystemApiType } from '@/api/ApiService'
 const apiStore = useApiStore()
-const fileSystemApi = apiStore.loadApi('fileSystem')
+const fileSystemApi: FileSystemApiType | null = apiStore.loadApi('fileSystem') as FileSystemApiType | null // prettier-ignore
+
+// Internal
+import { debounce } from '@/utils/helpers'
 
 // // Enable popstate callbacks // trash
 // import usePopState from '@/utils/popstate'
 // usePopState(popStateStore.setPopState)
+
+//
+//
+
+// Definitions
+const $mainWrap = ref<HTMLElement | null>(null)
+const $headlessWrap = ref<HTMLElement | null>(null)
 
 // While currently not used in the application, we preserve the
 // option to load certain paths as "raw", i.e. without the application
@@ -41,6 +54,31 @@ if (fileSystemApi) {
 			}
 			mainStore.setWorkspace(result.data)
 		})
+}
+
+onMounted(() => {
+	storeScreenWidth()
+})
+
+//
+//
+
+// Update screen width in the store on resize.
+function storeScreenWidth() {
+	const debouncer = debounce(_resizeHandler, 500)
+	window.addEventListener('resize', debouncer)
+	_resizeHandler()
+
+	function _resizeHandler() {
+		const $wrap: HTMLElement | null = $mainWrap.value || $headlessWrap.value || null
+		if (!$wrap) return
+
+		const padding = parseInt(window.getComputedStyle($wrap).paddingLeft)
+		const width = $wrap.clientWidth
+		const contentWidth = width - padding * 2
+		mainStore.setContentWidth(contentWidth)
+		mainStore.setScreenWidth(window.innerWidth)
+	}
 }
 </script>
 
@@ -68,6 +106,7 @@ if (fileSystemApi) {
 	<!-- Load a headless module (wrapper + loader) -->
 	<div
 		v-else-if="mainStore.headless"
+		ref="$headlessWrap"
 		id="headless-wrap"
 		:class="{ 'file-browser': fileStore.isDir }"
 	>
@@ -81,7 +120,7 @@ if (fileSystemApi) {
 	</div>
 
 	<!-- Load the full application -->
-	<div v-else id="main-wrap">
+	<div v-else ref="$mainWrap" id="main-wrap">
 		<header>
 			<nav>
 				<RouterLink :to="{ name: 'home' }">Home</RouterLink>
@@ -138,7 +177,6 @@ if (fileSystemApi) {
 	display: flex;
 	flex-direction: column;
 	position: relative;
-	padding: 40px;
 	padding-bottom: 0;
 	box-sizing: border-box;
 	height: 100%;
@@ -177,5 +215,20 @@ nav {
 	overflow-x: hidden;
 	overflow-y: auto;
 	margin: 0 -40px;
+}
+
+/**
+ * Responsive
+ */
+
+@media (max-width: $bp-medium) {
+	#main-wrap {
+		padding: 40px;
+	}
+}
+@media (max-width: $bp-small) {
+	#main-wrap {
+		padding: 20px;
+	}
 }
 </style>

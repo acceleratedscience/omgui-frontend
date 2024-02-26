@@ -9,8 +9,9 @@ const fileStore = useFileStore()
 
 // API
 import { useApiStore } from '@/stores/ApiStore'
+import type { FileSystemApi as FileSystemApiType } from '@/api/ApiService'
 const apiStore = useApiStore()
-const fileSystemApi = apiStore.loadApi('fileSystem')
+const fileSystemApi: FileSystemApiType | null = apiStore.loadApi('fileSystem') as FileSystemApiType | null // prettier-ignore
 </script>
 
 <template>ABC</template>

@@ -3,8 +3,9 @@ import { ref } from 'vue'
 
 // APIs
 import { useApiStore } from '@/stores/ApiStore'
+import type { MainApi as MainApiType } from '@/api/ApiService'
 const apiStore = useApiStore()
-const mainApi = apiStore.loadApi('main')
+const mainApi: MainApiType | null = apiStore.loadApi('main') as MainApiType | null
 
 const command = ref<string>('')
 const output = ref<string>('')

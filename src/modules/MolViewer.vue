@@ -1,17 +1,31 @@
 <template>
 	<!-- Input screen -->
 	<div v-if="!isFile && (!props.identifier || loadingError)">
-		<h2>Display any molecule</h2>
+		<h3>Display any molecule</h3>
 		<p>
-			Accepted identifiers are: <b>InChI</b> or <b>SMILES</b>.<br />
-			When a molecule is listed on PubChem, you can also use its <b>name</b>,
-			<b>InChIKey</b> or <b>PID</b>.
+			Accepted identifiers are:
+			<b><a href="#" @click.prevent="(e) => fillIn('inchi')">InChI</a></b>
+			or <b><a href="#" @click.prevent="(e) => fillIn('smiles')">SMILES</a></b
+			>.<br />
+			When a molecule is listed on PubChem, you can also use its
+			<b><a href="#" @click.prevent="(e) => fillIn('name')">name</a></b
+			>, <b><a href="#" @click.prevent="(e) => fillIn('inchikey')">InChIKey</a></b> or
+			<b><a href="#" @click.prevent="(e) => fillIn('pid')">PID</a></b
+			>.
 		</p>
-		<form @submit.prevent="displayMol">
-			Loading: {{ loading }}<br />
-			<input type="text" v-model="ipIdentifier" />
-			<button :disabled="!!loading">{{ loading ? 'Loading...' : 'Display' }}</button>
+		<form id="input-form" @submit.prevent="displayMol">
 			<div v-if="loadingError" class="error-msg">{{ loadingError }}</div>
+			<div class="fields">
+				<cv-text-input
+					v-model="ipIdentifier"
+					type="text"
+					placeholder="aspirin"
+					:hide-label="true"
+				/>
+				<cv-button size="default" :disabled="!!loading">{{
+					loading ? 'Loading...' : 'Display'
+				}}</cv-button>
+			</div>
 		</form>
 	</div>
 
@@ -22,31 +36,21 @@
 			<div class="container-3d" ref="$container3d"></div>
 		</div>
 
-		<div id="content-wrap" style="border: solid 1px red">
+		<div id="content-wrap">
 			<!-- Left -->
 			<div class="col-left">
 				<BreadCrumbs v-if="isFile" :path="fileStore.path" />
 				<div id="title-wrap">
 					<div class="icn-mol" :class="{ loading: loading }"></div>
-					<h1 id="data-name" data-val="{{ molName }}" :class="{ loading: loading }">
+					<h2 id="data-name" data-val="{{ molName }}" :class="{ loading: loading }">
 						{{ molName }}
-					</h1>
+					</h2>
 
 					<div id="btn-bookmark" class="icn-star" :class="{ hide: loading }"></div>
 				</div>
 
-				<router-link to="/molviewer/aspirin">aspirin</router-link> |
-				<router-link to="/molviewer/ibuprofen">ibuprofen</router-link><br /><br />
-
-				<!-- <div id="parameters" v-if="mol">
-					<div class="param-wrap" style="height: auto">
-						<div v-for="i in 3" :key="i" :class="{ empty: i / 2 == Math.round(i / 2) }">
-							<div class="key">Key:</div>
-							<div class="filler"></div>
-							<div class="val">Value</div>
-						</div>
-					</div>
-				</div> -->
+				<!-- <router-link to="/molviewer/aspirin">aspirin</router-link> |
+				<router-link to="/molviewer/ibuprofen">ibuprofen</router-link><br /><br /> -->
 
 				<template v-if="mol">
 					<div id="identification">
@@ -101,7 +105,7 @@
 					<br />
 
 					<div id="synonyms">
-						<h2>Synonyms</h2>
+						<h3>Synonyms</h3>
 						<div class="flip-v">
 							<a href="#" class="toggle-expand hide" @click.prevent="toggleExpand"
 								><span></span
@@ -112,6 +116,7 @@
 										v-for="(synonym, i) in mol?.synonyms"
 										:key="i"
 										:title="synonym"
+										:style="{ width: synonymColWidth }"
 									>
 										{{ synonym }}
 									</div>
@@ -125,13 +130,14 @@
 					<br />
 
 					<div id="parameters">
-						<h2>Parameters</h2>
+						<h3>Parameters</h3>
 						<div class="param-wrap" :style="{ height: paramsHeight }">
 							<div
 								v-for="(val, key) in mol?.properties"
 								:key="key"
-								:title="mol.property_sources.prop || null"
+								:title="molViewerStore.propertiesString[key]"
 								:class="{ empty: !val && val !== 0 }"
+								:style="{ width: paramColWidth }"
 							>
 								<div class="key">{{ key }}:</div>
 								<div class="filler"></div>
@@ -145,7 +151,7 @@
 					<br />
 
 					<div id="analysis">
-						<h2>Analysis</h2>
+						<h3>Analysis</h3>
 						Comin soon...
 					</div>
 
@@ -166,7 +172,10 @@
 			</div>
 
 			<!-- Right -->
-			<div class="col-right">Hello world</div>
+			<div class="col-right">
+				<h4>Notes</h4>
+				<textarea id="ip-notes"></textarea>
+			</div>
 		</div>
 	</template>
 
@@ -177,24 +186,28 @@
 <script setup lang="ts">
 // Libraries
 import Miew from 'miew'
+// @ts-ignore
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
 // Vue
-import { ref, onMounted, onBeforeMount, computed, watch, onUpdated, nextTick } from 'vue'
+import { ref, onMounted, onBeforeMount, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
-import { useMolViewerStore } from '@/stores/MolViewerStore'
+import { useMolViewerStore, type Mol } from '@/stores/MolViewerStore'
 const mainStore = useMainStore()
 const molViewerStore = useMolViewerStore()
 const fileStore = useFileStore()
 
+// Type declarations
+
 // API
 import { useApiStore } from '@/stores/ApiStore'
+import type { MoleculesApi as MoleculesApiType } from '@/api/ApiService'
 const apiStore = useApiStore()
-const moleculesApi = apiStore.loadApi('molecules')
+const moleculesApi: MoleculesApiType | null = apiStore.loadApi('molecules') as MoleculesApiType | null // prettier-ignore
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
@@ -215,37 +228,51 @@ const loading = ref<Boolean>(false)
 const loadingError = ref<String | false>(false)
 const router = useRouter()
 const route = useRoute()
-const ipIdentifier = ref('')
+const ipIdentifier = ref<String>('')
+const mol = computed((): Mol | null => molViewerStore.mol)
+const paramColMinWidth = 250
+const synonymColMinWidth = 150
 
-// const fetchingData = computed(() => {
-// 	return mol.value?.identifiers?.cid
-// })
-
-const mol = computed(() => molViewerStore.mol)
-
+// Title
 const molName = computed(() => {
 	return mol.value?.identifiers?.name
 		? mol.value.identifiers.name
-		: loading
+		: loading.value
 			? 'Loading'
 			: 'Unnamed Molecule'
-})
-
-const synonymsHeight = computed(() => {
-	const count = mol.value?.synonyms ? mol.value.synonyms.length : 0
-	const height = Math.ceil(count / 4) * 22
-	return `${height}px`
-})
-
-const paramsHeight = computed(() => {
-	const count = mol.value?.properties ? Object.keys(mol.value.properties).length : 0
-	const height = Math.ceil(count / 3) * 22
-	return `${height}px`
 })
 
 // The molviewer can be loaded directly or via a file path.
 const isFile = computed(() => {
 	return route.name == 'filebrowser' || route.name == 'headless-filebrowser'
+})
+
+// Synonyms
+const synonymsHeight = computed(() => {
+	const count = mol.value?.synonyms ? mol.value.synonyms.length : 0
+	const height = Math.ceil(count / synonymColCount.value) * 22
+	return `${height}px`
+})
+const synonymColCount = computed(() => {
+	if (!mainStore.contentWidth) return 4
+	return Math.floor(mainStore.contentWidth / synonymColMinWidth) || 1
+})
+const synonymColWidth = computed(() => {
+	return `calc((100% - ${(synonymColCount.value - 1) * 20}px) / ${synonymColCount.value})`
+})
+
+// Parameters
+const paramColCount = computed(() => {
+	if (!mainStore.contentWidth) return 3
+	return Math.floor(mainStore.contentWidth / paramColMinWidth) || 1
+})
+const paramColWidth = computed(() => {
+	return `calc((100% - ${(paramColCount.value - 1) * 40}px) / ${paramColCount.value})`
+})
+const paramsHeight = computed(() => {
+	const count = mol.value?.properties ? Object.keys(mol.value.properties).length : 0
+	const height = Math.ceil(count / paramColCount.value) * 22
+	return `${height}px`
 })
 
 //
@@ -267,8 +294,9 @@ onBeforeMount(async () => {
 		if (fileStore.data) {
 			try {
 				const molData = JSON.parse(fileStore.data)
-				molViewerStore.setMolData(molData, null, null)
+				molViewerStore.setMolData(molData)
 				fetchMolVizData()
+				loading.value = false
 			} catch (err) {
 				console.error(err)
 			}
@@ -297,12 +325,36 @@ function clearMolData() {
 //
 //
 
+// Pre-fill the input screen form.
+function fillIn(idKey: string) {
+	type Identifiers = {
+		inchi: string
+		smiles: string
+		name: string
+		inchikey: string
+		pid: string
+		[key: string]: string
+	}
+
+	const identifiers: Identifiers = {
+		inchi: 'InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)',
+		smiles: 'CC(=O)OC1=CC=CC=C1C(=O)O',
+		name: 'aspirin',
+		inchikey: 'BSYNRYMUTXBXSQ-UHFFFAOYSA-N',
+		pid: '2244',
+	}
+	ipIdentifier.value = identifiers[idKey]
+}
+
 // Display a molecule based on user input identifier.
 async function displayMol() {
 	if (ipIdentifier.value) {
-		const success = await fetchMolData(ipIdentifier.value)
+		const success = await fetchMolData(ipIdentifier.value.toString())
 		if (success) {
-			router.push({ name: 'molviewer', params: { identifier: ipIdentifier.value } })
+			router.push({
+				name: 'molviewer',
+				params: { identifier: ipIdentifier.value.toString() },
+			})
 		}
 	}
 }
@@ -316,9 +368,10 @@ async function fetchMolData(identifier: string | null = null) {
 	loading.value = true
 	loadingError.value = false
 	identifier = identifier || props.identifier || null
+	if (!identifier) return
 
 	try {
-		const response = await moleculesApi.getMolData(identifier)
+		const response = await moleculesApi?.getMolData(identifier)
 		if (response.status == 200) {
 			// Update HTML
 			molViewerStore.setMolData(response.data)
@@ -345,7 +398,7 @@ async function fetchMolVizData() {
 	const inchi = molViewerStore.mol?.identifiers?.inchi
 	if (!inchi) return
 	try {
-		const response = await moleculesApi.getMolVizData(inchi)
+		const response = await moleculesApi?.getMolVizData(inchi)
 		if (response.status == 200) {
 			molViewerStore.setMolVizData(response.data.svg, response.data.sdf)
 			init3DViewer()
@@ -359,7 +412,6 @@ async function fetchMolVizData() {
 }
 
 async function init3DViewer() {
-	console.log(11, 'init3DViewer')
 	if (!$container3d.value || !molViewerStore.sdf) return
 
 	// Using 3DMol library - 3dmol.org
@@ -370,7 +422,7 @@ async function init3DViewer() {
 // Using the Miew library - https://lifescience.opensource.epam.com/miew
 function render3d_miew($container: Element, sdf: string) {
 	const viewer = new Miew({
-		container: $container,
+		container: $container as HTMLDivElement,
 		// Required for the molecule data without residues, because default mode, Cartoon, visualizes residues.
 		// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/examples/load_from_string.html
 		reps: [
@@ -384,7 +436,8 @@ function render3d_miew($container: Element, sdf: string) {
 			// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
 			axes: false,
 			fps: false,
-			// autoRotation: -0.03,
+			autoRotation: -0.03,
+			// @ts-ignore
 			bg: { color: 0xffffff, transparent: true },
 		},
 	})
@@ -397,7 +450,7 @@ function render3d_miew($container: Element, sdf: string) {
 // Using the 3DMol library - https://3dmol.org
 // Doesn't have balls-and-stick visualization, only stick.
 function render3d_3DMol($container: Element, sdf: string) {
-	const config = { backgroundColor: '#fff' }
+	const config = { backgroundColor: 0xffffff, backgroundAlpha: 0 }
 	const viewer = $3Dmol.createViewer($container, config)
 	viewer.addModel(sdf, 'sdf')
 
@@ -444,6 +497,26 @@ function toggleExpand(e: Event) {
 
 <style lang="scss" scoped>
 @import 'https://unpkg.com/miew@0.9.0/dist/Miew.min.css';
+// @import 'carbon-components/css/carbon-components.css';
+// @import 'carbon-components/scss/components/text-input/_text-input.scss';
+
+/**
+ * Input screen
+ */
+#input-form .fields {
+	display: flex;
+	gap: 8px;
+}
+#input-form .fields > div {
+	flex: 1;
+}
+// Carbom fix
+#input-form .fields > div:deep(.bx--text-input) {
+	height: 48px;
+}
+#input-form .fields > button {
+	flex: 0;
+}
 
 /**
  * Toggle
@@ -490,15 +563,16 @@ function toggleExpand(e: Event) {
 
 #content-wrap {
 	display: flex;
+	gap: 0 40px;
 }
 
 #content-wrap .col-left {
 	flex: 1 1;
+	max-width: calc(100% - 290px);
 }
 #content-wrap .col-right {
-	flex: 0 0 200px;
-	background: pink;
-	opacity: 0.5;
+	flex: 0 0 250px;
+	background: fafafa;
 }
 
 /**
@@ -631,14 +705,13 @@ function toggleExpand(e: Event) {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: wrap;
-	margin-right: -20px;
+	gap: 0 20px;
 }
 #synonyms .synonyms-wrap div {
 	height: 22px;
 	line-height: 22px;
-	width: 25%;
-	padding-right: 20px;
 	box-sizing: border-box;
+	// width: 25%; // Set dynamically, see synonymColWidth
 
 	/* Truncation */
 	white-space: nowrap;
@@ -667,39 +740,39 @@ function toggleExpand(e: Event) {
 	flex-wrap: wrap;
 	// margin-right: -40px;
 	height: 200px;
+	gap: 0 40px;
 }
 #parameters .param-wrap > div {
-	/* margin-bottom: 4px; */
-	/* width: 25%; */
-	/* padding-right: 20px; */
-	/* box-sizing: border-box; */
-	/* display: flex; */
-
 	height: 22px;
 	line-height: 22px;
-	width: calc(100% / 3);
-	padding-right: 40px;
+	// padding-right: 40px;
 	box-sizing: border-box;
 	display: flex;
+	// width: calc(100% / 3); // Set dynamically, see paramColWidth
 }
 #parameters .param-wrap div.empty {
 	opacity: 0.3;
 }
 #parameters .param-wrap > div .key {
-	/* font-weight: bold; */
-	flex: 0 0;
+	flex: 0 0 auto;
 	padding-right: 4px;
+
+	/* Truncation */
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: calc(100% - 30px);
 }
 #parameters .param-wrap > div .val {
 	text-align: right;
-	flex: 0 0;
+	flex: 0 1 auto;
 	padding-left: 4px;
+	min-width: 0;
 
-	/* Truncation - DOESNT WORK YET */
+	/* Truncation */
 	white-space: nowrap;
-	/* overflow: hidden; */
-	/* text-overflow: ellipsis; */
-	/* background: pink; */
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 #parameters .param-wrap > div .filler {
 	flex: 1 1;
@@ -711,7 +784,20 @@ function toggleExpand(e: Event) {
 	// white-space: nowrap;
 }
 
-/**/
+/*
+ * Right Column
+ */
+#ip-notes {
+	width: 100%;
+	height: 200px;
+	padding: 8px;
+	box-sizing: border-box;
+	border: solid 1px var(--black-10);
+	border-radius: 3px;
+	background: var(--soft-bg);
+}
+
+/* TEMP */
 
 pre {
 	/* grid-column-start: 1; */
@@ -732,5 +818,19 @@ pre {
 }
 .toggle-expand.te-show.expand::before {
 	content: 'Hide ';
+}
+
+/**
+ * Responsive
+ */
+
+@media (max-width: $bp-medium) {
+	#content-wrap {
+		flex-direction: column;
+		gap: 40px 0;
+	}
+	#content-wrap .col-left {
+		max-width: none;
+	}
 }
 </style>

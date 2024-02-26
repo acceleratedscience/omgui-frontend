@@ -131,15 +131,18 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, onMounted, onBeforeUnmount, computed, watch, onUpdated, nextTick } from 'vue'
-import type { ComputedRef } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
-import { useFileStore } from '@/stores/FileStore'
 // import { usePopStateStore } from '@/stores/PopStateStore--trash' // trash
+
+// API
 import { useApiStore } from '@/stores/ApiStore'
+import type { FileSystemApi as FileSystemApiType } from '@/api/ApiService'
+const apiStore = useApiStore()
+const fileSystemApi: FileSystemApiType | null = apiStore.loadApi('fileSystem') as FileSystemApiType | null // prettier-ignore
 
 // Components
 import SvgServe from '@/components/SvgServe.vue'
@@ -186,10 +189,7 @@ type Level = {
 const router = useRouter()
 const route = useRoute()
 const mainStore = useMainStore()
-const fileStore = useFileStore()
 // const popStateStore = usePopStateStore() // trash
-const apiStore = useApiStore()
-const fileSystemApi = apiStore.loadApi('fileSystem')
 
 //
 //
@@ -199,12 +199,6 @@ const levels = ref<Level[] | null>(null)
 const filePreview = ref<File | null>(null)
 const colScroll = ref<HTMLDivElement | null>(null)
 const columns = ref<HTMLDivElement[] | null>(null)
-const lastCol: ComputedRef<HTMLDivElement | undefined> = computed(() =>
-	columns.value ? columns.value[columns.value.length - 1] : undefined,
-)
-const secondLastCol: ComputedRef<HTMLDivElement | undefined> = computed(() =>
-	columns.value ? columns.value[columns.value.length - 2] : undefined,
-)
 
 onMounted(async () => {
 	mounted.value = true
@@ -566,6 +560,7 @@ async function fetchWorkspaceFiles(path = '') {
 	display: flex;
 	gap: 8px;
 	user-select: none;
+	box-sizing: content-box;
 }
 #col-wrap .dir > div:not(.svg-wrap),
 #col-wrap .file > div:not(.svg-wrap),
