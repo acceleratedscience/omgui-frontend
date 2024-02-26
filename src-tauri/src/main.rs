@@ -10,9 +10,9 @@ fn main() {
 
     let menu = Menu::new().add_item(close);
 
-    let _open = openad::OpenAD::new();
+    let open = openad::OpenAD::new();
 
-    tauri::Builder::default()
+    let mut app = tauri::Builder::default()
         .menu(menu)
         .on_menu_event(|event| {
             if let "close" = event.menu_item_id() {
@@ -20,6 +20,16 @@ fn main() {
             }
         })
         .invoke_handler(tauri::generate_handler![get_user])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!("./tauri.conf.json"))
+        .unwrap();
+
+    loop {
+        let iteration = app.run_iteration();
+        // intercept signal to close the app
+
+        if iteration.window_count == 0 {
+            drop(open);
+            break;
+        }
+    }
 }

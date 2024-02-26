@@ -122,8 +122,6 @@ import User from '@/components/User.vue';
 
 	<!-- Load the full application -->
 	<div v-else ref="$mainWrap" id="main-wrap">
-	<div v-else id="main-wrap">
-		<User />
 		<header>
 			<nav>
 				<RouterLink :to="{ name: 'home' }">Home</RouterLink>
@@ -154,6 +152,9 @@ import User from '@/components/User.vue';
 					<component :is="Component" />
 				</KeepAlive>
 			</RouterView> -->
+		</div>
+		<div>
+			<User />
 		</div>
 	</div>
 </template>

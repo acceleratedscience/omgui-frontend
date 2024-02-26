@@ -10,7 +10,7 @@
 import axios from 'axios'
 
 // Constants
-const API_URL = 'http://127.0.0.1:5000/api/v1/'
+const API_URL = 'http://127.0.0.1:5001/api/v1/'
 
 // Type declarations
 type AxiosError = {
