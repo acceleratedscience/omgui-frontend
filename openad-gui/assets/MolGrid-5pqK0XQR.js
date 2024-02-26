@@ -1,1 +1,0 @@
-import{J as e,f as o,g as c}from"./index-Rya0IZQn.js";const t={},n={id:"module"};function s(r,a){return o(),c("main",n,"This is the molecule grid component")}const d=e(t,[["render",s],["__scopeId","data-v-c84fa136"]]);export{d as default};

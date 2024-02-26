@@ -172,7 +172,7 @@
 			</div>
 
 			<!-- Right -->
-			<div class="col-right">
+			<div v-if="!loading" class="col-right">
 				<h4>Notes</h4>
 				<textarea id="ip-notes"></textarea>
 			</div>
