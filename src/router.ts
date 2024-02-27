@@ -66,12 +66,12 @@ const routes = [
 		name: 'module-b',
 		component: () => import(/* webpackChunkName: 'module-b' */ '@/modules/ModuleB.vue'),
 	},
-	{
-		path: '/svg/:filename',
-		name: 'svg',
-		props: true,
-		component: () => import(/* webpackChunkName: 'svg' */ '@/components/SvgServe.vue'),
-	},
+	// {
+	// 	path: '/svg/:filename',
+	// 	name: 'svg',
+	// 	props: true,
+	// 	component: () => import(/* webpackChunkName: 'svg' */ '@/components/SvgServe.vue'),
+	// },
 	{
 		path: '/kitchen-sink',
 		name: 'kitchen-sink',

@@ -11,10 +11,13 @@ const fileStore = useFileStore()
 // const popStateStore = usePopStateStore() // trash
 
 // API
-import { useApiStore } from '@/stores/ApiStore'
-import type { FileSystemApi as FileSystemApiType } from '@/api/ApiService'
-const apiStore = useApiStore()
-const fileSystemApi: FileSystemApiType | null = apiStore.loadApi('fileSystem') as FileSystemApiType | null // prettier-ignore
+import { fileSystemApi } from '@/api/ApiService'
+
+// // TRASH: overcomplicated API mgmt
+// import { useApiStore } from '@/stores/ApiStore'
+// import type { FileSystemApi as FileSystemApiType } from '@/api/FileSystemApi'
+// const apiStore = useApiStore()
+// const fileSystemApi: FileSystemApiType | null = apiStore.loadApi('FileSystemApi') as FileSystemApiType | null // prettier-ignore
 
 // Internal
 import { debounce } from '@/utils/helpers'
@@ -205,7 +208,7 @@ nav {
 	top: 20px;
 	left: 40px;
 	display: inline-block;
-	width: calc(100vw - 80px);
+	// width: calc(100vw - 80px);
 }
 #body {
 	flex: 1;

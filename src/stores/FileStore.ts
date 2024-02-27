@@ -107,32 +107,15 @@ export const useFileStore = defineStore('fileStore', {
 			isDir: boolean
 			errCode: ErrCode
 		}) {
+			if (!file) return
 			this._data = file.data
 			this._path = file.path
 			this._pathFull = file.pathFull
 			this._isDir = file.isDir
 			this._errCode = file.errCode
 		},
-		// setData(data: string) {
-		// 	this._data = data
-		// },
-		// setPath(path: string, pathFull: string) {
-		// 	this._path = path
-		// 	this._pathFull = pathFull
-		// },
-		// setIsDir(isDir: boolean) {
-		// 	this.clear()
-		// 	this._isDir = isDir
-		// },
-		// setError(errCode: ErrCode) {
-		// 	this.clear()
-		// 	this._errCode = errCode
-		// },
-		// clearError() {
-		// 	this._errCode = null
-		// },
 		clear() {
-			console.log('* clearing file store *')
+			// console.log('* clearing file store *')
 			this._data = ''
 			this._path = ''
 			this._errCode = null

@@ -1,4 +1,12 @@
 <template>
+	<!-- JSON-only view -->
+	<!-- <template v-if="route.query.raw">
+		<router-link :to="route.path">Exit JSON view</router-link>
+
+		<BreadCrumbs v-if="isFile" :path="fileStore.path" />
+		<pre>{{ mol }}</pre>
+	</template> -->
+
 	<!-- Input screen -->
 	<div v-if="!isFile && (!props.identifier || loadingError)">
 		<h3>Display any molecule</h3>
@@ -98,6 +106,7 @@
 								<a href="#" @click="(e) => fetchMolData()">retry</a></span
 							>
 						</div>
+						<!-- <div><router-link :to=""></router-link></div> -->
 					</div>
 
 					<br />
@@ -185,7 +194,9 @@
 
 <script setup lang="ts">
 // Libraries
-import Miew from 'miew'
+// import Miew from 'miew'
+import Miew from '@/TEMP/miew/dist/miew.module'
+
 // @ts-ignore
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
@@ -201,28 +212,17 @@ const mainStore = useMainStore()
 const molViewerStore = useMolViewerStore()
 const fileStore = useFileStore()
 
-// Type declarations
-
 // API
-import { useApiStore } from '@/stores/ApiStore'
-import type { MoleculesApi as MoleculesApiType } from '@/api/ApiService'
-const apiStore = useApiStore()
-const moleculesApi: MoleculesApiType | null = apiStore.loadApi('molecules') as MoleculesApiType | null // prettier-ignore
+import { moleculesApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
-
-// Temp
-// import { mol, molSdf, molXyz, molPdb } from '@/utils/temp-mol-data'
-
-const props = defineProps<{
-	identifier?: string
-}>()
 
 //
 //
 
 // Definitions
+const props = defineProps<{ identifier?: string }>()
 const $container3d = ref<Element | null>(null)
 const loading = ref<Boolean>(false)
 const loadingError = ref<String | false>(false)
@@ -425,18 +425,18 @@ function render3d_miew($container: Element, sdf: string) {
 		container: $container as HTMLDivElement,
 		// Required for the molecule data without residues, because default mode, Cartoon, visualizes residues.
 		// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/examples/load_from_string.html
-		reps: [
-			{
-				mode: 'BS',
-				colorer: 'EL',
-				material: 'DF',
-			},
-		],
+		// reps: [
+		// 	{
+		// 		mode: 'BS',
+		// 		colorer: 'EL',
+		// 		material: 'DF',
+		// 	},
+		// ],
 		settings: {
 			// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
 			axes: false,
 			fps: false,
-			autoRotation: -0.03,
+			// autoRotation: -0.03,
 			// @ts-ignore
 			bg: { color: 0xffffff, transparent: true },
 		},
@@ -623,16 +623,28 @@ function toggleExpand(e: Event) {
 	outline: none;
 }
 
-/* 3dmol */
+/* Miew styling */
+#mol-render .container-3d:deep() .atom-info {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	pointer-events: initial;
+	color: var(--black-30);
+}
+#mol-render .container-3d:deep() .atom-info p {
+	font-size: var(--font-size-small);
+	margin: 0;
+}
+
+/* 3dmol styling */
 #mol-render .mol-3d {
 	background: var(--black);
 }
 #mol-render .mol-3d canvas {
-	/* mix-blend-mode: screen; */
 	outline: none;
 }
 
-/* jmol */
+/* jmol styling */
 .JSmolLoader {
 	display: none;
 }

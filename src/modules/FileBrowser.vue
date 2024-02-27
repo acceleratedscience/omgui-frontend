@@ -139,10 +139,7 @@ import { useMainStore } from '@/stores/MainStore'
 // import { usePopStateStore } from '@/stores/PopStateStore--trash' // trash
 
 // API
-import { useApiStore } from '@/stores/ApiStore'
-import type { FileSystemApi as FileSystemApiType } from '@/api/ApiService'
-const apiStore = useApiStore()
-const fileSystemApi: FileSystemApiType | null = apiStore.loadApi('fileSystem') as FileSystemApiType | null // prettier-ignore
+import { fileSystemApi } from '@/api/ApiService'
 
 // Components
 import SvgServe from '@/components/SvgServe.vue'
@@ -234,7 +231,6 @@ onBeforeUnmount(() => {
 
 // Parse the route and load the appropriate files.
 async function parseRoute() {
-	console.log('parseRoute')
 	// When going back or forward in the history while
 	// leaving the fileBrowser module, the popstate
 	// triggers parseRoute before the listener is removed.

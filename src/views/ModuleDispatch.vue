@@ -8,10 +8,7 @@ import { useRoute } from 'vue-router'
 import { useFileStore } from '@/stores/FileStore'
 
 // API
-import { useApiStore } from '@/stores/ApiStore'
-import type { FileSystemApi as FileSystemApiType } from '@/api/ApiService'
-const apiStore = useApiStore()
-const fileSystemApi: FileSystemApiType | null = apiStore.loadApi('fileSystem') as FileSystemApiType | null // prettier-ignore
+import { fileSystemApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
@@ -56,6 +53,7 @@ onBeforeUnmount(() => {
 async function parseRoute() {
 	const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
 	const file = await fetchFile(filePath)
+	if (!file) return
 	fileStore.loadItem(file)
 	if (file.isDir) {
 		// Directory

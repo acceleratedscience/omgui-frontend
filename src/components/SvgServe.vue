@@ -16,10 +16,7 @@ export default {
 	},
 	async created() {
 		try {
-			const response = await axios.get(
-				`/src/assets/svg/${this.filename.replace(/\.svg$/, '')}.svg`,
-			)
-			// console.log(234, `/src/assets/svg/${this.filename}.svg`)
+			const response = await axios.get(`/svg/${this.filename.replace(/\.svg$/, '')}.svg`)
 			this.svgContent = response.data
 		} catch (error) {
 			console.error('Failed to load SVG', error)

@@ -1,14 +1,16 @@
 <script setup lang="ts">
+// Vue
 import { ref } from 'vue'
 
 // APIs
-import { useApiStore } from '@/stores/ApiStore'
-import type { MainApi as MainApiType } from '@/api/ApiService'
-const apiStore = useApiStore()
-const mainApi: MainApiType | null = apiStore.loadApi('main') as MainApiType | null
+import { mainApi } from '@/api/ApiService'
 
+// Definitions
 const command = ref<string>('')
 const output = ref<string>('')
+
+//
+//
 
 async function submitCommand() {
 	output.value = ''
