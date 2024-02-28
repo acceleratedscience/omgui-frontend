@@ -15,9 +15,18 @@
 						class="col-header"
 						:class="{ root: level == 0 }"
 						:title="column['_meta']['name']"
-						@click="resetCol(level)"
+						@click="(e) => resetCol(e, level)"
 					>
-						{{ column['_meta']['name'] }}
+						<button
+							class="btn-workspace"
+							v-if="level == 0"
+							@click="showDialogWorkspaces"
+						>
+							{{ column['_meta']['name'] }}
+						</button>
+						<template v-else>
+							{{ column['_meta']['name'] }}
+						</template>
 					</div>
 
 					<div class="col-body">
@@ -131,11 +140,14 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
+import { useModalStore } from '@/stores/ModalStore'
+const mainStore = useMainStore()
+const modalStore = useModalStore()
 // import { usePopStateStore } from '@/stores/PopStateStore--trash' // trash
 
 // API
@@ -182,20 +194,18 @@ type Level = {
 	files_hidden: File[]
 }
 
+//
+//
+
 // Definitions
 const router = useRouter()
 const route = useRoute()
-const mainStore = useMainStore()
-// const popStateStore = usePopStateStore() // trash
-
-//
-//
-
 const mounted = ref(false)
 const levels = ref<Level[] | null>(null)
 const filePreview = ref<File | null>(null)
 const colScroll = ref<HTMLDivElement | null>(null)
 const columns = ref<HTMLDivElement[] | null>(null)
+// const popStateStore = usePopStateStore() // trash
 
 onMounted(async () => {
 	mounted.value = true
@@ -217,14 +227,14 @@ onBeforeUnmount(() => {
 	window.removeEventListener('popstate', parseRoute)
 })
 
-// trash
-// watch(
-// 	() => route.path,
-// 	() => {
-// 		console.log('x x x x x')
-// 		// parseRoute()
-// 	},
-// )
+// When the workspace is switched using the
+// workspace modal, we need to reload the files.
+watch(
+	() => mainStore.workspace,
+	(newVal, oldVal) => {
+		if (newVal && oldVal) fetchNextLevel()
+	},
+)
 
 //
 //
@@ -364,7 +374,10 @@ function markSelected(level: number, type: 'dir' | 'file', filename: string) {
 }
 
 // Focus on a selected column and remove selected state from its children.
-async function resetCol(level: number) {
+async function resetCol(e: MouseEvent, level: number) {
+	// When clicking the workspace button, we don't want to reset the column.
+	if ((e.target as HTMLElement)?.tagName === 'BUTTON') return
+
 	if (levels.value) levels.value.splice(level + 1) // Remove all levels after this one.
 	deselectCol(level)
 	hidePreviewFile()
@@ -390,6 +403,10 @@ async function fetchWorkspaceFiles(path = '') {
 	} else {
 		return data
 	}
+}
+
+function showDialogWorkspaces() {
+	modalStore.display('ModalWorkspaces')
 }
 </script>
 
@@ -496,6 +513,21 @@ async function fetchWorkspaceFiles(path = '') {
 // 	height: 0;
 // 	border-bottom: solid 1px #eee;
 // }
+#col-wrap .btn-workspace {
+	color: var(--ibm-black);
+	background: var(--ibm-light-gray);
+	border: none;
+	padding: 0 6px;
+	height: 20px;
+	line-height: 20px;
+	border-radius: 2px;
+	font-weight: 600;
+	cursor: pointer;
+}
+#col-wrap .btn-workspace:hover {
+	color: #fff;
+	background: var(--ibm-black);
+}
 
 // Column body (scrolls)
 #col-wrap .col-body {

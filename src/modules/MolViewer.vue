@@ -197,7 +197,7 @@
 // Libraries
 // import Miew from 'miew'
 // @ts-ignore
-import Miew from '@/TEMP/miew/dist/miew.module'
+import Miew from '@/TEMP/miew/_dist/miew.module'
 // @ts-ignore
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
