@@ -17,6 +17,7 @@ const pathArr = computed(() => {
 
 <template>
 	<div id="breadcrumbs">
+		<!-- <div>{{ fileStore.moduleName }}</div> -->
 		<template v-for="(item, i) in pathArr" :key="i">
 			<span v-if="i == pathArr.length - 1">{{ item }}</span>
 			<router-link v-else-if="i === 0" :to="'/~/'">{{ item }}</router-link>

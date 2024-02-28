@@ -120,4 +120,6 @@ router.beforeEach((to, from, next) => {
 // 	}
 // })
 
+// This lets us import the rouyer to any pinia store:
+// import { router } from '@/router'
 export default router

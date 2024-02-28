@@ -4,7 +4,9 @@
  * When the file is a directory, the FileBrowser module is loaded.
  */
 
+// Vue
 import { defineStore } from 'pinia'
+import router from '@/router'
 
 // Type declarations
 type ErrCode = null | 'not_found' | 'no_permission' | 'is_dir' | 'decode' | 'io' | 'unknown' // From open_file() in API, see helpers -> general.py
@@ -79,7 +81,9 @@ export const useFileStore = defineStore('fileStore', {
 
 		// The filename of the module we'll use to view the file.
 		moduleName(): string {
-			if (this.ext) {
+			if (router.currentRoute.value.query?.use) {
+				return router.currentRoute.value.query?.use?.toString()
+			} else if (this.ext) {
 				if (this.ext2) {
 					return EXT_MAP[`${this.ext2}.${this.ext}`] || EXT_MAP.default
 				} else {
@@ -89,6 +93,12 @@ export const useFileStore = defineStore('fileStore', {
 			} else {
 				return EXT_MAP.default
 			}
+		},
+
+		// Indicates whether the default module is being
+		// overridden by using the ?use= query parameter.
+		forcedModule(): boolean {
+			return !!router.currentRoute.value.query?.use
 		},
 
 		// Indicates whether we recognize the file's extension.

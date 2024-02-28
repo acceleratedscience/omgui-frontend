@@ -6,7 +6,6 @@ import { defineStore } from 'pinia'
 
 // Type declarations
 export type Mol = {
-	analysis: any[]
 	identifiers: {
 		name: string
 		inchi: string
@@ -16,6 +15,7 @@ export type Mol = {
 		formula: string
 		isomeric_smiles: string
 	}
+	synonyms: string[]
 	properties: {
 		[key: string]: string | number
 	}
@@ -24,7 +24,7 @@ export type Mol = {
 			[key: string]: string
 		}
 	}
-	synonyms: string[]
+	analysis: any[]
 }
 type State = {
 	_mol: Mol | null

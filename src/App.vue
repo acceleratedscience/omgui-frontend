@@ -123,7 +123,7 @@ function storeScreenWidth() {
 	</div>
 
 	<!-- Load the full application -->
-	<div v-else ref="$mainWrap" id="main-wrap">
+	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir }">
 		<header>
 			<nav>
 				<RouterLink :to="{ name: 'home' }">Home</RouterLink>
@@ -147,7 +147,7 @@ function storeScreenWidth() {
 				<RouterLink :to="{ name: 'module-b' }">Module B</RouterLink>
 			</nav>
 		</header>
-		<div id="body" :class="{ 'file-browser': fileStore.isDir }">
+		<div id="body">
 			<router-view />
 			<!-- <RouterView v-slot="{ Component }">
 				<KeepAlive>
@@ -214,7 +214,7 @@ nav {
 	flex: 1;
 	// background: orange;
 }
-#body.file-browser {
+#main-wrap.file-browser #body {
 	overflow-x: hidden;
 	overflow-y: auto;
 	margin: 0 -40px;

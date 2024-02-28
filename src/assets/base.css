@@ -23,8 +23,13 @@ a {
 	color: var(--ibm-blue);
 	text-decoration: none;
 }
-a.router-link-exact-active,
-a.router-link-exact-active:hover {
+a:not(.dumb).router-link-exact-active,
+a:not(.dumb).router-link-exact-active:hover {
+	/* When we link to a url parameter, the link
+	 * will be marked with router-link-exact-active
+	 * causing it to be underlined and not clickable.
+	 * That's why we have the .dumb class to override.
+	 */
 	color: var(--ibm-black);
 	text-decoration: underline;
 	pointer-events: none;

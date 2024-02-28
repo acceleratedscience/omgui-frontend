@@ -45,7 +45,7 @@
 		</div>
 
 		<div id="content-wrap">
-			<!-- Left -->
+			<!-- Left main column -->
 			<div class="col-left">
 				<BreadCrumbs v-if="isFile" :path="fileStore.path" />
 				<div id="title-wrap">
@@ -106,7 +106,8 @@
 								<a href="#" @click="(e) => fetchMolData()">retry</a></span
 							>
 						</div>
-						<!-- <div><router-link :to=""></router-link></div> -->
+						<br />
+						<router-link to="?use=JsonViewer" class="dumb">Show JSON</router-link>
 					</div>
 
 					<br />
@@ -180,8 +181,8 @@
 				</template>
 			</div>
 
-			<!-- Right -->
-			<div v-if="!loading" class="col-right">
+			<!-- Right column (to be enabled later) - See #enableright below -->
+			<div v-if="!loading && false" class="col-right">
 				<h4>Notes</h4>
 				<textarea id="ip-notes"></textarea>
 			</div>
@@ -195,8 +196,8 @@
 <script setup lang="ts">
 // Libraries
 // import Miew from 'miew'
+// @ts-ignore
 import Miew from '@/TEMP/miew/dist/miew.module'
-
 // @ts-ignore
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
@@ -290,7 +291,7 @@ onBeforeMount(async () => {
 	if (molViewerStore.mol && molViewerStore.sdf) return
 
 	if (isFile.value) {
-		// A molecule file is opened --> fetch viz data.
+		// A molecule file is opened --> only fetch viz data.
 		if (fileStore.data) {
 			try {
 				const molData = JSON.parse(fileStore.data)
@@ -302,7 +303,22 @@ onBeforeMount(async () => {
 			}
 		}
 	} else if (props.identifier) {
-		// Find mol by identifier --> load mol + viz data.
+		// When the molecule viewer is launched from the CLI or Jupyter
+		// (by `display molecule aspirin` for example), we calculate some
+		// of the molecule data in the backend and pass it to the frontend
+		// as the ?data= query parameter. This allows us to display some
+		// more molecule data while we wait for the rest of the molecule
+		// to be fetched. See mol_commands.py > show_mol() in backend repo.
+		if (route.query.data) {
+			const preliminaryData = JSON.parse(route.query.data as string)
+			if (preliminaryData) {
+				const { mol, svg, sdf } = preliminaryData
+				if (mol) molViewerStore.setMolData(mol)
+				if (svg) molViewerStore.setMolVizData(svg, sdf)
+			}
+		}
+
+		// Find mol by identifier --> load mol + fetch viz data.
 		fetchMolData()
 	}
 })
@@ -568,7 +584,7 @@ function toggleExpand(e: Event) {
 
 #content-wrap .col-left {
 	flex: 1 1;
-	max-width: calc(100% - 290px);
+	// max-width: calc(100% - 290px); // Enable this line to enable the right column. #enableright
 }
 #content-wrap .col-right {
 	flex: 0 0 250px;
