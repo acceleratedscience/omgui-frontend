@@ -20,7 +20,7 @@
 						<button
 							class="btn-workspace"
 							v-if="level == 0"
-							@click="showDialogWorkspaces"
+							@click="modalStore.display('ModalWorkspaces')"
 						>
 							{{ column['_meta']['name'] }}
 						</button>
@@ -404,10 +404,6 @@ async function fetchWorkspaceFiles(path = '') {
 		return data
 	}
 }
-
-function showDialogWorkspaces() {
-	modalStore.display('ModalWorkspaces')
-}
 </script>
 
 <style scoped lang="scss">
@@ -515,7 +511,7 @@ function showDialogWorkspaces() {
 // }
 #col-wrap .btn-workspace {
 	color: var(--ibm-black);
-	background: var(--ibm-light-gray);
+	background: var(--black-10);
 	border: none;
 	padding: 0 6px;
 	height: 20px;

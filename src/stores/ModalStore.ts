@@ -106,6 +106,7 @@ export const useModalStore = defineStore('modalStore', {
 		},
 
 		clear() {
+			console.log('modalStore clear')
 			this._active = false
 			this._modalName = null
 			this._label = null

@@ -1,23 +1,8 @@
-<script setup lang="ts">
-// Vue
-import { computed } from 'vue'
-
-// Stores
-import { useMainStore } from '@/stores/MainStore'
-
-// Definitions
-const mainStore = useMainStore()
-const props = defineProps<{
-	path: string
-}>()
-const pathArr = computed(() => {
-	return [mainStore.workspace].concat(props.path.split('/'))
-})
-</script>
-
 <template>
 	<div id="breadcrumbs">
-		<!-- <div>{{ fileStore.moduleName }}</div> -->
+		<button id="file-type" @click="modalStore.display('ModalFileType')">
+			{{ fileStore.fileType }}
+		</button>
 		<template v-for="(item, i) in pathArr" :key="i">
 			<span v-if="i == pathArr.length - 1">{{ item }}</span>
 			<router-link v-else-if="i === 0" :to="'/~/'">{{ item }}</router-link>
@@ -29,7 +14,49 @@ const pathArr = computed(() => {
 	</div>
 </template>
 
+<script setup lang="ts">
+// Vue
+import { computed } from 'vue'
+
+// Stores
+import { useMainStore } from '@/stores/MainStore'
+import { useFileStore } from '@/stores/FileStore'
+import { useModalStore } from '@/stores/ModalStore'
+const mainStore = useMainStore()
+const fileStore = useFileStore()
+const modalStore = useModalStore()
+
+// Definitions
+const props = defineProps<{
+	path: string
+}>()
+const pathArr = computed(() => {
+	return [mainStore.workspace].concat(props.path.split('/'))
+})
+
+//
+//
+</script>
+
 <style lang="css" scoped>
+#file-type {
+	color: var(--ibm-black);
+	background: var(--black-10);
+	border: none;
+	padding: 0 4px;
+	height: 16px;
+	line-height: 16px;
+	border-radius: 2px;
+	text-transform: uppercase;
+	font-size: var(--font-size-small);
+	font-weight: 600;
+	margin-right: 7px;
+	cursor: pointer;
+}
+#file-type:hover {
+	color: #fff;
+	background: var(--ibm-black);
+}
 #breadcrumbs {
 	margin-bottom: 8px;
 }
@@ -37,6 +64,7 @@ const pathArr = computed(() => {
 #breadcrumbs a {
 	color: var(--black-30);
 	font-size: var(--font-size-small);
+	line-height: var(--line-height-small);
 }
 #breadcrumbs a:hover {
 	color: var(--black-60);

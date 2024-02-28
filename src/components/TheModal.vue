@@ -1,4 +1,6 @@
 <template>
+	AAA
+	<div v-if="modalStore.active && dynamicModule">BBB</div>
 	<component
 		v-if="modalStore.active && dynamicModule"
 		:is="dynamicModule"

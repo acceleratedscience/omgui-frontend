@@ -17,19 +17,30 @@ type State = {
 	_isDir: boolean
 	_errCode: ErrCode
 }
-type ExtMap = {
+type Map = {
 	[key: string]: string
 }
 
-// Maps file extensions to module names.
+// Maps file extensions to module keys.
 // Controls which module is used to view a filetype.
-const EXT_MAP: ExtMap = {
-	default: 'TextViewer',
-	csv: 'DataViewer',
-	txt: 'TextViewer',
+const EXT_MAP: Map = {
+	_default: 'unknown',
+	txt: 'text',
+	csv: 'data',
+	json: 'json',
+	'mol.json': 'mol',
+	sdf: 'sdf', // should become part of mol
+}
+
+// Maps the different module keys to
+// their respective module names.
+const MODULE_MAP: Map = {
+	unknown: 'TextViewer',
+	text: 'TextViewer',
+	data: 'DataViewer',
 	json: 'JsonViewer',
-	'mol.json': 'MolViewer',
-	sdf: 'SdfViewer',
+	mol: 'MolViewer',
+	sdf: 'SdfViewer', // should become part of mol
 }
 
 export const useFileStore = defineStore('fileStore', {
@@ -79,20 +90,24 @@ export const useFileStore = defineStore('fileStore', {
 			}
 		},
 
-		// The filename of the module we'll use to view the file.
-		moduleName(): string {
+		// The type of file - defines wat module we'll load.
+		fileType(): string {
 			if (router.currentRoute.value.query?.use) {
 				return router.currentRoute.value.query?.use?.toString()
 			} else if (this.ext) {
 				if (this.ext2) {
-					return EXT_MAP[`${this.ext2}.${this.ext}`] || EXT_MAP.default
+					return EXT_MAP[`${this.ext2}.${this.ext}`] || EXT_MAP._default
 				} else {
-					console.log(11, this.ext)
-					return EXT_MAP[this.ext] || EXT_MAP.default
+					return EXT_MAP[this.ext] || EXT_MAP._default
 				}
 			} else {
-				return EXT_MAP.default
+				return EXT_MAP._default
 			}
+		},
+
+		// The filename of the module we'll use to view the file.
+		moduleName(): string {
+			return MODULE_MAP[this.fileType]
 		},
 
 		// Indicates whether the default module is being

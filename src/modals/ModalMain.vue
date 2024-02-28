@@ -1,12 +1,16 @@
 <script setup lang="ts">
 // Vue
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 // Stores
 import { useModalStore } from '@/stores/ModalStore'
 const modalStore = useModalStore()
 
+// Emits
+const emit = defineEmits(['after-modal-hidden'])
+
 // Definitions
+const visible = ref<boolean>(true)
 const label = computed(() => modalStore.label)
 const title = computed(() => modalStore.title)
 const content = computed(() => modalStore.content)
@@ -17,15 +21,21 @@ const otherBtn = computed(() => modalStore.otherBtn)
 function onBtnClick() {
 	alert(2)
 }
+
+function onHide() {
+	visible.value = false
+	emit('after-modal-hidden')
+}
 </script>
 
 <template>
 	<cv-modal
-		:visible="true"
+		:visible="visible"
 		size="xs"
 		@other-btn-click="onBtnClick"
 		@primary-click="onBtnClick"
 		@secondary-click="onBtnClick"
+		@after-modal-hidden="onHide"
 	>
 		<template v-if="label" v-slot:label>{{ label }}</template>
 		<template v-slot:title>{{ title }}</template>

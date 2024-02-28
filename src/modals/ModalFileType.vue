@@ -1,6 +1,6 @@
 <template>
 	<cv-modal :visible="visible" size="xs" @primary-click="onSubmit" @after-modal-hidden="onHide">
-		<template v-slot:title>Switch workspace</template>
+		<template v-slot:title>File Type</template>
 		<template v-slot:content>
 			<cv-dropdown v-model="selectedWorkspace">
 				<cv-dropdown-item
@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 // Vue
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
@@ -36,12 +36,11 @@ const visible = ref<boolean>(true)
 const allWorkspaces = ref<string[]>([' '])
 const selectedWorkspace = ref<string>(' ') // Space to avoid default text to display during load
 
-// Trash, doesn't work
-// // All minus the active, to avoid repitition in dropdown
-// const availableWorkspaces = computed(() => {
-// 	if (!allWorkspaces.value) return ' '
-// 	return allWorkspaces.value.filter((wsp) => wsp != selectedWorkspace.value)
-// })
+// All minus the active, to avoid repitition in dropdown
+const availableWorkspaces = computed(() => {
+	if (!allWorkspaces.value) return ' '
+	return allWorkspaces.value.filter((wsp) => wsp != selectedWorkspace.value)
+})
 
 //
 //
@@ -57,6 +56,7 @@ async function onSubmit() {
 		console.error(statusText)
 	} else {
 		mainStore.setWorkspace(selectedWorkspace.value)
+		visible.value = false
 	}
 }
 

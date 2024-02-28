@@ -59,7 +59,6 @@ let prevRouteType: RouteType = null
 
 // Update file or clear store when route changes.
 watch([() => route.path, () => route.query], () => {
-	console.log(3333)
 	parseRoute()
 })
 
@@ -73,7 +72,7 @@ onBeforeUnmount(() => {
 
 // Display a file or directory with the appropriate module.
 async function parseRoute() {
-	console.log('parseRoute')
+	// console.log('parseRoute')
 	const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
 	const file = await fetchFile(filePath)
 	if (!file) return
