@@ -8,6 +8,9 @@
 import { defineStore } from 'pinia'
 import router from '@/router'
 
+// Internal
+import { map_Ext2fileType, map_fileType2Module } from '@/utils/maps'
+
 // Type declarations
 type ErrCode = null | 'not_found' | 'no_permission' | 'is_dir' | 'decode' | 'io' | 'unknown' // From open_file() in API, see helpers -> general.py
 type State = {
@@ -16,31 +19,6 @@ type State = {
 	_pathFull: string
 	_isDir: boolean
 	_errCode: ErrCode
-}
-type Map = {
-	[key: string]: string
-}
-
-// Maps file extensions to module keys.
-// Controls which module is used to view a filetype.
-const EXT_MAP: Map = {
-	_default: 'unknown',
-	txt: 'text',
-	csv: 'data',
-	json: 'json',
-	'mol.json': 'mol',
-	sdf: 'sdf', // should become part of mol
-}
-
-// Maps the different module keys to
-// their respective module names.
-const MODULE_MAP: Map = {
-	unknown: 'TextViewer',
-	text: 'TextViewer',
-	data: 'DataViewer',
-	json: 'JsonViewer',
-	mol: 'MolViewer',
-	sdf: 'SdfViewer', // should become part of mol
 }
 
 export const useFileStore = defineStore('fileStore', {
@@ -90,24 +68,35 @@ export const useFileStore = defineStore('fileStore', {
 			}
 		},
 
-		// The type of file - defines wat module we'll load.
-		fileType(): string {
-			if (router.currentRoute.value.query?.use) {
-				return router.currentRoute.value.query?.use?.toString()
-			} else if (this.ext) {
+		// The file type based on the extension.
+		defaultFileType(): string {
+			if (this.ext) {
 				if (this.ext2) {
-					return EXT_MAP[`${this.ext2}.${this.ext}`] || EXT_MAP._default
+					return map_Ext2fileType[`${this.ext2}.${this.ext}`] || map_Ext2fileType._default
 				} else {
-					return EXT_MAP[this.ext] || EXT_MAP._default
+					return map_Ext2fileType[this.ext] || map_Ext2fileType._default
 				}
 			} else {
-				return EXT_MAP._default
+				return map_Ext2fileType._default
 			}
+		},
+
+		// Lets us detect when a file is being
+		// viewed with a non-default module.
+		fileTypeOverride(): boolean {
+			return !!router.currentRoute.value.query?.use
+		},
+
+		// The final file type, which may be overridden
+		fileType(): string {
+			return this.fileTypeOverride
+				? router.currentRoute.value.query?.use?.toString() || map_Ext2fileType._default
+				: this.defaultFileType
 		},
 
 		// The filename of the module we'll use to view the file.
 		moduleName(): string {
-			return MODULE_MAP[this.fileType]
+			return map_fileType2Module[this.fileType]
 		},
 
 		// Indicates whether the default module is being
@@ -121,7 +110,7 @@ export const useFileStore = defineStore('fileStore', {
 		// and display a warning to the user.
 		invalidExt(): boolean {
 			if (this._isDir || !this._path) return false
-			return this.ext ? !(this.ext in EXT_MAP) : true
+			return this.ext ? !(this.ext in map_Ext2fileType) : true
 		},
 	},
 	actions: {

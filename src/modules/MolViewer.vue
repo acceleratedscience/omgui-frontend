@@ -107,7 +107,7 @@
 							>
 						</div>
 						<br />
-						<router-link to="?use=JsonViewer" class="dumb">Show JSON</router-link>
+						<router-link to="?use=json" class="dumb">Show JSON</router-link>
 					</div>
 
 					<br />
@@ -532,6 +532,9 @@ function toggleExpand(e: Event) {
 }
 #input-form .fields > button {
 	flex: 0;
+}
+#input-form .error-msg {
+	margin-bottom: 10px;
 }
 
 /**

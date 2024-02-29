@@ -1,16 +1,8 @@
 <template>
-	<cv-modal :visible="visible" size="xs" @primary-click="onSubmit" @after-modal-hidden="onHide">
+	<cv-modal :visible="modalStore.visible" size="xs" @primary-click="onSubmit">
 		<template v-slot:title>Switch workspace</template>
 		<template v-slot:content>
-			<cv-dropdown v-model="selectedWorkspace">
-				<cv-dropdown-item
-					v-for="workspace in allWorkspaces"
-					:key="workspace"
-					:value="workspace"
-					:hidden="workspace == selectedWorkspace"
-					>{{ workspace }}</cv-dropdown-item
-				>
-			</cv-dropdown>
+			<cv-dropdown v-model="selectedWorkspace" :items="allWorkspaces"></cv-dropdown>
 		</template>
 		<template v-slot:secondary-button>Cancel</template>
 		<template v-slot:primary-button>Switch</template>
@@ -23,30 +15,23 @@ import { onMounted, ref } from 'vue'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
+import { useModalStore } from '@/stores/ModalStore'
 const mainStore = useMainStore()
+const modalStore = useModalStore()
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
 
-// Emits
-const emit = defineEmits(['after-modal-hidden'])
-
 // Definitions
-const visible = ref<boolean>(true)
+const emit = defineEmits(['mounted'])
 const allWorkspaces = ref<string[]>([' '])
 const selectedWorkspace = ref<string>(' ') // Space to avoid default text to display during load
-
-// Trash, doesn't work
-// // All minus the active, to avoid repitition in dropdown
-// const availableWorkspaces = computed(() => {
-// 	if (!allWorkspaces.value) return ' '
-// 	return allWorkspaces.value.filter((wsp) => wsp != selectedWorkspace.value)
-// })
 
 //
 //
 
 onMounted(() => {
+	emit('mounted')
 	loadWorkspaces()
 })
 
@@ -57,6 +42,7 @@ async function onSubmit() {
 		console.error(statusText)
 	} else {
 		mainStore.setWorkspace(selectedWorkspace.value)
+		modalStore.hide()
 	}
 }
 
@@ -84,21 +70,10 @@ async function fetchWorkspaces() {
 	}
 }
 
-function onHide() {
-	visible.value = false
-	emit('after-modal-hidden')
-}
+// function onHide() {
+// 	emit('after-modal-hidden')
+// }
 </script>
-
-<style lang="css">
-/* Non-scoped style to override the modal css */
-.bx--modal-content {
-	overflow: visible;
-}
-.bx--modal-content:focus {
-	outline: none;
-}
-</style>
 
 <style lang="css" scoped></style>
 getWorkspace

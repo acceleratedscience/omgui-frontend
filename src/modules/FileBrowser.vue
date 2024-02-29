@@ -367,8 +367,6 @@ function markSelected(level: number, type: 'dir' | 'file', filename: string) {
 				? thisLevel.dirs.concat(thisLevel.dirs_hidden)
 				: thisLevel.files.concat(thisLevel.files_hidden)
 		const item = items.filter((item) => item.filename === filename)[0]
-		// console.log(333, items, item)
-		// console.log('*', level, type, filename) %%
 		if (item) item.sel = true
 	}
 }
