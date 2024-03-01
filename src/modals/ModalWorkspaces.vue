@@ -27,13 +27,18 @@ const emit = defineEmits(['mounted'])
 const allWorkspaces = ref<string[]>([' '])
 const selectedWorkspace = ref<string>(' ') // Space to avoid default text to display during load
 
-//
-//
+/**
+ * Hooks
+ */
 
 onMounted(() => {
 	emit('mounted')
 	loadWorkspaces()
 })
+
+/**
+ * Functions
+ */
 
 async function onSubmit() {
 	if (!fileSystemApi) return
@@ -45,9 +50,6 @@ async function onSubmit() {
 		modalStore.hide()
 	}
 }
-
-//
-//
 
 async function loadWorkspaces() {
 	const data = await fetchWorkspaces()
@@ -69,10 +71,6 @@ async function fetchWorkspaces() {
 		return data
 	}
 }
-
-// function onHide() {
-// 	emit('after-modal-hidden')
-// }
 </script>
 
 <style lang="css" scoped></style>

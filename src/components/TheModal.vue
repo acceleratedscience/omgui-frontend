@@ -21,12 +21,8 @@ const loadError = ref(false as boolean)
 const dynamicModule = shallowRef(null as Component | null)
 
 /**
- * Logic
+ * Hooks
  */
-
-if (modalStore.modalName) {
-	loadDynamicComponent(modalStore.modalName)
-}
 
 watch(
 	() => modalStore.modalName,
@@ -34,6 +30,14 @@ watch(
 		if (newModalName) loadDynamicComponent(newModalName)
 	},
 )
+
+/**
+ * Logic
+ */
+
+if (modalStore.modalName) {
+	loadDynamicComponent(modalStore.modalName)
+}
 
 /**
  * Functions

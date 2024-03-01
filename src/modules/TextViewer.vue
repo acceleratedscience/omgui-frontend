@@ -1,3 +1,9 @@
+<template>
+	<main id="module">This is the Text viewer component {{ path }}</main>
+	<div v-if="fileStore.data" id="file-content">{{ fileStore.data }}</div>
+	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
+</template>
+
 <script setup lang="ts">
 // Vue
 import { computed } from 'vue'
@@ -11,20 +17,19 @@ const router = useRouter()
 import { useFileStore } from '@/stores/FileStore'
 const fileStore = useFileStore()
 
+// Props
 defineProps({
 	filePath: String,
 })
+
+/**
+ * Computed
+ */
 
 const path = computed(() => {
 	return route.query.path
 })
 </script>
-
-<template>
-	<main id="module">This is the Text viewer component {{ path }}</main>
-	<div v-if="fileStore.data" id="file-content">{{ fileStore.data }}</div>
-	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
-</template>
 
 <style lang="css" scoped>
 #module {

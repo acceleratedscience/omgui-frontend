@@ -75,6 +75,13 @@ hr {
 	height: 1px;
 	background-color: var(--black-10);
 	border: none;
+	margin: 40px 0;
+}
+
+/* Tricks */
+.v-align {
+	display: flex;
+	align-items: center;
 }
 
 /**
@@ -182,6 +189,21 @@ hr {
 	}
 	100% {
 		transform: rotate(360deg);
+	}
+}
+
+@keyframes ellipsis {
+	0% {
+		content: '';
+	}
+	25% {
+		content: '.';
+	}
+	50% {
+		content: '..';
+	}
+	75% {
+		content: '...';
 	}
 }
 

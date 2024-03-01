@@ -1,10 +1,10 @@
-<template>
-	<!-- {{ fileStore.moduleName }}& Switch module to:
-	<router-link to="?use=JsonViewer" class="dumb">JSON Viewer</router-link> |
-	<router-link to="?use=MolViewer" class="dumb">Molecule Viewer</router-link> |
-	<router-link to="?use=SdfViewer" class="dumb">SDF Viewer</router-link> |
-	<router-link to="?use=TextViewer" class="dumb">Text Viewer</router-link><br /><br /> -->
+<!-- 
+	This is an in-between layer loaded by the filebrowser route, responsible
+	for either loading the filebrowser for directory paths, or the appropriate
+	viewer module based on the file's extension.
+ -->
 
+<template>
 	<BreadCrumbs v-if="showBreadCrumbs" :path="fileStore.path" />
 	<p v-if="fileStore.invalidExt" class="error-msg">
 		We don't recognize this file's extension ({{ fileStore.ext }})
@@ -19,10 +19,14 @@
 // Vue
 import { defineAsyncComponent, ref, shallowRef, watch, onBeforeUnmount, computed } from 'vue'
 import type { Component } from 'vue'
+
+// Router
 import { useRoute } from 'vue-router'
+const route = useRoute()
 
 // Stores
 import { useFileStore } from '@/stores/FileStore'
+const fileStore = useFileStore()
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
@@ -33,17 +37,14 @@ import BreadCrumbs from '@/components/BreadCrumbs.vue'
 // Type declarations
 type RouteType = 'dir' | 'file' | 'error' | null
 
-//
-//
-
 // Definitions
-const route = useRoute()
-const fileStore = useFileStore()
-
-// Open file and load appropriate module.
+let prevRouteType: RouteType = null // Used to prevent a flash by unnecessarily re-rendering the component.
 const loadError = ref(false as boolean)
 const dynamicModule = shallowRef(null as Component | null)
-parseRoute()
+
+/**
+ * Computed
+ */
 
 // Show breadcrumbs only for files.
 const showBreadCrumbs = computed(() => {
@@ -53,22 +54,33 @@ const showBreadCrumbs = computed(() => {
 	return true
 })
 
-// Used to prevent a flash by unnecessarily
-// re-rendering the component.
-let prevRouteType: RouteType = null
+/**
+ * Hooks
+ */
 
 // Update file or clear store when route changes.
 watch([() => route.path, () => route.query], () => {
 	parseRoute()
 })
 
-// Clear store when unmounting.
-onBeforeUnmount(() => {
-	fileStore.clear()
-})
+watch(
+	() => fileStore.fileTypeOverride,
+	() => loadModule(fileStore.moduleName),
+)
 
-//
-//
+// Clear store when unmounting.
+onBeforeUnmount(fileStore.clear)
+
+/**
+ * Logic
+ */
+
+// Parse file path and open file using appropriate module.
+parseRoute()
+
+/**
+ * Functions
+ */
 
 // Display a file or directory with the appropriate module.
 async function parseRoute() {
@@ -88,7 +100,7 @@ async function parseRoute() {
 	} else {
 		// File
 		// We can force the usage of a different module with ?use=OtherModule.
-		if (prevRouteType != 'file' || fileStore.forcedModule) loadModule(fileStore.moduleName)
+		if (prevRouteType != 'file') loadModule(fileStore.moduleName)
 		prevRouteType = 'file'
 	}
 }

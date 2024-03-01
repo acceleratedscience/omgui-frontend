@@ -1,5 +1,6 @@
 /**
- * This store is responsible for storing the molecule data which is displayed in the molecule viewer.
+ * This store is responsible for storing the molecule
+ * data which is displayed in the molecule viewer.
  */
 
 import { defineStore } from 'pinia'

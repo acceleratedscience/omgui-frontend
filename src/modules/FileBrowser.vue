@@ -148,7 +148,6 @@ import { useMainStore } from '@/stores/MainStore'
 import { useModalStore } from '@/stores/ModalStore'
 const mainStore = useMainStore()
 const modalStore = useModalStore()
-// import { usePopStateStore } from '@/stores/PopStateStore--trash' // trash
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
@@ -159,7 +158,7 @@ import SvgServe from '@/components/SvgServe.vue'
 // Utils
 import { prettySize, timeAgo } from '@/utils/helpers'
 
-// Types
+// Type declarations
 type Dir = {
 	_meta: {
 		name: string
@@ -194,9 +193,6 @@ type Level = {
 	files_hidden: File[]
 }
 
-//
-//
-
 // Definitions
 const router = useRouter()
 const route = useRoute()
@@ -205,7 +201,10 @@ const levels = ref<Level[] | null>(null)
 const filePreview = ref<File | null>(null)
 const colScroll = ref<HTMLDivElement | null>(null)
 const columns = ref<HTMLDivElement[] | null>(null)
-// const popStateStore = usePopStateStore() // trash
+
+/**
+ * Hooks
+ */
 
 onMounted(async () => {
 	mounted.value = true
@@ -236,8 +235,9 @@ watch(
 	},
 )
 
-//
-//
+/**
+ * Functions
+ */
 
 // Parse the route and load the appropriate files.
 async function parseRoute() {
@@ -414,40 +414,28 @@ async function fetchWorkspaceFiles(path = '') {
 	overflow-x: auto;
 	scroll-behavior: smooth;
 	height: 100%;
-	// margin: 0 -40px;
-	// width: 100vw;
-	// border: solid 1px red;
 }
 #col-wrap {
 	display: flex;
 	flex-direction: row;
-	// padding-left: 24px;
 	height: 100%;
-	// height: 100vh;
-	// border: solid 1px green;
 }
 
 // Column
 #col-wrap .column {
-	// padding-right: 8px;
-	// margin-right: 8px;
 	flex: 200px 0 0;
 	height: 100%;
 	overflow-y: auto;
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	// border: solid 1px blue;
 }
 #col-wrap .column.file-preview {
 	flex-basis: 300px;
 }
 #col-wrap .column:not(.file-preview) {
 	min-width: 0; // This makes sure the last column is also truncated.
-	// min-width: 200px;
 	margin-right: 0;
-	// padding-right: 40px;
-	// flex: none;
 }
 
 // Column split (tab in between column titles)
@@ -469,7 +457,6 @@ async function fetchWorkspaceFiles(path = '') {
 	position: absolute;
 	top: 0;
 	left: -4px;
-	// background: pink;
 }
 
 // Column header
@@ -485,7 +472,6 @@ async function fetchWorkspaceFiles(path = '') {
 	cursor: pointer;
 	box-sizing: border-box;
 	flex: 0 0 auto;
-	// background: linear-gradient(rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
 
 	// Truncate
 	white-space: nowrap;
@@ -498,15 +484,6 @@ async function fetchWorkspaceFiles(path = '') {
 	font-weight: 400;
 	padding-left: 5px;
 }
-// #col-wrap .col-header.root::before {
-// 	content: '';
-// 	display: block;
-// 	position: absolute;
-// 	bottom: 0;
-// 	width: calc(100% - 16px);
-// 	height: 0;
-// 	border-bottom: solid 1px #eee;
-// }
 #col-wrap .btn-workspace {
 	color: var(--ibm-black);
 	background: var(--black-10);
@@ -518,10 +495,6 @@ async function fetchWorkspaceFiles(path = '') {
 	font-weight: 600;
 	cursor: pointer;
 }
-#col-wrap .btn-workspace:hover {
-	color: #fff;
-	background: var(--ibm-black);
-}
 
 // Column body (scrolls)
 #col-wrap .col-body {
@@ -529,14 +502,12 @@ async function fetchWorkspaceFiles(path = '') {
 	padding-bottom: 40px;
 	overflow-y: auto;
 	height: 100%;
-	// border: solid 1px red;
 }
 
 // Column fillers
 #col-wrap .column.filler-left {
 	flex: 0 0 24px;
 	border-right: none;
-	// background: pink;
 }
 #col-wrap .column.filler-left.headless {
 	flex-basis: 0;
@@ -544,7 +515,6 @@ async function fetchWorkspaceFiles(path = '') {
 #col-wrap .column.filler-right {
 	flex: 1 1 auto;
 	border-right: none;
-	// background: pink;
 }
 #col-wrap .column.filler-left .col-header,
 #col-wrap .column.filler-right .col-header {
@@ -644,6 +614,7 @@ async function fetchWorkspaceFiles(path = '') {
 }
 #file-preview b {
 	display: block;
+	margin-bottom: 4px;
 }
 #file-preview .soft {
 	margin-top: 8px;
@@ -654,6 +625,12 @@ async function fetchWorkspaceFiles(path = '') {
  */
 
 @media (hover: hover) {
+	// Workspace button
+	#col-wrap .btn-workspace:hover {
+		color: #fff;
+		background: var(--ibm-black);
+	}
+
 	// Files & folders
 	#col-wrap .dir:not(.sel):hover,
 	#col-wrap .file:not(.sel):hover {

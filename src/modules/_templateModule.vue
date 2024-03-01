@@ -1,3 +1,5 @@
+<template>ABC</template>
+
 <script setup lang="ts">
 // Vue
 import { ref, onMounted, onBeforeMount, computed, watch, onUpdated, nextTick } from 'vue'
@@ -10,7 +12,5 @@ const fileStore = useFileStore()
 // API
 import { fileSystemApi } from '@/api/ApiService'
 </script>
-
-<template>ABC</template>
 
 <style lang="scss" scoped></style>

@@ -1,32 +1,5 @@
-<script setup lang="ts">
-// Vue
-import { ref } from 'vue'
-
-// APIs
-import { mainApi } from '@/api/ApiService'
-
-// Definitions
-const command = ref<string>('')
-const output = ref<string>('')
-
-//
-//
-
-async function submitCommand() {
-	output.value = ''
-	const response = await mainApi?.execCommand(command.value)
-	if (response.status != 200) {
-		// console.error('Failed to execute command:', response.statusText)
-		output.value = response.data
-		return
-	}
-	output.value = response.data
-	command.value = ''
-}
-</script>
-
 <template>
-	<main id="module-a">
+	<main>
 		<p>
 			This module is meant as a proof-of-concept to preview how we can run commands from the
 			GUI.
@@ -43,8 +16,36 @@ async function submitCommand() {
 	</main>
 </template>
 
+<script setup lang="ts">
+// Vue
+import { ref } from 'vue'
+
+// APIs
+import { mainApi } from '@/api/ApiService'
+
+// Definitions
+const command = ref<string>('')
+const output = ref<string>('')
+
+/**
+ * Functions
+ */
+
+async function submitCommand() {
+	output.value = ''
+	const response = await mainApi?.execCommand(command.value)
+	if (response.status != 200) {
+		// console.error('Failed to execute command:', response.statusText)
+		output.value = response.data
+		return
+	}
+	output.value = response.data
+	command.value = ''
+}
+</script>
+
 <style lang="css" scoped>
-#module-a {
+main {
 	background: #eee;
 	padding: 24px;
 }

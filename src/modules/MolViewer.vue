@@ -1,14 +1,16 @@
 <template>
 	<!-- JSON-only view -->
-	<!-- <template v-if="route.query.raw">
-		<router-link :to="route.path">Exit JSON view</router-link>
-
-		<BreadCrumbs v-if="isFile" :path="fileStore.path" />
-		<pre>{{ mol }}</pre>
-	</template> -->
+	<!--
+		Note: this is only used when molviewer is loaded directly.
+		When we're opening a file, there's general viewer override
+		logic which lives in the fileStore, see fileTypeOverride.
+	 -->
+	<template v-if="route.query.use">
+		<JsonViewer :data="mol" />
+	</template>
 
 	<!-- Input screen -->
-	<div v-if="!isFile && (!props.identifier || loadingError)">
+	<div v-else-if="!isFile && (!props.identifier || loadingError)">
 		<h3>Display any molecule</h3>
 		<p>
 			Accepted identifiers are:
@@ -27,7 +29,7 @@
 				<cv-text-input
 					v-model="ipIdentifier"
 					type="text"
-					placeholder="aspirin"
+					placeholder="dopamine"
 					:hide-label="true"
 				/>
 				<cv-button size="default" :disabled="!!loading">{{
@@ -49,16 +51,19 @@
 			<div class="col-left">
 				<BreadCrumbs v-if="isFile" :path="fileStore.path" />
 				<div id="title-wrap">
-					<div class="icn-mol" :class="{ loading: loading }"></div>
+					<div class="v-align">
+						<SvgServe
+							class="icn-mol"
+							:class="{ loading: loading }"
+							filename="icn-mol"
+							size="large"
+						/>
+					</div>
 					<h2 id="data-name" data-val="{{ molName }}" :class="{ loading: loading }">
-						{{ molName }}
+						{{ capitalize(molName) }}
 					</h2>
-
-					<div id="btn-bookmark" class="icn-star" :class="{ hide: loading }"></div>
+					<IconButton v-if="!loading" icon="icn-star" colorOn="#d3bf0b" />
 				</div>
-
-				<!-- <router-link to="/molviewer/aspirin">aspirin</router-link> |
-				<router-link to="/molviewer/ibuprofen">ibuprofen</router-link><br /><br /> -->
 
 				<template v-if="mol">
 					<div id="identification">
@@ -96,7 +101,7 @@
 								>{{ mol.identifiers.cid }}</a
 							>
 							<span
-								v-if="loading"
+								v-else-if="loading"
 								id="fetching-pubchem"
 								:class="{ error: !!loadingError }"
 								>Fetching</span
@@ -110,16 +115,20 @@
 						<router-link to="?use=json" class="dumb">Show JSON</router-link>
 					</div>
 
-					<br />
 					<hr />
-					<br />
 
-					<div id="synonyms">
+					<div id="synonyms" :style="{ '--truncated-height': truncatedSynonymsHeight }">
 						<h3>Synonyms</h3>
 						<div class="flip-v">
-							<a href="#" class="toggle-expand hide" @click.prevent="toggleExpand"
-								><span></span
+							<a
+								v-if="truncateSynonyms"
+								href="#"
+								class="toggle-expand"
+								@click.prevent="toggleExpand"
 							></a>
+							<template v-else-if="mol?.synonyms?.length === 0"
+								>This molecule does not have any synonyms.</template
+							>
 							<div class="cloak">
 								<div class="synonyms-wrap" :style="{ height: synonymsHeight }">
 									<div
@@ -135,9 +144,7 @@
 						</div>
 					</div>
 
-					<br />
 					<hr />
-					<br />
 
 					<div id="parameters">
 						<h3>Parameters</h3>
@@ -156,28 +163,12 @@
 						</div>
 					</div>
 
-					<br />
 					<hr />
-					<br />
 
 					<div id="analysis">
 						<h3>Analysis</h3>
 						Comin soon...
 					</div>
-
-					<br />
-					<hr />
-					<br />
-
-					<a
-						id="show-json"
-						class="toggle-expand te-show"
-						href="#"
-						@click.prevent="toggleExpand"
-					>
-						JSON
-					</a>
-					<pre style="tab-size: 30px">{{ mol }}</pre>
 				</template>
 			</div>
 
@@ -189,7 +180,6 @@
 		</div>
 	</template>
 
-	<!-- <pre>{{ molViewerStore.mol }}</pre> -->
 	<!-- <pre>{{ molViewerStore.sdf }}</pre> -->
 </template>
 
@@ -197,13 +187,18 @@
 // Libraries
 // import Miew from 'miew'
 // @ts-ignore
-import Miew from '@/TEMP/miew/_dist/miew.module'
+import Miew from '@/TEMP/miew/_dist/miew.module' // https://github.com/epam/miew/issues/524
 // @ts-ignore
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
 // Vue
-import { ref, onMounted, onBeforeMount, computed, watch } from 'vue'
+import { ref, onMounted, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue'
+import type { ComputedRef } from 'vue'
+
+// Router
 import { useRouter, useRoute } from 'vue-router'
+const router = useRouter()
+const route = useRoute()
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
@@ -218,24 +213,31 @@ import { moleculesApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
+import JsonViewer from '@/modules/JsonViewer.vue'
+import IconButton from '@/components/IconButton.vue'
+import SvgServe from '@/components/SvgServe.vue'
 
-//
-//
+// Util
+import { capitalize } from '@/utils/helpers'
 
 // Definitions
 const props = defineProps<{ identifier?: string }>()
 const $container3d = ref<Element | null>(null)
 const loading = ref<Boolean>(false)
 const loadingError = ref<String | false>(false)
-const router = useRouter()
-const route = useRoute()
 const ipIdentifier = ref<String>('')
-const mol = computed((): Mol | null => molViewerStore.mol)
 const paramColMinWidth = 250
 const synonymColMinWidth = 150
 
+/**
+ * Computed
+ */
+
+// Molecule data
+const mol: ComputedRef<Mol | null> = computed(() => molViewerStore.mol)
+
 // Title
-const molName = computed(() => {
+const molName: ComputedRef<string> = computed(() => {
 	return mol.value?.identifiers?.name
 		? mol.value.identifiers.name
 		: loading.value
@@ -243,41 +245,53 @@ const molName = computed(() => {
 			: 'Unnamed Molecule'
 })
 
-// The molviewer can be loaded directly or via a file path.
-const isFile = computed(() => {
+// Detect how the molecule viewer was opened:
+// - Viewing a file: /~/dopamine.mol.json
+// - Directly: /molviewer/dopamine
+const isFile: ComputedRef<boolean> = computed(() => {
 	return route.name == 'filebrowser' || route.name == 'headless-filebrowser'
 })
 
 // Synonyms
-const synonymsHeight = computed(() => {
-	const count = mol.value?.synonyms ? mol.value.synonyms.length : 0
-	const height = Math.ceil(count / synonymColCount.value) * 22
+const synonymCount: ComputedRef<number> = computed(() => {
+	return mol.value?.synonyms ? mol.value.synonyms.length : 0
+})
+const synonymsHeight: ComputedRef<string> = computed(() => {
+	const height = Math.ceil(synonymCount.value / synonymColCount.value) * 22
 	return `${height}px`
 })
-const synonymColCount = computed(() => {
+const synonymColCount: ComputedRef<number> = computed(() => {
 	if (!mainStore.contentWidth) return 4
 	return Math.floor(mainStore.contentWidth / synonymColMinWidth) || 1
 })
-const synonymColWidth = computed(() => {
+const synonymColWidth: ComputedRef<string> = computed(() => {
 	return `calc((100% - ${(synonymColCount.value - 1) * 20}px) / ${synonymColCount.value})`
+})
+const truncateSynonyms: ComputedRef<boolean> = computed(() => {
+	const maxCount = 5 * synonymColCount.value + synonymColCount.value
+	return synonymCount.value > maxCount
+})
+const truncatedSynonymsHeight: ComputedRef<string> = computed(() => {
+	return truncateSynonyms.value ? '110px' : ''
 })
 
 // Parameters
-const paramColCount = computed(() => {
+const paramColCount: ComputedRef<number> = computed(() => {
 	if (!mainStore.contentWidth) return 3
 	return Math.floor(mainStore.contentWidth / paramColMinWidth) || 1
 })
-const paramColWidth = computed(() => {
+const paramColWidth: ComputedRef<string> = computed(() => {
 	return `calc((100% - ${(paramColCount.value - 1) * 40}px) / ${paramColCount.value})`
 })
-const paramsHeight = computed(() => {
+const paramsHeight: ComputedRef<string> = computed(() => {
 	const count = mol.value?.properties ? Object.keys(mol.value.properties).length : 0
 	const height = Math.ceil(count / paramColCount.value) * 22
 	return `${height}px`
 })
 
-//
-//
+/**
+ * Hooks
+ */
 
 onMounted(async () => {
 	// When toggling headless mode, we need to re-render the 3D molecule.
@@ -295,6 +309,7 @@ onBeforeMount(async () => {
 		if (fileStore.data) {
 			try {
 				const molData = JSON.parse(fileStore.data)
+				// molData.synonyms = [] // For testing truncation
 				molViewerStore.setMolData(molData)
 				fetchMolVizData()
 				loading.value = false
@@ -304,11 +319,14 @@ onBeforeMount(async () => {
 		}
 	} else if (props.identifier) {
 		// When the molecule viewer is launched from the CLI or Jupyter
-		// (by `display molecule aspirin` for example), we calculate some
+		// (by `display molecule dopamine` for example), we calculate some
 		// of the molecule data in the backend and pass it to the frontend
 		// as the ?data= query parameter. This allows us to display some
 		// more molecule data while we wait for the rest of the molecule
 		// to be fetched. See mol_commands.py > show_mol() in backend repo.
+		//
+		// To do: we should implement RDKit in the frontend so we can always
+		// display identifiers and visualisation before the API returns.
 		if (route.query.data) {
 			const preliminaryData = JSON.parse(route.query.data as string)
 			if (preliminaryData) {
@@ -323,6 +341,10 @@ onBeforeMount(async () => {
 	}
 })
 
+// Clear store on exit.
+onBeforeUnmount(clearMolData)
+
+// Update data when going from one mol to another.
 watch(
 	() => props.identifier,
 	(newVal) => {
@@ -333,13 +355,14 @@ watch(
 	},
 )
 
+/**
+ * Functions
+ */
+
 function clearMolData() {
 	if ($container3d.value) $container3d.value.innerHTML = ''
 	molViewerStore.clearMol()
 }
-
-//
-//
 
 // Pre-fill the input screen form.
 function fillIn(idKey: string) {
@@ -353,11 +376,11 @@ function fillIn(idKey: string) {
 	}
 
 	const identifiers: Identifiers = {
-		inchi: 'InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)',
-		smiles: 'CC(=O)OC1=CC=CC=C1C(=O)O',
-		name: 'aspirin',
-		inchikey: 'BSYNRYMUTXBXSQ-UHFFFAOYSA-N',
-		pid: '2244',
+		inchi: 'InChI=1S/C10H14O/c1-7-5-9(11)6-8(2)10(7,3)4/h5-6H,1-4H3',
+		smiles: 'CC1=CC(=O)C=C(C1(C)C)C',
+		name: 'penguinone',
+		inchikey: 'RHIYIMQPIGYWEK-UHFFFAOYSA-N',
+		pid: '12564106',
 	}
 	ipIdentifier.value = identifiers[idKey]
 }
@@ -375,10 +398,7 @@ async function displayMol() {
 	}
 }
 
-/**
- * Connect to the /enrich API endpoint to fetch
- * additional data about the molecule.
- */
+// Fetch molecule data from the API based on teh identifier.
 async function fetchMolData(identifier: string | null = null) {
 	let success = false
 	loading.value = true
@@ -410,6 +430,8 @@ async function fetchMolData(identifier: string | null = null) {
 	return success
 }
 
+// Fetch visualization data from the API.
+// I.e. a 2D SVG and an SDF string with 3D coordinates.
 async function fetchMolVizData() {
 	const inchi = molViewerStore.mol?.identifiers?.inchi
 	if (!inchi) return
@@ -427,6 +449,7 @@ async function fetchMolVizData() {
 	}
 }
 
+// Render 3D molecule.
 async function init3DViewer() {
 	if (!$container3d.value || !molViewerStore.sdf) return
 
@@ -435,7 +458,7 @@ async function init3DViewer() {
 	render3d_miew($container3d.value, molViewerStore.sdf)
 }
 
-// Using the Miew library - https://lifescience.opensource.epam.com/miew
+// 3D mol A --> Using the Miew library - https://lifescience.opensource.epam.com/miew
 function render3d_miew($container: Element, sdf: string) {
 	const viewer = new Miew({
 		container: $container as HTMLDivElement,
@@ -463,7 +486,7 @@ function render3d_miew($container: Element, sdf: string) {
 	}
 }
 
-// Using the 3DMol library - https://3dmol.org
+// 3D mol B --> Using the 3DMol library - https://3dmol.org
 // Doesn't have balls-and-stick visualization, only stick.
 function render3d_3DMol($container: Element, sdf: string) {
 	const config = { backgroundColor: 0xffffff, backgroundAlpha: 0 }
@@ -506,6 +529,7 @@ function render3d_3DMol($container: Element, sdf: string) {
 	// }
 }
 
+// Toggle synonym truncation.
 function toggleExpand(e: Event) {
 	;(e.currentTarget as Element).classList.toggle('expand')
 }
@@ -513,12 +537,11 @@ function toggleExpand(e: Event) {
 
 <style lang="scss" scoped>
 @import 'https://unpkg.com/miew@0.9.0/dist/Miew.min.css';
-// @import 'carbon-components/css/carbon-components.css';
-// @import 'carbon-components/scss/components/text-input/_text-input.scss';
 
 /**
  * Input screen
  */
+
 #input-form .fields {
 	display: flex;
 	gap: 8px;
@@ -526,7 +549,7 @@ function toggleExpand(e: Event) {
 #input-form .fields > div {
 	flex: 1;
 }
-// Carbom fix
+// Carbon fix
 #input-form .fields > div:deep(.bx--text-input) {
 	height: 48px;
 }
@@ -538,53 +561,13 @@ function toggleExpand(e: Event) {
 }
 
 /**
- * Toggle
- */
-.flip-v {
-	display: flex;
-	flex-direction: column-reverse;
-}
-.toggle-expand::before {
-	content: 'Show all';
-}
-.toggle-expand.expand::before {
-	content: 'Minimize';
-}
-.toggle-expand.expand span {
-	display: none;
-}
-.toggle-expand.hide {
-	display: none;
-}
-
-/**
- * Icons
- */
-.icn-star {
-	width: 24px;
-	height: 24px;
-	background: url(data:image/svg+xml;utf8,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M12.4483%202.40858C12.2649%202.03693%2011.735%202.03693%2011.5516%202.40857L8.7039%208.17905C8.63101%208.32675%208.49006%208.42908%208.32705%208.45264L1.96309%209.3725C1.55286%209.4318%201.38877%209.93582%201.68547%2010.2253L6.29184%2014.719C6.40961%2014.8339%206.46332%2014.9994%206.43547%2015.1615L5.34644%2021.5017C5.27629%2021.9101%205.70488%2022.2216%206.07174%2022.0289L11.7674%2019.0371C11.913%2018.9607%2012.0869%2018.9607%2012.2325%2019.0371L17.9282%2022.0289C18.295%2022.2216%2018.7236%2021.9101%2018.6535%2021.5017L17.5645%2015.1617C17.5366%2014.9995%2017.5904%2014.8339%2017.7084%2014.719L22.3142%2010.232C22.6111%209.94283%2022.4474%209.43877%2022.0373%209.37909L15.6725%208.45285C15.5097%208.42915%2015.369%208.32687%2015.2962%208.17933L12.4483%202.40858Z%22%20fill%3D%22%23D3BF0B%22%2F%3E%3C%2Fsvg%3E)
-		center center no-repeat;
-}
-.icn-mol {
-	width: 24px;
-	height: 24px;
-	background: url(data:image/svg+xml;utf8,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M7.30117%2019.79H16.6986L21.3981%2011.645L16.6986%203.5H7.30117L2.60165%2011.645L7.30117%2019.79ZM0.869873%2011.645L6.43487%2021.29H17.5649L23.1299%2011.645L17.5649%202H6.43487L0.869873%2011.645Z%22%20fill%3D%22%23333333%22%2F%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M5.19983%2011.6461L8.58983%205.75111L9.89015%206.49888L6.50015%2012.3939L5.19983%2011.6461Z%22%20fill%3D%22%23333333%22%2F%3E%3C%2Fsvg%3E)
-		center center no-repeat;
-}
-.icn-mol.loading {
-	animation: rotate 3s infinite linear;
-}
-
-/**
- * Grid
+ * Layout
  */
 
 #content-wrap {
 	display: flex;
 	gap: 0 40px;
 }
-
 #content-wrap .col-left {
 	flex: 1 1;
 	// max-width: calc(100% - 290px); // Enable this line to enable the right column. #enableright
@@ -622,7 +605,6 @@ function toggleExpand(e: Event) {
 	justify-content: center;
 	border-radius: 3px;
 	overflow: hidden;
-	/* border: solid 1px pink; */
 }
 
 // 2D molecule
@@ -638,11 +620,10 @@ function toggleExpand(e: Event) {
 	background: var(--soft-bg);
 }
 #mol-render .container-3d canvas {
-	/* mix-blend-mode: screen; */
 	outline: none;
 }
 
-/* Miew styling */
+// Miew styling
 #mol-render .container-3d:deep() .atom-info {
 	position: absolute;
 	bottom: 0;
@@ -655,28 +636,24 @@ function toggleExpand(e: Event) {
 	margin: 0;
 }
 
-/* 3dmol styling */
-#mol-render .mol-3d {
-	background: var(--black);
-}
-#mol-render .mol-3d canvas {
-	outline: none;
-}
-
-/* jmol styling */
-.JSmolLoader {
-	display: none;
-}
-/* #jmolApplet1_waitimage {
-	display: none;
-} */
-
 /**
  * Header
  */
+
 #title-wrap {
 	display: flex;
 	margin-bottom: 16px;
+}
+// Molecule Icon
+#title-wrap .v-align {
+	margin-bottom: 10px;
+	margin-right: 5px;
+}
+#title-wrap .icn-mol {
+	margin-left: -4px;
+}
+#title-wrap .icn-mol.loading {
+	animation: rotate 3s infinite linear;
 }
 #title-wrap h1.loading {
 	opacity: 0.3;
@@ -685,18 +662,6 @@ function toggleExpand(e: Event) {
 	content: '';
 	animation: ellipsis 800ms infinite;
 }
-#title-wrap .icn-mol,
-#title-wrap .icn-star {
-	width: 40px;
-	height: 40px;
-}
-#title-wrap .icn-star.hide {
-	display: none;
-}
-#title-wrap .icn-mol {
-	margin-left: -8px;
-}
-
 #identification div {
 	margin-bottom: 4px;
 }
@@ -713,20 +678,6 @@ function toggleExpand(e: Event) {
 	content: '';
 	animation: ellipsis 800ms infinite;
 }
-@keyframes ellipsis {
-	0% {
-		content: '';
-	}
-	25% {
-		content: '.';
-	}
-	50% {
-		content: '..';
-	}
-	75% {
-		content: '...';
-	}
-}
 
 /*
  * Synonyms
@@ -734,15 +685,15 @@ function toggleExpand(e: Event) {
 
 #synonyms .synonyms-wrap {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	flex-wrap: wrap;
 	gap: 0 20px;
 }
 #synonyms .synonyms-wrap div {
+	// width is set dynamically, see synonymColWidth
 	height: 22px;
 	line-height: 22px;
 	box-sizing: border-box;
-	// width: 25%; // Set dynamically, see synonymColWidth
 
 	/* Truncation */
 	white-space: nowrap;
@@ -750,14 +701,24 @@ function toggleExpand(e: Event) {
 	text-overflow: ellipsis;
 }
 
-/* Toggle */
+/* Toggle truncation */
+#synonyms .flip-v {
+	display: flex;
+	flex-direction: column-reverse;
+}
+#synonyms .toggle-expand::before {
+	content: 'Show all';
+}
+#synonyms .toggle-expand.expand::before {
+	content: 'Minimize';
+}
 #synonyms .toggle-expand {
 	height: 22px;
 	line-height: 22px;
 	margin-top: 10px;
 }
 #synonyms .toggle-expand:not(.expand) + .cloak {
-	height: 110px;
+	height: var(--truncated-height);
 	overflow: hidden;
 }
 
@@ -769,17 +730,15 @@ function toggleExpand(e: Event) {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: wrap;
-	// margin-right: -40px;
 	height: 200px;
 	gap: 0 40px;
 }
 #parameters .param-wrap > div {
+	// width is set dynamically, see paramColWidth
 	height: 22px;
 	line-height: 22px;
-	// padding-right: 40px;
 	box-sizing: border-box;
 	display: flex;
-	// width: calc(100% / 3); // Set dynamically, see paramColWidth
 }
 #parameters .param-wrap div.empty {
 	opacity: 0.3;
@@ -812,12 +771,12 @@ function toggleExpand(e: Event) {
 #parameters .param-wrap > div .filler::before {
 	content: '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .';
 	opacity: 0.3;
-	// white-space: nowrap;
 }
 
 /*
  * Right Column
  */
+
 #ip-notes {
 	width: 100%;
 	height: 200px;
@@ -826,29 +785,6 @@ function toggleExpand(e: Event) {
 	border: solid 1px var(--black-10);
 	border-radius: 3px;
 	background: var(--soft-bg);
-}
-
-/* TEMP */
-
-pre {
-	/* grid-column-start: 1; */
-	/* grid-column-end: 13; */
-	/* white-space: pre-wrap; */
-	font-family: 'Courier New', Courier, monospace;
-	background: #fafafa;
-	border: solid 1px rgba(0, 0, 0, 0.1);
-	border-radius: 3px;
-	padding: 16px;
-	overflow-x: auto;
-}
-.toggle-expand.te-show:not(.expand) + pre {
-	display: none;
-}
-.toggle-expand.te-show::before {
-	content: 'Show ';
-}
-.toggle-expand.te-show.expand::before {
-	content: 'Hide ';
 }
 
 /**

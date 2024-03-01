@@ -27,15 +27,8 @@ const fileStore = useFileStore()
 const modalStore = useModalStore()
 
 // Definitions
-const props = defineProps<{
-	path: string
-}>()
-const pathArr = computed(() => {
-	return [mainStore.workspace].concat(props.path.split('/'))
-})
-
-//
-//
+const props = defineProps<{ path: string }>()
+const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/')))
 </script>
 
 <style lang="css" scoped>
@@ -53,10 +46,6 @@ const pathArr = computed(() => {
 	margin-right: 7px;
 	cursor: pointer;
 }
-#file-type:hover {
-	color: #fff;
-	background: var(--ibm-black);
-}
 #breadcrumbs {
 	margin-bottom: 8px;
 }
@@ -66,7 +55,18 @@ const pathArr = computed(() => {
 	font-size: var(--font-size-small);
 	line-height: var(--line-height-small);
 }
-#breadcrumbs a:hover {
-	color: var(--black-60);
+
+/**
+ * Hover states
+ */
+
+@media (hover: hover) {
+	#file-type:hover {
+		color: #fff;
+		background: var(--ibm-black);
+	}
+	#breadcrumbs a:hover {
+		color: var(--black-60);
+	}
 }
 </style>
