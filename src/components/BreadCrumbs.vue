@@ -33,15 +33,15 @@ const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/'
 
 <style lang="css" scoped>
 #file-type {
-	color: var(--ibm-black);
-	background: var(--black-10);
+	color: $black;
+	background: $black-10;
 	border: none;
 	padding: 0 4px;
 	height: 16px;
 	line-height: 16px;
 	border-radius: 2px;
 	text-transform: uppercase;
-	font-size: var(--font-size-small);
+	font-size: $font-size-small;
 	font-weight: 600;
 	margin-right: 7px;
 	cursor: pointer;
@@ -51,9 +51,9 @@ const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/'
 }
 #breadcrumbs,
 #breadcrumbs a {
-	color: var(--black-30);
-	font-size: var(--font-size-small);
-	line-height: var(--line-height-small);
+	color: $black-30;
+	font-size: $font-size-small;
+	line-height: $line-height-small;
 }
 
 /**
@@ -63,10 +63,10 @@ const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/'
 @media (hover: hover) {
 	#file-type:hover {
 		color: #fff;
-		background: var(--ibm-black);
+		background: $black;
 	}
 	#breadcrumbs a:hover {
-		color: var(--black-60);
+		color: $black-60;
 	}
 }
 </style>

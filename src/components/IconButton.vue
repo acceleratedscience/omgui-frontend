@@ -28,7 +28,7 @@ const props = defineProps({
 	},
 	colorOn: {
 		type: String,
-		default: '#393939', // --ibm-black, same as text color
+		default: '#393939', // --black, same as text color
 	},
 })
 
@@ -60,7 +60,7 @@ function toggle() {
 
 @media (hover: hover) {
 	#icn-btn:not(.on):hover:deep() svg {
-		fill: var(--black-30);
+		fill: $black-30;
 	}
 	#icn-btn.on:hover:deep() svg {
 		filter: brightness(80%);

@@ -485,8 +485,8 @@ async function fetchWorkspaceFiles(path = '') {
 	padding-left: 5px;
 }
 #col-wrap .btn-workspace {
-	color: var(--ibm-black);
-	background: var(--black-10);
+	color: $black;
+	background: $black-10;
 	border: none;
 	padding: 0 6px;
 	height: 20px;
@@ -574,7 +574,7 @@ async function fetchWorkspaceFiles(path = '') {
 	flex: 1;
 }
 #col-wrap .dir .svg-wrap {
-	color: var(--black-30);
+	color: $black-30;
 }
 #col-wrap .dir {
 	padding-right: 3px;
@@ -584,7 +584,7 @@ async function fetchWorkspaceFiles(path = '') {
 #col-wrap .dir.sel,
 #col-wrap .file.sel {
 	color: #fff;
-	background: var(--ibm-blue);
+	background: var(--blue);
 }
 #col-wrap .dir.sel .svg-wrap {
 	color: #fff;
@@ -628,7 +628,7 @@ async function fetchWorkspaceFiles(path = '') {
 	// Workspace button
 	#col-wrap .btn-workspace:hover {
 		color: #fff;
-		background: var(--ibm-black);
+		background: $black;
 	}
 
 	// Files & folders
@@ -639,7 +639,7 @@ async function fetchWorkspaceFiles(path = '') {
 
 	// Arrow after directory names
 	#col-wrap .dir:not(.sel):hover .svg-wrap {
-		color: var(--ibm-black);
+		color: $black;
 	}
 }
 </style>

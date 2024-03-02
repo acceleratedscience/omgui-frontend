@@ -188,6 +188,7 @@
 // import Miew from 'miew'
 // @ts-ignore
 import Miew from '@/TEMP/miew/_dist/miew.module' // https://github.com/epam/miew/issues/524
+import '@/TEMP/miew/_dist/miew.min.css'
 // @ts-ignore
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
@@ -536,8 +537,6 @@ function toggleExpand(e: Event) {
 </script>
 
 <style lang="scss" scoped>
-@import 'https://unpkg.com/miew@0.9.0/dist/Miew.min.css';
-
 /**
  * Input screen
  */
@@ -609,7 +608,7 @@ function toggleExpand(e: Event) {
 
 // 2D molecule
 #mol-render .container-2d {
-	background: var(--soft-bg);
+	background: $soft-bg;
 }
 #mol-render .container-2d:deep() svg rect {
 	display: none;
@@ -617,7 +616,7 @@ function toggleExpand(e: Event) {
 
 // 3D molecule
 #mol-render .container-3d {
-	background: var(--soft-bg);
+	background: $soft-bg;
 }
 #mol-render .container-3d canvas {
 	outline: none;
@@ -629,10 +628,10 @@ function toggleExpand(e: Event) {
 	bottom: 0;
 	left: 0;
 	pointer-events: initial;
-	color: var(--black-30);
+	color: $black-30;
 }
 #mol-render .container-3d:deep() .atom-info p {
-	font-size: var(--font-size-small);
+	font-size: $font-size-small;
 	margin: 0;
 }
 
@@ -782,9 +781,9 @@ function toggleExpand(e: Event) {
 	height: 200px;
 	padding: 8px;
 	box-sizing: border-box;
-	border: solid 1px var(--black-10);
+	border: solid 1px $black-10;
 	border-radius: 3px;
-	background: var(--soft-bg);
+	background: $soft-bg;
 }
 
 /**

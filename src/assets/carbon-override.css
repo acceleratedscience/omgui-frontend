@@ -1,0 +1,78 @@
+/**
+ * Links
+ */
+
+a {
+	text-decoration: none;
+}
+a:not(.dumb).router-link-exact-active,
+a:not(.dumb).router-link-exact-active:hover {
+	/* When we link to a url parameter, the link
+	 * will be marked with router-link-exact-active
+	 * causing it to be underlined and not clickable.
+	 * That's why we have the .dumb class to override.
+	 */
+	color: $black;
+	text-decoration: underline;
+	pointer-events: none;
+}
+
+/**
+ * Text styles
+ */
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+	margin-top: 0;
+	margin-bottom: 10px;
+}
+h1 {
+	font-weight: 300;
+}
+h2 {
+	font-size: 28px;
+	font-weight: 600;
+}
+h3 {
+	font-size: 22px;
+	font-weight: 600;
+}
+h4 {
+	font-size: 16px;
+	font-weight: 600;
+}
+h5 {
+	font-size: 16px;
+	font-weight: 400;
+}
+
+/**
+ * Text styles
+ */
+
+b {
+	font-weight: 600;
+}
+p {
+	font-size: $font-size;
+}
+pre {
+	font-family: 'IBM Plex Mono', monospace;
+	font-size: $font-size;
+	tab-size: 2;
+	line-height: $line-height;
+}
+
+/**
+ * Hover states
+ */
+
+@media (hover: hover) {
+	/* Links in carbon css don't have hover state :( */
+	a:hover {
+		color: var(--blue-hover);
+	}
+}
