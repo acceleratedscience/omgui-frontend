@@ -1,9 +1,9 @@
 <template>
-	{{ fileStore.moduleName }}& Switch module to:
+	<!-- {{ fileStore.moduleName }}& Switch module to:
 	<router-link to="?use=JsonViewer" class="dumb">JSON Viewer</router-link> |
 	<router-link to="?use=MolViewer" class="dumb">Molecule Viewer</router-link> |
 	<router-link to="?use=SdfViewer" class="dumb">SDF Viewer</router-link> |
-	<router-link to="?use=TextViewer" class="dumb">Text Viewer</router-link><br /><br />
+	<router-link to="?use=TextViewer" class="dumb">Text Viewer</router-link><br /><br /> -->
 
 	<BreadCrumbs v-if="showBreadCrumbs" :path="fileStore.path" />
 	<p v-if="fileStore.invalidExt" class="error-msg">

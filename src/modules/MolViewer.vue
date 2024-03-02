@@ -162,22 +162,8 @@
 
 					<div id="analysis">
 						<h3>Analysis</h3>
-						Comin soon...
+						Coming soon...
 					</div>
-
-					<br />
-					<hr />
-					<br />
-
-					<a
-						id="show-json"
-						class="toggle-expand te-show"
-						href="#"
-						@click.prevent="toggleExpand"
-					>
-						JSON
-					</a>
-					<pre style="tab-size: 30px">{{ mol }}</pre>
 				</template>
 			</div>
 
