@@ -1,0 +1,11 @@
+// Allow dropdowns to expand outside
+// of the content box and the dialog.
+.bx--modal-container,
+.bx--modal-content {
+	overflow: visible;
+}
+
+// Remove focus outline from modal content.
+.bx--modal-content:focus {
+	outline: none;
+}

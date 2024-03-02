@@ -8,8 +8,18 @@ export default class FileSystemApi extends BaseApi {
 	//
 	//
 
-	getWorkspaceName() {
-		return this.apiClient.get('/get-workspace-name')
+	// Get the list of workspaces.
+	getWorkspaces() {
+		return this.apiClient.get('/get-workspaces')
+	}
+
+	// Get the name of the active workspace.
+	getWorkspace() {
+		return this.apiClient.get('/get-workspace')
+	}
+
+	setWorkspace(workspace: string) {
+		return this.apiClient.post('/set-workspace', { workspace })
 	}
 
 	// Get list of files in workspace or workspace directory.

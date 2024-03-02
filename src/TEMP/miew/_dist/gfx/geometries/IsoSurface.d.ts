@@ -1,0 +1,34 @@
+export default IsoSurface;
+declare class IsoSurface {
+    static _triTable: number[];
+    static _arrSize: number;
+    static _firstIndices: number[];
+    static _secondIndices: number[];
+    static _vertexList: any[];
+    static _normalList: any[];
+    _numTriangles: number;
+    _numVertices: number;
+    _position: any[];
+    _normals: any[];
+    _colors: any;
+    _indices: any[];
+    _volumetricData: any;
+    _xAxis: any;
+    _yAxis: any;
+    _zAxis: any;
+    _xDir: any;
+    _yDir: any;
+    _zDir: any;
+    _prepareAxesAndDirs(): boolean;
+    _vertexInterp(isoLevel: any, grid: any, ind1: any, ind2: any, vertex: any, normal: any): void;
+    _polygonize(grid: any, isoLevel: any, triangles: any): number;
+    _doGridPosNorms(isoValue: any, step: any, appendSimple: any): number;
+    compute(volData: any, origin: any, isoValue: any, step: any): void;
+    _origin: any;
+    _gradient: any;
+    _remapIndices(vertexMap: any, idcCount: any): void;
+    _remapVertices(vertices: any, normals: any, count: any): void;
+    vertexFusion(offset: any, len: any): void;
+    setColorVolTex(colorMap: any, atomMap: any, atomWeightMap: any, visibilitySelector: any): void;
+    toMesh(): any;
+}

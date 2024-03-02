@@ -107,7 +107,7 @@
 							>
 						</div>
 						<br />
-						<router-link to="?use=JsonViewer" class="dumb">Show JSON</router-link>
+						<router-link to="?use=json" class="dumb">Show JSON</router-link>
 					</div>
 
 					<br />
@@ -183,7 +183,7 @@
 // Libraries
 // import Miew from 'miew'
 // @ts-ignore
-import Miew from '@/TEMP/miew/dist/miew.module'
+import Miew from '@/TEMP/miew/_dist/miew.module'
 // @ts-ignore
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
@@ -518,6 +518,9 @@ function toggleExpand(e: Event) {
 }
 #input-form .fields > button {
 	flex: 0;
+}
+#input-form .error-msg {
+	margin-bottom: 10px;
 }
 
 /**

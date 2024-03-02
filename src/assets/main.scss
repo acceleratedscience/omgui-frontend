@@ -1,4 +1,5 @@
 @import './base.css';
+@import './carbon-fix.scss';
 
 /* Global variables */
 :root {
@@ -6,6 +7,7 @@
 	--font-size: var(--ibm-font-size);
 	--font-size-small: 12px;
 	--line-height: var(--ibm-line-height);
+	--line-height-small: 16px;
 
 	--black: var(--ibm-black); /* #393939 */
 	--black-10: rgba(0, 0, 0, 0.1);
