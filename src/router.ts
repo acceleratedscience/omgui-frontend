@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
-// import { usePopStateStore } from '@/stores/PopStateStore' // trash
 
 // Components
 import HomeView from '@/views/HomeView.vue'
@@ -18,7 +17,7 @@ const routes = [
 		path: '/~/:path(.*)?',
 		name: 'filebrowser',
 		component: () =>
-			import(/* webpackChunkName: 'module-dispatch' */ `@/views/ModuleDispatch.vue`),
+			import(/* webpackChunkName: 'viewer-dispatch' */ `@/views/ViewerDispatch.vue`),
 	},
 	{
 		path: '/',
@@ -56,22 +55,11 @@ const routes = [
 		component: () => import(/* webpackChunkName: 'commandline' */ '@/modules/CommandLine.vue'),
 	},
 	{
-		path: '/module-a',
-		name: 'module-a',
-		component: () => import(/* webpackChunkName: 'module-a' */ '@/modules/ModuleA.vue'),
+		path: '/svg/:filename',
+		name: 'svg',
+		props: true,
+		component: () => import(/* webpackChunkName: 'svg' */ '@/components/SvgServe.vue'),
 	},
-	{
-		path: '/module-b',
-		// path: '/:path(headless)?/module-b',
-		name: 'module-b',
-		component: () => import(/* webpackChunkName: 'module-b' */ '@/modules/ModuleB.vue'),
-	},
-	// {
-	// 	path: '/svg/:filename',
-	// 	name: 'svg',
-	// 	props: true,
-	// 	component: () => import(/* webpackChunkName: 'svg' */ '@/components/SvgServe.vue'),
-	// },
 	{
 		path: '/kitchen-sink',
 		name: 'kitchen-sink',
@@ -102,23 +90,11 @@ router.beforeEach((to, from, next) => {
 		mainStore.setHeadless()
 	}
 	if (!exitHeadless && from.meta.headless && !to.meta.headless) {
-		next({ path: `/headless${to.path}` }) // , replace: true // trash
+		next({ path: `/headless${to.path}` })
 	} else {
 		next()
 	}
 })
-
-// trash
-// router.afterEach((to) => {
-// 	console.log('after', to.path)
-// 	// console.log('@@', to.path)
-// 	const popStateStore = usePopStateStore()
-// 	if (popStateStore.popstate) {
-// 		console.log('after: pop state!', to.path)
-// 		popStateStore.execute()
-// 		popStateStore.unsetPopState()
-// 	}
-// })
 
 // This lets us import the rouyer to any pinia store:
 // import { router } from '@/router'

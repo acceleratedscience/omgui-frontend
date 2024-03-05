@@ -1,8 +1,7 @@
-// This file is for centralizing any mapping information,
-// like file extensions to file types, file types to modules, etc.
-
-//
-//
+/**
+ * This file is for centralizing any mapping information,
+ * like file extensions to file types, file types to modules, etc.
+ */
 
 // Type declaration
 type Map = {

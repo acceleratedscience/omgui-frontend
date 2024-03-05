@@ -1,8 +1,8 @@
-<script setup lang="ts"></script>
-
 <template>
 	<main id="module">This is the molecule grid component</main>
 </template>
+
+<script setup lang="ts"></script>
 
 <style lang="css" scoped>
 #module {

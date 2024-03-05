@@ -1,18 +1,37 @@
 <template>
-	<div class="svg-wrap" v-html="svgContent"></div>
+	<div class="svg-wrap" v-html="svgContent" :style="{ '--svg-dims': dimentions }"></div>
 </template>
 
 <script lang="ts">
 import axios from 'axios'
 
 export default {
-	props: ['filename'],
+	props: {
+		filename: {
+			type: String,
+			required: true,
+		},
+		size: {
+			type: String,
+			validator: function (value: string) {
+				return ['small', 'large'].includes(value)
+			},
+			default: 'small',
+		},
+	},
 	data() {
 		return {
 			svgContent: '',
-			// width: null,
-			// height: null,
 		}
+	},
+	computed: {
+		dimentions() {
+			if (this.size === 'large') {
+				return '24px'
+			} else {
+				return '16px'
+			}
+		},
 	},
 	async created() {
 		try {
@@ -22,17 +41,6 @@ export default {
 			console.error('Failed to load SVG', error)
 		}
 	},
-	// methods: {
-	//     storeSvgDimensions(svgString) {
-	//         const parser = new DOMParser()
-	//         const doc = parser.parseFromString(svgString, 'image/svg+xml')
-	//         const svgElement = doc.documentElement
-	//         const width = svgElement.getAttribute('width')
-	//         const height = svgElement.getAttribute('height')
-	//         this.width = width
-	//         this.height = height
-	//     },
-	// },
 }
 </script>
 
@@ -42,7 +50,9 @@ export default {
 	font-size: 0;
 	line-height: 0;
 }
-.svg-wrap svg {
+.svg-wrap:deep() svg {
 	display: block;
+	width: var(--svg-dims);
+	height: var(--svg-dims);
 }
 </style>

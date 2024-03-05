@@ -8,7 +8,7 @@
 import { defineStore } from 'pinia'
 import router from '@/router'
 
-// Internal
+// Utils
 import { map_Ext2fileType, map_fileType2Module } from '@/utils/maps'
 
 // Type declarations

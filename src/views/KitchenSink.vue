@@ -1,25 +1,3 @@
-<script setup lang="ts">
-// Stores
-import { useModalStore } from '@/stores/ModalStore'
-const modalStore = useModalStore()
-
-// Compnents
-import SvgServe from '@/components/SvgServe.vue'
-
-/**
- * Functions
- */
-
-function onSubmit() {
-	alert('yes')
-	modalStore.hide()
-}
-function onCancel() {
-	alert('no')
-	modalStore.hide()
-}
-</script>
-
 <template>
 	<hr />
 	<h4>:: Modals</h4>
@@ -79,5 +57,27 @@ function onCancel() {
 		<SvgServe filename="icn-caret-down" />
 	</span>
 </template>
+
+<script setup lang="ts">
+// Stores
+import { useModalStore } from '@/stores/ModalStore'
+const modalStore = useModalStore()
+
+// Compnents
+import SvgServe from '@/components/SvgServe.vue'
+
+/**
+ * Functions
+ */
+
+function onSubmit() {
+	alert('yes')
+	modalStore.hide()
+}
+function onCancel() {
+	alert('no')
+	modalStore.hide()
+}
+</script>
 
 <style scoped></style>

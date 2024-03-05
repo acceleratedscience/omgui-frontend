@@ -1,9 +1,3 @@
-<script setup lang="ts">
-// Stores
-import { useMainStore } from '@/stores/MainStore'
-const mainStore = useMainStore()
-</script>
-
 <template>
 	<main>
 		<template v-if="mainStore.headless">
@@ -29,5 +23,11 @@ const mainStore = useMainStore()
 		<cv-button @click.prevent="mainStore.toggleHeadless(true)">Toggle headless</cv-button>
 	</main>
 </template>
+
+<script setup lang="ts">
+// Stores
+import { useMainStore } from '@/stores/MainStore'
+const mainStore = useMainStore()
+</script>
 
 <style lang="css" scoped></style>

@@ -57,10 +57,6 @@
 				<RouterLink :to="{ name: 'textviewer' }">Text Viewer</RouterLink>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
 				<RouterLink :to="{ name: 'commandline' }">Command Line</RouterLink>
-				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<RouterLink :to="{ name: 'module-a' }">Module A</RouterLink
-				>&nbsp;&nbsp;|&nbsp;&nbsp;
-				<RouterLink :to="{ name: 'module-b' }">Module B</RouterLink>
 			</nav>
 		</header>
 		<div id="body">
@@ -81,12 +77,8 @@ import { computed, onMounted, ref } from 'vue'
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
-import { useModalStore } from '@/stores/ModalStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
-const modalStore = useModalStore()
-// import { usePopStateStore } from '@/stores/PopStateStore--trash' // trash
-// const popStateStore = usePopStateStore() // trash
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
@@ -96,30 +88,22 @@ webSocketClient()
 // Components
 import TheModal from '@/components/TheModal.vue'
 
-// // TRASH: overcomplicated API mgmt
-// import { useApiStore } from '@/stores/ApiStore'
-// import type { FileSystemApi as FileSystemApiType } from '@/api/FileSystemApi'
-// const apiStore = useApiStore()
-// const fileSystemApi: FileSystemApiType | null = apiStore.loadApi('FileSystemApi') as FileSystemApiType | null // prettier-ignore
-
-// Internal
+// Utils
 import { debounce } from '@/utils/helpers'
-
-// // Enable popstate callbacks // trash
-// import usePopState from '@/utils/popstate'
-// usePopState(popStateStore.setPopState)
-
-//
-//
 
 // Definitions
 const $mainWrap = ref<HTMLElement | null>(null)
 const $headlessWrap = ref<HTMLElement | null>(null)
 
-// While currently not used in the application, we preserve the
-// option to load certain paths as "raw", i.e. without the application
-// or headless wrapper. This is currently only applied to SVG paths,
-// which are useful for debugging.
+/**
+ * Computed
+ */
+
+// While currently not really used in the application, we preserve the
+// option to load certain paths as "raw", i.e. without the main-wrap
+// or headless-wrap. This is currently only in use for /svg/icn-mol,
+// which is useful for previewing svg content during development.
+// - - -
 // Because the router takes a moment to load, we instead check the URL
 // directly to avoid flash-loading the application wrapper.
 const isRawPath = computed(() => {
@@ -128,6 +112,18 @@ const isRawPath = computed(() => {
 	const isRaw = basePaths.includes(pathItems[1])
 	return isRaw
 })
+
+/**
+ * Hooks
+ */
+
+onMounted(() => {
+	storeScreenWidth()
+})
+
+/**
+ * Logic
+ */
 
 // Store the name of your current workspace.
 if (fileSystemApi) {
@@ -142,12 +138,9 @@ if (fileSystemApi) {
 		})
 }
 
-onMounted(() => {
-	storeScreenWidth()
-})
-
-//
-//
+/**
+ * Functions
+ */
 
 // Update screen width in the store on resize.
 function storeScreenWidth() {
@@ -172,6 +165,7 @@ function storeScreenWidth() {
 /**
  * Headless
  */
+
 #headless-wrap {
 	background: white;
 	height: 100%;
@@ -184,8 +178,9 @@ function storeScreenWidth() {
 }
 
 /**
-  * Normal
-  */
+ * Normal
+ */
+
 #main-wrap {
 	display: flex;
 	flex-direction: column;
@@ -211,7 +206,6 @@ header {
 	min-height: 40px;
 	margin-bottom: 20px;
 	flex: 0 0 auto;
-	// background: yellow;
 }
 nav {
 	min-height: 40px;
@@ -221,11 +215,9 @@ nav {
 	top: 20px;
 	left: 40px;
 	display: inline-block;
-	// width: calc(100vw - 80px);
 }
 #body {
 	flex: 1;
-	// background: orange;
 }
 #main-wrap.file-browser #body {
 	overflow-x: hidden;

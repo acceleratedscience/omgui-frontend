@@ -27,46 +27,46 @@ const fileStore = useFileStore()
 const modalStore = useModalStore()
 
 // Definitions
-const props = defineProps<{
-	path: string
-}>()
-const pathArr = computed(() => {
-	return [mainStore.workspace].concat(props.path.split('/'))
-})
-
-//
-//
+const props = defineProps<{ path: string }>()
+const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/')))
 </script>
 
 <style lang="css" scoped>
 #file-type {
-	color: var(--ibm-black);
-	background: var(--black-10);
+	color: $black;
+	background: $black-10;
 	border: none;
 	padding: 0 4px;
 	height: 16px;
 	line-height: 16px;
 	border-radius: 2px;
 	text-transform: uppercase;
-	font-size: var(--font-size-small);
+	font-size: $font-size-small;
 	font-weight: 600;
 	margin-right: 7px;
 	cursor: pointer;
-}
-#file-type:hover {
-	color: #fff;
-	background: var(--ibm-black);
 }
 #breadcrumbs {
 	margin-bottom: 8px;
 }
 #breadcrumbs,
 #breadcrumbs a {
-	color: var(--black-30);
-	font-size: var(--font-size-small);
-	line-height: var(--line-height-small);
+	color: $black-30;
+	font-size: $font-size-small;
+	line-height: $line-height-small;
 }
-#breadcrumbs a:hover {
-	color: var(--black-60);
+
+/**
+ * Hover states
+ */
+
+@media (hover: hover) {
+	#file-type:hover {
+		color: #fff;
+		background: $black;
+	}
+	#breadcrumbs a:hover {
+		color: $black-60;
+	}
 }
 </style>

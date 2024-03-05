@@ -1,9 +1,3 @@
-<script setup lang="ts">
-// Stores
-import { useFileStore } from '@/stores/FileStore'
-const fileStore = useFileStore()
-</script>
-
 <template>
 	<!-- <router-link to="/~/sample.csv">sample</router-link> |
 	<router-link to="/~/foo.csv">foo</router-link> -->
@@ -11,6 +5,12 @@ const fileStore = useFileStore()
 	<pre v-if="fileStore.data" id="file-content">{{ fileStore.data }}</pre>
 	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
 </template>
+
+<script setup lang="ts">
+// Stores
+import { useFileStore } from '@/stores/FileStore'
+const fileStore = useFileStore()
+</script>
 
 <style lang="css" scoped>
 #module {

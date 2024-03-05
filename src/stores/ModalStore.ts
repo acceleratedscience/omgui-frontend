@@ -1,14 +1,12 @@
 /**
- * This store is responsible for
+ * This store is responsible for controling the modal.
  */
 
 import { defineStore } from 'pinia'
-// import router from '@/router'
 
 // Type declarations
 type Size = 'xs' | 'sm' | 'md' | 'lg'
 type State = {
-	// _active: boolean // trash
 	_visible: boolean
 	//
 	_modalName: string | null
@@ -28,7 +26,6 @@ type State = {
 
 export const useModalStore = defineStore('modalStore', {
 	state: (): State => ({
-		// _active: false, // trash
 		_visible: false,
 
 		// Name of the template holding the modal content.
@@ -109,10 +106,11 @@ export const useModalStore = defineStore('modalStore', {
 
 		// Display a custom modal.
 		display(templateName: string, data: object | null = null) {
-			// this._active = true // trash
 			this._modalName = templateName
 			this._data = data
-			// this.show()
+			// this.show() is triggered in the onMounted hook
+			// with a few ms delay, to ensure the intro animation
+			// is played. See _ModalTemplate.vue.
 		},
 
 		// Display a regular text modal.
@@ -130,7 +128,6 @@ export const useModalStore = defineStore('modalStore', {
 			} = {},
 			confirm: boolean = false, // Confirm/Cancel buttons instead of Ok button
 		) {
-			// this._active = true // trash
 			this._modalName = 'ModalMain'
 			this._content = content
 			this._size = options.size || null
@@ -150,7 +147,6 @@ export const useModalStore = defineStore('modalStore', {
 
 		clear() {
 			// console.log('modalStore clear')
-			// this._active = false // trash
 			this._visible = false
 			this._modalName = null
 			this._data = null

@@ -1,30 +1,45 @@
+<template>
+	<main id="module">This is the JSON viewer component {{ path }}</main>
+	<pre v-if="molData" id="file-content">{{ molData }}</pre>
+	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
+</template>
+
 <script setup lang="ts">
 // Vue
 import { computed } from 'vue'
 
 // Router
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 const route = useRoute()
-const router = useRouter()
 
 // Stores
 import { useFileStore } from '@/stores/FileStore'
 const fileStore = useFileStore()
 
-defineProps({
-	filePath: String,
+// Props
+const props = defineProps({
+	filePath: {
+		type: String,
+		required: false,
+	},
+	data: {
+		type: Object as () => Record<string, any> | undefined | null, // Silly but to shut up TS errors.
+		required: false,
+	},
 })
+
+/**
+ * Computed
+ */
 
 const path = computed(() => {
 	return route.query.path
 })
-</script>
 
-<template>
-	<main id="module">This is the JSON viewer component {{ path }}</main>
-	<pre v-if="fileStore.data" id="file-content">{{ fileStore.data }}</pre>
-	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
-</template>
+const molData = computed(() => {
+	return props.data || fileStore.data
+})
+</script>
 
 <style lang="css" scoped>
 #module {

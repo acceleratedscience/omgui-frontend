@@ -29,7 +29,8 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, computed, ComputedRef, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import type { ComputedRef } from 'vue'
 import { useRouter } from 'vue-router'
 
 // Stores
@@ -38,7 +39,7 @@ import { useFileStore } from '@/stores/FileStore'
 const modalStore = useModalStore()
 const fileStore = useFileStore()
 
-// Internal
+// Utils
 import { map_fileType2DisplayFT } from '@/utils/maps'
 import { capitalize } from '@/utils/helpers'
 
@@ -73,7 +74,7 @@ const submitDisabled: ComputedRef<boolean> = computed(() => {
 })
 
 /*
- * Logic
+ * Hooks
  */
 
 onMounted(() => emit('mounted'))

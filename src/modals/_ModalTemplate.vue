@@ -18,14 +18,14 @@ import { useModalStore } from '@/stores/ModalStore'
 const modalStore = useModalStore()
 
 // Definitions
-const emit = defineEmits(['mounted'])
+const emit = defineEmits(['mounted']) // <--
 
 /*
  * Computed
  */
 
 /*
- * Logic
+ * Hooks
  */
 
 onMounted(() => emit('mounted'))
@@ -36,7 +36,7 @@ onMounted(() => emit('mounted'))
 
 async function onSubmit() {
 	alert('submit')
-	modalStore.hide()
+	modalStore.hide() // <--
 }
 </script>
 

@@ -29,6 +29,7 @@ const emit = defineEmits(['mounted'])
 /**
  * Computed
  */
+
 const label = computed(() => modalStore.label)
 const title = computed(() => modalStore.title)
 const content = computed(() => modalStore.content)
@@ -40,18 +41,10 @@ const onCancel = computed(() => modalStore.onCancel)
 const onOther = computed(() => modalStore.onOther)
 
 /**
- * Logic
+ * Hooks
  */
 
 onMounted(() => emit('mounted'))
-
-/**
- * Functions
- */
-
-function onBtnClick() {
-	alert(2)
-}
 </script>
 
 <style lang="css" scoped></style>
