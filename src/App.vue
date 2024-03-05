@@ -90,6 +90,8 @@ const modalStore = useModalStore()
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
+import webSocketClient from '@/api/WebSocketClient'
+webSocketClient()
 
 // Components
 import TheModal from '@/components/TheModal.vue'
