@@ -82,8 +82,8 @@ const fileStore = useFileStore()
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
-import webSocketClient from '@/api/WebSocketClient'
-webSocketClient()
+// import webSocketClient from '@/api/WebSocketClient'// Experimental
+// webSocketClient()
 
 // Components
 import TheModal from '@/components/TheModal.vue'

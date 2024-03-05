@@ -1,7 +1,9 @@
 /**
- * Links
+ * This file contains consacious overrides to the
+ * Carbon design system. These are design choices.
  */
 
+// Links
 a {
 	text-decoration: none;
 }
@@ -17,10 +19,7 @@ a:not(.dumb).router-link-exact-active:hover {
 	pointer-events: none;
 }
 
-/**
- * Text styles
- */
-
+// Header styles
 h1,
 h2,
 h3,
@@ -49,10 +48,7 @@ h5 {
 	font-weight: 400;
 }
 
-/**
- * Text styles
- */
-
+// Text styles
 b {
 	font-weight: 600;
 }
@@ -66,10 +62,7 @@ pre {
 	line-height: $line-height;
 }
 
-/**
- * Hover states
- */
-
+// Hover states
 @media (hover: hover) {
 	/* Links in carbon css don't have hover state :( */
 	a:hover {

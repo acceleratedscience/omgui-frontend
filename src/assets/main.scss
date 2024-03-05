@@ -1,49 +1,21 @@
 /**
- * Global SCSS variables.
- */
-
-:root {
-	// --font-fam: 'IBM Plex Sans', sans-serif;
-	// --font-size: 14px;
-	// --line-height: 18px;
-	// --font-size-small: 12px;
-	// --line-height-small: 16px;
-
-	// --black: #393939;
-	// --black-10: rgba(0, 0, 0, 0.1);
-	// --black-20: rgba(0, 0, 0, 0.2);
-	// --black-30: rgba(0, 0, 0, 0.3);
-	// --black-60: rgba(0, 0, 0, 0.6);
-
-	// --soft-bg: #fafafa;
-
-	--highlight: #fff7cc;
-	--highlight-border: #e5deb8; /* Equivalent of 10% black overlay */
-
-	--light-gray: #f4f4f4;
-
-	--error: #d00;
-}
-
-/**
  * General
  */
 
 #app {
 	height: 100%;
 	background: $soft-bg;
-	/* min-width: min-content; */
 }
 .error-msg {
-	color: var(--error);
+	color: $error;
 }
 
-/* This is needed for the success message to be centered. */
-html,
-body {
-	height: 100%;
-	box-sizing: border-box;
-}
+// For the success message to be centered.
+// html,
+// body {
+// 	height: 100%;
+// 	box-sizing: border-box;
+// }
 body {
 	margin: 0;
 	font-family: $font-fam;

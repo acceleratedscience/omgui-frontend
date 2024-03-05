@@ -1,5 +1,38 @@
-// THIS FILE IS IMPORTED INTO EVERY COMPONENT - DO NOT BLOAT
-// https://austingil.com/global-sass-vue-project/
+/**
+ * THIS FILE IS IMPORTED INTO EVERY COMPONENT - DO NOT BLOAT
+ * https://austingil.com/global-sass-vue-project/
+ */
+
+@use 'sass:color';
+
+// Fonts
+$font-fam: 'IBM Plex Sans', sans-serif;
+$font-size: 14px;
+$font-size-small: 12px;
+$line-height: 18px;
+$line-height-small: 16px;
+
+// Colors - blacks & grays
+$black: #393939;
+$black-60: rgba(0, 0, 0, 0.6);
+$black-30: rgba(0, 0, 0, 0.3);
+$black-20: rgba(0, 0, 0, 0.2); // Not yet used
+$black-10: rgba(0, 0, 0, 0.1);
+$soft-bg: #fafafa;
+
+// Colors
+$blue: #0f62fe; // IBM Blue
+$blue-hover: #0043ce;
+$blue-30: color.mix($blue, white, 30%);
+$blue-20: color.mix($blue, white, 20%);
+$blue-15: color.mix($blue, white, 15%);
+$blue-05: color.mix($blue, white, 5%);
+$success: #198038;
+$warning: #f1c21b;
+$caution: #ff832b;
+$error: #da1e28;
+$highlight: #fff7cc; // Unused, for data tables
+$highlight-border: #e5deb8; // Equivalent of 10% black overlay
 
 // Responsive breakpoints.
 // Should be used as max values.
