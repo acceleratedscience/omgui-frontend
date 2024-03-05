@@ -3,11 +3,6 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-const additionalData = `
-@use 'sass:color';
-@import '@/assets/_shared.scss';
-`
-
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [vue()],
@@ -19,7 +14,7 @@ export default defineConfig({
 	css: {
 		preprocessorOptions: {
 			scss: {
-				additionalData,
+				additionalData: `@import "@/assets/vars.scss"; @import "@/assets/_shared.scss";`,
 			},
 		},
 	},
