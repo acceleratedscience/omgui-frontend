@@ -40,7 +40,7 @@ if (modalStore.modalName) {
 }
 
 /**
- * Functions
+ * Methods
  */
 
 // Load the correct modal component.

@@ -187,8 +187,8 @@
 // Libraries
 // import Miew from 'miew'
 // @ts-ignore
-import Miew from '@/TEMP/miew/_dist/miew.module' // https://github.com/epam/miew/issues/524
-import '@/TEMP/miew/_dist/miew.min.css'
+import Miew from '@/TEMP/miew/dist/miew.module' // https://github.com/epam/miew/issues/524
+import '@/TEMP/miew/dist/miew.min.css'
 // @ts-ignore
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
@@ -357,7 +357,7 @@ watch(
 )
 
 /**
- * Functions
+ * Methods
  */
 
 function clearMolData() {

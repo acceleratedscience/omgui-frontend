@@ -36,7 +36,7 @@ const props = defineProps({
 const toggleState = ref(false)
 
 /**
- * Functions
+ * Methods
  */
 
 function toggle() {

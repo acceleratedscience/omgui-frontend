@@ -17,6 +17,7 @@
 	},
 	"dependencies": {
 		"@carbon/vue": "^3.0.13",
+		"@rdkit/rdkit": "^2023.9.2-1.0.0",
 		"3dmol": "^2.0.6",
 		"axios": "^1.6.7",
 		"miew": "^0.10.1",

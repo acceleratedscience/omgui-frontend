@@ -139,7 +139,7 @@ if (fileSystemApi) {
 }
 
 /**
- * Functions
+ * Methods
  */
 
 // Update screen width in the store on resize.

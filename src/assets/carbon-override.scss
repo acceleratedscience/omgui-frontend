@@ -66,6 +66,6 @@ pre {
 @media (hover: hover) {
 	/* Links in carbon css don't have hover state :( */
 	a:hover {
-		color: var(--blue-hover);
+		color: $blue-hover;
 	}
 }

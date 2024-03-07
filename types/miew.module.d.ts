@@ -1,4 +1,4 @@
-declare module '@/TEMP/miew/_dist/miew.module' {
-	const Miew: any
-	export default Miew
+declare module '@/TEMP/miew/dist/*' {
+	const value: any
+	export default value
 }

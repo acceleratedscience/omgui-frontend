@@ -37,7 +37,7 @@ onMounted(() => {
 })
 
 /**
- * Functions
+ * Methods
  */
 
 async function onSubmit() {

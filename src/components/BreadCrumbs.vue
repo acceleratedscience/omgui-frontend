@@ -31,7 +31,7 @@ const props = defineProps<{ path: string }>()
 const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/')))
 </script>
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
 #file-type {
 	color: $black;
 	background: $black-10;

@@ -35,6 +35,7 @@ type BaseApiType = {
 }
 
 class BaseApi implements BaseApiType {
+	static isInitialized = false
 	apiClient: any
 	altPort: number
 
@@ -54,7 +55,12 @@ class BaseApi implements BaseApiType {
 
 		this.setupInterceptors()
 		this.altPort = DEFAULT_PORT
-		this.testApiPort()
+
+		// API health check
+		if (!BaseApi.isInitialized) {
+			this.testApiPort()
+			BaseApi.isInitialized = true
+		}
 	}
 
 	/**

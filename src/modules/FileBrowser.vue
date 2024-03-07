@@ -236,7 +236,7 @@ watch(
 )
 
 /**
- * Functions
+ * Methods
  */
 
 // Parse the route and load the appropriate files.
@@ -584,7 +584,7 @@ async function fetchWorkspaceFiles(path = '') {
 #col-wrap .dir.sel,
 #col-wrap .file.sel {
 	color: #fff;
-	background: var(--blue);
+	background: $blue;
 }
 #col-wrap .dir.sel .svg-wrap {
 	color: #fff;

@@ -18,20 +18,25 @@ $black-60: rgba(0, 0, 0, 0.6);
 $black-30: rgba(0, 0, 0, 0.3);
 $black-20: rgba(0, 0, 0, 0.2); // Not yet used
 $black-10: rgba(0, 0, 0, 0.1);
-$soft-bg: #fafafa;
+$black-05: rgba(0, 0, 0, 0.05);
+$white-50: rgba(255, 255, 255, 0.5);
+$white-30: rgba(255, 255, 255, 0.3); // Not yet used
+$soft-bg: #f4f4f4;
 
 // Colors
 $blue: #0f62fe; // IBM Blue
 $blue-hover: #0043ce;
 $blue-30: color.mix($blue, white, 30%);
 $blue-20: color.mix($blue, white, 20%);
-$blue-15: color.mix($blue, white, 15%);
+$blue-10: color.mix($blue, white, 10%);
 $blue-05: color.mix($blue, white, 5%);
 $success: #198038;
 $warning: #f1c21b;
 $caution: #ff832b;
 $error: #da1e28;
 $highlight: #fff7cc; // Unused, for data tables
+$highlight-soft: color.mix($highlight, white, 40%);
+$highlight-soft-sel: color.mix($highlight-soft, $blue-10, 50%);
 $highlight-border: #e5deb8; // Equivalent of 10% black overlay
 
 // Responsive breakpoints.

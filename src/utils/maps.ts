@@ -20,6 +20,7 @@ export const map_Ext2fileType: Map = {
 	csv: 'data',
 	json: 'json',
 	'mol.json': 'mol',
+	'molset.json': 'molset',
 	sdf: 'sdf', // should become part of mol
 }
 
@@ -31,6 +32,7 @@ const _map_FileType: MultiMap = {
 	data: ['data', 'DataViewer'],
 	json: ['json', 'JsonViewer'],
 	mol: ['molecule', 'MolViewer'],
+	molset: ['molecule set', 'MolGrid'],
 	sdf: ['sdf', 'SdfViewer'], // should become part of mol
 }
 

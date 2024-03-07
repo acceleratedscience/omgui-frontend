@@ -74,7 +74,7 @@
 		<div class="swatch blue-hover">$blue-hover</div>
 		<div class="swatch blue-30">$blue-30</div>
 		<div class="swatch blue-20">$blue-20</div>
-		<div class="swatch blue-15">$blue-15</div>
+		<div class="swatch blue-10">$blue-10</div>
 		<div class="swatch blue-05">$blue-05</div>
 	</div>
 	<div class="swatch-wrap">
@@ -94,7 +94,7 @@ const modalStore = useModalStore()
 import SvgServe from '@/components/SvgServe.vue'
 
 /**
- * Functions
+ * Methods
  */
 
 function onSubmit() {
@@ -164,8 +164,8 @@ function onCancel() {
 .swatch.blue-20 {
 	background-color: $blue-20;
 }
-.swatch.blue-15 {
-	background-color: $blue-15;
+.swatch.blue-10 {
+	background-color: $blue-10;
 }
 .swatch.blue-05 {
 	background-color: $blue-05;

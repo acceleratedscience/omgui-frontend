@@ -28,7 +28,7 @@ const command = ref<string>('')
 const output = ref<string>('')
 
 /**
- * Functions
+ * Methods
  */
 
 async function submitCommand() {

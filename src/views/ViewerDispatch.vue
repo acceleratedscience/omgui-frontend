@@ -79,7 +79,7 @@ onBeforeUnmount(fileStore.clear)
 parseRoute()
 
 /**
- * Functions
+ * Methods
  */
 
 // Display a file or directory with the appropriate module.
