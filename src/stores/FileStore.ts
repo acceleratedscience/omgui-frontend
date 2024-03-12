@@ -99,6 +99,7 @@ export const useFileStore = defineStore('fileStore', {
 
 		// The filename of the module we'll use to view the file.
 		moduleName(): string {
+			console.log(113, this.fileType, map_fileType2Module[this.fileType])
 			return map_fileType2Module[this.fileType]
 		},
 

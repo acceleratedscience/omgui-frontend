@@ -1,29 +1,44 @@
 <template>
-	<!-- <div v-html="svgComponent?.template"></div> -->
-	<component v-if="svgComponent" :is="svgComponent" :style="{ '--svg-dims': dimensions }" />
-	<div v-else></div>
+	<component
+		v-if="svgComponent"
+		:is="svgComponent"
+		class="svg"
+		:style="{ '--svg-dims': dimensions }"
+	/>
+	<div v-else class="svg-placeholder" :style="{ '--svg-dims': dimensions }"></div>
 </template>
 
 <script lang="ts" setup>
 import axios from 'axios'
 import { ref, shallowRef, computed, onMounted, watchEffect } from 'vue'
+import type { PropType } from 'vue'
 
+// Type declarations
+type Props = {
+	filename: string
+	size: 'small' | 'large'
+}
+
+// Props
 const props = defineProps({
 	filename: {
-		type: String,
+		type: String as PropType<Props['filename']>,
 		required: true,
 	},
 	size: {
-		type: String,
-		validator: function (value: string) {
-			return ['small', 'large'].includes(value)
-		},
+		type: String as PropType<Props['size']>,
 		default: 'small',
+		validator: (value: Props['size']) => ['small', 'large'].includes(value),
 	},
 })
 
+// Definitions
 const svgContent = ref<string>('')
 const svgComponent = shallowRef<{ template?: string } | null>(null)
+
+/**
+ * Computed
+ */
 
 const dimensions = computed(() => {
 	if (props.size === 'large') {
@@ -33,9 +48,12 @@ const dimensions = computed(() => {
 	}
 })
 
+/**
+ * Hooks
+ */
+
 watchEffect(() => {
 	if (svgContent.value) {
-		// console.log(11, props.filename, svgContent.value)
 		svgComponent.value = {
 			template: svgContent.value,
 		}
@@ -70,7 +88,8 @@ async function loadSvg(filenameOverride?: string) {
 </script>
 
 <style scoped lang="scss">
-svg {
+.svg,
+.svg-placeholder {
 	width: var(--svg-dims);
 	height: var(--svg-dims);
 }

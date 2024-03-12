@@ -71,7 +71,7 @@ const molGridStore = useMolGridStore()
 import BasePagination from '@/components/BasePagination.vue'
 import MolSearch from '@/components/MolSearch.vue'
 
-// Internal
+// Utils
 import useStickyObserver from '@/utils/sticky-observer'
 
 // Definitions

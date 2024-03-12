@@ -1,10 +1,6 @@
 <template>
-	<div id="breadcrumbs-wrap" :class="{ truncate }">
-		<div
-			id="breadcrumbs"
-			ref="$breadcrumbs"
-			:class="{ truncate, 'needs-truncated': isTruncated }"
-		>
+	<div id="breadcrumbs">
+		<div id="truncation" ref="$truncation" :class="{ truncate, 'is-truncated': isTruncated }">
 			<button id="file-type" @click="modalStore.display('ModalFileType')">
 				{{ fileStore.fileType }}
 			</button>
@@ -17,7 +13,7 @@
 				<span v-if="i < pathArr.length - 1">&nbsp;&nbsp;&rsaquo;&nbsp;&nbsp;</span>
 			</template>
 		</div>
-		<a href="#" class="toggle" @click.prevent="toggleTruncate"></a>
+		<a href="#" class="show" @click.prevent="toggleTruncate">show</a>
 	</div>
 </template>
 
@@ -46,7 +42,7 @@ const props = defineProps({
 })
 
 // Definitions
-const $breadcrumbs = ref<HTMLElement | null>(null)
+const $truncation = ref<HTMLElement | null>(null)
 const truncate = ref<boolean>(true) // Lets us toggle truncation
 const isTruncated = ref<boolean>(false) // Lets us check if the breadcrumbs are truncated
 const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/')))
@@ -56,7 +52,7 @@ const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/'
  */
 
 onMounted(() => {
-	if ($breadcrumbs.value && $breadcrumbs.value.offsetWidth < $breadcrumbs.value.scrollWidth) {
+	if ($truncation.value && $truncation.value.offsetWidth < $truncation.value.scrollWidth) {
 		isTruncated.value = true
 	}
 })
@@ -71,14 +67,10 @@ function toggleTruncate() {
 </script>
 
 <style lang="scss" scoped>
-#breadcrumbs-wrap {
-	display: flex;
-	gap: 2px;
+#breadcrumbs {
 	font-size: $font-size-small;
 	line-height: $line-height-small;
 	color: $black-30;
-}
-#breadcrumbs {
 	margin-bottom: 8px;
 }
 #breadcrumbs a {
@@ -86,27 +78,19 @@ function toggleTruncate() {
 }
 
 // Truncation
-#breadcrumbs.truncate {
+#truncation {
+	display: flex;
+	gap: 2px;
+	background: pink;
+}
+#truncation.truncate {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
 }
-#breadcrumbs-wrap:not(.truncate),
-#breadcrumbs:not(.truncate) {
-	display: inline;
-}
 
 // Show-more link for truncated breadcrumbs
-#breadcrumbs + .toggle::after {
-	content: 'hide';
-}
-#breadcrumbs.truncate + .toggle::after {
-	content: 'show';
-}
-#breadcrumbs:not(.truncate)::after {
-	content: '\a0\a0';
-}
-#breadcrumbs:not(.needs-truncated) + .toggle {
+#truncation:not(.is-truncated) + .show {
 	display: none;
 }
 

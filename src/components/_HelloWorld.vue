@@ -4,9 +4,18 @@
   use vitest under __tests__
  -->
 <script setup lang="ts">
-defineProps<{
+import type { PropType } from 'vue'
+
+type Props = {
 	msg: string
-}>()
+}
+
+defineProps({
+	msg: {
+		type: String as PropType<Props['msg']>,
+		default: 'No message provided',
+	},
+})
 </script>
 
 <template>

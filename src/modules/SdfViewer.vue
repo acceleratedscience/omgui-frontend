@@ -7,6 +7,7 @@
 <script setup lang="ts">
 // Vue
 import { computed } from 'vue'
+import type { PropType } from 'vue'
 
 // Router
 import { useRoute, useRouter } from 'vue-router'
@@ -17,9 +18,14 @@ const router = useRouter()
 import { useFileStore } from '@/stores/FileStore'
 const fileStore = useFileStore()
 
+// Type declarations
+type Props = {
+	filePath: string
+}
+
 // Props
-defineProps({
-	filePath: String,
+const props = defineProps({
+	filePath: String as PropType<Props['filePath']>,
 })
 
 /**

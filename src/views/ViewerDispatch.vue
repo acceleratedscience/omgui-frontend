@@ -12,7 +12,12 @@
 	<div v-if="loadError" class="error-msg">
 		The requested module '{{ fileStore.moduleName }}' was not found.
 	</div>
-	<template v-else-if="dynamicModule"><component :is="dynamicModule" /></template>
+	<component v-else-if="dynamicModule" :is="dynamicModule" />
+	<template v-else>
+		<!-- To do: show breadcrumbs when file is not found, requires some refactoring -->
+		<!-- <BreadCrumbs v-if="!showBreadCrumbs" :path="fileStore.path" /> -->
+		File not found
+	</template>
 </template>
 
 <script setup lang="ts">

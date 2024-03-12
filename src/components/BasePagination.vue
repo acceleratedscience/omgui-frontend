@@ -17,26 +17,36 @@
 </template>
 
 <script setup lang="ts">
+// Vue
+import type { PropType } from 'vue'
+
 // Components
 import SvgServe from '@/components/SvgServe.vue'
 
 // Emits
 const emit = defineEmits(['update:modelValue'])
 
+// Type declarations
+type Props = {
+	total: number
+	modelValue: number
+	max: number
+}
+
 // Props
 const props = defineProps({
 	total: {
-		type: Number,
+		type: Number as PropType<Props['total']>,
 		required: true,
 	},
 	modelValue: {
-		type: Number,
+		type: Number as PropType<Props['modelValue']>,
 		default: 1,
 	},
 
 	// Maximum number of pages to show.
 	max: {
-		type: Number,
+		type: Number as PropType<Props['max']>,
 		default: 10,
 	},
 })

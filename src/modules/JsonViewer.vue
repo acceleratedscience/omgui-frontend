@@ -7,6 +7,7 @@
 <script setup lang="ts">
 // Vue
 import { computed } from 'vue'
+import type { PropType } from 'vue'
 
 // Router
 import { useRoute } from 'vue-router'
@@ -16,14 +17,20 @@ const route = useRoute()
 import { useFileStore } from '@/stores/FileStore'
 const fileStore = useFileStore()
 
+// Type declarations
+type Props = {
+	filePath: string
+	data: Record<string, any>
+}
+
 // Props
 const props = defineProps({
 	filePath: {
-		type: String,
+		type: String as PropType<Props['filePath']>,
 		required: false,
 	},
 	data: {
-		type: Object as () => Record<string, any> | undefined | null, // Silly but to shut up TS errors.
+		type: Object as PropType<Props['data']>,
 		required: false,
 	},
 })

@@ -30,67 +30,85 @@
 </template>
 
 <script setup lang="ts">
+// Vue
 import { nextTick, onMounted, onUpdated, reactive, ref, watch, computed } from 'vue'
+import type { PropType } from 'vue'
+
+// Utils
 import type { JSMol } from '@/utils/rdkit/tsTypes'
 import initRDKit from '@/utils/rdkit/initRDKit'
 
-/**
- * Definitions
- */
+// Type declarations
+type Props = {
+	id: string
+	className: string
+	svgMode: boolean
+	width: number
+	height: number
+	structure: string
+	subStructure: string
+	extraDetails: Record<string, unknown>
+	drawingDelay: number | undefined
+}
 
+// Props
 const props = defineProps({
 	// Generic props
 	id: {
-		type: String,
+		type: String as PropType<Props['id']>,
 		required: true,
 	},
 	className: {
-		type: String,
+		type: String as PropType<Props['className']>,
 		default: '',
 	},
 	svgMode: {
-		type: Boolean,
+		type: Boolean as PropType<Props['svgMode']>,
 		default: false,
 	},
 	width: {
-		type: Number,
+		type: Number as PropType<Props['width']>,
 		default: 250,
 	},
 	height: {
-		type: Number,
+		type: Number as PropType<Props['height']>,
 		default: 200,
 	},
 
 	// RDKit-specific props
 	structure: {
-		type: String,
+		type: String as PropType<Props['structure']>,
 		required: true,
 	},
 	subStructure: {
-		type: String,
+		type: String as PropType<Props['subStructure']>,
 		default: '',
 	},
 	extraDetails: {
-		type: Object,
+		type: Object as PropType<Props['extraDetails']>,
 		default: () => {},
 	},
 	drawingDelay: {
-		type: Number,
+		type: Number as PropType<Props['drawingDelay']>,
 		default: undefined,
 	},
 })
 
-// RDKit state reporting values
+// Definitions
+// - RDKit state reporting values
 let rdkitLoaded = ref(false)
 let rdkitError = ref(false)
-
-// Molecule state values
+// - Molecule state values
 let wasCalled = ref(false)
 let molDetails = reactive({
 	width: props.width,
 	height: props.height,
 	bondLineWidth: 2,
 	addStereoAnnotation: true,
+	// With explicitMethyl activated, molecule will be rendered with a CH3 (or Me)
+	// at the end of the empty lines. Without it, they are assumed, creating less
+	// noisy graphics. The field is divided as what is the best visualization.
+	// https://www.thoughtco.com/definition-of-methyl-605887
 	// explicitMethyl: true,
 	...props.extraDetails,
 })

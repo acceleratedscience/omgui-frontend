@@ -12,23 +12,31 @@
 <script setup lang="ts">
 // Vue
 import { ref } from 'vue'
+import type { PropType } from 'vue'
 
 // Components
 import SvgServe from '@/components/SvgServe.vue'
 
+// Type declarations
+type Props = {
+	icon: string
+	colorOff: string
+	colorOn: string
+}
+
 // Props
 const props = defineProps({
 	icon: {
-		type: String,
+		type: String as PropType<Props['icon']>,
 		required: true,
 	},
 	colorOff: {
-		type: String,
-		default: 'rgba(0, 0, 0, 0.1)', // --black-10
+		type: String as PropType<Props['colorOff']>,
+		default: 'rgba(0, 0, 0, 0.1)', // $black-10
 	},
 	colorOn: {
-		type: String,
-		default: '#393939', // --black, same as text color
+		type: String as PropType<Props['colorOn']>,
+		default: '#393939', // $black, same as text color
 	},
 })
 
@@ -44,7 +52,7 @@ function toggle() {
 }
 </script>
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
 #icn-btn {
 	width: 40px;
 	height: 40px;

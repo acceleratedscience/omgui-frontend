@@ -194,7 +194,7 @@ import * as $3Dmol from '3dmol/build/3Dmol.js'
 
 // Vue
 import { ref, onMounted, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue'
-import type { ComputedRef } from 'vue'
+import type { ComputedRef, PropType } from 'vue'
 
 // Router
 import { useRouter, useRoute } from 'vue-router'
@@ -221,8 +221,19 @@ import SvgServe from '@/components/SvgServe.vue'
 // Util
 import { capitalize } from '@/utils/helpers'
 
+// Type declarations
+type Props = {
+	identifier?: string
+}
+
+// Props
+const props = defineProps({
+	identifier: {
+		type: String as PropType<Props['identifier']>,
+	},
+})
+
 // Definitions
-const props = defineProps<{ identifier?: string }>()
 const $container3d = ref<Element | null>(null)
 const loading = ref<Boolean>(false)
 const loadingError = ref<String | false>(false)

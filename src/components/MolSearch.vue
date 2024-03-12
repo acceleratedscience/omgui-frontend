@@ -46,7 +46,7 @@ import { fetch, moleculesApi } from '@/api/ApiService'
 // @ts-ignore
 import CloseIcon from '@carbon/icons-vue/es/close/16'
 
-// Internal
+// Utils
 import { debounce, throttle } from '@/utils/helpers'
 
 /**
