@@ -1,11 +1,13 @@
+/**
+ * This file holds a varietry pack of general helper functions.
+ */
+
 // const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] // prettier-ignore
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] // prettier-ignore
 
 // Return timestamp as "10 days ago"
-export function timeAgo(dateParam: Date | string | number): string {
-	if (!dateParam) {
-		return ''
-	}
+export function timeAgo(dateParam: Date | string | number | null): string {
+	if (!dateParam) return ''
 
 	const date = typeof dateParam === 'object' ? dateParam : new Date(dateParam)
 	const DAY_IN_MS = 86400000 // 24 * 60 * 60 * 1000
@@ -70,7 +72,8 @@ export function _prettyDate(
 }
 
 // Return a human-readable file size.
-export function prettySize(bytes: number) {
+export function prettySize(bytes: number | null) {
+	if (!bytes) return ''
 	if (bytes < 500) {
 		// 0 - 99 Bytes
 		return bytes + ' Bytes'
@@ -101,10 +104,11 @@ export function capitalize(str: string) {
 }
 
 // Debounce
+// - - -
 // Limit rate of rapid-fire event, executing only when time limit expires.
 // Usefull for window resize events, etc.
 // Source: https://blog.webdevsimplified.com/2022-03/debounce-vs-throttle/
-//
+// - - -
 // import { debounce } from '@/utils/helpers'
 // const debouncer = debounce(this.resizeHandler, 500)
 // window.addEventListener('resize', debouncer)
@@ -119,10 +123,11 @@ export function debounce(func: Function, delay: number = 300) {
 }
 
 // Throttle
+// - - -
 // Limit rate of rapid-fire event, executing only once per time limit
 // Useful for scroll handlers, etc.
 // Source: https://blog.webdevsimplified.com/2022-03/debounce-vs-throttle/
-//
+// - - -
 // import { throttle } from '@/utils/helpers'
 // const throttler = throttle(this.scrollHandler, 500)
 // window.addEventListener('scroll', throttler)

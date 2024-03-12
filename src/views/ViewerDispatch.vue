@@ -89,7 +89,7 @@ async function parseRoute() {
 	const file = await fetchFile(filePath)
 	if (!file) return
 	fileStore.loadItem(file)
-	if (file.isDir) {
+	if (file._meta.fileType == 'dir') {
 		// Directory
 		if (prevRouteType != 'dir') loadModule('FileBrowser')
 		prevRouteType = 'dir'

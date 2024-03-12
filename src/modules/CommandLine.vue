@@ -20,7 +20,7 @@
 // Vue
 import { ref } from 'vue'
 
-// APIs
+// API
 import { mainApi } from '@/api/ApiService'
 
 // Definitions

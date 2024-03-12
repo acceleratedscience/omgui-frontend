@@ -15,4 +15,9 @@ export default class MoleculesApi extends BaseApi {
 	getMolVizData(inchi: string) {
 		return this.apiClient.post(`/get-mol-viz-data`, { inchi })
 	}
+
+	// Filter a molecule set based on query.
+	filterMolset(path: string = '', query: string = '') {
+		return this.apiClient.post('/filter-molset', { path, query })
+	}
 }

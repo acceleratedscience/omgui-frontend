@@ -9,26 +9,49 @@ import { defineStore } from 'pinia'
 import router from '@/router'
 
 // Utils
-import { map_Ext2fileType, map_fileType2Module } from '@/utils/maps'
+import { map_fileType2Module } from '@/utils/maps'
 
 // Type declarations
-type ErrCode = null | 'not_found' | 'no_permission' | 'is_dir' | 'decode' | 'io' | 'unknown' // From open_file() in API, see helpers -> general.py
+import type { FileErrCode, File } from '@/types'
 type State = {
-	_data: string
+	_meta: {
+		size: number | null
+		timeCreated: number | null
+		timeEdited: number | null
+		fileType: string
+		ext: string
+		ext2: string
+		errCode: FileErrCode
+	}
+	_filename: string
 	_path: string
-	_pathFull: string
-	_isDir: boolean
-	_errCode: ErrCode
+	_pathAbsolute: string
+	_data: string
+}
+
+// Initial state
+function getInitialState(): State {
+	return {
+		_meta: {
+			size: null, // File size in bytes
+			timeCreated: null, // Timestamp in ms
+			timeEdited: null, // Timestamp in ms
+			fileType: '', // File type based on the extension, 'dir' for directories
+			ext: '',
+			ext2: '', // Secondary extension (e.g. foobar.mol.json --> mol)
+			errCode: null, // Error code from the API
+		},
+		_filename: '',
+		_path: '', // File path relative to the workspace
+		_pathAbsolute: '', // Absolute file path
+		_data: '', // Content of file
+	}
 }
 
 export const useFileStore = defineStore('fileStore', {
-	state: (): State => ({
-		_data: '', // Content of file
-		_path: '', // Path of file relative to the workspace
-		_pathFull: '', // Path of file relative to the system
-		_isDir: false, // Whether the path is a directory
-		_errCode: null, // Error code from the API
-	}),
+	// The state matched the API output as defined in fuke_system.py > _compile_file_data()
+	state: () => getInitialState(),
+
 	getters: {
 		data(): string {
 			return this._data
@@ -36,49 +59,29 @@ export const useFileStore = defineStore('fileStore', {
 		path(): string {
 			return this._path
 		},
-		pathFull(): string {
-			return this._pathFull
+		pathAbsolute(): string {
+			return this._pathAbsolute
 		},
 		isDir(): boolean {
-			return this._isDir
+			return this._meta.fileType == 'dir'
 		},
 		errCode(): string | null {
-			return this._errCode
+			return this._meta.errCode
 		},
 
 		// The file's extension.
-		ext(): string | null {
-			const hasExt = this._path.indexOf('.') >= 0
-			if (hasExt) {
-				return this._path.split('.').pop() || null
-			} else {
-				return null
-			}
+		ext(): string {
+			return this._meta.ext
 		},
 
 		// The file's secondary extension (e.g. .mol.json).
-		ext2(): string | null {
-			const hasExt2 = this._path.split('.').length >= 3
-			if (hasExt2) {
-				const splitPath = this._path.split('.')
-				splitPath.pop() // Remove the primary extension
-				return splitPath.pop() || null
-			} else {
-				return null
-			}
+		ext2(): string {
+			return this._meta.ext2
 		},
 
 		// The file type based on the extension.
 		defaultFileType(): string {
-			if (this.ext) {
-				if (this.ext2) {
-					return map_Ext2fileType[`${this.ext2}.${this.ext}`] || map_Ext2fileType._default
-				} else {
-					return map_Ext2fileType[this.ext] || map_Ext2fileType._default
-				}
-			} else {
-				return map_Ext2fileType._default
-			}
+			return this._meta.fileType
 		},
 
 		// Lets us detect when a file is being
@@ -90,7 +93,7 @@ export const useFileStore = defineStore('fileStore', {
 		// The final file type, which may be overridden
 		fileType(): string {
 			return this.fileTypeOverride
-				? router.currentRoute.value.query?.use?.toString() || map_Ext2fileType._default
+				? router.currentRoute.value.query?.use?.toString() || this.defaultFileType
 				: this.defaultFileType
 		},
 
@@ -99,41 +102,34 @@ export const useFileStore = defineStore('fileStore', {
 			return map_fileType2Module[this.fileType]
 		},
 
-		// Indicates whether the default module is being
-		// overridden by using the ?use= query parameter.
-		forcedModule(): boolean {
-			return !!router.currentRoute.value.query?.use
-		},
-
 		// Indicates whether we recognize the file's extension.
 		// When we don't, we default to the TextViewer module
 		// and display a warning to the user.
 		invalidExt(): boolean {
-			if (this._isDir || !this._path) return false
-			return this.ext ? !(this.ext in map_Ext2fileType) : true
+			if (this.isDir || !this.path) return false
+			return this.defaultFileType == 'unk' && !this.fileTypeOverride
 		},
 	},
 	actions: {
-		loadItem(file: {
-			data: string
-			path: string
-			pathFull: string
-			isDir: boolean
-			errCode: ErrCode
-		}) {
+		// Load file or directory.
+		loadItem(file: File) {
 			if (!file) return
-			this._data = file.data
-			this._path = file.path
-			this._pathFull = file.pathFull
-			this._isDir = file.isDir
-			this._errCode = file.errCode
+			this._meta.size = file._meta.size || null
+			this._meta.timeCreated = file._meta.timeCreated || null
+			this._meta.timeEdited = file._meta.timeEdited || null
+			this._meta.fileType = file._meta.fileType || ''
+			this._meta.ext = file._meta.ext || ''
+			this._meta.ext2 = file._meta.ext2 || ''
+			this._meta.errCode = file._meta.errCode || null
+			this._filename = file.filename || ''
+			this._path = file.path || ''
+			this._pathAbsolute = file.pathAbsolute || ''
+			this._data = file.data || ''
 		},
+
+		// Clear store.
 		clear() {
-			// console.log('* clearing file store *')
-			this._data = ''
-			this._path = ''
-			this._errCode = null
-			this._isDir = false
+			Object.assign(this, getInitialState())
 		},
 	},
 })

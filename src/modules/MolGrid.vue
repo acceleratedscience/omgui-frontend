@@ -1,20 +1,14 @@
 <template>
 	<MolProps />
-	<div id="actions">
-		<!-- <MolPagination :total="10" :page="1" /> -->
-		<!-- <cv-button size="md">Load</cv-button> -->
-		<!-- <cv-text-input hideLabel="true"></cv-text-input> -->
-		<cv-dropdown :items="sortItems" placeholder="Sort"></cv-dropdown>
-		<cv-search size="lg" type="text" placeholder="Search" :hide-label="true"></cv-search>
-	</div>
+	<MolActions />
 	<div id="resp-container">
 		<div id="mol-grid" ref="$molGrid">
 			<div
-				v-for="(mol, i) in molGridStore.molset"
+				v-for="(mol, i) in molGridStore.molsetPage"
 				:key="i"
 				class="mol"
 				:class="{ focus: i == molGridStore.focus, sel: molGridStore.sel.includes(i) }"
-				@click="onMolClick(i)"
+				@click="(e) => onMolClick(e, i)"
 			>
 				<cv-checkbox
 					:label="`${i}`"
@@ -32,22 +26,22 @@
 				<!-- prettier-ignore -->
 				<template v-if="1">
 					<!-- Identifiers -->
-					<div v-if="molGridStore.showIdentifiers.includes('name') && mol?.identifiers?.name" class="idfr name">{{ mol.identifiers.name }}</div>
-					<div v-if="molGridStore.showIdentifiers.includes('inchi') && mol?.identifiers?.inchi" class="idfr">{{ mol.identifiers.inchi }}</div>
-					<div v-if="molGridStore.showIdentifiers.includes('inchikey') && mol?.identifiers?.inchikey" class="idfr">{{ mol.identifiers.inchikey }}</div>
-					<div v-if="molGridStore.showIdentifiers.includes('canonical_smiles') && mol?.identifiers?.canonical_smiles" class="idfr">{{ mol.identifiers.canonical_smiles }}</div>
-					<div v-if="molGridStore.showIdentifiers.includes('isomeric_smiles') && mol?.identifiers?.isomeric_smiles" class="idfr">{{ mol.identifiers.isomeric_smiles }}</div>
-					<div v-if="molGridStore.showIdentifiers.includes('formula') && mol?.identifiers?.formula" class="idfr">{{ mol.identifiers.formula }}</div>
-					<a v-if="molGridStore.showIdentifiers.includes('cid') && mol?.identifiers?.cid" :href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`" target="_blank" class="idfr">{{ mol.identifiers.cid }}</a>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('name') && mol?.identifiers?.name" class="idfr name">{{ mol.identifiers.name }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchi') && mol?.identifiers?.inchi" class="idfr">{{ mol.identifiers.inchi }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchikey') && mol?.identifiers?.inchikey" class="idfr">{{ mol.identifiers.inchikey }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('canonical_smiles') && mol?.identifiers?.canonical_smiles" class="idfr">{{ mol.identifiers.canonical_smiles }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('isomeric_smiles') && mol?.identifiers?.isomeric_smiles" class="idfr">{{ mol.identifiers.isomeric_smiles }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('formula') && mol?.identifiers?.formula" class="idfr formula">{{ mol.identifiers.formula }}</div>
+					<a v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('cid') && mol?.identifiers?.cid" :href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`" target="_blank" class="idfr">{{ mol.identifiers.cid }}</a>
 				</template>
 
 				<!-- prettier-ignore -->
 				<div v-if="molGridStore.showProps.length" class="props-wrap">
 					<template v-for="(key, i) in molGridStore.showProps" :key="i">
 						<!-- Properties -->
-						<div class="prop">
+						<div class="prop" :title="`${key}:\n${mol.properties[key] || mol.properties[key] === 0 ? mol.properties[key] : '-'}`">
 							<div class="key">{{ key }}</div>
-							<div class="value" :class="{ empty: !mol.properties[key] && mol.properties[key] !== 0 }">
+							<div v-copy-on-click="nothingSelected" class="value" :class="{ empty: !mol.properties[key] && mol.properties[key] !== 0 }">
 								{{ mol.properties[key] || mol.properties[key] === 0 ? mol.properties[key] : '-' }}
 							</div>
 						</div>
@@ -78,8 +72,10 @@ const router = useRouter()
 const route = useRoute()
 
 // Stores
+import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
+const mainStore = useMainStore()
 const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
 
@@ -90,6 +86,7 @@ import { fileSystemApi } from '@/api/ApiService'
 import MolPagination from '@/components/MolPagination.vue'
 import MolProps from '@/components/MolProps.vue'
 import MolRender from '@/components/MolRender.vue'
+import MolActions from '@/components/MolActions.vue'
 
 // Type declarations
 type KeyHandlers = {
@@ -118,13 +115,6 @@ const columns: ComputedRef<number | null> = computed(() => {
 	return Math.round($molGrid.value.clientWidth / $mol.clientWidth)
 })
 
-const sortItems: ComputedRef<string[]> = computed(() => {
-	return ['Name', 'Date', 'Size']
-	// if (fileStore.data) {
-	// 	fileStore.data[0]
-	// }
-})
-
 // const propertyValues: ComputedRef<string[]> = computed(() => {
 // 	const values = []
 // 	for (const mol in molGridStore.molset) {
@@ -148,6 +138,9 @@ const sortItems: ComputedRef<string[]> = computed(() => {
 onMounted(async () => {
 	// Add keyboard shortcuts
 	document.addEventListener('keydown', onKeyDown)
+
+	// Add blur listener
+	mainStore.SetOnBlurFn(_maybeBlur)
 })
 
 onBeforeMount(async () => {
@@ -156,7 +149,7 @@ onBeforeMount(async () => {
 		if (fileStore.data) {
 			try {
 				const molsetData = JSON.parse(fileStore.data)
-				molGridStore.setMolsetData(molsetData)
+				molGridStore.setMolset(molsetData)
 				loading.value = false
 			} catch (err) {
 				console.error(err)
@@ -184,12 +177,67 @@ onBeforeUnmount(() => {
  * Methods
  */
 
-function onMolClick(i: number) {
+let lastSelectedRowIndex = ref<number | null>(null)
+let lastSelectedRowSelState = ref<boolean | null>(null)
+
+function onMolClick(e: MouseEvent, i: number) {
+	// Abort molecule selection when the target is a click-to-copy element.
+	const click2CopyTarget =
+		(e.target as HTMLElement).classList.contains('idfr') ||
+		(e.target as HTMLElement).classList.contains('value')
+	if (!molGridStore.sel.length && click2CopyTarget) return
+
 	molGridStore.toggleSel(i)
 	molGridStore.setFocus(i)
+
+	const currentRowIndex = i
+
+	// Batch select with shift
+	if (e.shiftKey && lastSelectedRowSelState.value != null) {
+		if (molGridStore.sel.length && lastSelectedRowIndex.value !== null) {
+			let lowIndex = Math.min(lastSelectedRowIndex.value, currentRowIndex)
+			let highIndex = Math.max(lastSelectedRowIndex.value, currentRowIndex)
+
+			// When you select from bottom to top, we gotta include the highIndex
+			// When you select from top to bottom, we gotta include the lowIndex
+			if (lowIndex != lastSelectedRowIndex.value) {
+				lowIndex -= 1
+				highIndex -= 1
+			}
+
+			// Create array with selected range indices.
+			const range = []
+			for (let i = lowIndex; i <= highIndex; i++) {
+				range.push(i)
+			}
+
+			if (lastSelectedRowSelState.value) {
+				molGridStore.addSel(range)
+			} else {
+				molGridStore.removeSel(range)
+			}
+		}
+	} else {
+		lastSelectedRowSelState.value = molGridStore.sel.includes(i)
+	}
+
+	lastSelectedRowIndex.value = currentRowIndex
 }
 
-function onKeyDown(e) {
+// Validator that disables the click-to-copy feature when items are selected.
+function nothingSelected() {
+	return !molGridStore.hasSel
+}
+
+// Registrer blur event when clicked outside of the molecule grid.
+function _maybeBlur(e: MouseEvent) {
+	if ((e.target as HTMLElement).closest('.mol')) return
+	molGridStore.unsetFocus()
+}
+
+function onKeyDown(e: KeyboardEvent) {
+	// Check if there's any input in focus
+	if (document.activeElement?.tagName == 'INPUT') return
 	if (e.key in keyHandlers) {
 		keyHandlers[e.key]()
 		e.preventDefault()
@@ -199,10 +247,10 @@ function onKeyDown(e) {
 const keyHandlers: KeyHandlers = {
 	ArrowLeft: () => {
 		let i = molGridStore.focus
-		console.log('A', i)
+		// console.log('A', i)
 		if (i === null) return
 		i = i - 1 < 0 ? i : i - 1
-		console.log('B', i)
+		// console.log('B', i)
 		molGridStore.setFocus(i)
 	},
 	ArrowRight: () => {
@@ -239,21 +287,11 @@ const keyHandlers: KeyHandlers = {
 </script>
 
 <style lang="scss" scoped>
-/**
- * Actions
- */
-
-#actions {
-	// background: pink;
-	margin-bottom: 8px;
-	display: flex;
-	gap: 8px;
-}
-
 // Wrapper
 #mol-grid {
 	display: flex;
 	flex-wrap: wrap;
+	margin-top: -1px;
 }
 
 /**
@@ -316,11 +354,6 @@ const keyHandlers: KeyHandlers = {
 // 	max-width: 100%;
 // 	height: auto;
 // }
-#mol-grid .mol .name {
-	font-weight: bold;
-	margin-bottom: 4px;
-	text-transform: capitalize;
-}
 #mol-grid .mol .idfr {
 	// Truncate
 	word-wrap: normal;
@@ -328,21 +361,40 @@ const keyHandlers: KeyHandlers = {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
+#mol-grid .mol .idfr.name {
+	font-weight: bold;
+	margin-bottom: 4px;
+	text-transform: capitalize;
+}
+#mol-grid .mol .idfr.formula {
+	font-weight: 500;
+	font-size: $font-size-small;
+	font-style: italic;
+	text-transform: capitalize;
+	color: $black-60;
+}
 
 // Properties
 #mol-grid .mol .props-wrap {
 	background: $soft-bg;
+	mix-blend-mode: multiply;
 	margin: 0 -4px -4px -4px;
 	padding: 8px;
 	border-radius: 2px;
 	margin-top: 8px;
 }
-#mol-grid .mol .prop {
+#mol-grid .mol .prop:not(:last-child) {
 	margin-bottom: 6px;
 }
 #mol-grid .mol .prop .key {
 	font-size: $font-size-small;
 	line-height: $line-height-small;
+
+	// Truncate
+	word-wrap: normal;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 #mol-grid .mol .prop .value {
 	font-weight: 500;

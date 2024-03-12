@@ -89,8 +89,9 @@ let wasCalled = ref(false)
 let molDetails = reactive({
 	width: props.width,
 	height: props.height,
-	bondLineWidth: 1,
+	bondLineWidth: 2,
 	addStereoAnnotation: true,
+	// explicitMethyl: true,
 	...props.extraDetails,
 })
 let svg = ref('')

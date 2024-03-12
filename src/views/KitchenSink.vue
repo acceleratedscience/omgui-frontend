@@ -1,5 +1,5 @@
 <template>
-	<!-- <hr />
+	<hr />
 	<h4>:: Modals</h4>
 	<button @click="modalStore.alert('Hello world')">simple modal</button>&nbsp;
 	<button
@@ -37,25 +37,30 @@
 	<h4>:: Icons</h4>
 
 	<span style="color: red">
-		<a href="#"><SvgServe filename="icn-mol" /></a>
-		<SvgServe filename="icn-mol" />
-		<SvgServe filename="icn-molset" />
-		<SvgServe filename="icn-data" />
-		<SvgServe filename="icn-text" />
+		<a href="#"><SvgServe filename="icn-file-mol" /></a>
+		<SvgServe filename="icn-file-mol" />
+		<SvgServe filename="icn-file-molset" />
+		<SvgServe filename="icn-file-data" />
+		<SvgServe filename="icn-file-txt" />
 		<SvgServe filename="icn-link" />
 		<SvgServe filename="icn-reaction" />
 		<SvgServe filename="icn-model" />
-		<SvgServe filename="icn-run" />
-		<SvgServe filename="icn-json" />
-		<SvgServe filename="icn-pdf" />
-		<SvgServe filename="icn-svg" />
-		<SvgServe filename="icn-md" />
-		<SvgServe filename="icn-doc" />
+		<SvgServe filename="icn-file-run" />
+		<SvgServe filename="icn-file-json" />
+		<SvgServe filename="icn-file-pdf" />
+		<SvgServe filename="icn-file-svg" />
+		<SvgServe filename="icn-file-md" />
+		<SvgServe filename="icn-file-unk" />
 		<SvgServe filename="icn-caret-left" />
 		<SvgServe filename="icn-caret-right" />
 		<SvgServe filename="icn-caret-up" />
 		<SvgServe filename="icn-caret-down" />
-	</span> -->
+		<SvgServe filename="icn-file-mol" size="large" />
+
+		<!-- Native icons -->
+		<CloseIcon />
+		<ChevronRight />
+	</span>
 
 	<br /><br />
 	<hr />
@@ -92,6 +97,10 @@ const modalStore = useModalStore()
 
 // Compnents
 import SvgServe from '@/components/SvgServe.vue'
+// @ts-ignore
+import CloseIcon from '@carbon/icons-vue/es/close/16'
+// @ts-ignore
+import ChevronRight from '@carbon/icons-vue/es/chevron--right/16'
 
 /**
  * Methods

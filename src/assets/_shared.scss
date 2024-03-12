@@ -38,6 +38,8 @@ $highlight: #fff7cc; // Unused, for data tables
 $highlight-soft: color.mix($highlight, white, 40%);
 $highlight-soft-sel: color.mix($highlight-soft, $blue-10, 50%);
 $highlight-border: #e5deb8; // Equivalent of 10% black overlay
+$aux-green: #e2ead9;
+$aux-green-hover: darken($aux-green, 5%);
 
 // Responsive breakpoints.
 // Should be used as max values.

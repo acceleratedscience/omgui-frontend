@@ -13,3 +13,13 @@
 .bx--modal-content:focus {
 	outline: none;
 }
+
+/* Disabled items in dropdown, currently not supported */
+.bx--dropdown--open .bx--dropdown-item[disabled='true'] {
+	opacity: 0.5;
+	pointer-events: none;
+}
+/* Hidden items in dropdown, currently not supported */
+.bx--dropdown--open .bx--dropdown-item[hidden='true'] {
+	display: none;
+}

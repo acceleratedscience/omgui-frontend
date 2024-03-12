@@ -53,9 +53,9 @@
 				<div id="title-wrap">
 					<div class="v-align">
 						<SvgServe
-							class="icn-mol"
+							class="icn-file-mol"
 							:class="{ loading: loading }"
-							filename="icn-mol"
+							filename="icn-file-mol"
 							size="large"
 						/>
 					</div>
@@ -401,14 +401,15 @@ async function displayMol() {
 
 // Fetch molecule data from the API based on teh identifier.
 async function fetchMolData(identifier: string | null = null) {
-	let success = false
-	loading.value = true
-	loadingError.value = false
 	identifier = identifier || props.identifier || null
 	if (!identifier) return
 
+	let success = false
+	loading.value = true
+	loadingError.value = false
+
 	try {
-		const response = await moleculesApi?.getMolData(identifier)
+		const response = await moleculesApi.getMolData(identifier)
 		if (response.status == 200) {
 			// Update HTML
 			molViewerStore.setMolData(response.data)
@@ -437,7 +438,7 @@ async function fetchMolVizData() {
 	const inchi = molViewerStore.mol?.identifiers?.inchi
 	if (!inchi) return
 	try {
-		const response = await moleculesApi?.getMolVizData(inchi)
+		const response = await moleculesApi.getMolVizData(inchi)
 		if (response.status == 200) {
 			molViewerStore.setMolVizData(response.data.svg, response.data.sdf)
 			init3DViewer()
@@ -648,10 +649,10 @@ function toggleExpand(e: Event) {
 	margin-bottom: 10px;
 	margin-right: 5px;
 }
-#title-wrap .icn-mol {
+#title-wrap .icn-file-mol {
 	margin-left: -4px;
 }
-#title-wrap .icn-mol.loading {
+#title-wrap .icn-file-mol.loading {
 	animation: rotate 3s infinite linear;
 }
 #title-wrap h1.loading {

@@ -65,6 +65,11 @@ const routes = [
 		name: 'kitchen-sink',
 		component: () => import(/* webpackChunkName: 'kitchen-sink' */ '@/views/KitchenSink.vue'),
 	},
+	// {
+	// 	path: '/:pathMatch(.*)*',
+	// 	name: 'not-found',
+	// 	component: () => import(/* webpackChunkName: 'not-found' */ '@/views/NotFound.vue'),
+	// },
 ]
 
 // Duplicate each route with a '/headless' prefix and a 'headless' meta field

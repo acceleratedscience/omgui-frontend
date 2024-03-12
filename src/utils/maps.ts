@@ -1,6 +1,6 @@
 /**
  * This file is for centralizing any mapping information,
- * like file extensions to file types, file types to modules, etc.
+ * like file types to modules, etc.
  */
 
 // Type declaration
@@ -9,19 +9,6 @@ type Map = {
 }
 type MultiMap = {
 	[key: string]: string[]
-}
-
-// Maps file extensions to file types. The file type
-// is displayed in the breadcrumbs, and it controls
-// which module is used to view which file.
-export const map_Ext2fileType: Map = {
-	_default: 'unknown',
-	txt: 'text',
-	csv: 'data',
-	json: 'json',
-	'mol.json': 'mol',
-	'molset.json': 'molset',
-	sdf: 'sdf', // should become part of mol
 }
 
 // Maps the different file types to their full

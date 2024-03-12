@@ -3,8 +3,10 @@
  */
 
 #app {
-	height: 100%;
+	// height: min-content;
+	height: 100%; // Required for file-browser to stretch to the bottom.
 	background: $soft-bg;
+	// border: solid 1px red;
 }
 .error-msg {
 	color: $error;
@@ -144,6 +146,32 @@ hr {
 .btn-wrap {
 	display: flex;
 	gap: 5px;
+}
+
+/**
+ * Click to copy
+ */
+.click-copy {
+	// position: relative;
+	cursor: pointer;
+}
+.copy-blink {
+	animation: copy-blink 100ms 3;
+	color: $success;
+}
+@keyframes copy-blink {
+	0% {
+		opacity: 1;
+	}
+	49% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 0;
+	}
 }
 
 /**

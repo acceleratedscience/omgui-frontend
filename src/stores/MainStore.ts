@@ -12,6 +12,7 @@ type State = {
 	_workspace: string | null
 	_screenWidth: number | null
 	_contentWidth: number | null
+	_onBlurFn: (e: MouseEvent) => void
 }
 
 export const useMainStore = defineStore('mainStore', {
@@ -20,6 +21,7 @@ export const useMainStore = defineStore('mainStore', {
 		_workspace: null, // The current workspace
 		_screenWidth: null, // The available width of the viewport
 		_contentWidth: null, // The width of the content area (screen - padding)
+		_onBlurFn: () => {},
 	}),
 	getters: {
 		headless(): boolean {
@@ -33,6 +35,9 @@ export const useMainStore = defineStore('mainStore', {
 		},
 		contentWidth(): number | null {
 			return this._contentWidth
+		},
+		onBlurFn(): (e: MouseEvent) => void {
+			return this._onBlurFn
 		},
 	},
 	actions: {
@@ -78,6 +83,11 @@ export const useMainStore = defineStore('mainStore', {
 		// Set content width
 		setContentWidth(width: number) {
 			this._contentWidth = width
+		},
+
+		// Set onBlur function
+		SetOnBlurFn(fn: (e: MouseEvent) => void) {
+			this._onBlurFn = fn
 		},
 	},
 })

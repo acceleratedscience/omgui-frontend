@@ -72,7 +72,7 @@
 
 <script setup lang="ts">
 // Vue
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeMount, onMounted, ref } from 'vue'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
@@ -101,7 +101,7 @@ const $headlessWrap = ref<HTMLElement | null>(null)
 
 // While currently not really used in the application, we preserve the
 // option to load certain paths as "raw", i.e. without the main-wrap
-// or headless-wrap. This is currently only in use for /svg/icn-mol,
+// or headless-wrap. This is currently only in use for /svg/<svg_filename>,
 // which is useful for previewing svg content during development.
 // - - -
 // Because the router takes a moment to load, we instead check the URL
@@ -119,6 +119,17 @@ const isRawPath = computed(() => {
 
 onMounted(() => {
 	storeScreenWidth()
+
+	// Add blur handler
+	document.body.removeEventListener('click', mainStore.onBlurFn)
+	document.body.addEventListener('click', (e) => {
+		mainStore.onBlurFn(e)
+	})
+})
+
+onBeforeMount(() => {
+	// Remove blur handler
+	document.body.removeEventListener('click', mainStore.onBlurFn)
 })
 
 /**
@@ -168,13 +179,14 @@ function storeScreenWidth() {
 
 #headless-wrap {
 	background: white;
-	height: 100%;
+	// height: 100%;
+	height: min-content; // Required for bottom patting to show
 }
 #headless-wrap:not(.file-browser) {
 	padding: 20px;
 }
 #headless-wrap.file-browser {
-	height: 100%;
+	height: 100%; // Required for file-browser to stretch to the bottom.
 }
 
 /**
@@ -187,8 +199,9 @@ function storeScreenWidth() {
 	position: relative;
 	padding-bottom: 0;
 	box-sizing: border-box;
-	height: 100%;
-	overflow-x: hidden;
+	height: min-content; // Required for bottom patting to show
+	min-height: 100vh; // To avoid bottom shadow when content is short.
+	// overflow-x: hidden;
 
 	// Centered layout
 	padding: 80px;
@@ -200,6 +213,7 @@ function storeScreenWidth() {
 }
 #main-wrap.file-browser {
 	padding-bottom: 0;
+	height: 100%; // Required for file-browser to stretch to the bottom.
 }
 header {
 	width: 100%;

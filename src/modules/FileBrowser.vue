@@ -14,7 +14,7 @@
 					<div
 						class="col-header"
 						:class="{ root: level == 0 }"
-						:title="column['_meta']['name']"
+						:title="column.dirname"
 						@click="(e) => resetCol(e, level)"
 					>
 						<button
@@ -22,17 +22,17 @@
 							v-if="level == 0"
 							@click="modalStore.display('ModalWorkspaces')"
 						>
-							{{ column['_meta']['name'] }}
+							{{ column.dirname }}
 						</button>
 						<template v-else>
-							{{ column['_meta']['name'] }}
+							{{ column.dirname }}
 						</template>
 					</div>
 
 					<div class="col-body">
 						<!-- Hidden directories -->
 						<div
-							v-for="(dir_hidden, key) in column['dirs_hidden']"
+							v-for="(dir_hidden, key) in column['dirsHidden']"
 							:key="key"
 							class="dir hidden"
 							:class="{ sel: dir_hidden.sel }"
@@ -66,19 +66,19 @@
 
 						<!-- Hidden files -->
 						<div
-							v-for="(file_hidden, key) in column['files_hidden']"
+							v-for="(file_hidden, key) in column['filesHidden']"
 							:key="key"
 							class="file hidden"
 							:class="{ sel: file_hidden.sel }"
-							:data-type="file_hidden._meta.type"
+							:data-type="file_hidden._meta.fileType"
 							:data-ext="file_hidden._meta.ext"
 							:title="file_hidden.filename"
 							@click="() => previewFile(file_hidden, level + 1, true)"
 							@dblclick="openFile(file_hidden)"
 						>
 							<SvgServe
-								:filename="'icn-' + file_hidden._meta.type"
-								:key="file_hidden._meta.type"
+								:filename="'icn-file-' + file_hidden._meta.fileType"
+								:key="file_hidden._meta.fileType"
 							/>
 							<div>{{ file_hidden.filename }}</div>
 						</div>
@@ -89,13 +89,16 @@
 							:key="key"
 							class="file"
 							:class="{ sel: file.sel }"
-							:data-type="file._meta.type"
+							:data-type="file._meta.fileType"
 							:data-ext="file._meta.ext"
 							:title="file.filename"
 							@click="() => previewFile(file, level + 1, true)"
 							@dblclick="openFile(file)"
 						>
-							<SvgServe :filename="'icn-' + file._meta.type" :key="file._meta.type" />
+							<SvgServe
+								:filename="'icn-file-' + file._meta.fileType"
+								:key="file._meta.fileType"
+							/>
 							<div>{{ file.filename }}</div>
 						</div>
 
@@ -112,18 +115,18 @@
 			<!-- File preview column -->
 			<div v-if="filePreview" class="column file-preview">
 				<!-- Column header -->
-				<div class="col-header" :title="filePreview['_meta']['name']">
-					{{ filePreview['_meta']['name'] }}
+				<div class="col-header" :title="filePreview.filename">
+					{{ filePreview.filename }}
 				</div>
 
 				<!-- File preview -->
 				<div id="file-preview">
-					<b>{{ filePreview._meta.name }}</b>
+					<b>{{ filePreview.filename }}</b>
 					<small>
-						<i>{{ filePreview.disp_size }}</i>
+						<i>{{ filePreview.dispSize }}</i>
 						<div class="soft">
-							Created: {{ filePreview.disp_time_created }}<br />
-							Last edit: {{ filePreview.disp_time_edited }}
+							Created: {{ filePreview.dispTimeCreated }}<br />
+							Last edit: {{ filePreview.dispTimeEdited }}
 						</div>
 					</small>
 				</div>
@@ -159,39 +162,7 @@ import SvgServe from '@/components/SvgServe.vue'
 import { prettySize, timeAgo } from '@/utils/helpers'
 
 // Type declarations
-type Dir = {
-	_meta: {
-		name: string
-		size: number
-		time_created: number
-		time_edited: number
-	}
-
-	filename: string
-	path: string
-	sel: boolean // Selection state, not from API
-}
-type File = Dir & {
-	_meta: {
-		type: string
-		ext: string
-	}
-	disp_size: string
-	disp_time_created: string
-	disp_time_edited: string
-}
-type Level = {
-	_meta: {
-		name: string
-		empty: boolean
-		empty_hidden: boolean
-	}
-
-	dirs: Dir[]
-	dirs_hidden: Dir[]
-	files: File[]
-	files_hidden: File[]
-}
+import type { Level, File } from '@/types'
 
 // Definitions
 const router = useRouter()
@@ -241,6 +212,7 @@ watch(
 
 // Parse the route and load the appropriate files.
 async function parseRoute() {
+	console.log('parseRoute')
 	// When going back or forward in the history while
 	// leaving the fileBrowser module, the popstate
 	// triggers parseRoute before the listener is removed.
@@ -261,7 +233,7 @@ async function parseRoute() {
 	const filename = route.hash.replace(/^#/, '')
 	if (levels.value && filename && filename.length > 0) {
 		const thisLevel = levels.value[levels.value.length - 1]
-		const files = thisLevel.files.concat(thisLevel.files_hidden)
+		const files = thisLevel.files.concat(thisLevel.filesHidden)
 		const file = files.filter((file) => file.filename === filename)[0]
 		previewFile(file, levels.value.length)
 	}
@@ -270,28 +242,29 @@ async function parseRoute() {
 // Preview file information in rightmost column.
 async function previewFile(file: File, level: number, fromClick: boolean = false) {
 	// Update the URL.
-	if (!fromClick) {
-		const re = new RegExp('/?' + file.filename + '$')
-		const previewPath = file.path.replace(re, '')
-		const headless = mainStore.headless ? '/headless' : ''
-		router.push(headless + '/~/' + previewPath + '#' + file.filename)
-	}
+	// if (!fromClick) {
+	const re = new RegExp('/?' + file.filename + '$')
+	const previewPath = file.path.replace(re, '')
+	const headless = mainStore.headless ? '/headless' : ''
+	router.push(headless + '/~/' + previewPath + '#' + file.filename)
+	// }
 
 	// Update selection state.
 	deselectCol(level - 1) // Remove selection state of clicked column.
 	file.sel = true // Set current file as selected.
 
 	// Prepare file object for display.
-	file.disp_size = prettySize(file._meta.size)
-	file.disp_time_created = timeAgo(file._meta.time_created)
-	file.disp_time_edited = timeAgo(file._meta.time_edited)
+	file.dispSize = prettySize(file._meta.size)
+	file.dispTimeCreated = timeAgo(file._meta.timeCreated)
+	file.dispTimeEdited = timeAgo(file._meta.timeEdited)
 
 	// Display preview into rightmost column.
 	if (levels.value) levels.value.splice(level) // Remove all levels after this one.
 	filePreview.value = file
 
 	// Scroll to the right.
-	if (fromClick) scrollRight()
+	// if (fromClick)
+	scrollRight()
 }
 
 // Remove file preview.
@@ -300,6 +273,7 @@ function hidePreviewFile() {
 }
 
 function openFile(file: File) {
+	console.log(99, '/~/' + file.path)
 	router.push('/~/' + file.path)
 }
 
@@ -338,13 +312,6 @@ async function fetchNextLevel(
 		}
 	}
 
-	// Scroll to the right -- trash
-	// const lastColWidth = lastCol.value ? lastCol.value.clientWidth : 0
-	// const secondLastColWidth = secondLastCol.value ? secondLastCol.value.clientWidth : 0
-	// const maxScroll = colScroll.value ? colScroll.value.scrollWidth - lastColWidth - secondLastColWidth : 0 // prettier-ignore
-	// console.log(111, lastColWidth, secondLastColWidth, maxScroll)
-	// if (colScroll.value) colScroll.value.scrollLeft = maxScroll
-
 	// Scroll to the right.
 	if (fromClick) scrollRight()
 }
@@ -364,8 +331,8 @@ function markSelected(level: number, type: 'dir' | 'file', filename: string) {
 		const thisLevel = levels.value[level]
 		const items =
 			type == 'dir'
-				? thisLevel.dirs.concat(thisLevel.dirs_hidden)
-				: thisLevel.files.concat(thisLevel.files_hidden)
+				? thisLevel.dirs.concat(thisLevel.dirsHidden)
+				: thisLevel.files.concat(thisLevel.filesHidden)
 		const item = items.filter((item) => item.filename === filename)[0]
 		if (item) item.sel = true
 	}
@@ -386,9 +353,9 @@ async function resetCol(e: MouseEvent, level: number) {
 function deselectCol(level: number) {
 	if (!levels.value) return
 	levels.value[level].dirs.forEach((dir) => (dir.sel = false))
-	levels.value[level].dirs_hidden.forEach((dir_hidden) => (dir_hidden.sel = false))
+	levels.value[level].dirsHidden.forEach((dir_hidden) => (dir_hidden.sel = false))
 	levels.value[level].files.forEach((file) => (file.sel = false))
-	levels.value[level].files_hidden.forEach((file_hidden) => (file_hidden.sel = false))
+	levels.value[level].filesHidden.forEach((file_hidden) => (file_hidden.sel = false))
 }
 
 // Return structured content of a directory.
@@ -554,8 +521,8 @@ async function fetchWorkspaceFiles(path = '') {
 	user-select: none;
 	box-sizing: content-box;
 }
-#col-wrap .dir > div:not(.svg-wrap),
-#col-wrap .file > div:not(.svg-wrap),
+#col-wrap .dir > div,
+#col-wrap .file > div,
 #col-wrap .empty {
 	// Truncate
 	white-space: nowrap;
@@ -564,16 +531,14 @@ async function fetchWorkspaceFiles(path = '') {
 }
 
 // Icons
-#col-wrap .file .svg-wrap,
-#col-wrap .dir .svg-wrap {
-	width: 16px;
-	height: 16px;
-	flex: 16px 0 0;
+#col-wrap .file svg,
+#col-wrap .dir svg {
+	flex: 0 0 16px;
 }
-#col-wrap .dir > div:not(.svg-wrap) {
+#col-wrap .dir > div {
 	flex: 1;
 }
-#col-wrap .dir .svg-wrap {
+#col-wrap .dir svg {
 	color: $black-30;
 }
 #col-wrap .dir {
@@ -586,7 +551,7 @@ async function fetchWorkspaceFiles(path = '') {
 	color: #fff;
 	background: $blue;
 }
-#col-wrap .dir.sel .svg-wrap {
+#col-wrap .dir.sel svg {
 	color: #fff;
 }
 
@@ -638,7 +603,7 @@ async function fetchWorkspaceFiles(path = '') {
 	}
 
 	// Arrow after directory names
-	#col-wrap .dir:not(.sel):hover .svg-wrap {
+	#col-wrap .dir:not(.sel):hover svg {
 		color: $black;
 	}
 }
