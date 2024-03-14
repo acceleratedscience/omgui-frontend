@@ -42,21 +42,21 @@
 	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir }">
 		<header>
 			<nav>
-				<RouterLink :to="{ name: 'home' }">Home</RouterLink>
+				<router-link :to="{ name: 'home' }">Home</router-link>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<RouterLink :to="{ name: 'filebrowser' }">File Browser</RouterLink>
+				<router-link :to="{ name: 'filebrowser' }">File Browser</router-link>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<RouterLink :to="{ name: 'molviewer' }">Molecule Viewer</RouterLink>
+				<router-link :to="{ name: 'molviewer-input' }">Molecule Viewer</router-link>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<RouterLink :to="{ name: 'molgrid' }">Molecule Grid</RouterLink>
+				<router-link :to="{ name: 'molgrid' }">Molecule Grid</router-link>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<RouterLink :to="{ name: 'dataviewer' }">Data Viewer</RouterLink>
+				<router-link :to="{ name: 'dataviewer' }">Data Viewer</router-link>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<RouterLink :to="{ name: 'jsonviewer' }">JSON Viewer</RouterLink>
+				<router-link :to="{ name: 'jsonviewer' }">JSON Viewer</router-link>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<RouterLink :to="{ name: 'textviewer' }">Text Viewer</RouterLink>
+				<router-link :to="{ name: 'textviewer' }">Text Viewer</router-link>
 				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<RouterLink :to="{ name: 'commandline' }">Command Line</RouterLink>
+				<router-link :to="{ name: 'commandline' }">Command Line</router-link>
 			</nav>
 		</header>
 		<div id="body">
@@ -114,6 +114,23 @@ const isRawPath = computed(() => {
 })
 
 /**
+ * Logic
+ */
+
+// Store the name of your current workspace.
+if (fileSystemApi) {
+	fileSystemApi
+		.getWorkspace()
+		.then((result: { data: string; status: number; statusText: string }) => {
+			if (result.status != 200) {
+				console.error('Failed to get workspace name:', result.statusText)
+				return
+			}
+			mainStore.setWorkspace(result.data)
+		})
+}
+
+/**
  * Hooks
  */
 
@@ -131,23 +148,6 @@ onBeforeMount(() => {
 	// Remove blur handler
 	document.body.removeEventListener('click', mainStore.onBlurFn)
 })
-
-/**
- * Logic
- */
-
-// Store the name of your current workspace.
-if (fileSystemApi) {
-	fileSystemApi
-		.getWorkspace()
-		.then((result: { data: string; status: number; statusText: string }) => {
-			if (result.status != 200) {
-				console.error('Failed to get workspace name:', result.statusText)
-				return
-			}
-			mainStore.setWorkspace(result.data)
-		})
-}
 
 /**
  * Methods
@@ -179,8 +179,8 @@ function storeScreenWidth() {
 
 #headless-wrap {
 	background: white;
-	// height: 100%;
 	height: min-content; // Required for bottom patting to show
+	min-height: 100vh; // To avoid bottom shadow when content is short.
 }
 #headless-wrap:not(.file-browser) {
 	padding: 20px;

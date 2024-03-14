@@ -3,7 +3,7 @@
 		<div
 			id="breadcrumbs"
 			ref="$breadcrumbs"
-			:class="{ truncate, 'needs-truncated': isTruncated }"
+			:class="{ truncate, 'needs-truncated': needsTruncation }"
 		>
 			<button id="file-type" @click="modalStore.display('ModalFileType')">
 				{{ fileStore.fileType }}
@@ -16,8 +16,22 @@
 				}}</router-link>
 				<span v-if="i < pathArr.length - 1">&nbsp;&nbsp;&rsaquo;&nbsp;&nbsp;</span>
 			</template>
+			<a
+				v-if="needsTruncation && !truncate"
+				href="#"
+				class="toggle-hide"
+				@click.prevent="toggleTruncate"
+				>hide</a
+			>
 		</div>
-		<a href="#" class="toggle" @click.prevent="toggleTruncate"></a>
+		<a
+			v-if="needsTruncation && truncate"
+			href="#"
+			class="toggle-show"
+			@click.prevent="toggleTruncate"
+			>show</a
+		>
+		<span v-if="props.slotRight" class="slot">{{ props.slotRight }}</span>
 	</div>
 </template>
 
@@ -35,21 +49,20 @@ const fileStore = useFileStore()
 const modalStore = useModalStore()
 
 // Type declarations
-type Props = { path: string }
+type Props = { slotRight: string }
 
 // Props
 const props = defineProps({
-	path: {
-		type: String as PropType<Props['path']>,
-		required: true,
+	slotRight: {
+		type: String as PropType<Props['slotRight']>,
 	},
 })
 
 // Definitions
 const $breadcrumbs = ref<HTMLElement | null>(null)
 const truncate = ref<boolean>(true) // Lets us toggle truncation
-const isTruncated = ref<boolean>(false) // Lets us check if the breadcrumbs are truncated
-const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/')))
+const needsTruncation = ref<boolean>(false) // Lets us check if the breadcrumbs are truncated
+const pathArr = computed(() => [mainStore.workspace].concat(fileStore.path.split('/')))
 
 /**
  * Hooks
@@ -57,7 +70,7 @@ const pathArr = computed(() => [mainStore.workspace].concat(props.path.split('/'
 
 onMounted(() => {
 	if ($breadcrumbs.value && $breadcrumbs.value.offsetWidth < $breadcrumbs.value.scrollWidth) {
-		isTruncated.value = true
+		needsTruncation.value = true
 	}
 })
 
@@ -73,19 +86,19 @@ function toggleTruncate() {
 <style lang="scss" scoped>
 #breadcrumbs-wrap {
 	display: flex;
-	gap: 2px;
 	font-size: $font-size-small;
 	line-height: $line-height-small;
 	color: $black-30;
 }
 #breadcrumbs {
+	flex: 1;
 	margin-bottom: 8px;
 }
 #breadcrumbs a {
 	color: $black-30;
 }
 
-// Truncation
+// Truncation at end
 #breadcrumbs.truncate {
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -93,21 +106,17 @@ function toggleTruncate() {
 }
 #breadcrumbs-wrap:not(.truncate),
 #breadcrumbs:not(.truncate) {
-	display: inline;
+	display: block;
 }
 
 // Show-more link for truncated breadcrumbs
-#breadcrumbs + .toggle::after {
-	content: 'hide';
+#breadcrumbs-wrap a.toggle-show,
+#breadcrumbs-wrap a.toggle-hide {
+	color: $black;
 }
-#breadcrumbs.truncate + .toggle::after {
-	content: 'show';
-}
-#breadcrumbs:not(.truncate)::after {
+#breadcrumbs-wrap .toggle-show::before,
+#breadcrumbs-wrap .toggle-hide::before {
 	content: '\a0\a0';
-}
-#breadcrumbs:not(.needs-truncated) + .toggle {
-	display: none;
 }
 
 // File type button

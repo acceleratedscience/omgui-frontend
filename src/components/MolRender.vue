@@ -35,10 +35,11 @@ import { nextTick, onMounted, onUpdated, reactive, ref, watch, computed } from '
 import type { PropType } from 'vue'
 
 // Utils
-import type { JSMol } from '@/utils/rdkit/tsTypes'
 import initRDKit from '@/utils/rdkit/initRDKit'
+import { isValidMolString, isValid } from '@/utils/rdkit-helpers'
 
 // Type declarations
+import type { JSMol } from '@/utils/rdkit/tsTypes'
 type Props = {
 	id: string
 	className: string
@@ -119,16 +120,11 @@ let svg = ref('')
  */
 
 const dimensions = computed(() => {
-	return {
-		// width: props.width + 'px',
-		height: props.height + 'px',
-	}
+	const dims: { width?: string; height?: string } = {}
+	if (props.width) dims['width'] = props.width + 'px'
+	if (props.height) dims['height'] = props.height + 'px'
+	return dims
 })
-
-// Validate the molecule
-function isValid(m: JSMol | null) {
-	return !!m
-}
 
 /**
  * Hooks
@@ -163,14 +159,6 @@ watch(props, () => draw())
 /**
  * Methods
  */
-
-// Validate the string representation of the molecule
-function isValidMolString(s: string) {
-	const mol = window.RDKit.get_mol(s || 'invalid')
-	const isValidMol = isValid(mol)
-	mol?.delete()
-	return isValidMol
-}
 
 // Get highlight details for molecule
 function getMolDetails(mol: JSMol | null, qmol: JSMol | null) {

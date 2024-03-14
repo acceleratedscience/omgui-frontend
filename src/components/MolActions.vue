@@ -96,6 +96,12 @@ const forceSelectReload: ComputedRef<string> = computed(() => {
 })
 
 /**
+ * Logic
+ */
+
+useStickyObserver('#actions')
+
+/**
  * Hooks
  */
 
@@ -103,12 +109,6 @@ const forceSelectReload: ComputedRef<string> = computed(() => {
 watch(selectedSelect, (newVal) => {
 	dispatchSelect(newVal)
 })
-
-/**
- * Logic
- */
-
-useStickyObserver('#actions')
 
 /**
  * Methods

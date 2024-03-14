@@ -1,4 +1,5 @@
 <template>
+	<BreadCrumbs slotRight="Hello" />
 	<MolProps />
 	<MolActions />
 	<div id="resp-container">
@@ -16,7 +17,7 @@
 					:checked="molGridStore.sel.includes(i)"
 				/>
 				<MolRender
-					:id="mol.identifiers.inchi"
+					:id="`mol-svg-${i}`"
 					:structure="mol.identifiers.isomeric_smiles.toString()"
 					:width="200"
 					:height="200"
@@ -83,7 +84,7 @@ const molGridStore = useMolGridStore()
 import { fileSystemApi } from '@/api/ApiService'
 
 // Components
-import MolPagination from '@/components/MolPagination.vue'
+import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import MolProps from '@/components/MolProps.vue'
 import MolRender from '@/components/MolRender.vue'
 import MolActions from '@/components/MolActions.vue'
@@ -132,6 +133,10 @@ const columns: ComputedRef<number | null> = computed(() => {
 // })
 
 /**
+ * Logic
+ */
+
+/**
  * Hooks
  */
 
@@ -168,10 +173,6 @@ onBeforeUnmount(() => {
 	// Clear store
 	molGridStore.clear()
 })
-
-/**
- * Logic
- */
 
 /**
  * Methods

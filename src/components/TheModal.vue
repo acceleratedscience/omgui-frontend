@@ -17,8 +17,16 @@ import { useModalStore } from '@/stores/ModalStore'
 const modalStore = useModalStore()
 
 // Definitions
-const loadError = ref(false as boolean)
-const dynamicModule = shallowRef(null as Component | null)
+const loadError = ref<boolean>(false)
+const dynamicModule = shallowRef<Component | null>(null)
+
+/**
+ * Logic
+ */
+
+if (modalStore.modalName) {
+	loadDynamicComponent(modalStore.modalName)
+}
 
 /**
  * Hooks
@@ -30,14 +38,6 @@ watch(
 		if (newModalName) loadDynamicComponent(newModalName)
 	},
 )
-
-/**
- * Logic
- */
-
-if (modalStore.modalName) {
-	loadDynamicComponent(modalStore.modalName)
-}
 
 /**
  * Methods

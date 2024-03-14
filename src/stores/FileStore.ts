@@ -12,27 +12,17 @@ import router from '@/router'
 import { map_fileType2Module } from '@/utils/maps'
 
 // Type declarations
-import type { FileErrCode, File } from '@/types'
-type State = {
-	_meta: {
-		size: number | null
-		timeCreated: number | null
-		timeEdited: number | null
-		fileType: string
-		ext: string
-		ext2: string
-		errCode: FileErrCode
-	}
-	_filename: string
-	_path: string
-	_pathAbsolute: string
-	_data: string
+import type { File } from '@/types'
+// The State type is just a copy of the File type but with underscored keys.
+type State = AddUnderscore<File>
+type AddUnderscore<T> = {
+	[P in keyof T as `_${string & P}`]: T[P]
 }
 
 // Initial state
 function getInitialState(): State {
 	return {
-		_meta: {
+		__meta: {
 			size: null, // File size in bytes
 			timeCreated: null, // Timestamp in ms
 			timeEdited: null, // Timestamp in ms
@@ -53,7 +43,7 @@ export const useFileStore = defineStore('fileStore', {
 	state: () => getInitialState(),
 
 	getters: {
-		data(): string {
+		data(): string | undefined {
 			return this._data
 		},
 		path(): string {
@@ -63,25 +53,25 @@ export const useFileStore = defineStore('fileStore', {
 			return this._pathAbsolute
 		},
 		isDir(): boolean {
-			return this._meta.fileType == 'dir'
+			return this.__meta.fileType == 'dir'
 		},
 		errCode(): string | null {
-			return this._meta.errCode
+			return this.__meta.errCode
 		},
 
 		// The file's extension.
 		ext(): string {
-			return this._meta.ext
+			return this.__meta.ext
 		},
 
 		// The file's secondary extension (e.g. .mol.json).
 		ext2(): string {
-			return this._meta.ext2
+			return this.__meta.ext2
 		},
 
 		// The file type based on the extension.
 		defaultFileType(): string {
-			return this._meta.fileType
+			return this.__meta.fileType
 		},
 
 		// Lets us detect when a file is being
@@ -99,7 +89,6 @@ export const useFileStore = defineStore('fileStore', {
 
 		// The filename of the module we'll use to view the file.
 		moduleName(): string {
-			console.log(113, this.fileType, map_fileType2Module[this.fileType])
 			return map_fileType2Module[this.fileType]
 		},
 
@@ -115,13 +104,13 @@ export const useFileStore = defineStore('fileStore', {
 		// Load file or directory.
 		loadItem(file: File) {
 			if (!file) return
-			this._meta.size = file._meta.size || null
-			this._meta.timeCreated = file._meta.timeCreated || null
-			this._meta.timeEdited = file._meta.timeEdited || null
-			this._meta.fileType = file._meta.fileType || ''
-			this._meta.ext = file._meta.ext || ''
-			this._meta.ext2 = file._meta.ext2 || ''
-			this._meta.errCode = file._meta.errCode || null
+			this.__meta.size = file._meta.size || null
+			this.__meta.timeCreated = file._meta.timeCreated || null
+			this.__meta.timeEdited = file._meta.timeEdited || null
+			this.__meta.fileType = file._meta.fileType || ''
+			this.__meta.ext = file._meta.ext || ''
+			this.__meta.ext2 = file._meta.ext2 || ''
+			this.__meta.errCode = file._meta.errCode || null
 			this._filename = file.filename || ''
 			this._path = file.path || ''
 			this._pathAbsolute = file.pathAbsolute || ''

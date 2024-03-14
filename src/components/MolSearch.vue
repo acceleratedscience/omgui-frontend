@@ -59,9 +59,8 @@ watch(
 		// (newVal: string) => {
 		const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
 
-		fetch(moleculesApi.filterMolset(filePath, newVal), {
+		fetch(moleculesApi.getMolset(filePath, newVal), {
 			onSuccess: (data) => {
-				console.log(typeof data.mols, data.mols.length)
 				molGridStore.setMolset(JSON.parse(data.mols))
 			},
 		})

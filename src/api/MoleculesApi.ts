@@ -12,12 +12,12 @@ export default class MoleculesApi extends BaseApi {
 		return this.apiClient.post(`/get-mol-data`, { identifier })
 	}
 
-	getMolVizData(inchi: string) {
-		return this.apiClient.post(`/get-mol-viz-data`, { inchi })
+	getMolVizData(inchi_or_smiles: string) {
+		return this.apiClient.post(`/get-mol-viz-data`, { inchi_or_smiles })
 	}
 
 	// Filter a molecule set based on query.
-	filterMolset(path: string = '', query: string = '') {
-		return this.apiClient.post('/filter-molset', { path, query })
+	getMolset(path: string = '', query: string = '') {
+		return this.apiClient.post('/get-molset', { path, query })
 	}
 }

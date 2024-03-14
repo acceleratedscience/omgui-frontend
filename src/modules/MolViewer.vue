@@ -1,55 +1,81 @@
+<!-- 
+	The molviewer can be loaded in two different ways:
+	- File: /~/dopamine.mol.json
+	- Direct: /molviewer/dopamine
+
+	Because of this, fetchMolData() and fetchMolVizData() need to be called
+	on a number of different occasions to cover all use cases:
+	
+	fetchMolData()
+	- #case-A-1: File/Direct - When the component is loaded.
+	- #case-A-2: Direct - When going from one mol-by-identifier to another, by watching props.identifier.
+	
+	fetchMolVizData()
+	- #case-B-1: File/Direct - When the component is loaded.
+	- #case-B-2: File - When going from one mol file to another, by watching inchi.
+	- #case-B-3: Direct - After then fetchMolData() has completed, when the identifier was not a SMILES or inchi.
+
+	When testing, make sure to always check the following scenarios:
+	- Open molecule file
+	- Find molecule by identifier
+	- Go from one molecule-by-identifier to another
+	- Go from one molecule file to another
+	- Go from one molecule file to a molecule-by-identifier
+	- Go from one molecule-by-identifier to a molecule file
+
+ -->
+
 <template>
+	<!-- Links for testing going from one molecule to another -->
+	<!-- <router-link to="/~/_mols/mol_a.mol.json">file A</router-link>&nbsp;&nbsp;
+	<router-link to="/~/_mols/mol_b.mol.json">file B</router-link>&nbsp;&nbsp;
+	<router-link to="/molviewer/penguinone">idfr A</router-link>&nbsp;&nbsp;
+	<router-link to="/molviewer/serotonin">idfr B</router-link>
+	<br /><br /><br /> -->
+
 	<!-- JSON-only view -->
 	<!--
 		Note: this is only used when molviewer is loaded directly.
 		When we're opening a file, there's general viewer override
 		logic which lives in the fileStore, see fileTypeOverride.
 	 -->
-	<template v-if="route.query.use">
+	<template v-if="mol && route.query.use">
 		<JsonViewer :data="mol" />
 	</template>
 
-	<!-- Input screen -->
-	<div v-else-if="!isFile && (!props.identifier || loadingError)">
-		<h3>Display any molecule</h3>
-		<p>
-			Accepted identifiers are:
-			<b><a href="#" @click.prevent="(e) => fillIn('inchi')">InChI</a></b>
-			or <b><a href="#" @click.prevent="(e) => fillIn('smiles')">SMILES</a></b
-			>.<br />
-			When a molecule is listed on PubChem, you can also use its
-			<b><a href="#" @click.prevent="(e) => fillIn('name')">name</a></b
-			>, <b><a href="#" @click.prevent="(e) => fillIn('inchikey')">InChIKey</a></b> or
-			<b><a href="#" @click.prevent="(e) => fillIn('pid')">PID</a></b
-			>.
-		</p>
-		<form id="input-form" @submit.prevent="displayMol">
-			<div v-if="loadingError" class="error-msg">{{ loadingError }}</div>
-			<div class="fields">
-				<cv-text-input
-					v-model="ipIdentifier"
-					type="text"
-					placeholder="dopamine"
-					:hide-label="true"
-				/>
-				<cv-button size="default" :disabled="!!loading">{{
-					loading ? 'Loading...' : 'Display'
-				}}</cv-button>
-			</div>
-		</form>
-	</div>
-
-	<!-- Molecule viewer -->
 	<template v-else>
+		<!-- Visualization -->
 		<div id="mol-render" :class="{ headless: mainStore.headless }">
+			<!--
+				We could use the MolRender component to render the SVG in the frontend,
+				the same way we do it in the MolGrid module. However, MolRender requires
+				a SMILES string as input structure and rdkit-js doesn't let us convert
+				InChI to SMILES, so when the identifier string is an InChI, we have to
+				wait for the main fetchMolData API call to complete in order to get the
+				SMILES, which results in a huge delay. So instead we fetch the SVG from
+				the API together with the 3D data in a separate call, which is much faster.
+			-->
+			<!-- <div class="container-2d">
+				<MolRender
+					v-if="mol.identifiers.canonical_smiles"
+					id="mol-svg"
+					:structure="mol.identifiers.canonical_smiles.toString()"
+					:width="300"
+					:height="300"
+					svg-mode
+				/>
+			</div> -->
 			<div class="container-2d" v-html="molViewerStore.svg"></div>
 			<div class="container-3d" ref="$container3d"></div>
 		</div>
 
+		<!-- Page content -->
 		<div id="content-wrap">
 			<!-- Left main column -->
 			<div class="col-left">
-				<BreadCrumbs v-if="isFile" :path="fileStore.path" />
+				<BreadCrumbs v-if="isFile" />
+
+				<!-- Title -->
 				<div id="title-wrap">
 					<div class="v-align">
 						<SvgServe
@@ -66,30 +92,46 @@
 				</div>
 
 				<template v-if="mol">
+					<!-- Identification -->
 					<div id="identification">
 						<div>
 							<b>InChI: </b>
-							<span id="data-inchi">{{ mol?.identifiers?.inchi }}</span>
+							<span v-if="mol?.identifiers?.inchi" id="data-inchi">{{
+								mol?.identifiers?.inchi
+							}}</span>
+							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>InChIKey: </b>
-							<span id="data-inchikey">{{ mol?.identifiers?.inchikey }}</span>
+							<span v-if="mol?.identifiers?.inchikey" id="data-inchikey">{{
+								mol?.identifiers?.inchikey
+							}}</span>
+							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>Canonical SMILES: </b>
-							<span id="data-canonical-smiles">{{
-								mol?.identifiers?.canonical_smiles
-							}}</span>
+							<span
+								v-if="mol?.identifiers?.canonical_smiles"
+								id="data-canonical-smiles"
+								>{{ mol?.identifiers?.canonical_smiles }}</span
+							>
+							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>Isomeric SMILES: </b>
-							<span id="data-isomeric-smiles">{{
-								mol?.identifiers?.isomeric_smiles
-							}}</span>
+							<span
+								v-if="mol?.identifiers?.isomeric_smiles"
+								id="data-isomeric-smiles"
+								>{{ mol?.identifiers?.isomeric_smiles }}</span
+							>
+							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>Formula: </b>
-							<span id="data-isomeric-smiles">{{ mol?.identifiers?.formula }}</span>
+							<span v-if="mol?.identifiers?.formula" id="data-isomeric-smiles">{{
+								mol?.identifiers?.formula
+							}}</span>
+							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>PubChem CID: </b>
@@ -100,16 +142,7 @@
 								target="_blank"
 								>{{ mol.identifiers.cid }}</a
 							>
-							<span
-								v-else-if="loading"
-								id="fetching-pubchem"
-								:class="{ error: !!loadingError }"
-								>Fetching</span
-							>
-							<span v-else-if="!!loadingError" class="error"
-								>Failed to connect -
-								<a href="#" @click="(e) => fetchMolData()">retry</a></span
-							>
+							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<br />
 						<router-link to="?use=json" class="dumb">Show JSON</router-link>
@@ -117,58 +150,95 @@
 
 					<hr />
 
-					<div id="synonyms" :style="{ '--truncated-height': truncatedSynonymsHeight }">
-						<h3>Synonyms</h3>
-						<div class="flip-v">
-							<a
-								v-if="truncateSynonyms"
-								href="#"
-								class="toggle-expand"
-								@click.prevent="toggleExpand"
-							></a>
-							<template v-else-if="mol?.synonyms?.length === 0"
-								>This molecule does not have any synonyms.</template
+					<!-- Fetching status -->
+					<BaseFetching
+						v-if="loading && !loadingError"
+						text="Fetching molecule data"
+						:error="loadingError"
+					/>
+
+					<!-- Fetching error -->
+					<!-- To test, see #fetching-error below -->
+					<div v-else-if="loadingError" id="fetch-fail" class="error-msg">
+						<div>
+							Something went wrong fetching the molecule data.
+							<div class="status-msg" v-if="loadingErrorMsg">
+								{{ loadingErrorMsg }}
+							</div>
+						</div>
+						<div>
+							<cv-button kind="danger" size="field" @click="fetchMolData"
+								>Retry</cv-button
 							>
-							<div class="cloak">
-								<div class="synonyms-wrap" :style="{ height: synonymsHeight }">
-									<div
-										v-for="(synonym, i) in mol?.synonyms"
-										:key="i"
-										:title="synonym"
-										:style="{ width: synonymColWidth }"
-									>
-										{{ synonym }}
+						</div>
+					</div>
+
+					<!-- Molecule data -->
+					<template v-else>
+						<!-- Synonyms -->
+						<div
+							id="synonyms"
+							:style="{ '--truncated-height': truncatedSynonymsHeight }"
+						>
+							<h3>Synonyms</h3>
+							<div class="flip-v">
+								<a
+									v-if="truncateSynonyms"
+									href="#"
+									class="toggle-expand"
+									@click.prevent="toggleExpand"
+								></a>
+
+								<div v-if="synonymCount && 'synonyms' in mol" class="cloak">
+									<div class="synonyms-wrap" :style="{ height: synonymsHeight }">
+										<div
+											v-for="(synonym, i) in mol?.synonyms"
+											:key="i"
+											:title="synonym"
+											:style="{ width: synonymColWidth }"
+										>
+											{{ synonym }}
+										</div>
 									</div>
+								</div>
+								<BaseFetching v-else-if="loading" :error="loadingError" />
+								<template v-else
+									>This molecule does not have any synonyms.</template
+								>
+							</div>
+						</div>
+
+						<hr />
+
+						<!-- Properties -->
+						<div id="properties">
+							<h3>Properties</h3>
+							<div
+								v-if="'properties' in mol"
+								class="param-wrap"
+								:style="stylePropWrap"
+							>
+								<div
+									v-for="(val, key) in mol?.properties"
+									:key="key"
+									:title="molViewerStore.propertiesString[key]"
+									:class="{ empty: !val && val !== 0 }"
+									:style="{ width: propColWidth }"
+								>
+									<div class="key">{{ key }}:</div>
+									<div class="filler"></div>
+									<div class="val">{{ val || val === 0 ? val : '-' }}</div>
 								</div>
 							</div>
 						</div>
-					</div>
 
-					<hr />
+						<!-- <hr /> -->
 
-					<div id="parameters">
-						<h3>Parameters</h3>
-						<div class="param-wrap" :style="{ height: paramsHeight }">
-							<div
-								v-for="(val, key) in mol?.properties"
-								:key="key"
-								:title="molViewerStore.propertiesString[key]"
-								:class="{ empty: !val && val !== 0 }"
-								:style="{ width: paramColWidth }"
-							>
-								<div class="key">{{ key }}:</div>
-								<div class="filler"></div>
-								<div class="val">{{ val || val === 0 ? val : '-' }}</div>
-							</div>
-						</div>
-					</div>
-
-					<hr />
-
-					<div id="analysis">
-						<h3>Analysis</h3>
-						Coming soon...
-					</div>
+						<!-- <div id="analysis">
+							<h3>Analysis</h3>
+							Coming soon...
+						</div> -->
+					</template>
 				</template>
 			</div>
 
@@ -193,21 +263,18 @@ import '@/TEMP/miew/dist/miew.min.css'
 import * as $3Dmol from '3dmol/build/3Dmol.js'
 
 // Vue
-import { ref, onMounted, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue'
-import type { ComputedRef, PropType } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
+import type { ComputedRef } from 'vue'
 
 // Router
-import { useRouter, useRoute } from 'vue-router'
-const router = useRouter()
+import { useRoute } from 'vue-router'
 const route = useRoute()
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
-import { useFileStore } from '@/stores/FileStore'
-import { useMolViewerStore, type Mol } from '@/stores/MolViewerStore'
+import { useMolViewerStore } from '@/stores/MolViewerStore'
 const mainStore = useMainStore()
 const molViewerStore = useMolViewerStore()
-const fileStore = useFileStore()
 
 // API
 import { moleculesApi } from '@/api/ApiService'
@@ -217,27 +284,26 @@ import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import JsonViewer from '@/modules/JsonViewer.vue'
 import IconButton from '@/components/IconButton.vue'
 import SvgServe from '@/components/SvgServe.vue'
+import BaseFetching from '@/components/BaseFetching.vue'
 
 // Util
 import { capitalize } from '@/utils/helpers'
+import initRDKit from '@/utils/rdkit/initRDKit'
 
 // Type declarations
-type Props = {
-	identifier?: string
-}
+import type { Mol, TempMol } from '@/types'
+import type { JSMol } from '@/utils/rdkit/tsTypes'
 
 // Props
-const props = defineProps({
-	identifier: {
-		type: String as PropType<Props['identifier']>,
-	},
-})
+const props = defineProps<{
+	identifier?: string
+}>()
 
 // Definitions
 const $container3d = ref<Element | null>(null)
 const loading = ref<Boolean>(false)
-const loadingError = ref<String | false>(false)
-const ipIdentifier = ref<String>('')
+const loadingError = ref<boolean>(false)
+const loadingErrorMsg = ref<string>('')
 const paramColMinWidth = 250
 const synonymColMinWidth = 150
 
@@ -246,7 +312,7 @@ const synonymColMinWidth = 150
  */
 
 // Molecule data
-const mol: ComputedRef<Mol | null> = computed(() => molViewerStore.mol)
+const mol: ComputedRef<Mol | TempMol> = computed(() => molViewerStore.mol)
 
 // Title
 const molName: ComputedRef<string> = computed(() => {
@@ -258,14 +324,15 @@ const molName: ComputedRef<string> = computed(() => {
 })
 
 // Detect how the molecule viewer was opened:
-// - Viewing a file: /~/dopamine.mol.json
-// - Directly: /molviewer/dopamine
+// - File: /~/dopamine.mol.json
+// - Direct: /molviewer/dopamine
 const isFile: ComputedRef<boolean> = computed(() => {
 	return route.name == 'filebrowser' || route.name == 'headless-filebrowser'
 })
 
-// Synonyms
+// Synonyms section
 const synonymCount: ComputedRef<number> = computed(() => {
+	if (!('synonyms' in mol.value)) return 0
 	return mol.value?.synonyms ? mol.value.synonyms.length : 0
 })
 const synonymsHeight: ComputedRef<string> = computed(() => {
@@ -287,82 +354,112 @@ const truncatedSynonymsHeight: ComputedRef<string> = computed(() => {
 	return truncateSynonyms.value ? '110px' : ''
 })
 
-// Parameters
-const paramColCount: ComputedRef<number> = computed(() => {
+// Properties section
+const propColCount: ComputedRef<number> = computed(() => {
 	if (!mainStore.contentWidth) return 3
 	return Math.floor(mainStore.contentWidth / paramColMinWidth) || 1
 })
-const paramColWidth: ComputedRef<string> = computed(() => {
-	return `calc((100% - ${(paramColCount.value - 1) * 40}px) / ${paramColCount.value})`
+const propColWidth: ComputedRef<string> = computed(() => {
+	return `calc((100% - ${(propColCount.value - 1) * 40}px) / ${propColCount.value})`
 })
-const paramsHeight: ComputedRef<string> = computed(() => {
+const stylePropWrap: ComputedRef<{ height?: string }> = computed(() => {
+	if (!('properties' in mol.value)) return {}
 	const count = mol.value?.properties ? Object.keys(mol.value.properties).length : 0
-	const height = Math.ceil(count / paramColCount.value) * 22
-	return `${height}px`
+	const height = Math.ceil(count / propColCount.value) * 22
+	return height ? { height: `${height}px` } : {}
 })
+
+/**
+ * Logic
+ */
+
+// While waiting for the API, prepopulate the UI where possible.
+if (props.identifier) {
+	if (props.identifier.startsWith('InChI=')) {
+		// InChI --> prepopulate inchi field only.
+		molViewerStore.setMolIdentifier('inchi', props.identifier)
+		fetchMolVizData(props.identifier) // #case-B-1
+	} else {
+		// SMILES --> prepopulate other identifiers and generate the SVG.
+		// OTHER --> this won't do anything, we'll call fetchMolVizData later.
+		tryPrepopulateFromSmiles(props.identifier)
+		fetchMolVizData(props.identifier) // #case-B-1
+	}
+} else if (molViewerStore.inchi) {
+	// When opening a molecule file.
+	fetchMolVizData(molViewerStore.inchi) // #case-B-1
+}
+
+// Fetch mol data from the API.
+fetchMolData() // #case-A-1
 
 /**
  * Hooks
  */
 
-onMounted(async () => {
-	// When toggling headless mode, we need to re-render the 3D molecule.
-	if (molViewerStore.mol && molViewerStore.sdf) {
-		init3DViewer()
-	}
-})
+// onMounted(async () => {
+// 	// When toggling headless mode, we need to re-render the 3D molecule.
+// 	if (molViewerStore.mol && molViewerStore.sdf) {
+// 		init3DViewer()
+// 	}
+// })
 
-onBeforeMount(async () => {
-	// When toggling headless mode, we don't wanna reload the molecule.
-	if (molViewerStore.mol && molViewerStore.sdf) return
+// If the identifier is a SMILES, we can use rdkit-js to generate
+// most other identifiers and generate the SVG on the fly, without
+// having to wait for the API.
+async function tryPrepopulateFromSmiles(identifier: string) {
+	await initRDKit()
+	let rdkMol: JSMol | null = window.RDKit.get_mol(identifier)
 
-	if (isFile.value) {
-		// A molecule file is opened --> only fetch viz data.
-		if (fileStore.data) {
-			try {
-				const molData = JSON.parse(fileStore.data)
-				// molData.synonyms = [] // For testing truncation
-				molViewerStore.setMolData(molData)
-				fetchMolVizData()
-				loading.value = false
-			} catch (err) {
-				console.error(err)
-			}
-		}
-	} else if (props.identifier) {
-		// When the molecule viewer is launched from the CLI or Jupyter
-		// (by `display molecule dopamine` for example), we calculate some
-		// of the molecule data in the backend and pass it to the frontend
-		// as the ?data= query parameter. This allows us to display some
-		// more molecule data while we wait for the rest of the molecule
-		// to be fetched. See mol_commands.py > show_mol() in backend repo.
-		//
-		// To do: we should implement RDKit in the frontend so we can always
-		// display identifiers and visualisation before the API returns.
-		if (route.query.data) {
-			const preliminaryData = JSON.parse(route.query.data as string)
-			if (preliminaryData) {
-				const { mol, svg, sdf } = preliminaryData
-				if (mol) molViewerStore.setMolData(mol)
-				if (svg) molViewerStore.setMolVizData(svg, sdf)
-			}
-		}
+	// If the identifier is anything other than a SMILES,
+	// rdkMol will be null and we abort.
+	if (!rdkMol) return
 
-		// Find mol by identifier --> load mol + fetch viz data.
-		fetchMolData()
-	}
-})
+	// Prepopulate
+	const inchi = rdkMol.get_inchi()
+	molViewerStore.setMolIdentifier('canonical_smiles', identifier) // This will trigger the SVG rendering
+	molViewerStore.setMolIdentifier('inchi', inchi)
+	molViewerStore.setMolIdentifier('inchikey', window.RDKit.get_inchikey_for_inchi(inchi))
+
+	// // Rendering the  3D Molecule from the frontend is
+	// // currently not possible with rdkit-js, but when it is,
+	// // we can use the following code to generate the 3D molecule.
+	// // https://github.com/rdkit/rdkit-js/issues/338
+	//
+	// // Add explicit hydrogen atoms, which are
+	// // displayed as spikes in the 3D render.
+	// rdkMol.add_hs()
+	//
+	// // Generate 3D coordinates.
+	// // Functionality missing :(
+	//
+	// // Generate SDF format.
+	// const sdf = rdkMol.get_molblock()
+	// molViewerStore.setMolVizData(null, sdf)
+	// init3DViewer()
+}
 
 // Clear store on exit.
 onBeforeUnmount(clearMolData)
 
-// Update data when going from one mol to another.
+// Update data when going from one mol-by-identifier to another.
 watch(
 	() => props.identifier,
 	(newVal) => {
 		clearMolData()
 		if (newVal) {
-			fetchMolData(newVal)
+			fetchMolData(newVal) // #case-A-2
+		}
+	},
+)
+
+// When going from one molecule file to another, fetchMolVizData will be
+// called before the molecule is loaded, so we need to call it again here.
+watch(
+	() => molViewerStore.inchi,
+	(newVal) => {
+		if (newVal && isFile.value) {
+			fetchMolVizData(newVal) // #case-B-2
 		}
 	},
 )
@@ -376,83 +473,72 @@ function clearMolData() {
 	molViewerStore.clearMol()
 }
 
-// Pre-fill the input screen form.
-function fillIn(idKey: string) {
-	type Identifiers = {
-		inchi: string
-		smiles: string
-		name: string
-		inchikey: string
-		pid: string
-		[key: string]: string
-	}
-
-	const identifiers: Identifiers = {
-		inchi: 'InChI=1S/C10H14O/c1-7-5-9(11)6-8(2)10(7,3)4/h5-6H,1-4H3',
-		smiles: 'CC1=CC(=O)C=C(C1(C)C)C',
-		name: 'penguinone',
-		inchikey: 'RHIYIMQPIGYWEK-UHFFFAOYSA-N',
-		pid: '12564106',
-	}
-	ipIdentifier.value = identifiers[idKey]
-}
-
-// Display a molecule based on user input identifier.
-async function displayMol() {
-	if (ipIdentifier.value) {
-		const success = await fetchMolData(ipIdentifier.value.toString())
-		if (success) {
-			router.push({
-				name: 'molviewer',
-				params: { identifier: ipIdentifier.value.toString() },
-			})
-		}
-	}
-}
-
-// Fetch molecule data from the API based on teh identifier.
+// Fetch molecule data from the API based on the identifier.
 async function fetchMolData(identifier: string | null = null) {
+	console.log('fetchMolData')
+	// console.time('fetchMolData')
 	identifier = identifier || props.identifier || null
 	if (!identifier) return
 
 	let success = false
 	loading.value = true
 	loadingError.value = false
+	loadingErrorMsg.value = ''
 
 	try {
 		const response = await moleculesApi.getMolData(identifier)
 		if (response.status == 200) {
+			// console.timeEnd('fetchMolData')
+
+			// // #fetching-error
+			// // To test error handling.
+			// loadingError.value = true
+			// loadingErrorMsg.value = 'Some status message'
+			// loading.value = false
+			// return
+
 			// Update HTML
 			molViewerStore.setMolData(response.data)
-			fetchMolVizData()
 			success = true
+
+			// If the molviewer is loaded directly with a smiles or inchi as
+			// the identifier, we pre-loaded the visualisation data with a
+			// separate API call. But for any other identifier, we need to
+			// wait until we get the inchi back.
+			if (!molViewerStore.sdf && molViewerStore.inchi) {
+				fetchMolVizData(molViewerStore.inchi) // #case-B-3
+			}
 		} else {
 			// Handle API errors.
-			loadingError.value = response.statusText
-			console.error(loadingError.value, response)
-			ipIdentifier.value = props.identifier || ''
+			loadingError.value = true
+			loadingErrorMsg.value = response.statusText
+			console.error(loadingErrorMsg, response)
 		}
 
 		loading.value = false
 	} catch (err) {
 		// Catch-all error.
-		loadingError.value = 'Something went wrong fetching the molecule data.'
 		console.error(loadingError.value, err)
-		ipIdentifier.value = props.identifier || ''
 	}
 	return success
 }
 
 // Fetch visualization data from the API.
 // I.e. a 2D SVG and an SDF string with 3D coordinates.
-async function fetchMolVizData() {
-	const inchi = molViewerStore.mol?.identifiers?.inchi
-	if (!inchi) return
+async function fetchMolVizData(inchi_or_smiles: string) {
 	try {
-		const response = await moleculesApi.getMolVizData(inchi)
+		// console.time('fetchMolVizData')
+		const response = await moleculesApi.getMolVizData(inchi_or_smiles)
 		if (response.status == 200) {
-			molViewerStore.setMolVizData(response.data.svg, response.data.sdf)
-			init3DViewer()
+			// console.timeEnd('fetchMolVizData')
+
+			// This function will also be called with other identifiers,
+			// in which case nothing happens.
+			if (response.data.svg) {
+				// console.log('fetchMolVizData')
+				molViewerStore.setMolVizData(response.data.svg, response.data.sdf)
+				init3DViewer()
+			}
 		} else {
 			console.error(response.statusText)
 		}
@@ -466,8 +552,7 @@ async function fetchMolVizData() {
 async function init3DViewer() {
 	if (!$container3d.value || !molViewerStore.sdf) return
 
-	// Using 3DMol library - 3dmol.org
-	// render3d_3DMol($container3d.value, molViewerStore.sdf)
+	// render3d_3DMol($container3d.value, molViewerStore.sdf) // Using alt 3DMol library - 3dmol.org
 	render3d_miew($container3d.value, molViewerStore.sdf)
 }
 
@@ -475,22 +560,21 @@ async function init3DViewer() {
 function render3d_miew($container: Element, sdf: string) {
 	const viewer = new Miew({
 		container: $container as HTMLDivElement,
-		// Required for the molecule data without residues, because default mode, Cartoon, visualizes residues.
-		// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/examples/load_from_string.html
-		// reps: [
-		// 	{
-		// 		mode: 'BS',
-		// 		colorer: 'EL',
-		// 		material: 'DF',
-		// 	},
-		// ],
+		// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
 		settings: {
-			// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
 			axes: false,
 			fps: false,
-			// autoRotation: -0.03,
-			// @ts-ignore
-			bg: { color: 0xffffff, transparent: true },
+			camDistance: 3, // Default 2.5 tends to crop some of the molecule.
+			resolution: 'high',
+			zooming: false,
+			bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg
+			// bg: { color: 0xffffff, transparent: true }, // This creates ugly edges
+			// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
+			// shadow: { // Cool but generates weird artifacts
+			// 	on: true,
+			// 	type: 'random',
+			// 	radius: 1,
+			// },
 		},
 	})
 	if (viewer.init()) {
@@ -550,28 +634,6 @@ function toggleExpand(e: Event) {
 
 <style lang="scss" scoped>
 /**
- * Input screen
- */
-
-#input-form .fields {
-	display: flex;
-	gap: 8px;
-}
-#input-form .fields > div {
-	flex: 1;
-}
-// Carbon fix
-#input-form .fields > div:deep(.bx--text-input) {
-	height: 48px;
-}
-#input-form .fields > button {
-	flex: 0;
-}
-#input-form .error-msg {
-	margin-bottom: 10px;
-}
-
-/**
  * Layout
  */
 
@@ -611,18 +673,21 @@ function toggleExpand(e: Event) {
 	height: 100%;
 	position: relative;
 	max-height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
 	border-radius: 3px;
 	overflow: hidden;
+	// display: flex;
+	// align-items: center;
+	// justify-content: center;
 }
 
 // 2D molecule
 #mol-render .container-2d {
 	background: $soft-bg;
 }
-#mol-render .container-2d:deep() svg rect {
+#mol-render .container-2d:deep() svg {
+	max-width: 100%;
+}
+#mol-render .container-2d:deep() svg rect:first-child {
 	display: none;
 }
 
@@ -631,10 +696,19 @@ function toggleExpand(e: Event) {
 	background: $soft-bg;
 }
 #mol-render .container-3d canvas {
+	max-width: 100%;
 	outline: none;
 }
 
 // Miew styling
+#mol-render .container-3d:deep() .miew-canvas {
+	// A little hack to make the molecule edges extra smooth.
+	width: 200%;
+	height: 200%;
+	transform: scale(0.5);
+	transform-origin: 0 0;
+}
+
 #mol-render .container-3d:deep() .atom-info {
 	position: absolute;
 	bottom: 0;
@@ -677,17 +751,21 @@ function toggleExpand(e: Event) {
 	margin-bottom: 4px;
 }
 
-/* PubChem loader */
-#fetching-pubchem {
-	color: #999;
-	font-style: italic;
+/**
+ * Fail message
+ */
+
+#fetch-fail {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin: 40px 0;
 }
-#fetching-pubchem.error {
-	color: #d00;
-}
-#fetching-pubchem:not(.error)::after {
-	content: '';
-	animation: ellipsis 800ms infinite;
+#fetch-fail .status-msg {
+	color: $black-30;
+	font-size: $font-size-small;
+	line-height: $line-height-small;
+	margin-top: 4px;
 }
 
 /*
@@ -734,27 +812,27 @@ function toggleExpand(e: Event) {
 }
 
 /*
- * Parameters
+ * Properties
  */
 
-#parameters .param-wrap {
+#properties .param-wrap {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: wrap;
 	height: 200px;
 	gap: 0 40px;
 }
-#parameters .param-wrap > div {
+#properties .param-wrap > div {
 	// width is set dynamically, see paramColWidth
 	height: 22px;
 	line-height: 22px;
 	box-sizing: border-box;
 	display: flex;
 }
-#parameters .param-wrap div.empty {
+#properties .param-wrap div.empty {
 	opacity: 0.3;
 }
-#parameters .param-wrap > div .key {
+#properties .param-wrap > div .key {
 	flex: 0 0 auto;
 	padding-right: 4px;
 
@@ -764,7 +842,7 @@ function toggleExpand(e: Event) {
 	text-overflow: ellipsis;
 	max-width: calc(100% - 30px);
 }
-#parameters .param-wrap > div .val {
+#properties .param-wrap > div .val {
 	text-align: right;
 	flex: 0 1 auto;
 	padding-left: 4px;
@@ -775,11 +853,11 @@ function toggleExpand(e: Event) {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-#parameters .param-wrap > div .filler {
+#properties .param-wrap > div .filler {
 	flex: 1 1;
 	overflow: hidden;
 }
-#parameters .param-wrap > div .filler::before {
+#properties .param-wrap > div .filler::before {
 	content: '. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .';
 	opacity: 0.3;
 }

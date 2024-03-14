@@ -6,8 +6,7 @@
 import { defineStore } from 'pinia'
 
 // Type declarations
-import type { Mol } from '@/stores/MolViewerStore'
-export type Molset = Mol[]
+import type { Mol, Molset } from '@/types'
 type SearchMode = 'text' | 'smarts'
 type State = {
 	_molset: Molset | null
@@ -59,6 +58,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// One page of a molecule set.
 		molsetPage(): Molset | null {
+			if (!this._molset) return null
 			const start = (this._page - 1) * this._pageSize
 			const end = start + this._pageSize
 			return this._molset ? this._molset.slice(start, end) : null

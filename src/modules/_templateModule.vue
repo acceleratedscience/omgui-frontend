@@ -5,7 +5,7 @@
 import { ref, onMounted, onBeforeMount, computed, watch, onUpdated, nextTick } from 'vue'
 import type { ComputedRef } from 'vue'
 
-// Ruuter
+// Router
 import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()

@@ -6,43 +6,29 @@
 import { defineStore } from 'pinia'
 
 // Type declarations
-export type Mol = {
-	identifiers: {
-		name: string
-		inchi: string
-		inchikey: string
-		canonical_smiles: string
-		cid: string
-		formula: string
-		isomeric_smiles: string
-	}
-	synonyms: string[]
-	properties: {
-		[key: string]: string | number
-	}
-	property_sources: {
-		[key: string]: {
-			[key: string]: string
-		}
-	}
-	analysis: any[]
-}
+import type { Mol, TempMol } from '@/types'
 type State = {
-	_mol: Mol | null
+	_mol: Mol | TempMol
 	_sdf: string | null
 	_svg: string | null
 }
 
 export const useMolViewerStore = defineStore('molViewerStore', {
 	state: (): State => ({
-		_mol: null,
+		_mol: { identifiers: {} },
 		_sdf: null,
 		_svg: null,
 	}),
 	getters: {
-		mol(): Mol | null {
+		mol(): Mol | TempMol {
 			return this._mol
 		},
+		inchi(): string | null {
+			return this._mol.identifiers.inchi || null
+		},
+		// molLoaded(): boolean {
+		// 	return !!this._mol.identifiers.name
+		// },
 		sdf(): string | null {
 			return this._sdf
 		},
@@ -50,7 +36,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			return this._svg
 		},
 		propertiesString(): Record<string, string> {
-			if (!this._mol) return {}
+			if (!this._mol || !('properties' in this._mol)) return {}
 
 			const props: Record<string, string> = {}
 			for (const prop in this._mol.properties) {
@@ -68,12 +54,18 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		setMolData(mol: Mol) {
 			this._mol = mol
 		},
+		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
+			this._mol.identifiers[identifier] = value
+		},
+		// setMolSDF(sdf: string) {
+		// 	this._sdf = sdf
+		// },
 		setMolVizData(svg: string, sdf: string) {
-			this._svg = svg
-			this._sdf = sdf
+			if (svg) this._svg = svg
+			if (sdf) this._sdf = sdf
 		},
 		clearMol() {
-			this._mol = null
+			this._mol = { identifiers: {} }
 			this._sdf = null
 			this._svg = null
 		},
