@@ -1,5 +1,10 @@
-// const shell = require('shelljs')
-// const chalk = require('chalk')
+/**
+ * This script is run after the build process.
+ * If the sibling `openad` repository exists,
+ * it renames the `dist` folder to `openad-gui` and
+ * moves it to the sibling `openad` repository.
+ */
+
 import shell from 'shelljs'
 import chalk from 'chalk'
 
@@ -12,15 +17,16 @@ const dirStructure = [
 	"    /openad-gui  <-- 'dist' was renamed and moved here",
 ]
 
-// Rename the `dist` folder to `openad-gui` and move it to the sibling `openad` repository
+// Check if destination exists.
 if (shell.test('-d', '../openad')) {
 	if (shell.test('-d', '../openad/openad-gui')) {
-		const result = shell.rm('-rf', '../openad/openad-gui')
-		console.log(33, result)
+		// Remove previous build if it exists.
+		shell.rm('-rf', '../openad/openad-gui')
 	}
-	const result1 = shell.mv('dist', '../openad/openad-gui')
-	console.log(34, result1)
+	// Move new build.
+	shell.mv('dist', '../openad/openad-gui')
 
+	// Construct output SUCCESS message.
 	const sep = '******************************************************************'
 	const msg = [
 		"Your build's output folder 'dist' has been renamed to 'openad-gui'",
@@ -35,6 +41,7 @@ if (shell.test('-d', '../openad')) {
 
 	console.log(output)
 } else {
+	// Construct output FAIL message.
 	const sep = '*********************************************************************'
 	const msg = [
 		"No 'openad' sibling repo not found, your dist folder was not moved.",
@@ -47,17 +54,6 @@ if (shell.test('-d', '../openad')) {
 		chalk.gray(dirStructure.join('\n').replace(/was renamed/, 'would be renamed')),
 		chalk.yellow(sep),
 	].join('\n\n')
-
-	// output = output
-	// 	.split('\n')
-	// 	.map((line, i) => {
-	// 		const prefix =
-	// 			i === 0 || i == output.split('\n').length - 1
-	// 				? chalk.yellow('**')
-	// 				: chalk.yellow('  ')
-	// 		return prefix + line
-	// 	})
-	// 	.join('\n')
 
 	console.log(output)
 }

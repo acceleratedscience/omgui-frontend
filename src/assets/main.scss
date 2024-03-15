@@ -2,10 +2,12 @@
  * General
  */
 
+body {
+	// background: $soft-bg;
+}
 #app {
 	// height: min-content;
 	height: 100%; // Required for file-browser to stretch to the bottom.
-	background: $soft-bg;
 	// border: solid 1px red;
 }
 .error-msg {
