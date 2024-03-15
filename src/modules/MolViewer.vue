@@ -397,13 +397,6 @@ fetchMolData() // #case-A-1
  * Hooks
  */
 
-// onMounted(async () => {
-// 	// When toggling headless mode, we need to re-render the 3D molecule.
-// 	if (molViewerStore.mol && molViewerStore.sdf) {
-// 		init3DViewer()
-// 	}
-// })
-
 // If the identifier is a SMILES, we can use rdkit-js to generate
 // most other identifiers and generate the SVG on the fly, without
 // having to wait for the API.
@@ -475,8 +468,7 @@ function clearMolData() {
 
 // Fetch molecule data from the API based on the identifier.
 async function fetchMolData(identifier: string | null = null) {
-	console.log('fetchMolData')
-	// console.time('fetchMolData')
+	// console.log('fetchMolData')
 	identifier = identifier || props.identifier || null
 	if (!identifier) return
 
@@ -675,14 +667,14 @@ function toggleExpand(e: Event) {
 	max-height: 100%;
 	border-radius: 3px;
 	overflow: hidden;
-	// display: flex;
-	// align-items: center;
-	// justify-content: center;
 }
 
 // 2D molecule
 #mol-render .container-2d {
 	background: $soft-bg;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 #mol-render .container-2d:deep() svg {
 	max-width: 100%;

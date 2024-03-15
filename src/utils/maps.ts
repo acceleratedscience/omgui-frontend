@@ -13,14 +13,16 @@ type MultiMap = {
 
 // Maps the different file types to their full
 // display name and their respective module names.
+// File types are defined in _get_file_type() in file_system.py.
 const _map_FileType: MultiMap = {
-	unknown: ['unknown', 'TextViewer'],
+	unk: ['unknown', 'TextViewer'],
 	text: ['text', 'TextViewer'],
 	data: ['data', 'DataViewer'],
 	json: ['json', 'JsonViewer'],
 	mol: ['molecule', 'MolViewer'],
 	molset: ['molecule set', 'MolGrid'],
 	sdf: ['sdf', 'SdfViewer'], // should become part of mol
+	run: ['run', 'TextViewer'],
 }
 
 // Splitting up the above map into two separate maps.

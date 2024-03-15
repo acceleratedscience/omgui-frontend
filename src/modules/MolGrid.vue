@@ -148,24 +148,6 @@ onMounted(async () => {
 	mainStore.SetOnBlurFn(_maybeBlur)
 })
 
-onBeforeMount(async () => {
-	if (isFile.value) {
-		// A molecule file is opened --> only fetch viz data.
-		if (fileStore.data) {
-			try {
-				const molsetData = JSON.parse(fileStore.data)
-				molGridStore.setMolset(molsetData)
-				loading.value = false
-			} catch (err) {
-				console.error(err)
-			}
-		}
-	} else {
-		// May create a standalone version where you can add molecules,
-		// or a version that displays the in-memory list of molecules.
-	}
-})
-
 onBeforeUnmount(() => {
 	// Remove key handlers.
 	document.removeEventListener('keydown', onKeyDown)
