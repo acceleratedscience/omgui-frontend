@@ -1,26 +1,29 @@
 <template>
-	<BreadCrumbs slotRight="Hello" />
+	<BreadCrumbs :slotRight="`${prettyNr(molGridStore.total)} mols`" />
 	<MolProps />
 	<MolActions />
 	<div id="resp-container">
 		<div id="mol-grid" ref="$molGrid">
 			<div
-				v-for="(mol, i) in molGridStore.molsetPage"
+				v-for="(mol, i) in molGridStore.mols"
 				:key="i"
 				class="mol"
-				:class="{ focus: i == molGridStore.focus, sel: molGridStore.sel.includes(i) }"
-				@click="(e) => onMolClick(e, i)"
+				:class="{
+					focus: mol.index! == molGridStore.focus,
+					sel: molGridStore.sel.includes(mol.index!),
+				}"
+				@click="(e) => onMolClick(e, mol.index!)"
 			>
 				<cv-checkbox
-					:label="`${i}`"
-					:value="`${i}`"
-					:checked="molGridStore.sel.includes(i)"
+					:label="`${mol.index!}`"
+					:value="`${mol.index!}`"
+					:checked="molGridStore.sel.includes(mol.index!)"
 				/>
 				<MolRender
-					:id="`mol-svg-${i}`"
+					:id="`mol-svg-${mol.index!}`"
 					:structure="mol.identifiers.isomeric_smiles.toString()"
-					:width="200"
-					:height="200"
+					:width="190"
+					:height="190"
 					svg-mode
 				/>
 
@@ -81,13 +84,16 @@ const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
 
 // API
-import { fileSystemApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import MolProps from '@/components/MolProps.vue'
 import MolRender from '@/components/MolRender.vue'
 import MolActions from '@/components/MolActions.vue'
+
+// Utils
+import { prettyNr } from '@/utils/helpers'
 
 // Type declarations
 type KeyHandlers = {
@@ -118,10 +124,10 @@ const columns: ComputedRef<number | null> = computed(() => {
 
 // const propertyValues: ComputedRef<string[]> = computed(() => {
 // 	const values = []
-// 	for (const mol in molGridStore.molset) {
+// 	for (const mol in molGridStore.mols) {
 // 		{}
 // 		if (mol.properties[key] || mol.properties[key] === 0) {
-// 			values Object.keys(molGridStore.molset[0].properties)
+// 			values Object.keys(molGridStore.mols[0].properties)
 // 		} else {
 // 			return []
 // 		}
@@ -129,32 +135,53 @@ const columns: ComputedRef<number | null> = computed(() => {
 // })
 
 // const molset = computed(() => {
-// 	return molGridStore.molset
+// 	return molGridStore.mols
 // })
 
 /**
  * Logic
  */
 
+// Data is loaded into the store via ViewerDispatch.vue
+
 /**
  * Hooks
  */
 
 onMounted(async () => {
-	// Add keyboard shortcuts
+	// Add keyboard shortcuts.
 	document.addEventListener('keydown', onKeyDown)
 
-	// Add blur listener
-	mainStore.SetOnBlurFn(_maybeBlur)
+	// Add blur listener.
+	mainStore.SetOnBlurFn(maybeBlur)
 })
 
 onBeforeUnmount(() => {
 	// Remove key handlers.
 	document.removeEventListener('keydown', onKeyDown)
 
-	// Clear store
+	// Clear store.
 	molGridStore.clear()
 })
+
+// Page change.
+watch(
+	() => molGridStore.page,
+	(newVal) => {
+		// fecthNewMols({ page: newVal })
+		// updatePageQuery({ page: newVal })
+	},
+)
+
+// // Url change.
+// watch(
+// 	() => route.query,
+// 	(newVal) => {
+// 		// Scroll to top.
+// 		// $molGrid.value?.scrollTo(0, 0)
+// 		const page = Number(newVal.page)
+// 	},
+// )
 
 /**
  * Methods
@@ -213,7 +240,7 @@ function nothingSelected() {
 }
 
 // Registrer blur event when clicked outside of the molecule grid.
-function _maybeBlur(e: MouseEvent) {
+function maybeBlur(e: MouseEvent) {
 	if ((e.target as HTMLElement).closest('.mol')) return
 	molGridStore.unsetFocus()
 }
@@ -227,6 +254,37 @@ function onKeyDown(e: KeyboardEvent) {
 	}
 }
 
+// function updatePageQuery(options: { page?: number } = {}) {
+// 	const { page } = options
+// 	const query = { ...route.query }
+// 	if (page == 1) {
+// 		delete query.page
+// 	} else {
+// 		query.page = String(page)
+// 	}
+// 	let queryStr = Object.keys(query)
+// 		.map((key) => `${key}=${query[key]}`)
+// 		.join('&')
+// 	queryStr = queryStr.length ? `?${queryStr}` : ''
+// 	const newPath = '/~/' + route.params.path + queryStr
+// 	// console.log(newPath)
+
+// 	router.push(newPath)
+// }
+
+// function fecthNewMols(options: { page?: number } = {}) {
+// 	const { page } = options
+// 	fetch(moleculesApi.getMolset(fileStore.path, { page }), {
+// 		onSuccess: (data) => {
+// 			console.log(456, data)
+// 			molGridStore.setMolset(data)
+// 		},
+// 		onError: (err) => {
+// 			console.log('!!', err)
+// 		},
+// 	})
+// }
+
 const keyHandlers: KeyHandlers = {
 	ArrowLeft: () => {
 		let i = molGridStore.focus
@@ -238,8 +296,8 @@ const keyHandlers: KeyHandlers = {
 	},
 	ArrowRight: () => {
 		let i = molGridStore.focus
-		if (i === null || !molGridStore.molset) return
-		i = i + 1 > molGridStore.molset.length - 1 ? i : i + 1
+		if (i === null || !molGridStore.mols) return
+		i = i + 1 > molGridStore.mols.length - 1 ? i : i + 1
 		molGridStore.setFocus(i)
 	},
 	ArrowUp: () => {
@@ -250,8 +308,8 @@ const keyHandlers: KeyHandlers = {
 	},
 	ArrowDown: () => {
 		let i = molGridStore.focus
-		if (i === null || !columns.value || !molGridStore.molset) return
-		i = i + columns.value > molGridStore.molset.length - 1 ? i : i + columns.value
+		if (i === null || !columns.value || !molGridStore.mols) return
+		i = i + columns.value > molGridStore.mols.length - 1 ? i : i + columns.value
 		molGridStore.setFocus(i)
 	},
 	Enter: () => {
@@ -323,20 +381,9 @@ const keyHandlers: KeyHandlers = {
 	left: 3px;
 	pointer-events: none;
 }
-// #mol-grid .mol .image {
-// 	display: flex;
-// 	align-items: center;
-// 	justify-content: center;
-// 	font-size: 0;
-// 	line-height: 0;
-// 	// height: 150px;
-// 	// background: pink;
-// }
-// #mol-grid .mol .image:deep() svg {
-// 	max-height: 100%;
-// 	max-width: 100%;
-// 	height: auto;
-// }
+#mol-grid .mol .svg-wrap {
+	margin: 0 -3px;
+}
 #mol-grid .mol .idfr {
 	// Truncate
 	word-wrap: normal;

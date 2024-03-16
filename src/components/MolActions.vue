@@ -18,8 +18,13 @@
 		<div class="filler-2"></div>
 
 		<!-- Sort -->
-		<cv-dropdown id="dd-sort" v-model="selectedSort">
-			<cv-dropdown-item value="" hidden>Sort</cv-dropdown-item>
+		<cv-dropdown
+			id="dd-sort"
+			:class="{ default: !molGridStore.sort }"
+			:modelValue="molGridStore.sort"
+			@update:modelValue="molGridStore.setSort"
+		>
+			<cv-dropdown-item value="">&nbsp;</cv-dropdown-item>
 			<cv-dropdown-item v-for="(item, i) in sortItems" :key="i" :value="item">
 				{{ item }}
 			</cv-dropdown-item>
@@ -76,7 +81,6 @@ import useStickyObserver from '@/utils/sticky-observer'
 
 // Definitions
 const $actions = ref<HTMLElement | null>(null)
-const selectedSort = ref<string>('name')
 const selectedSelect = ref<string>('default')
 const selectActions = ['select all', 'deselect all', 'select matching', 'invert selection']
 const actions = ['remove selected', 'keep selected', 'copy to clipboard', 'save SMILES', 'save CSV'] // prettier-ignore
@@ -115,16 +119,16 @@ watch(selectedSelect, (newVal) => {
  */
 
 async function dispatchSelect(selectAction: string) {
-	if (!molGridStore.molset || !selectAction) return
+	if (!molGridStore.mols || !selectAction) return
 	if (selectAction == 'default') return
 	if (selectAction == 'select all') {
-		molGridStore.setSel([...Array(molGridStore.molset.length).keys()])
+		molGridStore.setSel([...Array(molGridStore.mols.length).keys()])
 	} else if (selectAction == 'deselect all') {
 		molGridStore.setSel([])
 	} else if (selectAction == 'select matching') {
 		// console.log('select matching')
 	} else if (selectAction == 'invert selection') {
-		const allIndices = [...Array(molGridStore.molset.length).keys()]
+		const allIndices = [...Array(molGridStore.mols.length).keys()]
 		const invertedSelection = allIndices.filter((i) => !molGridStore.sel.includes(i))
 		molGridStore.setSel(invertedSelection)
 	}
@@ -196,8 +200,17 @@ function dispatchAction(action: string) {
 #dd-sort {
 	flex: 250px 0 0;
 }
-#dd-sort:deep() #dd-sort-value::before {
+#dd-sort:not(.default):deep() #dd-sort-value::before {
 	content: 'Sort: ';
+}
+#dd-sort.default:deep() #dd-sort-value::before {
+	content: 'Sort';
+}
+#dd-sort.default:deep() .cv-dropdown-item:first-child {
+	display: none;
+}
+#dd-sort:not(.default):deep() .cv-dropdown-item:first-child > .bx--dropdown-link::before {
+	content: 'Unsort';
 }
 #dd-actions,
 #dd-select {
@@ -243,18 +256,6 @@ function dispatchAction(action: string) {
 @media (max-width: $bp-small) {
 	#pages:deep() .display {
 		display: none;
-	}
-}
-
-@media (max-width: $bp-xsmall) {
-	#search-wrap:deep() .toggle > .option.op-text::after {
-		content: 'Tx';
-	}
-	#search-wrap:deep() .toggle > .option.op-smarts::after {
-		content: 'Sm';
-	}
-	#search-wrap:deep() .bx--search-input {
-		padding-right: 103px;
 	}
 }
 </style>

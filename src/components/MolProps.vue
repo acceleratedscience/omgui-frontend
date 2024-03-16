@@ -37,17 +37,7 @@
 
 <script setup lang="ts">
 // Vue
-import {
-	ref,
-	onMounted,
-	onBeforeMount,
-	computed,
-	watch,
-	onUpdated,
-	nextTick,
-	onBeforeUnmount,
-} from 'vue'
-import type { ComputedRef } from 'vue'
+import { ref } from 'vue'
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'
@@ -58,26 +48,6 @@ import SvgServe from '@/components/SvgServe.vue'
 
 // Definitions
 const expand = ref(false)
-
-/**
- * Computed
- */
-
-const identifiers: ComputedRef<string[]> = computed(() => {
-	if (molGridStore.molset) {
-		return Object.keys(molGridStore.molset[0].identifiers)
-	} else {
-		return []
-	}
-})
-
-const availableProps: ComputedRef<string[]> = computed(() => {
-	if (molGridStore.molset) {
-		return Object.keys(molGridStore.molset[0].properties)
-	} else {
-		return []
-	}
-})
 
 /**
  * Methods

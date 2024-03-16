@@ -97,6 +97,18 @@ export function prettySize(bytes: number | null) {
 	}
 }
 
+// Add commas to large numbers
+export function prettyNr(nr: number, imperial: boolean = true) {
+	if (!nr && nr !== 0) return
+
+	if (imperial) {
+		return nr.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+	} else {
+		const output = nr.toString().replace(/,(\d{1,2})$/, '.$1')
+		return output.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+	}
+}
+
 // Capitalize the first letter of a string.
 export function capitalize(str: string) {
 	if (!str) return ''

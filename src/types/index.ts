@@ -87,6 +87,7 @@ export type FileErrCode =
 
 // A molecule object, as returned by the API.
 export type Mol = {
+	index?: number // For the molgrid position
 	identifiers: {
 		name: string
 		inchi: string
@@ -116,3 +117,12 @@ export type TempMol = {
 
 // A set of molecules.
 export type Molset = Mol[]
+
+// The API response for molset page.
+export type MolsetApi = {
+	mols: Molset // Paginated subset of the molset
+	total: number
+	page: number
+	pageSize: number
+	pageTotal: number
+}

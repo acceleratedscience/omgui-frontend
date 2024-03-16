@@ -50,7 +50,7 @@ import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
 
 // Type declarations
-import type { File, Molset, Mol } from '@/types'
+import type { File, Molset, MolsetApi, Mol } from '@/types'
 type RouteType = 'dir' | 'file' | 'error' | null
 
 // Definitions
@@ -84,8 +84,15 @@ parseRoute()
  */
 
 // Update file or clear store when route changes.
-watch([() => route.path, () => route.query], () => {
+// watch([() => route.path, () => route.query], () => {
+watch([() => route.path], () => {
 	parseRoute()
+	// console.log(222, route.name)
+	// if (route.name != 'molgrid') {
+	// 	parseRoute()
+	// } else {
+	// 	console.log('NOPE')
+	// }
 })
 
 watch(
@@ -120,7 +127,7 @@ async function parseRoute() {
 	} else {
 		// File
 		if (fileStore.__meta.fileType == 'molset') {
-			const data: Molset = file.data
+			const data: MolsetApi = file.data
 			molGridStore.setMolset(data)
 		} else if (fileStore.__meta.fileType == 'mol') {
 			const data: Mol = file.data

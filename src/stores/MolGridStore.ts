@@ -4,14 +4,32 @@
 
 // Vue
 import { defineStore } from 'pinia'
+import router from '@/router'
+
+// Stores
+import { useFileStore } from '@/stores/FileStore'
+const fileStore = useFileStore()
+
+// API
+import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Type declarations
-import type { Mol, Molset } from '@/types'
+import type { Molset, MolsetApi } from '@/types'
 type SearchMode = 'text' | 'smarts'
 type State = {
-	_molset: Molset | null
+	// Data
+	_mols: Molset | null
+	_total: number
+
+	// Query
+	_query: string
+
+	// Pagination
 	_page: number
 	_pageSize: number
+	_sort: string
+
+	// Display
 	_availIdentifiers: string[]
 	_showIdentifiers: string[]
 	_availProps: string[]
@@ -36,33 +54,60 @@ const AVAIL_IDENTIFIERS = [
 const IDFR_DEFAULTS = ['name', 'isomeric_smiles', 'formula']
 const PROP_DEFAULT = ['molecular_weight']
 
-export const useMolGridStore = defineStore('molGridStore', {
-	state: (): State => ({
-		_molset: null,
+function getInitialState(): State {
+	return {
+		// Data
+		_mols: null,
+		_total: 0,
+
+		// Query
+		_query: null,
+
+		// Pagination & Filters
 		_page: 1,
 		_pageSize: PAGE_SIZE,
+		_sort: '',
+
+		// Display
 		_availIdentifiers: AVAIL_IDENTIFIERS, // List of available identifiers
 		_showIdentifiers: IDFR_DEFAULTS, // List of identifiers to show
 		_availProps: [], // List of available properties
 		_showProps: PROP_DEFAULT, // List of properties to show
 		_focus: null, // Index of the focused molecule
 		_sel: [], // Array with selected indices
-		_searchMode: 'text',
+		_searchMode: 'text', // Search mode: 'text' or 'smarts'
 		_searchValue: '',
-	}),
+	}
+}
+
+export const useMolGridStore = defineStore('molGridStore', {
+	state: () => getInitialState(),
 	getters: {
+		/**
+		 * Data
+		 */
+
 		// Entire molecule set.
-		molset(): Molset | null {
-			return this._molset
+		mols(): Molset | null {
+			return this._mols
 		},
 
-		// One page of a molecule set.
-		molsetPage(): Molset | null {
-			if (!this._molset) return null
-			const start = (this._page - 1) * this._pageSize
-			const end = start + this._pageSize
-			return this._molset ? this._molset.slice(start, end) : null
+		// Total number of molecules.
+		total(): number {
+			return this._total
 		},
+
+		/**
+		 * Query
+		 */
+
+		query(): string {
+			return this._query
+		},
+
+		/**
+		 * Pagination & Filters
+		 */
 
 		// Page number.
 		page(): number {
@@ -70,8 +115,20 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		pageTotal(): number {
-			return this._molset ? Math.ceil(this._molset.length / this._pageSize) : 0
+			return Math.ceil(this._total / this._pageSize)
 		},
+
+		pageSize(): number {
+			return this._pageSize
+		},
+
+		sort(): string {
+			return this._sort
+		},
+
+		/**
+		 * Display
+		 */
 
 		// List of all identifiers.
 		availIdentifiers(): string[] {
@@ -119,30 +176,127 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 	},
 	actions: {
+		/**
+		 * Data
+		 */
+
 		// Load molecule set.
-		setMolset(molset: Molset) {
-			this._molset = molset
+		setMolset(molsData: MolsetApi) {
+			this._mols = molsData.mols
+			this._total = molsData.total
+			this._page = molsData.page
+			this._pageSize = molsData.pageSize
 
 			// Store the available properties to show.
-			if (molset[0]) {
-				this._availProps = Object.keys(molset[0].properties)
+			if (molsData.mols[0]) {
+				this._availProps = Object.keys(molsData.mols[0].properties)
 			}
 		},
 
-		// Pagination
+		/**
+		 * Query
+		 */
+
+		setQuery(query: string) {
+			this._query = query || ''
+			this.updateMols()
+		},
+
+		/**
+		 * Pagination & Filters
+		 */
+
+		// Set page
 		setPage(page: number) {
 			this._page = page
+			this.updateMols()
 		},
-		nextPage() {
-			this._page++
+
+		// Set page size
+		setPageSize(pageSize: number) {
+			this._pageSize = pageSize
+			this.updateMols()
 		},
-		prevPage() {
-			this._page--
+
+		setSort(sort: string) {
+			if (sort) {
+				this._sort = sort
+			} else {
+				this._sort = ''
+			}
+			this.updateMols()
 		},
+
+		//
+		//
+
+		// Update the molecule set with filtered data.
+		// This is called by the setFilter actions
+		// every time any filter value changes.
+		// - Update the URL
+		// - Fetch new molecules from the API.
+		updateMols() {
+			this._updateUrlQuery()
+
+			apiFetch(
+				moleculesApi.getMolset(fileStore.path, {
+					query: this.query,
+					page: this.page,
+					pageSize: this.pageSize,
+					sort: this.sort,
+				}),
+				{
+					onSuccess: (data) => {
+						// console.log(456, data)
+						this.setMolset(data)
+					},
+					onError: (err) => {
+						console.log(err)
+					},
+				},
+			)
+		},
+
+		// Update URL query.
+		_updateUrlQuery() {
+			const query = { ...router.currentRoute.value.query }
+			// Query
+			if (this.query) {
+				query.q = this.query
+			} else {
+				delete query.q
+			}
+
+			// Pagination
+			if (this.page == 1) {
+				delete query.page
+			} else {
+				query.page = String(this.page)
+			}
+
+			// Sort
+			if (this.sort) {
+				query.sort = this.sort
+			} else {
+				delete query.sort
+			}
+
+			let queryStr = Object.keys(query)
+				.map((key) => `${key}=${query[key]}`)
+				.join('&')
+			queryStr = queryStr.length ? `?${queryStr}` : ''
+			const newPath = '/~/' + router.currentRoute.value.params.path + queryStr
+			// console.log(newPath)
+
+			router.push(newPath)
+		},
+
+		/**
+		 * Display
+		 */
 
 		// Toggle which identifiers are displayed.
 		toggleIdentifier(key: string) {
-			console.log(22, key, this._showIdentifiers.includes(key), this._showIdentifiers)
 			if (this._showIdentifiers.includes(key)) {
 				this._showIdentifiers = this._showIdentifiers.filter((i) => i !== key)
 			} else {
@@ -207,11 +361,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Clear
 		clear() {
-			this._molset = null
-			this._showProps = []
-			this._showIdentifiers = []
-			this._focus = null
-			this._sel = []
+			Object.assign(this, getInitialState())
 		},
 	},
 })

@@ -15,7 +15,7 @@ type FetchOptions = {
 	loadingError?: Ref<boolean | string> | null
 }
 
-export async function fetch(
+export async function apiFetch(
 	apiCall: Promise<any>,
 	{ onSuccess, onError, loading, loadingError }: FetchOptions,
 ) {

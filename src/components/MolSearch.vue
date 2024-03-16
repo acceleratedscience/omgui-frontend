@@ -36,11 +36,13 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 
 // Stores
+import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
+const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
 
 // API
-import { fetch, moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Components
 // @ts-ignore
@@ -56,15 +58,12 @@ import { debounce, throttle } from '@/utils/helpers'
 watch(
 	() => molGridStore.searchValue,
 	throttle((newVal: string) => {
-		// (newVal: string) => {
-		const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
-
-		fetch(moleculesApi.getMolset(filePath, newVal), {
-			onSuccess: (data) => {
-				molGridStore.setMolset(JSON.parse(data.mols))
-			},
-		})
-		// },
+		molGridStore.setQuery(newVal)
+		// apiFetch(moleculesApi.getMolset(fileStore.path, { query: newVal }), {
+		// 	onSuccess: (data) => {
+		// 		molGridStore.setMolset(data)
+		// 	},
+		// })
 	}, 500),
 )
 </script>
@@ -75,7 +74,7 @@ watch(
 	position: relative;
 }
 #search-wrap:deep() .bx--search-input {
-	padding-right: 141px;
+	padding-right: 145px;
 }
 #search-wrap:deep() .bx--search-close {
 	display: none;
@@ -101,7 +100,7 @@ watch(
 	content: 'Text';
 }
 #search-wrap .toggle > .option.op-smarts::after {
-	content: 'Smart';
+	content: 'Smarts';
 }
 #search-wrap .toggle > .close {
 	width: 36px;
@@ -121,6 +120,7 @@ watch(
 /**
  * Hover
  */
+
 @media (hover: hover) {
 	#search-wrap .toggle > .close:hover::after {
 		content: '';
@@ -132,6 +132,22 @@ watch(
 		height: calc(100% - 8px);
 		background: #eee; // Multiplied equivalent of #e5e5e5 in component
 		mix-blend-mode: multiply;
+	}
+}
+
+/**
+ * Responsive
+ */
+
+@media (max-width: $bp-xsmall) {
+	#search-wrap .toggle > .option.op-text::after {
+		content: 'Tx';
+	}
+	#search-wrap .toggle > .option.op-smarts::after {
+		content: 'Sm';
+	}
+	#search-wrap:deep() .bx--search-input {
+		padding-right: 107px;
 	}
 }
 </style>
