@@ -120,9 +120,16 @@ export type Molset = Mol[]
 
 // The API response for molset page.
 export type MolsetApi = {
+	cacheId: number
 	mols: Molset // Paginated subset of the molset
+	searchStr: string
+	sort: string
+	matching: number[]
 	total: number
 	page: number
 	pageSize: number
 	pageTotal: number
 }
+
+// The URL query object as part of the route.
+export type UrlQuery = Record<string, string | (string | null)[]>

@@ -1,4 +1,5 @@
 import BaseApi from './BaseApi'
+import type { LocationQuery } from 'vue-router'
 
 export default class FileSystemApi extends BaseApi {
 	constructor() {
@@ -28,8 +29,8 @@ export default class FileSystemApi extends BaseApi {
 	}
 
 	// Get file content from path.
-	getFile(path: string = '') {
-		return this.apiClient.post('/get-file', { path })
+	getFile(path: string = '', query: LocationQuery = {}) {
+		return this.apiClient.post('/get-file', { path, query })
 	}
 
 	test() {

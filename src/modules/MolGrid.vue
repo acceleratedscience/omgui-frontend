@@ -10,7 +10,7 @@
 				class="mol"
 				:class="{
 					focus: mol.index! == molGridStore.focus,
-					sel: molGridStore.sel.includes(mol.index!),
+					sel: molGridStore.sel?.includes(mol.index!),
 				}"
 				@click="(e) => onMolClick(e, mol.index!)"
 			>
@@ -44,7 +44,7 @@
 					<template v-for="(key, i) in molGridStore.showProps" :key="i">
 						<!-- Properties -->
 						<div class="prop" :title="`${key}:\n${mol.properties[key] || mol.properties[key] === 0 ? mol.properties[key] : '-'}`">
-							<div class="key">{{ key }}</div>
+							<div class="key" @click="molGridStore.setSort(key)">{{ key }}</div>
 							<div v-copy-on-click="nothingSelected" class="value" :class="{ empty: !mol.properties[key] && mol.properties[key] !== 0 }">
 								{{ mol.properties[key] || mol.properties[key] === 0 ? mol.properties[key] : '-' }}
 							</div>
@@ -122,27 +122,15 @@ const columns: ComputedRef<number | null> = computed(() => {
 	return Math.round($molGrid.value.clientWidth / $mol.clientWidth)
 })
 
-// const propertyValues: ComputedRef<string[]> = computed(() => {
-// 	const values = []
-// 	for (const mol in molGridStore.mols) {
-// 		{}
-// 		if (mol.properties[key] || mol.properties[key] === 0) {
-// 			values Object.keys(molGridStore.mols[0].properties)
-// 		} else {
-// 			return []
-// 		}
-// 	}
-// })
-
-// const molset = computed(() => {
-// 	return molGridStore.mols
-// })
-
 /**
  * Logic
  */
 
 // Data is loaded into the store via ViewerDispatch.vue
+window.onbeforeunload = function () {
+	molGridStore.clear()
+	// return true
+}
 
 /**
  * Hooks
@@ -154,6 +142,10 @@ onMounted(async () => {
 
 	// Add blur listener.
 	mainStore.SetOnBlurFn(maybeBlur)
+
+	// If we're sorting by a non-default property,
+	// we need to activate it in the store.
+	if (route.query.sort) molGridStore.enableProp(route.query.sort.toString())
 })
 
 onBeforeUnmount(() => {
@@ -164,49 +156,36 @@ onBeforeUnmount(() => {
 	molGridStore.clear()
 })
 
-// Page change.
-watch(
-	() => molGridStore.page,
-	(newVal) => {
-		// fecthNewMols({ page: newVal })
-		// updatePageQuery({ page: newVal })
-	},
-)
-
-// // Url change.
-// watch(
-// 	() => route.query,
-// 	(newVal) => {
-// 		// Scroll to top.
-// 		// $molGrid.value?.scrollTo(0, 0)
-// 		const page = Number(newVal.page)
-// 	},
-// )
-
 /**
  * Methods
  */
 
 let lastSelectedRowIndex = ref<number | null>(null)
-let lastSelectedRowSelState = ref<boolean | null>(null)
+let lastSelectedItemSelState = ref<boolean | null>(null)
 
 function onMolClick(e: MouseEvent, i: number) {
 	// Abort molecule selection when the target is a click-to-copy element.
 	const click2CopyTarget =
 		(e.target as HTMLElement).classList.contains('idfr') ||
+		(e.target as HTMLElement).classList.contains('key') ||
 		(e.target as HTMLElement).classList.contains('value')
 	if (!molGridStore.sel.length && click2CopyTarget) return
+
+	// Convert absolute index to display index.
+	const displayIndex = molGridStore.getDisplayIndex(i)
+	if (displayIndex === null) return
+	console.log(111, displayIndex)
 
 	molGridStore.toggleSel(i)
 	molGridStore.setFocus(i)
 
-	const currentRowIndex = i
+	const currentItemIndex = i
 
 	// Batch select with shift
-	if (e.shiftKey && lastSelectedRowSelState.value != null) {
+	if (e.shiftKey && lastSelectedItemSelState.value != null) {
 		if (molGridStore.sel.length && lastSelectedRowIndex.value !== null) {
-			let lowIndex = Math.min(lastSelectedRowIndex.value, currentRowIndex)
-			let highIndex = Math.max(lastSelectedRowIndex.value, currentRowIndex)
+			let lowIndex = Math.min(lastSelectedRowIndex.value, currentItemIndex)
+			let highIndex = Math.max(lastSelectedRowIndex.value, currentItemIndex)
 
 			// When you select from bottom to top, we gotta include the highIndex
 			// When you select from top to bottom, we gotta include the lowIndex
@@ -221,17 +200,18 @@ function onMolClick(e: MouseEvent, i: number) {
 				range.push(i)
 			}
 
-			if (lastSelectedRowSelState.value) {
+			if (lastSelectedItemSelState.value) {
 				molGridStore.addSel(range)
 			} else {
 				molGridStore.removeSel(range)
 			}
 		}
 	} else {
-		lastSelectedRowSelState.value = molGridStore.sel.includes(i)
+		lastSelectedItemSelState.value = molGridStore.sel.includes(i)
 	}
 
-	lastSelectedRowIndex.value = currentRowIndex
+	console.log('>>', lastSelectedRowIndex.value, currentItemIndex)
+	lastSelectedRowIndex.value = currentItemIndex
 }
 
 // Validator that disables the click-to-copy feature when items are selected.
@@ -245,53 +225,26 @@ function maybeBlur(e: MouseEvent) {
 	molGridStore.unsetFocus()
 }
 
+/**
+ * Keyboard functions
+ */
+
 function onKeyDown(e: KeyboardEvent) {
 	// Check if there's any input in focus
 	if (document.activeElement?.tagName == 'INPUT') return
+
+	// Listen
 	if (e.key in keyHandlers) {
 		keyHandlers[e.key]()
 		e.preventDefault()
 	}
 }
 
-// function updatePageQuery(options: { page?: number } = {}) {
-// 	const { page } = options
-// 	const query = { ...route.query }
-// 	if (page == 1) {
-// 		delete query.page
-// 	} else {
-// 		query.page = String(page)
-// 	}
-// 	let queryStr = Object.keys(query)
-// 		.map((key) => `${key}=${query[key]}`)
-// 		.join('&')
-// 	queryStr = queryStr.length ? `?${queryStr}` : ''
-// 	const newPath = '/~/' + route.params.path + queryStr
-// 	// console.log(newPath)
-
-// 	router.push(newPath)
-// }
-
-// function fecthNewMols(options: { page?: number } = {}) {
-// 	const { page } = options
-// 	fetch(moleculesApi.getMolset(fileStore.path, { page }), {
-// 		onSuccess: (data) => {
-// 			console.log(456, data)
-// 			molGridStore.setMolset(data)
-// 		},
-// 		onError: (err) => {
-// 			console.log('!!', err)
-// 		},
-// 	})
-// }
-
 const keyHandlers: KeyHandlers = {
 	ArrowLeft: () => {
 		let i = molGridStore.focus
-		// console.log('A', i)
 		if (i === null) return
 		i = i - 1 < 0 ? i : i - 1
-		// console.log('B', i)
 		molGridStore.setFocus(i)
 	},
 	ArrowRight: () => {
@@ -321,7 +274,7 @@ const keyHandlers: KeyHandlers = {
 		if (molGridStore.focus) {
 			molGridStore.unsetFocus()
 		} else {
-			molGridStore.deselectAll()
+			molGridStore.deselectAll(true)
 		}
 	},
 }

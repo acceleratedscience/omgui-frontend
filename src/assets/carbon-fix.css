@@ -15,11 +15,11 @@
 }
 
 /* Disabled items in dropdown, currently not supported */
-.bx--dropdown--open .bx--dropdown-item[disabled='true'] {
+.bx--dropdown--open .bx--dropdown-item[disabled]:not([disabled='false']) {
 	opacity: 0.5;
 	pointer-events: none;
 }
 /* Hidden items in dropdown, currently not supported */
-.bx--dropdown--open .bx--dropdown-item[hidden='true'] {
+.bx--dropdown--open .bx--dropdown-item[hidden]:not([hidden='false']) {
 	display: none;
 }

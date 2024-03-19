@@ -1,5 +1,5 @@
 <template>
-	<div id="pages">
+	<div id="pages" :class="{ disabled }">
 		<div class="btn" @click="prevPage"><SvgServe filename="icn-caret-left" /></div>
 		<div class="btn" @click="nextPage"><SvgServe filename="icn-caret-right" /></div>
 		<div class="display">
@@ -17,39 +17,25 @@
 </template>
 
 <script setup lang="ts">
-// Vue
-import type { PropType } from 'vue'
-
 // Components
 import SvgServe from '@/components/SvgServe.vue'
 
 // Emits
 const emit = defineEmits(['update:modelValue'])
 
-// Type declarations
-type Props = {
-	total: number
-	modelValue: number
-	max: number
-}
-
 // Props
-const props = defineProps({
-	total: {
-		type: Number as PropType<Props['total']>,
-		required: true,
+const props = withDefaults(
+	defineProps<{
+		total: number
+		modelValue: number
+		max?: number
+		disabled?: boolean
+	}>(),
+	{
+		modelValue: 1,
+		max: 10,
 	},
-	modelValue: {
-		type: Number as PropType<Props['modelValue']>,
-		default: 1,
-	},
-
-	// Maximum number of pages to show.
-	max: {
-		type: Number as PropType<Props['max']>,
-		default: 10,
-	},
-})
+)
 
 /**
  * Methods
@@ -68,6 +54,7 @@ function nextPage() {
 }
 
 function setPage(page: number | string | undefined) {
+	console.log(999, 'setPage!', 999)
 	if (!page) return
 	page = typeof page == 'string' ? parseInt(page) : page
 	emit('update:modelValue', page)
@@ -106,6 +93,14 @@ function setPage(page: number | string | undefined) {
 	height: 100%;
 	opacity: 0;
 	cursor: pointer;
+}
+
+// Disabled state
+#pages.disabled {
+	pointer-events: none;
+}
+#pages.disabled .btn {
+	color: $black-30;
 }
 
 /**

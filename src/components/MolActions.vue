@@ -1,40 +1,35 @@
 <template>
-	<div id="actions" ref="$actions">
+	<div id="actions">
+		<!-- ref="$actions" -->
 		<!-- <cv-text-input hideLabel="true"></cv-text-input> -->
+
+		<!-- Search -->
+		<MolSearch />
 
 		<!-- Pagination -->
 		<BasePagination
-			v-if="molGridStore.pageTotal > 1"
 			:modelValue="molGridStore.page"
 			@update:modelValue="molGridStore.setPage"
 			:total="molGridStore.pageTotal"
 			:max="3"
+			:disabled="molGridStore.pageTotal == 1"
 		/>
-
-		<!-- Search -->
-		<MolSearch />
 
 		<div class="filler-1"></div>
 		<div class="filler-2"></div>
 
 		<!-- Sort -->
-		<cv-dropdown
+		<SortDropdown
 			id="dd-sort"
 			:class="{ default: !molGridStore.sort }"
+			:items="sortItems"
+			:disabledItems="disabledSortItems"
 			:modelValue="molGridStore.sort"
 			@update:modelValue="molGridStore.setSort"
-		>
-			<cv-dropdown-item value="">&nbsp;</cv-dropdown-item>
-			<cv-dropdown-item v-for="(item, i) in sortItems" :key="i" :value="item">
-				{{ item }}
-			</cv-dropdown-item>
-			<cv-dropdown-item v-if="sortItems.length == 1" value="" disabled
-				>(Activate properties to sort)</cv-dropdown-item
-			>
-		</cv-dropdown>
+		/>
 
 		<!-- Selection actions -->
-		<cv-dropdown id="dd-select" v-model="selectedSelect" :key="forceSelectReload">
+		<cv-dropdown id="dd-select" v-model="selectActionsSelect" :key="forceSelectReload">
 			<cv-dropdown-item value="default" hidden>
 				<template v-if="molGridStore.sel.length > 0">
 					({{ molGridStore.sel.length }}) selected
@@ -45,15 +40,21 @@
 				v-for="(selAction, i) in selectActions"
 				:key="i"
 				:value="selAction"
-				:disabled="selAction == 'select matching' && !molGridStore.searchValue"
+				:disabled="selAction == 'select matching' && !molGridStore.searchStr"
 			>
 				{{ selAction }}
 			</cv-dropdown-item>
 		</cv-dropdown>
 
 		<!-- Main actions -->
-		<cv-dropdown id="dd-actions" placeholder="Actions" :disabled="!molGridStore.sel.length">
-			<cv-dropdown-item v-for="(action, i) in actions" :key="i" :value="action">
+		<cv-dropdown
+			id="dd-actions"
+			v-model="mainActionsSelect"
+			:disabled="!molGridStore.sel.length"
+			@change="dispatchMainAction"
+		>
+			<cv-dropdown-item value="default" hidden>Actions</cv-dropdown-item>
+			<cv-dropdown-item v-for="(action, i) in mainActions" :key="i" :value="action">
 				{{ action }}
 			</cv-dropdown-item>
 		</cv-dropdown>
@@ -75,15 +76,17 @@ const molGridStore = useMolGridStore()
 // Components
 import BasePagination from '@/components/BasePagination.vue'
 import MolSearch from '@/components/MolSearch.vue'
+import SortDropdown from '@/components/SortDropdown.vue'
 
 // Utils
 import useStickyObserver from '@/utils/sticky-observer'
 
 // Definitions
-const $actions = ref<HTMLElement | null>(null)
-const selectedSelect = ref<string>('default')
+// const $actions = ref<HTMLElement | null>(null)
+const selectActionsSelect = ref<string>('default')
 const selectActions = ['select all', 'deselect all', 'select matching', 'invert selection']
-const actions = ['remove selected', 'keep selected', 'copy to clipboard', 'save SMILES', 'save CSV'] // prettier-ignore
+const mainActionsSelect = ref<string>('default')
+const mainActions = ['remove selected', 'keep selected', 'copy to clipboard', 'save SMILES', 'save CSV'] // prettier-ignore
 
 /**
  * Computed
@@ -91,6 +94,9 @@ const actions = ['remove selected', 'keep selected', 'copy to clipboard', 'save 
 
 const sortItems: ComputedRef<string[]> = computed(() => {
 	return ['name'].concat(molGridStore.showProps)
+})
+const disabledSortItems: ComputedRef<string[]> = computed(() => {
+	return sortItems.value.length == 1 ? ['Activate properties to sort'] : []
 })
 
 // The selected ticker doesn't automnatically
@@ -110,7 +116,7 @@ useStickyObserver('#actions')
  */
 
 // Selection dropdown
-watch(selectedSelect, (newVal) => {
+watch(selectActionsSelect, (newVal) => {
 	dispatchSelect(newVal)
 })
 
@@ -122,29 +128,26 @@ async function dispatchSelect(selectAction: string) {
 	if (!molGridStore.mols || !selectAction) return
 	if (selectAction == 'default') return
 	if (selectAction == 'select all') {
-		molGridStore.setSel([...Array(molGridStore.mols.length).keys()])
+		molGridStore.setSel([...Array(molGridStore.total).keys()])
 	} else if (selectAction == 'deselect all') {
 		molGridStore.setSel([])
 	} else if (selectAction == 'select matching') {
-		// console.log('select matching')
+		molGridStore.setSel(molGridStore.matching)
 	} else if (selectAction == 'invert selection') {
-		const allIndices = [...Array(molGridStore.mols.length).keys()]
+		const allIndices = [...Array(molGridStore.total).keys()]
 		const invertedSelection = allIndices.filter((i) => !molGridStore.sel.includes(i))
 		molGridStore.setSel(invertedSelection)
 	}
 
-	// Reset so we can reuse
-	// setTimeout(() => {
-	// 	selectedSelect.value = 'deselect all'
-	// }, 1)
+	// Reset for next use.
 	await nextTick()
-	selectedSelect.value = 'default'
+	selectActionsSelect.value = 'default'
 }
-function dispatchAction(action: string) {
+async function dispatchMainAction(action: string) {
 	if (action == 'remove selected') {
-		// console.log('remove')
+		molGridStore.removeMols(molGridStore.sel)
 	} else if (action == 'keep selected') {
-		// console.log('keep')
+		molGridStore.keepMols(molGridStore.sel)
 	} else if (action == 'copy to clipboard') {
 		// console.log('copy to clipboard')
 	} else if (action == 'save SMILES') {
@@ -153,7 +156,9 @@ function dispatchAction(action: string) {
 		// console.log('save CSV')
 	}
 
-	// console.log(action)
+	// Reset for next use.
+	await nextTick()
+	mainActionsSelect.value = 'default'
 }
 </script>
 
@@ -197,21 +202,7 @@ function dispatchAction(action: string) {
 }
 
 // Sort, select & actions
-#dd-sort {
-	flex: 250px 0 0;
-}
-#dd-sort:not(.default):deep() #dd-sort-value::before {
-	content: 'Sort: ';
-}
-#dd-sort.default:deep() #dd-sort-value::before {
-	content: 'Sort';
-}
-#dd-sort.default:deep() .cv-dropdown-item:first-child {
-	display: none;
-}
-#dd-sort:not(.default):deep() .cv-dropdown-item:first-child > .bx--dropdown-link::before {
-	content: 'Unsort';
-}
+
 #dd-actions,
 #dd-select {
 	flex: 150px 0 0;

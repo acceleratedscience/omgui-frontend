@@ -1,8 +1,8 @@
 <template>
 	<div id="search-wrap">
 		<cv-search
-			:modelValue="molGridStore.searchValue"
-			@update:modelValue="molGridStore.setSearchValue"
+			:modelValue="molGridStore.searchStr"
+			@update:modelValue="molGridStore.setSearchQuery"
 			label="TextSmarts"
 			size="lg"
 			type="text"
@@ -10,7 +10,11 @@
 			:hide-label="true"
 		></cv-search>
 		<div class="toggle">
-			<div class="close" :class="{ show: molGridStore.searchValue.length > 0 }">
+			<div
+				class="close"
+				:class="{ show: molGridStore.searchStr.length > 0 }"
+				@click="molGridStore.setSearchQuery('')"
+			>
 				<CloseIcon />
 			</div>
 			<div
@@ -50,22 +54,6 @@ import CloseIcon from '@carbon/icons-vue/es/close/16'
 
 // Utils
 import { debounce, throttle } from '@/utils/helpers'
-
-/**
- * Watchers
- */
-
-watch(
-	() => molGridStore.searchValue,
-	throttle((newVal: string) => {
-		molGridStore.setQuery(newVal)
-		// apiFetch(moleculesApi.getMolset(fileStore.path, { query: newVal }), {
-		// 	onSuccess: (data) => {
-		// 		molGridStore.setMolset(data)
-		// 	},
-		// })
-	}, 500),
-)
 </script>
 
 <style lang="scss" scoped>

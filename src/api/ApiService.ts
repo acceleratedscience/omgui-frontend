@@ -9,7 +9,7 @@ export const moleculesApi = new MoleculesApi()
 export const mainApi = new MainApi()
 
 type FetchOptions = {
-	onSuccess: ((response: any) => void) | null
+	onSuccess?: ((response: any) => void) | null
 	onError?: ((error: any) => void) | null
 	loading?: Ref<boolean> | null
 	loadingError?: Ref<boolean | string> | null

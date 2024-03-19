@@ -43,14 +43,15 @@ const molViewerStore = useMolViewerStore()
 const molGridStore = useMolGridStore()
 
 // API
-import { fileSystemApi } from '@/api/ApiService'
+import { apiFetch, fileSystemApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
 
 // Type declarations
-import type { File, Molset, MolsetApi, Mol } from '@/types'
+import type { File, Molset, MolsetApi, Mol, UrlQuery } from '@/types'
+import type { LocationQuery } from 'vue-router'
 type RouteType = 'dir' | 'file' | 'error' | null
 
 // Definitions
@@ -84,15 +85,8 @@ parseRoute()
  */
 
 // Update file or clear store when route changes.
-// watch([() => route.path, () => route.query], () => {
 watch([() => route.path], () => {
 	parseRoute()
-	// console.log(222, route.name)
-	// if (route.name != 'molgrid') {
-	// 	parseRoute()
-	// } else {
-	// 	console.log('NOPE')
-	// }
 })
 
 watch(
@@ -109,35 +103,42 @@ onBeforeUnmount(fileStore.clear)
 
 // Display a file or directory with the appropriate module.
 async function parseRoute() {
-	console.log('parseRoute')
+	// console.log('parseRoute')
 	const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
-	const file: File = await fetchFile(filePath)
-	if (!file) return
+	const urlQuery: LocationQuery = route.query
+	apiFetch(fileSystemApi.getFile(filePath, urlQuery), {
+		loading: loading,
+		onError: (err) => {
+			console.log('Error in updateMols()', err)
+		},
+		onSuccess: (file: File) => {
+			fileStore.loadItem(file)
 
-	fileStore.loadItem(file)
+			if (fileStore.__meta.fileType == 'dir') {
+				// Directory
+				if (prevRouteType != 'dir') loadModule('FileBrowser')
+				prevRouteType = 'dir'
+			} else if (fileStore.__meta.errCode) {
+				// Error
+				if (prevRouteType != 'error') loadModule(null)
+				prevRouteType = 'error'
+			} else {
+				// File
+				if (fileStore.__meta.fileType == 'molset') {
+					// molGridStore.parseUrlQuery()
+					const data: MolsetApi = file.data
+					molGridStore.setMolset(data)
+				} else if (fileStore.__meta.fileType == 'mol') {
+					const data: Mol = file.data
+					molViewerStore.setMolData(data)
+				}
 
-	if (fileStore.__meta.fileType == 'dir') {
-		// Directory
-		if (prevRouteType != 'dir') loadModule('FileBrowser')
-		prevRouteType = 'dir'
-	} else if (fileStore.__meta.errCode) {
-		// Error
-		if (prevRouteType != 'error') loadModule(null)
-		prevRouteType = 'error'
-	} else {
-		// File
-		if (fileStore.__meta.fileType == 'molset') {
-			const data: MolsetApi = file.data
-			molGridStore.setMolset(data)
-		} else if (fileStore.__meta.fileType == 'mol') {
-			const data: Mol = file.data
-			molViewerStore.setMolData(data)
-		}
-
-		// We can force the usage of a different module with ?use=OtherModule.
-		if (prevRouteType != 'file') loadModule(fileStore.moduleName)
-		prevRouteType = 'file'
-	}
+				// We can force the usage of a different module with ?use=OtherModule.
+				if (prevRouteType != 'file') loadModule(fileStore.moduleName)
+				prevRouteType = 'file'
+			}
+		},
+	})
 }
 
 // Load the dynamic module.
@@ -152,20 +153,6 @@ function loadModule(moduleName: string | null) {
 			loadError.value = true
 		}),
 	)
-}
-
-// Return file contents from API.
-async function fetchFile(path = '') {
-	if (!fileSystemApi) return
-	loading.value = true
-	const { status, data, statusText } = await fileSystemApi.getFile(path)
-	loading.value = false
-	if (status !== 200) {
-		console.error(statusText)
-		return
-	} else {
-		return data
-	}
 }
 </script>
 
