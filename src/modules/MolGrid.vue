@@ -171,15 +171,16 @@ function onMolClick(e: MouseEvent, i: number) {
 		(e.target as HTMLElement).classList.contains('value')
 	if (!molGridStore.sel.length && click2CopyTarget) return
 
-	// Convert absolute index to display index.
-	const displayIndex = molGridStore.getDisplayIndex(i)
-	if (displayIndex === null) return
-	console.log(111, displayIndex)
-
+	// Select and focus clicked molecule.
 	molGridStore.toggleSel(i)
 	molGridStore.setFocus(i)
 
-	const currentItemIndex = i
+	// Convert absolute index to display index.
+	const displayIndex = molGridStore.getDisplayIndex(i)
+	if (displayIndex === null) return
+
+	// Store the current display index.
+	const currentItemIndex = displayIndex
 
 	// Batch select with shift
 	if (e.shiftKey && lastSelectedItemSelState.value != null) {
@@ -187,17 +188,10 @@ function onMolClick(e: MouseEvent, i: number) {
 			let lowIndex = Math.min(lastSelectedRowIndex.value, currentItemIndex)
 			let highIndex = Math.max(lastSelectedRowIndex.value, currentItemIndex)
 
-			// When you select from bottom to top, we gotta include the highIndex
-			// When you select from top to bottom, we gotta include the lowIndex
-			if (lowIndex != lastSelectedRowIndex.value) {
-				lowIndex -= 1
-				highIndex -= 1
-			}
-
 			// Create array with selected range indices.
 			const range = []
-			for (let i = lowIndex; i <= highIndex; i++) {
-				range.push(i)
+			for (let i = lowIndex; i < highIndex; i++) {
+				range.push(molGridStore.matching[i])
 			}
 
 			if (lastSelectedItemSelState.value) {
@@ -210,7 +204,6 @@ function onMolClick(e: MouseEvent, i: number) {
 		lastSelectedItemSelState.value = molGridStore.sel.includes(i)
 	}
 
-	console.log('>>', lastSelectedRowIndex.value, currentItemIndex)
 	lastSelectedRowIndex.value = currentItemIndex
 }
 
