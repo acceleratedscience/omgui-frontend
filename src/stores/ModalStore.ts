@@ -12,6 +12,7 @@ type State = {
 	_modalName: string | null
 	_data: object | null
 	//
+	_html: boolean
 	_content: string | null
 	_size: Size | null
 	_label: string | null
@@ -36,6 +37,7 @@ export const useModalStore = defineStore('modalStore', {
 
 		// When no template is set, ModalMain is loaded,
 		// and the following parameters are used.
+		_html: false,
 		_content: null,
 		_size: null,
 		_label: null,
@@ -65,6 +67,9 @@ export const useModalStore = defineStore('modalStore', {
 		},
 
 		//
+		html(): boolean {
+			return this._html
+		},
 		content(): string | null {
 			return this._content
 		},
@@ -117,6 +122,7 @@ export const useModalStore = defineStore('modalStore', {
 		alert(
 			content: string,
 			options: {
+				html?: boolean
 				size?: Size
 				title?: string
 				primaryBtn?: string
@@ -130,6 +136,7 @@ export const useModalStore = defineStore('modalStore', {
 		) {
 			this._modalName = 'ModalMain'
 			this._content = content
+			this._html = options.html || false
 			this._size = options.size || null
 			this._title = options.title || null
 			this._primaryBtn = options.primaryBtn || confirm ? 'Confirm' : 'Ok'

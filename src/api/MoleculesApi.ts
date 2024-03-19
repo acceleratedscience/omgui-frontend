@@ -18,7 +18,7 @@ export default class MoleculesApi extends BaseApi {
 	}
 
 	// Get one page of a molset, possibly filtered/sorted.
-	getMolset(path: string = '', cacheId: number | null, query: LocationQuery = {}) {
+	getMolset(path: string, cacheId: number | null, query: LocationQuery = {}) {
 		console.log(123, 'getMolset', query)
 		return this.apiClient.post('/get-molset', {
 			path,
@@ -37,5 +37,11 @@ export default class MoleculesApi extends BaseApi {
 	clearFromCache(cacheId: number) {
 		console.log('clearFromCache')
 		return this.apiClient.post('/clear-from-cache', { cacheId })
+	}
+
+	// Save molset changes.
+	// This will override the original molset with the contents of the edited working copy.
+	saveMolsetChanges(path: string, cacheId: number) {
+		return this.apiClient.post('/save-molset-changes', { path, cacheId })
 	}
 }

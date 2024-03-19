@@ -8,7 +8,11 @@
 	>
 		<template v-if="label" v-slot:label>{{ label }}</template>
 		<template v-slot:title>{{ title || 'Alert' }}</template>
-		<template v-if="content" v-slot:content>{{ content }}</template>
+		<template v-if="content" v-slot:content>
+			<span v-if="html" v-html="content"></span>
+			<span v-else-if="content.includes('\n')" v-html="content.replace(/\n/g, '<br>')"></span>
+			<template v-else>{{ content }}</template>
+		</template>
 		<template v-if="otherBtn" v-slot:other-button>{{ otherBtn }}</template>
 		<template v-if="secondaryBtn" v-slot:secondary-button>{{ secondaryBtn }}</template>
 		<template v-if="primaryBtn" v-slot:primary-button>{{ primaryBtn }}</template>
@@ -30,6 +34,7 @@ const emit = defineEmits(['mounted'])
  * Computed
  */
 
+const html = computed(() => modalStore.html)
 const label = computed(() => modalStore.label)
 const title = computed(() => modalStore.title)
 const content = computed(() => modalStore.content)

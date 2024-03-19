@@ -1,5 +1,9 @@
 /**
- * This store is responsible for
+ * This store is responsible for rendering the molecule grid.
+ * It handles the state as well as the API calls.
+ * - - -
+ * For optimal viewing in Visual Studio Code:
+ * cmd + k, cmd + j, cmd + k, cmd + 3
  */
 
 // Vue
@@ -9,41 +13,12 @@ import { nextTick } from 'vue'
 
 // Stores
 import { useFileStore } from '@/stores/FileStore'
+import { useModalStore } from '@/stores/ModalStore'
 const fileStore = useFileStore()
+const modalStore = useModalStore()
 
 // API
 import { apiFetch, moleculesApi } from '@/api/ApiService'
-
-// Type declarations
-import type { Molset, MolsetApi } from '@/types'
-type SearchMode = 'text' | 'smarts'
-type State = {
-	// Status
-	_disableUpdate: boolean
-
-	// Data
-	_cacheId: number | null
-	_mols: Molset | null
-	_total: number
-
-	// Query
-	_searchStr: string
-
-	// Pagination
-	_page: number
-	_pageSize: number
-	_sort: string
-
-	// Display
-	_focus: number | null
-	_sel: number[]
-	_matching: number[]
-	_searchMode: SearchMode
-	_availIdentifiers: string[]
-	_showIdentifiers: string[]
-	_availProps: string[]
-	_showProps: string[]
-}
 
 // Constants
 const PAGE_SIZE = 100
@@ -59,8 +34,43 @@ const AVAIL_IDENTIFIERS = [
 const IDFR_DEFAULTS = ['name', 'isomeric_smiles', 'formula']
 const PROP_DEFAULT = ['molecular_weight']
 
+// Type declarations
+import type { Molset, MolsetApi } from '@/types'
+type SearchMode = 'text' | 'smarts'
+type State = {
+	// Status
+	_disableUpdate: boolean
+	_hasChanges: boolean
+
+	// Data
+	_cacheId: number | null
+	_mols: Molset | null
+	_total: number
+
+	// Search
+	_searchStr: string
+	_searchMode: SearchMode
+
+	// Pagination
+	_page: number
+	_pageSize: number
+
+	// Sort & Filters
+	_sort: string
+
+	// Display
+	_focus: number | null
+	_sel: number[]
+	_matching: number[]
+	_availIdentifiers: string[]
+	_showIdentifiers: string[]
+	_availProps: string[]
+	_showProps: string[]
+}
+
 function getInitialState(): State {
 	return {
+		// Status
 		// When the user changes any of the filter/sort values, we launch
 		// an API request to update the molecules (updateMols). But because
 		// the UI elements are linked to the store values by means of
@@ -69,19 +79,22 @@ function getInitialState(): State {
 		// turn will also trigger the API request. To avoid this, we set
 		// _disableUpdate to true whenever we are updating the store.
 		_disableUpdate: true,
+		_hasChanges: false,
 
 		// Data
 		_cacheId: null,
 		_mols: null,
 		_total: 0,
 
-		// Query
+		// Search
 		_searchStr: '',
 		_searchMode: 'text', // Search mode: 'text' or 'smarts'
 
-		// Pagination & Filters
+		// Pagination
 		_page: 1,
 		_pageSize: PAGE_SIZE,
+
+		// Sort & Filters
 		_sort: '',
 
 		// Display
@@ -98,9 +111,18 @@ function getInitialState(): State {
 export const useMolGridStore = defineStore('molGridStore', {
 	state: () => getInitialState(),
 	getters: {
-		/**
-		 * Data
-		 */
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Status
+
+		hasChanges(): boolean {
+			return this._hasChanges
+		},
+
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Data
 
 		// Molecules visible on this page
 		mols(): Molset | null {
@@ -112,9 +134,10 @@ export const useMolGridStore = defineStore('molGridStore', {
 			return this._total
 		},
 
-		/**
-		 * Query
-		 */
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Search
 
 		searchStr(): string {
 			return this._searchStr
@@ -125,9 +148,10 @@ export const useMolGridStore = defineStore('molGridStore', {
 			return this._searchMode
 		},
 
-		/**
-		 * Pagination & Filters
-		 */
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Pagination
 
 		// Page number.
 		page(): number {
@@ -142,13 +166,19 @@ export const useMolGridStore = defineStore('molGridStore', {
 			return this._pageSize
 		},
 
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Sort & Filters
+
 		sort(): string {
 			return this._sort
 		},
 
-		/**
-		 * Display
-		 */
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Display
 
 		// Index of the molecule in focus.
 		focus(): number | null {
@@ -189,15 +219,17 @@ export const useMolGridStore = defineStore('molGridStore', {
 		showProps(): string[] {
 			return this._showProps
 		},
+
+		// #endregion
 	},
 	actions: {
-		/**
-		 * Data
-		 */
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Data
 
 		// Update the molecule set with filtered data.
-		// This is called by the setFilter actions
-		// every time any filter value changes.
+		// This is called by the page/filter/sort actions
+		// every time any value changes.
 		// - Update the URL
 		// - Fetch new molecules from the API.
 		async updateMols() {
@@ -211,78 +243,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 					console.log('Error in getMolset()', err)
 				},
 			})
-		},
-
-		// Load molecule set.
-		async setMolset(molsData: MolsetApi) {
-			console.log('setMolset', molsData)
-			console.log('(((')
-			this._disableUpdate = true
-
-			this._cacheId = molsData.cacheId
-			this._mols = molsData.mols
-			this._searchStr = molsData.searchStr
-			this._sort = molsData.sort ?? ''
-			this._matching = molsData.matching
-			this._total = molsData.total
-			this._pageSize = molsData.pageSize
-			this._page = molsData.page
-			// console.log(this._page, molsData.page, molsData.pageTotal)
-			// this._page = Math.min(molsData.page, molsData.pageTotal)
-
-			// Store the available properties to show.
-			if (molsData.mols[0]) {
-				this._availProps = Object.keys(molsData.mols[0].properties)
-			}
-
-			await nextTick()
-			this._disableUpdate = false
-			console.log(')))')
-		},
-
-		// Remove molecules from cached set.
-		removeMols(indices: number[]) {
-			apiFetch(
-				moleculesApi.removeFromMolset(
-					this._cacheId!,
-					indices,
-					router.currentRoute.value.query,
-				),
-				{
-					onSuccess: (data) => {
-						this.setMolset(data)
-						this.deselectAll()
-					},
-					onError: (err) => {
-						console.log('Error in removeFromMolset()', err)
-					},
-				},
-			)
-		},
-
-		// Keep selected molecules and remove rest from the set.
-		async keepMols(indices: number[]) {
-			const indicesToRemove = this._matching.filter((i) => !indices.includes(i))
-			console.log(345, indicesToRemove)
-			this.removeMols(indicesToRemove)
-		},
-
-		/**
-		 * Query
-		 */
-
-		// Set query
-		setSearchQuery(query: string) {
-			this._searchStr = query || ''
-			if (!this._disableUpdate) {
-				console.log('>>> 4', this._disableUpdate)
-				this.updateMols() // This calls _updateUrlQuery
-			}
-		},
-
-		// Search mode
-		setSearchMode(mode: SearchMode) {
-			this._searchMode = mode
 		},
 
 		// Update URL query.
@@ -321,16 +281,132 @@ export const useMolGridStore = defineStore('molGridStore', {
 			return query
 		},
 
-		/**
-		 * Pagination & Filters
-		 */
+		// Load molecule set into the state.
+		async setMolset(molsData: MolsetApi) {
+			// console.log('setMolset', molsData)
+			this._disableUpdate = true
+
+			this._cacheId = molsData.cacheId
+			this._mols = molsData.mols
+			this._searchStr = molsData.searchStr
+			this._sort = molsData.sort ?? ''
+			this._matching = molsData.matching
+			this._total = molsData.total
+			this._pageSize = molsData.pageSize
+			this._page = molsData.page
+
+			// Store the available properties to show.
+			if (molsData.mols[0]) {
+				this._availProps = Object.keys(molsData.mols[0].properties)
+			}
+
+			await nextTick()
+			this._disableUpdate = false
+		},
+
+		// Remove molecules from our cached working copy.
+		removeMols(indices: number[]) {
+			apiFetch(
+				moleculesApi.removeFromMolset(
+					this._cacheId!,
+					indices,
+					router.currentRoute.value.query,
+				),
+				{
+					onSuccess: (data) => {
+						this.setMolset(data)
+						this.deselectAll()
+						this._hasChanges = true
+					},
+					onError: (err) => {
+						console.log('Error in removeFromMolset()', err)
+					},
+				},
+			)
+		},
+
+		// Keep selected molecules and remove the rest.
+		async keepMols(indices: number[]) {
+			const indicesToRemove = this._matching.filter((i) => !indices.includes(i))
+			this.removeMols(indicesToRemove)
+		},
+
+		saveChanges() {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolsetChanges(fileStore.path, this._cacheId!), {
+					onSuccess: () => {
+						console.log(444, this._hasChanges)
+						this._hasChanges = false
+						resolve(true)
+						// this.clearWorkingCopy()
+					},
+					onError: (err) => {
+						console.log('Error in saveMolsetChanges()', err)
+						reject(err)
+					},
+				})
+			})
+		},
+
+		// Save changes to the molecule set.
+		saveChanges1() {
+			modalStore.confirm(
+				'Are you sure you want to save your changes?\nThis cannot be undone.',
+				{
+					title: 'Save changes',
+					onSubmit: () => {
+						apiFetch(moleculesApi.saveMolsetChanges(fileStore.path, this._cacheId!), {
+							onSuccess: () => {
+								modalStore.alert('Your changes have been saved.', {
+									title: 'Success',
+								})
+								this._hasChanges = false
+								// this.clearWorkingCopy()
+							},
+							onError: (err) => {
+								modalStore.alert(
+									'<span class="error-msg">Something went wrong saving your changes...</span>',
+									{
+										html: true,
+										title: 'Error',
+									},
+								)
+								console.log('Error in saveMolsetChanges()', err)
+							},
+						})
+					},
+				},
+			)
+		},
+
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Search
+
+		// Set search query
+		setSearchQuery(query: string) {
+			this._searchStr = query || ''
+			if (!this._disableUpdate) {
+				this.updateMols() // This calls _updateUrlQuery
+			}
+		},
+
+		// Search mode
+		setSearchMode(mode: SearchMode) {
+			this._searchMode = mode
+		},
+
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Pagination
 
 		// Set page
 		setPage(page: number) {
 			this._page = page
 
 			if (!this._disableUpdate) {
-				console.log('>>> 3')
 				this.updateMols()
 			}
 		},
@@ -340,7 +416,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 			this._pageSize = pageSize
 
 			if (!this._disableUpdate) {
-				console.log('>>> 2')
 				this.updateMols()
 				this.resetPagination()
 			}
@@ -351,6 +426,11 @@ export const useMolGridStore = defineStore('molGridStore', {
 			this._page = 1
 		},
 
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Sort & Filters
+
 		setSort(sort: string) {
 			if (sort) {
 				this._sort = sort
@@ -359,7 +439,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 			}
 
 			if (!this._disableUpdate) {
-				console.log('>>> 1')
 				this.updateMols()
 			}
 		},
@@ -375,9 +454,10 @@ export const useMolGridStore = defineStore('molGridStore', {
 			return this._matching.indexOf(index) + 1
 		},
 
-		/**
-		 * Display
-		 */
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Display
 
 		// Focus
 		setFocus(index: number) {
@@ -440,15 +520,18 @@ export const useMolGridStore = defineStore('molGridStore', {
 			}
 		},
 
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		//
+		// #region - Clearing
+
 		// Clear
 		async clear() {
 			this._disableUpdate = true
-			console.log('C L E A R')
 			this.clearWorkingCopy()
 			Object.assign(this, getInitialState())
 			await nextTick()
 			this._disableUpdate = false
-			console.log('D O N E')
 		},
 
 		// When you open a molset, we make a working copy

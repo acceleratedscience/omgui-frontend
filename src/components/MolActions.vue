@@ -60,7 +60,7 @@
 		</cv-dropdown>
 
 		<!-- Save -->
-		<cv-button size="sm" :disabled="false">Save</cv-button>
+		<ButtonSave :onSave="molGridStore.saveChanges" :disabled="!molGridStore.hasChanges" />
 	</div>
 </template>
 
@@ -77,6 +77,7 @@ const molGridStore = useMolGridStore()
 import BasePagination from '@/components/BasePagination.vue'
 import MolSearch from '@/components/MolSearch.vue'
 import SortDropdown from '@/components/SortDropdown.vue'
+import ButtonSave from '@/components/ButtonSave.vue'
 
 // Utils
 import useStickyObserver from '@/utils/sticky-observer'

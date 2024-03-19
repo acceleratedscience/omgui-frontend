@@ -4,11 +4,16 @@
 	<button @click="modalStore.alert('Hello world')">simple modal</button>&nbsp;
 	<button
 		@click="
-			modalStore.alert('Hello world', {
+			modalStore.alert('Hello <span style=\'color: red\'>world</span>', {
+				html: true,
 				size: 'md',
 				primaryBtn: 'One',
 				secondaryBtn: 'Two',
 				otherBtn: 'Three',
+				title: 'Here\'s a title',
+				onSubmit,
+				onCancel,
+				onOther,
 			})
 		"
 	>
@@ -112,6 +117,10 @@ function onSubmit() {
 }
 function onCancel() {
 	alert('no')
+	modalStore.hide()
+}
+function onOther() {
+	alert('Other button')
 	modalStore.hide()
 }
 </script>
