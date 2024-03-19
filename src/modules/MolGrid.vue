@@ -71,7 +71,8 @@ import {
 import type { ComputedRef } from 'vue'
 
 // Router
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
+import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 
@@ -79,9 +80,11 @@ const route = useRoute()
 import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
+import { useModalStore } from '@/stores/ModalStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
+const modalStore = useModalStore()
 
 // API
 import { apiFetch, moleculesApi } from '@/api/ApiService'
@@ -124,12 +127,13 @@ const columns: ComputedRef<number | null> = computed(() => {
 
 /**
  * Logic
+ * - - -
+ * Note: Data is loaded into the store via ViewerDispatch.vue
  */
 
-// Data is loaded into the store via ViewerDispatch.vue
 window.onbeforeunload = function () {
+	if (molGridStore.hasChanges) return true
 	molGridStore.clear()
-	// return true
 }
 
 /**
@@ -155,6 +159,22 @@ onBeforeUnmount(() => {
 	// Clear store.
 	molGridStore.clear()
 })
+onBeforeRouteLeave(onBeforeExit)
+onBeforeRouteUpdate(onBeforeExit)
+
+function onBeforeExit(
+	to: RouteLocationNormalized,
+	from: RouteLocationNormalized,
+	next: NavigationGuardNext,
+) {
+	console.log('onBeforeExit')
+	if (molGridStore.hasChanges) {
+		modalStore.alert('You have unsaved changes')
+		next(false)
+	} else {
+		next()
+	}
+}
 
 /**
  * Methods

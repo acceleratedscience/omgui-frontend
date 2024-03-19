@@ -331,6 +331,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 			this.removeMols(indicesToRemove)
 		},
 
+		// Save changes to the molecule set.
 		saveChanges() {
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(moleculesApi.saveMolsetChanges(fileStore.path, this._cacheId!), {
@@ -346,37 +347,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 					},
 				})
 			})
-		},
-
-		// Save changes to the molecule set.
-		saveChanges1() {
-			modalStore.confirm(
-				'Are you sure you want to save your changes?\nThis cannot be undone.',
-				{
-					title: 'Save changes',
-					onSubmit: () => {
-						apiFetch(moleculesApi.saveMolsetChanges(fileStore.path, this._cacheId!), {
-							onSuccess: () => {
-								modalStore.alert('Your changes have been saved.', {
-									title: 'Success',
-								})
-								this._hasChanges = false
-								// this.clearWorkingCopy()
-							},
-							onError: (err) => {
-								modalStore.alert(
-									'<span class="error-msg">Something went wrong saving your changes...</span>',
-									{
-										html: true,
-										title: 'Error',
-									},
-								)
-								console.log('Error in saveMolsetChanges()', err)
-							},
-						})
-					},
-				},
-			)
 		},
 
 		// #endregion

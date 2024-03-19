@@ -4,9 +4,9 @@
 		size="sm"
 		@click="onClick"
 		:disabled="props.disabled && !complete"
-		:class="{ loading, complete }"
+		:class="{ loading, error, complete }"
 		:style="styleButton"
-		:icon="complete ? CheckmarkFilled : null"
+		:icon="error ? ErrorFilled : complete ? CheckmarkFilled : null"
 		>{{ text }}</cv-button
 	>
 </template>
@@ -18,6 +18,8 @@ import { ref, computed } from 'vue'
 // Components
 // @ts-ignore
 import CheckmarkFilled from '@carbon/icons-vue/es/checkmark--filled/16'
+// @ts-ignore
+import ErrorFilled from '@carbon/icons-vue/es/error--filled/16'
 
 // Type declarations
 import type { ComponentPublicInstance } from 'vue'
@@ -25,6 +27,7 @@ import type { ComponentPublicInstance } from 'vue'
 // Definitions
 const text = ref<string>('Save')
 const loading = ref<boolean>(false)
+const error = ref<boolean>(false)
 const complete = ref<boolean>(false)
 const $btn = ref<ComponentPublicInstance | null>(null)
 const fixWidth = ref<number | null>(null)
@@ -59,20 +62,24 @@ const styleButton = computed(() => {
  * Methods
  */
 
-//  emit('click', $event)
-
 async function onClick() {
 	loading.value = true
-	// loading.value = !loading.value
 	fixWidth.value = $btn.value?.$el?.offsetWidth ?? null
-	const success: boolean = await props.onSave()
-	if (success) {
+	try {
+		await props.onSave()
+		loading.value = false
 		complete.value = true
 		setTimeout(() => {
 			complete.value = false
 		}, 2000)
+	} catch (err) {
+		console.error(err)
+		loading.value = false
+		error.value = true
+		setTimeout(() => {
+			error.value = false
+		}, 2000)
 	}
-	loading.value = false
 }
 </script>
 
@@ -82,11 +89,14 @@ async function onClick() {
 	animation: ellipsis 800ms infinite;
 }
 .bx--btn.loading {
-	/* transform: scale(0.8);*/
 	animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both infinite;
 }
+.bx--btn.error {
+	background: $error;
+	color: white;
+}
 .bx--btn.complete {
-	background-color: $success;
+	background: $success;
 	color: white;
 }
 @keyframes shake {
