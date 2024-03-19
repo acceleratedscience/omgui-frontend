@@ -19,6 +19,8 @@
 					:value="`${mol.index!}`"
 					:checked="molGridStore.sel.includes(mol.index!)"
 				/>
+				<IconButton class="icn-btn-smell" icon="icn-smell" @click="previewMolecule(mol)" />
+				<IconButton class="icn-btn-taste" icon="icn-taste" />
 				<MolRender
 					:id="`mol-svg-${mol.index!}`"
 					:structure="mol.identifiers.isomeric_smiles.toString()"
@@ -95,11 +97,13 @@ import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import MolProps from '@/components/MolProps.vue'
 import MolRender from '@/components/MolRender.vue'
 import MolActions from '@/components/MolActions.vue'
+import IconButton from '@/components/IconButton.vue'
 
 // Utils
 import { prettyNr } from '@/utils/helpers'
 
 // Type declarations
+import type { JSMol } from '@/utils/rdkit/tsTypes'
 type KeyHandlers = {
 	[key: string]: () => void
 }
@@ -185,12 +189,14 @@ let lastSelectedRowIndex = ref<number | null>(null)
 let lastSelectedItemSelState = ref<boolean | null>(null)
 
 function onMolClick(e: MouseEvent, i: number) {
-	// Abort molecule selection when the target is a click-to-copy element.
-	const click2CopyTarget =
+	// Abort molecule selection when the target has its own click handler.
+	const targetsToIgnore =
 		(e.target as HTMLElement).classList.contains('idfr') ||
 		(e.target as HTMLElement).classList.contains('key') ||
-		(e.target as HTMLElement).classList.contains('value')
-	if (!molGridStore.sel.length && click2CopyTarget) return
+		(e.target as HTMLElement).classList.contains('value') ||
+		(e.target as HTMLElement).classList.contains('icn-btn')
+	console.log(targetsToIgnore, e.target as HTMLElement)
+	if (!molGridStore.sel.length && targetsToIgnore) return
 
 	// Select and focus clicked molecule.
 	molGridStore.toggleSel(i)
@@ -237,6 +243,10 @@ function nothingSelected() {
 function maybeBlur(e: MouseEvent) {
 	if ((e.target as HTMLElement).closest('.mol')) return
 	molGridStore.unsetFocus()
+}
+
+function previewMolecule(mol: JSMol) {
+	modalStore.display('ModalMolPreview', mol)
 }
 
 /**
@@ -342,15 +352,34 @@ const keyHandlers: KeyHandlers = {
 		0 0 0 1px $blue;
 }
 
+// Checkbox
 #mol-grid .mol .cv-checkbox {
 	position: absolute;
 	top: 3px;
 	left: 3px;
 	pointer-events: none;
 }
+
+// Icons
+#mol-grid .mol .icn-btn {
+	// background: $soft-bg;
+	position: absolute;
+	top: 3px;
+	right: 3px;
+}
+#mol-grid .mol .icn-btn-taste {
+	top: 43px;
+}
+#mol-grid .mol .icn-btn:deep() svg {
+	fill: $black-30;
+}
+
+// Image
 #mol-grid .mol .svg-wrap {
 	margin: 0 -3px;
 }
+
+// Identifiers
 #mol-grid .mol .idfr {
 	// Truncate
 	word-wrap: normal;
@@ -405,6 +434,7 @@ const keyHandlers: KeyHandlers = {
  */
 
 @media (hover: hover) {
+	// Molecule cell highlight
 	#mol-grid .mol:hover::after {
 		content: '';
 		width: 100%;
@@ -415,6 +445,19 @@ const keyHandlers: KeyHandlers = {
 		background: $highlight-soft;
 		mix-blend-mode: multiply;
 		pointer-events: none;
+	}
+
+	// Icons
+	#mol-grid .mol:not(:hover) .icn-btn {
+		display: none;
+	}
+	#mol-grid .mol .icn-btn:hover {
+		background: $black-05;
+		border-radius: 2px;
+	}
+	#mol-grid .mol .icn-btn:hover:deep() svg {
+		fill: $black;
+		pointer-events: none; // Avoid this as e.target
 	}
 }
 

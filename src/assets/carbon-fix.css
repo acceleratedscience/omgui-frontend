@@ -23,3 +23,10 @@
 .bx--dropdown--open .bx--dropdown-item[hidden]:not([hidden='false']) {
 	display: none;
 }
+
+.bx--modal-container {
+	max-height: calc(100% - 40px) !important;
+}
+.bx--modal-content {
+	overflow: auto;
+}

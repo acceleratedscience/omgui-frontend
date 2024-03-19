@@ -199,7 +199,6 @@ async function drawSVGorCanvas() {
 	const mol = window.RDKit.get_mol(props.structure || 'invalid')
 	const qmol = window.RDKit.get_qmol(props.subStructure || 'invalid')
 	const isValidMol = isValid(mol)
-	console.log(99, isValidMol)
 
 	if (props.svgMode && isValidMol) {
 		const svgGenerated = (mol as JSMol).get_svg_with_highlights(getMolDetails(mol, qmol))

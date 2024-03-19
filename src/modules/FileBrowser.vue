@@ -273,7 +273,6 @@ function hidePreviewFile() {
 }
 
 function openFile(file: File) {
-	console.log(99, '/~/' + file.path)
 	router.push('/~/' + file.path)
 }
 

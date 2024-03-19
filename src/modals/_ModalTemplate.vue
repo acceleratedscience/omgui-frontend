@@ -28,7 +28,7 @@ const emit = defineEmits(['mounted']) // <--
  * Hooks
  */
 
-onMounted(() => emit('mounted'))
+onMounted(() => emit('mounted')) // <--
 
 /*
  * Functions

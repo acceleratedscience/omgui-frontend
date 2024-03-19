@@ -1,6 +1,6 @@
 <template>
 	<div
-		id="icn-btn"
+		class="icn-btn"
 		:class="{ on: toggleState }"
 		@click="toggle"
 		:style="{ '--color-off': colorOff, '--color-on': colorOn }"
@@ -53,24 +53,24 @@ function toggle() {
 </script>
 
 <style lang="scss" scoped>
-#icn-btn {
+.icn-btn {
 	width: 40px;
 	height: 40px;
 	padding: 8px;
 	cursor: pointer;
 }
-#icn-btn:deep() svg {
+.icn-btn:deep() svg {
 	fill: var(--color-off);
 }
-#icn-btn.on:deep() svg {
+.icn-btn.on:deep() svg {
 	fill: var(--color-on);
 }
 
 @media (hover: hover) {
-	#icn-btn:not(.on):hover:deep() svg {
+	.icn-btn:not(.on):hover:deep() svg {
 		fill: $black-30;
 	}
-	#icn-btn.on:hover:deep() svg {
+	.icn-btn.on:hover:deep() svg {
 		filter: brightness(80%);
 	}
 }
