@@ -277,7 +277,7 @@ const mainStore = useMainStore()
 const molViewerStore = useMolViewerStore()
 
 // API
-import { moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
@@ -297,11 +297,12 @@ import type { JSMol } from '@/utils/rdkit/tsTypes'
 // Props
 const props = defineProps<{
 	identifier?: string
+	path?: string
 }>()
 
 // Definitions
 const $container3d = ref<Element | null>(null)
-const loading = ref<Boolean>(false)
+const loading = ref<boolean>(false)
 const loadingError = ref<boolean>(false)
 const loadingErrorMsg = ref<string>('')
 const paramColMinWidth = 250
@@ -391,7 +392,7 @@ if (props.identifier) {
 }
 
 // Fetch mol data from the API.
-fetchMolData() // #case-A-1
+fetchMolData(props.identifier, props.path) // #case-A-1
 
 /**
  * Hooks
@@ -466,10 +467,35 @@ function clearMolData() {
 	molViewerStore.clearMol()
 }
 
+async function fetchMolData(identifier: string | null = null, path: string | null = null) {
+	if (identifier) {
+		fetchMolDataByIdentifier(identifier)
+	} else if (path) {
+		fetchMolDataFromMolset(path)
+	}
+}
+
+function fetchMolDataFromMolset(path: string | null = null) {
+	if (!path) return
+	let index: number = parseInt(String(route.query.index)) || 1
+	apiFetch(moleculesApi.getMolDataFromMolset(path, index), {
+		onSuccess: (data) => {
+			molViewerStore.setMolData(data)
+			if (!molViewerStore.sdf && molViewerStore.inchi) {
+				fetchMolVizData(molViewerStore.inchi) // #case-B-3
+			}
+		},
+		onError: (err) => {
+			console.log('Error in getMolDataFromMolset()', err)
+		},
+		loading: loading,
+		loadingError: loadingErrorMsg,
+	})
+}
+
 // Fetch molecule data from the API based on the identifier.
-async function fetchMolData(identifier: string | null = null) {
+async function fetchMolDataByIdentifier(identifier: string | null = null) {
 	// console.log('fetchMolData')
-	identifier = identifier || props.identifier || null
 	if (!identifier) return
 
 	let success = false

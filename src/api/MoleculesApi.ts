@@ -33,6 +33,10 @@ export default class MoleculesApi extends BaseApi {
 		})
 	}
 
+	async getMolDataFromMolset(path: string, index: number = 0) {
+		return this.apiClient.post('/get-mol-data-from-molset', { path, index })
+	}
+
 	// Remove molecules from a molset cache.
 	// Note: we include the query so we can preserve the filter/sort state.
 	removeFromMolset(cacheId: number, indices: number[], query: LocationQuery = {}) {

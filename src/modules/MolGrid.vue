@@ -19,8 +19,12 @@
 					:value="`${mol.index!}`"
 					:checked="molGridStore.sel.includes(mol.index!)"
 				/>
-				<IconButton class="icn-btn-smell" icon="icn-smell" @click="previewMolecule(mol)" />
-				<IconButton class="icn-btn-taste" icon="icn-taste" />
+				<IconButton class="icn-btn-smell" icon="icn-smell" @click="previewMolecule(i)" />
+				<IconButton
+					class="icn-btn-taste"
+					icon="icn-taste"
+					@click="molGridStore.openMolecule(mol.index!)"
+				/>
 				<MolRender
 					:id="`mol-svg-${mol.index!}`"
 					:structure="mol.identifiers.isomeric_smiles.toString()"
@@ -103,7 +107,8 @@ import IconButton from '@/components/IconButton.vue'
 import { prettyNr } from '@/utils/helpers'
 
 // Type declarations
-import type { JSMol } from '@/utils/rdkit/tsTypes'
+// @ts-ignore
+import type { Mol } from '@/utils/types'
 type KeyHandlers = {
 	[key: string]: () => void
 }
@@ -245,8 +250,12 @@ function maybeBlur(e: MouseEvent) {
 	molGridStore.unsetFocus()
 }
 
-function previewMolecule(mol: JSMol) {
-	modalStore.display('ModalMolPreview', mol)
+function previewMolecule(i: number) {
+	const mol = molGridStore.mols ? molGridStore.mols[i] : null
+	console.log(i, mol)
+	if (mol) {
+		modalStore.display('ModalMolPreview', mol)
+	}
 }
 
 /**

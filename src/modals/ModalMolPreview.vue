@@ -1,6 +1,8 @@
 <template>
 	<cv-modal :visible="modalStore.visible" size="xs" @primary-click="onSubmit" class="TEST">
-		<template v-slot:title><h2>Dopamine</h2></template>
+		<template v-slot:title>
+			<h2>{{ capitalize(mol.identifiers.name) || 'Unnamed Molecule' }}</h2>
+		</template>
 		<template v-slot:content>
 			<h3>Identifiers</h3>
 			<div class="param-wrap">
@@ -8,6 +10,7 @@
 					<div class="key">{{ key }}</div>
 					<div class="filler"></div>
 					<div class="val">{{ val ? val : '-' }}</div>
+					z
 				</div>
 			</div>
 
@@ -40,12 +43,17 @@ import { computed, onMounted, ref } from 'vue'
 import { useMainStore } from '@/stores/MainStore'
 import { useModalStore } from '@/stores/ModalStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
+import { useMolGridStore } from '@/stores/MolGridStore'
 const mainStore = useMainStore()
 const modalStore = useModalStore()
 const molViewerStore = useMolViewerStore()
+const molGridStore = useMolGridStore()
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
+
+// Util
+import { capitalize } from '@/utils/helpers'
 
 // Type declarations
 import type { Mol } from '@/types'
@@ -74,7 +82,8 @@ onMounted(() => {
  */
 
 async function onSubmit() {
-	alert('OPEN')
+	molGridStore.openMolecule(mol.value.index!)
+	modalStore.hide()
 }
 </script>
 

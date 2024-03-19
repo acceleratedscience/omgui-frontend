@@ -512,6 +512,12 @@ export const useMolGridStore = defineStore('molGridStore', {
 			}
 		},
 
+		// Open the molecule detail page.
+		openMolecule(index: number) {
+			const path = `/molviewer/~/${fileStore.path}?index=${index}`
+			router.push(path)
+		},
+
 		// #endregion
 		///////////////////////////////////////////////////////////////
 		//
