@@ -59,6 +59,7 @@ type State = {
 	_sort: string
 
 	// Display
+	_highlight: string
 	_focus: number | null
 	_sel: number[]
 	_matching: number[]
@@ -98,6 +99,7 @@ function getInitialState(): State {
 		_sort: '',
 
 		// Display
+		_highlight: '', // Substring that will be highlighted in the SVG
 		_focus: null, // Index of the focused molecule
 		_sel: [], // Array with selected indices
 		_matching: [], // Array with indices of molecules matching the query
@@ -180,6 +182,11 @@ export const useMolGridStore = defineStore('molGridStore', {
 		//
 		// #region - Display
 
+		// Substring that will be highlighted in the SVG.
+		highlight(): string {
+			return this._highlight
+		},
+
 		// Index of the molecule in focus.
 		focus(): number | null {
 			return this._focus
@@ -235,7 +242,8 @@ export const useMolGridStore = defineStore('molGridStore', {
 		async updateMols() {
 			const query = this._setUrlQuery()
 
-			apiFetch(moleculesApi.getMolset(fileStore.path, this._cacheId, query), {
+			const smartsMode = this._searchMode == 'smarts'
+			apiFetch(moleculesApi.getMolset(fileStore.path, this._cacheId, query, smartsMode), {
 				onSuccess: (data) => {
 					this.setMolset(data)
 				},
@@ -354,9 +362,13 @@ export const useMolGridStore = defineStore('molGridStore', {
 		//
 		// #region - Search
 
-		// Set search query
-		setSearchQuery(query: string) {
-			this._searchStr = query || ''
+		// Set search string
+		setSearchStr(searchStr: string) {
+			// console.log('****setHighlight')
+			this._searchStr = searchStr || ''
+			if (this._searchMode == 'smarts') {
+				this.setHighlight(searchStr)
+			}
 			if (!this._disableUpdate) {
 				this.updateMols() // This calls _updateUrlQuery
 			}
@@ -364,6 +376,11 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Search mode
 		setSearchMode(mode: SearchMode) {
+			if (mode == 'text') {
+				this.setHighlight('')
+			} else if (mode == 'smarts') {
+				this.setHighlight(this._searchStr)
+			}
 			this._searchMode = mode
 		},
 
@@ -428,6 +445,11 @@ export const useMolGridStore = defineStore('molGridStore', {
 		///////////////////////////////////////////////////////////////
 		//
 		// #region - Display
+
+		// Highlight substring in the SVG.
+		setHighlight(str: string) {
+			this._highlight = str
+		},
 
 		// Focus
 		setFocus(index: number) {

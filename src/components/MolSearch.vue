@@ -2,7 +2,7 @@
 	<div id="search-wrap">
 		<cv-search
 			:modelValue="molGridStore.searchStr"
-			@update:modelValue="molGridStore.setSearchQuery"
+			@update:modelValue="molGridStore.setSearchStr"
 			label="TextSmarts"
 			size="lg"
 			type="text"
@@ -13,7 +13,7 @@
 			<div
 				class="close"
 				:class="{ show: molGridStore.searchStr.length > 0 }"
-				@click="molGridStore.setSearchQuery('')"
+				@click="molGridStore.setSearchStr('')"
 			>
 				<CloseIcon />
 			</div>

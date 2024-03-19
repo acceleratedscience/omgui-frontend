@@ -166,18 +166,19 @@ function getMolDetails(mol: JSMol | null, qmol: JSMol | null) {
 		// Get substructure highlight details
 		const details = JSON.parse(mol?.get_substruct_matches(qmol as JSMol) || '')
 		// Reduce the list of objects to a single list object with all atoms and bonds
-		const detailsMerged: { atoms: number[]; bonds: number[] } = details
-			? details.reduce(
-					(
-						acc: { atoms: number[]; bonds: number[] },
-						{ atoms, bonds }: { atoms: number[]; bonds: number[] },
-					) => ({
-						atoms: [...acc.atoms, ...atoms],
-						bonds: [...acc.bonds, ...bonds],
-					}),
-					{ atoms: [], bonds: [] },
-				)
-			: details
+		const detailsMerged: { atoms: number[]; bonds: number[] } =
+			details && typeof details[0] === 'object'
+				? details.reduce(
+						(
+							acc: { atoms: number[]; bonds: number[] },
+							{ atoms, bonds }: { atoms: number[]; bonds: number[] },
+						) => ({
+							atoms: [...acc.atoms, ...atoms],
+							bonds: [...acc.bonds, ...bonds],
+						}),
+						{ atoms: [], bonds: [] },
+					)
+				: details
 
 		return JSON.stringify({
 			...molDetails,
@@ -198,6 +199,7 @@ async function drawSVGorCanvas() {
 	const mol = window.RDKit.get_mol(props.structure || 'invalid')
 	const qmol = window.RDKit.get_qmol(props.subStructure || 'invalid')
 	const isValidMol = isValid(mol)
+	console.log(99, isValidMol)
 
 	if (props.svgMode && isValidMol) {
 		const svgGenerated = (mol as JSMol).get_svg_with_highlights(getMolDetails(mol, qmol))

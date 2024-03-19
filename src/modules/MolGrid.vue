@@ -22,6 +22,7 @@
 				<MolRender
 					:id="`mol-svg-${mol.index!}`"
 					:structure="mol.identifiers.isomeric_smiles.toString()"
+					:sub-structure="molGridStore.highlight"
 					:width="190"
 					:height="190"
 					svg-mode

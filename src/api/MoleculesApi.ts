@@ -18,12 +18,18 @@ export default class MoleculesApi extends BaseApi {
 	}
 
 	// Get one page of a molset, possibly filtered/sorted.
-	getMolset(path: string, cacheId: number | null, query: LocationQuery = {}) {
+	getMolset(
+		path: string,
+		cacheId: number | null,
+		query: LocationQuery = {},
+		smartsMode: boolean = false,
+	) {
 		console.log(123, 'getMolset', query)
 		return this.apiClient.post('/get-molset', {
 			path,
 			cacheId,
 			query,
+			smartsMode,
 		})
 	}
 
