@@ -1,36 +1,18 @@
 <template>
 	<div id="breadcrumbs-wrap" :class="{ truncate }">
-		<div
-			id="breadcrumbs"
-			ref="$breadcrumbs"
-			:class="{ truncate, 'needs-truncated': needsTruncation }"
-		>
+		<div id="breadcrumbs" ref="$breadcrumbs" :class="{ truncate, 'needs-truncated': needsTruncation }">
 			<button id="file-type" @click="modalStore.display('ModalFileType')">
-				{{ fileStore.fileType }}
+				{{ fileType }}
 			</button>
-			<template v-for="(item, i) in pathArr" :key="i">
-				<span v-if="i == pathArr.length - 1">{{ item }}</span>
-				<router-link v-else-if="i === 0" :to="'/~/'">{{ item }}</router-link>
-				<router-link v-else :to="'/~/' + pathArr.slice(1, i + 1).join('/')">{{
-					item
-				}}</router-link>
-				<span v-if="i < pathArr.length - 1">&nbsp;&nbsp;&rsaquo;&nbsp;&nbsp;</span>
+			<template v-for="(item, i) in props.pathArray" :key="i">
+				<span v-if="i == props.pathArray.length - 1">{{ item }}</span>
+				<router-link v-else-if="i === 0" :to="'/~/'" class="dumb">{{ item }}</router-link>
+				<router-link v-else :to="'/~/' + props.pathArray.slice(1, i + 1).join('/')" class="dumb">{{ item }}</router-link>
+				<span v-if="i < props.pathArray.length - 1">&nbsp;&nbsp;&rsaquo;&nbsp;&nbsp;</span>
 			</template>
-			<a
-				v-if="needsTruncation && !truncate"
-				href="#"
-				class="toggle-hide"
-				@click.prevent="toggleTruncate"
-				>hide</a
-			>
+			<a v-if="needsTruncation && !truncate" href="#" class="toggle-hide" @click.prevent="toggleTruncate">hide</a>
 		</div>
-		<a
-			v-if="needsTruncation && truncate"
-			href="#"
-			class="toggle-show"
-			@click.prevent="toggleTruncate"
-			>show</a
-		>
+		<a v-if="needsTruncation && truncate" href="#" class="toggle-show" @click.prevent="toggleTruncate">show</a>
 		<span v-if="props.slotRight" class="slot">{{ props.slotRight }}</span>
 	</div>
 </template>
@@ -49,20 +31,24 @@ const fileStore = useFileStore()
 const modalStore = useModalStore()
 
 // Type declarations
-type Props = { slotRight: string }
 
 // Props
-const props = defineProps({
-	slotRight: {
-		type: String as PropType<Props['slotRight']>,
-	},
-})
+const props = defineProps<{
+	pathArray: string[]
+	slotRight?: string
+	fileType?: string
+}>()
 
 // Definitions
 const $breadcrumbs = ref<HTMLElement | null>(null)
 const truncate = ref<boolean>(true) // Lets us toggle truncation
 const needsTruncation = ref<boolean>(false) // Lets us check if the breadcrumbs are truncated
-const pathArr = computed(() => [mainStore.workspace].concat(fileStore.path.split('/')))
+
+/**
+ * Computed
+ */
+
+const fileType = computed(() => props.fileType ?? fileStore.fileType)
 
 /**
  * Hooks

@@ -3,22 +3,27 @@
 		<div class="btn" @click="prevPage"><SvgServe filename="icn-caret-left" /></div>
 		<div class="btn" @click="nextPage"><SvgServe filename="icn-caret-right" /></div>
 		<div class="display">
-			<span>{{ props.modelValue }} / {{ props.total }}</span>
-			<select
-				:value="props.modelValue"
-				@change="setPage(($event.target as HTMLSelectElement)?.value)"
-			>
-				<option v-for="page in props.total" :key="page" :value="page">
+			<span>{{ props.modelValue }} / {{ displayTotal }}</span>
+			<select :value="props.modelValue" @change="setPage(($event.target as HTMLSelectElement)?.value)">
+				<option v-if="dropdownPageNrs[0] > 1" value="before" disabled>...</option>
+				<option v-for="page in dropdownPageNrs" :key="page" :value="page">
 					{{ page }}
 				</option>
+				<option v-if="dropdownPageNrs[dropdownPageNrs.length - 1] < props.total" value="after" disabled>...</option>
 			</select>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+// Vue
+import { computed } from 'vue'
+
 // Components
 import SvgServe from '@/components/SvgServe.vue'
+
+// Utils
+import { largeNr } from '@/utils/helpers'
 
 // Emits
 const emit = defineEmits(['update:modelValue'])
@@ -38,6 +43,28 @@ const props = withDefaults(
 )
 
 /**
+ * Computed
+ */
+
+// Elegantly display large numbers.
+const displayTotal = computed(() => {
+	return largeNr(props.total)
+})
+
+// We show max 200 pages in the dropdown, otherwise it gets too
+// long when opening mega files, which slows down the browser.
+const dropdownPageNrs = computed(() => {
+	const range = 200
+	const pages = []
+	const start = Math.max(1, props.modelValue - range / 2)
+	const end = Math.min(props.total, start + range)
+	for (let i = start; i <= end; i++) {
+		pages.push(i)
+	}
+	return pages
+})
+
+/**
  * Methods
  */
 
@@ -54,7 +81,6 @@ function nextPage() {
 }
 
 function setPage(page: number | string | undefined) {
-	console.log(999, 'setPage!', 999)
 	if (!page) return
 	page = typeof page == 'string' ? parseInt(page) : page
 	emit('update:modelValue', page)
@@ -66,6 +92,7 @@ function setPage(page: number | string | undefined) {
 	height: 40px;
 	display: flex;
 	background: $soft-bg;
+	user-select: none;
 }
 #pages .btn {
 	width: 40px;

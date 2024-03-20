@@ -73,7 +73,12 @@
 		<div id="content-wrap">
 			<!-- Left main column -->
 			<div class="col-left">
-				<BreadCrumbs v-if="isFile" />
+				<BreadCrumbs v-if="sourceType == 'molFile'" :pathArray="fileStore.breadCrumbPathArray" />
+				<BreadCrumbs
+					v-else-if="sourceType == 'molset'"
+					:pathArray="fileStore.breadCrumbPathArray.concat(['mol #' + molViewerStore.molFromMolsetIndex.toString()])"
+					fileType="molset"
+				/>
 
 				<!-- Title -->
 				<div id="title-wrap">
@@ -81,7 +86,7 @@
 						<SvgServe
 							class="icn-file-mol"
 							:class="{ loading: loading }"
-							filename="icn-file-mol"
+							:filename="sourceType == 'molset' ? 'icn-file-molset' : 'icn-file-mol'"
 							size="large"
 						/>
 					</div>
@@ -89,6 +94,14 @@
 						{{ capitalize(molName) }}
 					</h2>
 					<IconButton v-if="!loading" icon="icn-star" colorOn="#d3bf0b" />
+					<div class="filler"></div>
+					<BasePagination
+						v-if="molViewerStore.molFromMolset"
+						:modelValue="molViewerStore.molFromMolsetIndex"
+						@update:modelValue="molViewerStore.setMolFromMolsetIndex"
+						:total="molGridStore.total"
+						:max="3"
+					/>
 				</div>
 
 				<template v-if="mol">
@@ -96,41 +109,27 @@
 					<div id="identification">
 						<div>
 							<b>InChI: </b>
-							<span v-if="mol?.identifiers?.inchi" id="data-inchi">{{
-								mol?.identifiers?.inchi
-							}}</span>
+							<span v-if="mol?.identifiers?.inchi" id="data-inchi">{{ mol?.identifiers?.inchi }}</span>
 							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>InChIKey: </b>
-							<span v-if="mol?.identifiers?.inchikey" id="data-inchikey">{{
-								mol?.identifiers?.inchikey
-							}}</span>
+							<span v-if="mol?.identifiers?.inchikey" id="data-inchikey">{{ mol?.identifiers?.inchikey }}</span>
 							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>Canonical SMILES: </b>
-							<span
-								v-if="mol?.identifiers?.canonical_smiles"
-								id="data-canonical-smiles"
-								>{{ mol?.identifiers?.canonical_smiles }}</span
-							>
+							<span v-if="mol?.identifiers?.canonical_smiles" id="data-canonical-smiles">{{ mol?.identifiers?.canonical_smiles }}</span>
 							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>Isomeric SMILES: </b>
-							<span
-								v-if="mol?.identifiers?.isomeric_smiles"
-								id="data-isomeric-smiles"
-								>{{ mol?.identifiers?.isomeric_smiles }}</span
-							>
+							<span v-if="mol?.identifiers?.isomeric_smiles" id="data-isomeric-smiles">{{ mol?.identifiers?.isomeric_smiles }}</span>
 							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>Formula: </b>
-							<span v-if="mol?.identifiers?.formula" id="data-isomeric-smiles">{{
-								mol?.identifiers?.formula
-							}}</span>
+							<span v-if="mol?.identifiers?.formula" id="data-isomeric-smiles">{{ mol?.identifiers?.formula }}</span>
 							<BaseFetching v-else text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
@@ -151,11 +150,7 @@
 					<hr />
 
 					<!-- Fetching status -->
-					<BaseFetching
-						v-if="loading && !loadingError"
-						text="Fetching molecule data"
-						:error="loadingError"
-					/>
+					<BaseFetching v-if="loading && !loadingError" text="Fetching molecule data" :error="loadingError" />
 
 					<!-- Fetching error -->
 					<!-- To test, see #fetching-error below -->
@@ -167,44 +162,27 @@
 							</div>
 						</div>
 						<div>
-							<cv-button kind="danger" size="field" @click="fetchMolData"
-								>Retry</cv-button
-							>
+							<cv-button kind="danger" size="field" @click="fetchMolData">Retry</cv-button>
 						</div>
 					</div>
 
 					<!-- Molecule data -->
 					<template v-else>
 						<!-- Synonyms -->
-						<div
-							id="synonyms"
-							:style="{ '--truncated-height': truncatedSynonymsHeight }"
-						>
+						<div id="synonyms" :style="{ '--truncated-height': truncatedSynonymsHeight }">
 							<h3>Synonyms</h3>
 							<div class="flip-v">
-								<a
-									v-if="truncateSynonyms"
-									href="#"
-									class="toggle-expand"
-									@click.prevent="toggleExpand"
-								></a>
+								<a v-if="truncateSynonyms" href="#" class="toggle-expand" @click.prevent="toggleExpand"></a>
 
 								<div v-if="synonymCount && 'synonyms' in mol" class="cloak">
 									<div class="synonyms-wrap" :style="{ height: synonymsHeight }">
-										<div
-											v-for="(synonym, i) in mol?.synonyms"
-											:key="i"
-											:title="synonym"
-											:style="{ width: synonymColWidth }"
-										>
+										<div v-for="(synonym, i) in mol?.synonyms" :key="i" :title="synonym" :style="{ width: synonymColWidth }">
 											{{ synonym }}
 										</div>
 									</div>
 								</div>
 								<BaseFetching v-else-if="loading" :error="loadingError" />
-								<template v-else
-									>This molecule does not have any synonyms.</template
-								>
+								<template v-else>This molecule does not have any synonyms.</template>
 							</div>
 						</div>
 
@@ -213,11 +191,7 @@
 						<!-- Properties -->
 						<div id="properties">
 							<h3>Properties</h3>
-							<div
-								v-if="'properties' in mol"
-								class="param-wrap"
-								:style="stylePropWrap"
-							>
+							<div v-if="'properties' in mol" class="param-wrap" :style="stylePropWrap">
 								<div
 									v-for="(val, key) in mol?.properties"
 									:key="key"
@@ -273,8 +247,12 @@ const route = useRoute()
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
+import { useFileStore } from '@/stores/FileStore'
+import { useMolGridStore } from '@/stores/MolGridStore'
 const mainStore = useMainStore()
 const molViewerStore = useMolViewerStore()
+const fileStore = useFileStore()
+const molGridStore = useMolGridStore()
 
 // API
 import { apiFetch, moleculesApi } from '@/api/ApiService'
@@ -285,8 +263,9 @@ import JsonViewer from '@/modules/JsonViewer.vue'
 import IconButton from '@/components/IconButton.vue'
 import SvgServe from '@/components/SvgServe.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
+import BasePagination from '@/components/BasePagination.vue'
 
-// Util
+// Utils
 import { capitalize } from '@/utils/helpers'
 import initRDKit from '@/utils/rdkit/initRDKit'
 
@@ -297,7 +276,6 @@ import type { JSMol } from '@/utils/rdkit/tsTypes'
 // Props
 const props = defineProps<{
 	identifier?: string
-	path?: string
 }>()
 
 // Definitions
@@ -305,6 +283,7 @@ const $container3d = ref<Element | null>(null)
 const loading = ref<boolean>(false)
 const loadingError = ref<boolean>(false)
 const loadingErrorMsg = ref<string>('')
+const molsetPagination = ref<number>(1)
 const paramColMinWidth = 250
 const synonymColMinWidth = 150
 
@@ -317,18 +296,27 @@ const mol: ComputedRef<Mol | TempMol> = computed(() => molViewerStore.mol)
 
 // Title
 const molName: ComputedRef<string> = computed(() => {
-	return mol.value?.identifiers?.name
-		? mol.value.identifiers.name
-		: loading.value
-			? 'Loading'
-			: 'Unnamed Molecule'
+	return mol.value?.identifiers?.name ? mol.value.identifiers.name : loading.value ? 'Loading' : 'Unnamed Molecule'
 })
 
-// Detect how the molecule viewer was opened:
-// - File: /~/dopamine.mol.json
-// - Direct: /molviewer/dopamine
+// The molecule viewer is used for differenbt sources with different routes.
+// - identifier: /molviewer/dopamine
+// - molFile:    /~/dopamine.mol.json
+// - molset:     /molviewer/~/my_mols.molset.json?index=1
 const isFile: ComputedRef<boolean> = computed(() => {
 	return route.name == 'filebrowser' || route.name == 'headless-filebrowser'
+})
+
+const sourceType: ComputedRef<'identifier' | 'molFile' | 'molset'> = computed(() => {
+	if (route.name == 'molviewer' || route.name == 'headless-molviewer') {
+		return 'identifier'
+	} else {
+		if (molViewerStore.molFromMolset) {
+			return 'molset'
+		} else {
+			return 'molFile'
+		}
+	}
 })
 
 // Synonyms section
@@ -392,7 +380,7 @@ if (props.identifier) {
 }
 
 // Fetch mol data from the API.
-fetchMolData(props.identifier, props.path) // #case-A-1
+fetchMolData(props.identifier) // #case-A-1
 
 /**
  * Hooks
@@ -436,6 +424,14 @@ async function tryPrepopulateFromSmiles(identifier: string) {
 // Clear store on exit.
 onBeforeUnmount(clearMolData)
 
+// When cycling between molecules in a molset.
+watch(
+	() => molViewerStore.molFromMolsetIndex,
+	() => {
+		fetchMolData() // #case-A-2
+	},
+)
+
 // Update data when going from one mol-by-identifier to another.
 watch(
 	() => props.identifier,
@@ -452,7 +448,7 @@ watch(
 watch(
 	() => molViewerStore.inchi,
 	(newVal) => {
-		if (newVal && isFile.value) {
+		if (newVal && sourceType.value in ['molFile', 'molset']) {
 			fetchMolVizData(newVal) // #case-B-2
 		}
 	},
@@ -467,17 +463,18 @@ function clearMolData() {
 	molViewerStore.clearMol()
 }
 
-async function fetchMolData(identifier: string | null = null, path: string | null = null) {
+async function fetchMolData(identifier: string | null = null) {
 	if (identifier) {
 		fetchMolDataByIdentifier(identifier)
-	} else if (path) {
-		fetchMolDataFromMolset(path)
+	} else if (molViewerStore.molFromMolset) {
+		fetchMolDataFromMolset(fileStore.path)
 	}
 }
 
 function fetchMolDataFromMolset(path: string | null = null) {
+	console.log('Fetch from:', path)
 	if (!path) return
-	let index: number = parseInt(String(route.query.index)) || 1
+	let index = molViewerStore.molFromMolsetIndex
 	apiFetch(moleculesApi.getMolDataFromMolset(path, index), {
 		onSuccess: (data) => {
 			molViewerStore.setMolData(data)
@@ -751,6 +748,9 @@ function toggleExpand(e: Event) {
 #title-wrap .v-align {
 	margin-bottom: 10px;
 	margin-right: 5px;
+}
+#title-wrap .filler {
+	flex: 1;
 }
 #title-wrap .icn-file-mol {
 	margin-left: -4px;

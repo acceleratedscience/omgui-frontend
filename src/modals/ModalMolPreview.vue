@@ -52,7 +52,7 @@ const molGridStore = useMolGridStore()
 // API
 import { fileSystemApi } from '@/api/ApiService'
 
-// Util
+// Utils
 import { capitalize } from '@/utils/helpers'
 
 // Type declarations

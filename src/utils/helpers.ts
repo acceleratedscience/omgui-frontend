@@ -39,11 +39,7 @@ export function timeAgo(dateParam: Date | string | number | null): string {
 }
 
 // Return timestamp as "Jan 10, 2024 at 10:20"
-export function _prettyDate(
-	date: Date,
-	prefomattedDate: string | null = null,
-	hideYear: boolean = false,
-): string {
+export function _prettyDate(date: Date, prefomattedDate: string | null = null, hideYear: boolean = false): string {
 	const day = date.getDate()
 	const month = MONTHS_SHORT[date.getMonth()]
 	const year = date.getFullYear()
@@ -107,6 +103,27 @@ export function prettyNr(nr: number, imperial: boolean = true) {
 		const output = nr.toString().replace(/,(\d{1,2})$/, '.$1')
 		return output.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 	}
+}
+
+// Truncate large numbers.
+export function largeNr(nr: number) {
+	if (nr >= 1000000000) {
+		// Billions as 1B / 1.5B / 1.5B+
+		const reduced = Math.round(nr / 100000000) / 10
+		const plus = reduced * 1000000000 < nr ? '+' : ''
+		return `${reduced}B${plus}`
+	} else if (nr >= 1000000) {
+		// Millions as 1M / 1.5M / 1.5M+
+		const reduced = Math.round(nr / 100000) / 10
+		const plus = reduced * 1000000 < nr ? '+' : ''
+		return `${reduced}M${plus}`
+	} else if (nr >= 1000) {
+		// Thousans as 1k / 1.5k / 1.5k+
+		const reduced = Math.round(nr / 100) / 10
+		const plus = reduced * 1000 < nr ? '+' : ''
+		return `${reduced}k${plus}`
+	}
+	return nr
 }
 
 // Capitalize the first letter of a string.

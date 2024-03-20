@@ -14,15 +14,24 @@ type MultiMap = {
 // Maps the different file types to their full
 // display name and their respective module names.
 // File types are defined in _get_file_type() in file_system.py.
+// prettier-ignore
 const _map_FileType: MultiMap = {
-	unk: ['unknown', 'TextViewer'],
-	text: ['text', 'TextViewer'],
-	data: ['data', 'DataViewer'],
-	json: ['json', 'JsonViewer'],
-	mol: ['molecule', 'MolViewer'],
+	mol:    ['molecule',     'MolViewer'],
 	molset: ['molecule set', 'MolGrid'],
-	sdf: ['sdf', 'SdfViewer'], // should become part of mol
-	run: ['run', 'TextViewer'],
+	json:   ['json',         'JsonViewer'],
+	data:   ['data',         'DataViewer'],
+	text:   ['text',         'TextViewer'],
+	html:   ['html',         'TextViewer'], // Viewer TBD
+	img:    ['image',        'TextViewer'], // Viewer TBD
+	vid:    ['video',        'TextViewer'], // Viewer TBD
+	xml:    ['xml',          'TextViewer'], // Viewer TBD
+	pdf:    ['pdf',          'TextViewer'], // Viewer TBD
+	svg:    ['svg',          'TextViewer'], // Viewer TBD
+	run:    ['run',          'TextViewer'], // Viewer TBD
+	rxn:    ['reaction',     'TextViewer'], // Viewer TBD
+	md:     ['markdown',     'TextViewer'], // Viewer TBD
+	unk:    ['unknown',      'TextViewer'],
+	// sdf: ['sdf', 'SdfViewer'], // should become part of mol
 }
 
 // Splitting up the above map into two separate maps.

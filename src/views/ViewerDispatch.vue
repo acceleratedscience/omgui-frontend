@@ -5,18 +5,10 @@
  -->
 
 <template>
-	<BreadCrumbs v-if="showBreadCrumbs" />
-	<p v-if="fileStore.invalidExt" class="error-msg">
-		We don't recognize this file's extension ({{ fileStore.ext }})
-	</p>
-	<div v-if="loadError" class="error-msg">
-		The requested module '{{ fileStore.moduleName }}' was not found.
-	</div>
-	<BaseFetching
-		v-else-if="loading && !fileStore.isDir"
-		text="Fetching file"
-		failText="Failed to fetch file"
-	/>
+	<BreadCrumbs v-if="showBreadCrumbs" :pathArray="fileStore.breadCrumbPathArray" />
+	<p v-if="fileStore.invalidExt" class="error-msg">We don't recognize this file's extension ({{ fileStore.ext }})</p>
+	<div v-if="loadError" class="error-msg">The requested module '{{ fileStore.moduleName }}' was not found.</div>
+	<BaseFetching v-else-if="loading && !fileStore.isDir" text="Fetching file" failText="Failed to fetch file" />
 	<component v-else-if="dynamicModule" :is="dynamicModule" />
 	<template v-else>
 		<!-- To do: show breadcrumbs when file is not found, requires some refactoring -->
@@ -90,7 +82,7 @@ watch([() => route.path], () => {
 })
 
 watch(
-	() => fileStore.fileTypeOverride,
+	() => fileStore.fileType,
 	() => loadModule(fileStore.moduleName),
 )
 

@@ -8,11 +8,15 @@
 import { defineStore } from 'pinia'
 import router from '@/router'
 
+// Stores
+import { useMainStore } from '@/stores/MainStore'
+import { useMolViewerStore } from './MolViewerStore'
+
 // Utils
 import { map_fileType2Module } from '@/utils/maps'
 
 // Type declarations
-import type { File } from '@/types'
+import type { File, FileType } from '@/types'
 // The State type is just a copy of the File type but with underscored keys.
 type State = AddUnderscore<File>
 type AddUnderscore<T> = {
@@ -26,7 +30,7 @@ function getInitialState(): State {
 			size: null, // File size in bytes
 			timeCreated: null, // Timestamp in ms
 			timeEdited: null, // Timestamp in ms
-			fileType: '', // File type based on the extension, 'dir' for directories
+			fileType: null, // File type based on the extension, 'dir' for directories
 			ext: '',
 			ext2: '', // Secondary extension (e.g. foobar.mol.json --> mol)
 			errCode: null, // Error code from the API
@@ -49,6 +53,10 @@ export const useFileStore = defineStore('fileStore', {
 		path(): string {
 			return this._path
 		},
+		breadCrumbPathArray(): string[] {
+			const mainStore = useMainStore()
+			return [mainStore.workspace as string, ...this._path.split('/')].filter(Boolean)
+		},
 		pathAbsolute(): string {
 			return this._pathAbsolute
 		},
@@ -70,7 +78,7 @@ export const useFileStore = defineStore('fileStore', {
 		},
 
 		// The file type based on the extension.
-		defaultFileType(): string {
+		defaultFileType(): FileType {
 			return this.__meta.fileType
 		},
 
@@ -81,15 +89,25 @@ export const useFileStore = defineStore('fileStore', {
 		},
 
 		// The final file type, which may be overridden
-		fileType(): string {
+		fileType(): FileType {
+			const molViewerStore = useMolViewerStore()
 			return this.fileTypeOverride
-				? router.currentRoute.value.query?.use?.toString() || this.defaultFileType
-				: this.defaultFileType
+				? (router.currentRoute.value.query?.use?.toString() as FileType) || this.defaultFileType
+				: molViewerStore.molFromMolset
+					? 'mol'
+					: this.defaultFileType
 		},
 
 		// The filename of the module we'll use to view the file.
 		moduleName(): string {
-			return map_fileType2Module[this.fileType]
+			const molViewerStore = useMolViewerStore()
+			if (molViewerStore.molFromMolset) {
+				// When opening a molset, you can view a single
+				// molecule by adding ?show=<index> to the URL.
+				return 'MolViewer'
+			} else {
+				return map_fileType2Module[this.fileType || 'unk']
+			}
 		},
 
 		// Indicates whether we recognize the file's extension.
@@ -107,7 +125,7 @@ export const useFileStore = defineStore('fileStore', {
 			this.__meta.size = file._meta.size || null
 			this.__meta.timeCreated = file._meta.timeCreated || null
 			this.__meta.timeEdited = file._meta.timeEdited || null
-			this.__meta.fileType = file._meta.fileType || ''
+			this.__meta.fileType = file._meta.fileType || null
 			this.__meta.ext = file._meta.ext || ''
 			this.__meta.ext2 = file._meta.ext2 || ''
 			this.__meta.errCode = file._meta.errCode || null

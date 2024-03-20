@@ -1,5 +1,8 @@
 <template>
-	<BreadCrumbs :slotRight="`${prettyNr(molGridStore.total)} mols`" />
+	<BreadCrumbs
+		:pathArray="fileStore.breadCrumbPathArray"
+		:slotRight="`${prettyNr(molGridStore.total)} mols`"
+	/>
 	<MolProps />
 	<MolActions />
 	<div id="resp-container">

@@ -3,7 +3,12 @@
  * data which is displayed in the molecule viewer.
  */
 
+// Vue
 import { defineStore } from 'pinia'
+import router from '@/router'
+
+// Stores
+import { useFileStore } from '@/stores/FileStore'
 
 // Type declarations
 import type { Mol, TempMol } from '@/types'
@@ -11,6 +16,7 @@ type State = {
 	_mol: Mol | TempMol
 	_sdf: string | null
 	_svg: string | null
+	_molFromMolsetIndex: number
 }
 
 export const useMolViewerStore = defineStore('molViewerStore', {
@@ -18,6 +24,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		_mol: { identifiers: {} },
 		_sdf: null,
 		_svg: null,
+		// When viewing a molecule from a molset,
+		// this is controls which molecule to show.
+		_molFromMolsetIndex: 1,
 	}),
 	getters: {
 		mol(): Mol | TempMol {
@@ -35,6 +44,20 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		svg(): string | null {
 			return this._svg
 		},
+
+		// Indicated whether we're viewing a molecule from a molset.
+		molFromMolset(): boolean {
+			const fileStore = useFileStore()
+			return Boolean(fileStore.defaultFileType == 'molset' && Number(router.currentRoute.value.query?.show))
+		},
+
+		// When viewing a molecule from a molset, this is the index of the molecule.
+		molFromMolsetIndex(): number {
+			return this._molFromMolsetIndex
+			// return Number(router.currentRoute.value.query?.show)
+		},
+
+		// A combination string of "key: value" pairs used as tooltip.
 		propertiesString(): Record<string, string> {
 			if (!this._mol || !('properties' in this._mol)) return {}
 
@@ -57,12 +80,13 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
 			this._mol.identifiers[identifier] = value
 		},
-		// setMolSDF(sdf: string) {
-		// 	this._sdf = sdf
-		// },
 		setMolVizData(svg: string, sdf: string) {
 			if (svg) this._svg = svg
 			if (sdf) this._sdf = sdf
+		},
+		setMolFromMolsetIndex(nr: number) {
+			this._molFromMolsetIndex = nr
+			router.push({ query: { show: nr.toString() } })
 		},
 		clearMol() {
 			this._mol = { identifiers: {} }

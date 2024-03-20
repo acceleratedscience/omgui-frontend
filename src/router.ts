@@ -36,12 +36,6 @@ const routes = [
 		component: () => import(/* webpackChunkName: 'molviewer' */ '@/modules/MolViewer.vue'),
 	},
 	{
-		path: '/molviewer/~/:path(.*)?',
-		name: 'molviewer-from-molset',
-		props: true,
-		component: () => import(/* webpackChunkName: 'molviewer' */ '@/modules/MolViewer.vue'),
-	},
-	{
 		path: '/molgrid',
 		name: 'molgrid',
 		component: () => import(/* webpackChunkName: 'molgrid' */ '@/modules/MolGrid.vue'),

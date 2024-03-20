@@ -31,7 +31,7 @@ export type Dir = {
 
 export type File = {
 	_meta: {
-		fileType: string
+		fileType: FileType | null
 		size: number | null
 		timeCreated: number | null
 		timeEdited: number | null
@@ -66,6 +66,27 @@ export type FileErrCode =
 	| 'decode'
 	| 'io'
 	| 'unknown'
+
+// File types are defined in _get_file_type() in API, see workers -> file_system.py
+// They are translated into the corresponsing name / module name in @/types/maps.ts › _map_FileType()
+export type FileType =
+	| 'dir'
+	| 'mol'
+	| 'molset'
+	| 'json'
+	| 'data'
+	| 'text'
+	| 'html'
+	| 'img'
+	| 'vid'
+	| 'xml'
+	| 'pdf'
+	| 'svg'
+	| 'run'
+	| 'rxn'
+	| 'md'
+	| 'unk'
+	| null
 
 // // A file item in one of the file browser's columns,
 // // or a file being displayed by one of the viewer modules.
