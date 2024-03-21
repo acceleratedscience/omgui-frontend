@@ -1,7 +1,7 @@
 <template>
 	<div class="container-3d" :class="{ fullscreen }">
 		<div class="info" v-if="fullscreen">
-			<h4>{{ mol.identifiers.name }}</h4>
+			<h4>{{ capitalize(mol.identifiers.name) }}</h4>
 			<!-- <div>{{ mol.identifiers.inchi }}</div> -->
 			<!-- <div>{{ mol.identifiers.canonical_smiles }}</div> -->
 		</div>
@@ -24,11 +24,14 @@ import { ref, watch, nextTick } from 'vue'
 // Components
 import IconButton from '@/components/IconButton.vue'
 
+// Utils
+import { capitalize } from '@/utils/helpers'
+
 // Type declarations
-import type { Mol } from '@/types'
+import type { Mol, TempMol } from '@/types'
 
 // Props
-const props = defineProps<{ sdf: string | null; mol: Mol }>()
+const props = defineProps<{ sdf: string | null; mol: Mol | TempMol }>()
 
 // Definitions
 const $container3d = ref<Element | null>(null)

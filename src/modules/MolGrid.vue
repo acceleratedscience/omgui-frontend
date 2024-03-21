@@ -15,8 +15,8 @@
 				@click="(e) => onMolClick(e, mol.index!)"
 			>
 				<cv-checkbox :label="`${mol.index!}`" :value="`${mol.index!}`" :checked="molGridStore.sel.includes(mol.index!)" />
-				<IconButton class="icn-btn-smell" icon="icn-smell" @click="previewMolecule(i)" />
-				<IconButton class="icn-btn-taste" icon="icn-taste" @click="molGridStore.openMolecule(mol.index!)" />
+				<IconButton class="icn-btn-smell" icon="icn-smell" btnStyle="soft" @click="previewMolecule(i)" />
+				<IconButton class="icn-btn-taste" icon="icn-taste" btnStyle="soft" @click="molGridStore.openMolecule(mol.index!)" />
 				<MolRender
 					:id="`mol-svg-${mol.index!}`"
 					:structure="mol.identifiers.isomeric_smiles.toString()"
@@ -57,13 +57,12 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, onMounted, onBeforeMount, computed, watch, onUpdated, nextTick, onBeforeUnmount } from 'vue'
+import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue'
 import type { ComputedRef } from 'vue'
 
 // Router
-import { useRouter, useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
+import { useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
-const router = useRouter()
 const route = useRoute()
 
 // Stores
@@ -76,9 +75,6 @@ const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
 const modalStore = useModalStore()
 
-// API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
-
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import MolProps from '@/components/MolProps.vue'
@@ -90,27 +86,16 @@ import IconButton from '@/components/IconButton.vue'
 import { prettyNr } from '@/utils/helpers'
 
 // Type declarations
-// @ts-ignore
-import type { Mol } from '@/utils/types'
 type KeyHandlers = {
 	[key: string]: () => void
 }
 
 // Definitions
 const $molGrid = ref<HTMLElement | null>(null)
-const loading = ref<Boolean>(false)
-const loadingError = ref<String | false>(false)
 
 /**
  * Computed
  */
-
-// Detect how the molecule viewer was opened:
-// - Viewing a file: /~/dopamine.mol.json
-// - Directly: /molviewer/dopamine
-const isFile: ComputedRef<boolean> = computed(() => {
-	return route.name == 'filebrowser' || route.name == 'headless-filebrowser'
-})
 
 const columns: ComputedRef<number | null> = computed(() => {
 	const $mol = $molGrid.value?.querySelector('.mol')
@@ -444,8 +429,10 @@ const keyHandlers: KeyHandlers = {
 		display: none;
 	}
 	#mol-grid .mol .icn-btn:hover {
-		background: $soft-bg;
+		background: white;
 		border-radius: 2px;
+		z-index: 1;
+		box-shadow: 0 0 0 1px $black-10;
 	}
 	#mol-grid .mol .icn-btn:hover:deep() svg {
 		fill: $black;

@@ -94,14 +94,7 @@
 						{{ capitalize(molName) }}
 					</h2>
 					<div class="filler"></div>
-					<IconButton
-						v-if="!loading"
-						icon="icn-star-large-outline"
-						iconHover="icn-star"
-						colorHover="rgba(0,0,0,.3)"
-						colorToggle="#d3bf0b"
-						:toggle="true"
-					/>
+					<IconButton icon="icn-star-large-outline" iconHover="icn-star" colorHover="rgba(0,0,0,.3)" colorToggle="#d3bf0b" :toggle="true" />
 					<BasePagination
 						v-if="molViewerStore.molFromMolset"
 						:modelValue="molViewerStore.molFromMolsetIndex"
@@ -234,16 +227,8 @@
 </template>
 
 <script setup lang="ts">
-// Libraries
-// import Miew from 'miew'
-// @ts-ignore
-import Miew from '@/TEMP/miew/dist/miew.module' // https://github.com/epam/miew/issues/524
-import '@/TEMP/miew/dist/miew.min.css'
-// @ts-ignore
-import * as $3Dmol from '3dmol/build/3Dmol.js'
-
 // Vue
-import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
+import { ref, onBeforeUnmount, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
 
 // Router
@@ -277,7 +262,7 @@ import { capitalize } from '@/utils/helpers'
 import initRDKit from '@/utils/rdkit/initRDKit'
 
 // Type declarations
-import type { Mol } from '@/types'
+import type { Mol, TempMol } from '@/types'
 import type { JSMol } from '@/utils/rdkit/tsTypes'
 
 // Props
@@ -297,7 +282,7 @@ const synonymColMinWidth: number = 150
  */
 
 // Molecule data
-const mol: ComputedRef<Mol> = computed(() => molViewerStore.mol)
+const mol: ComputedRef<Mol | TempMol> = computed(() => molViewerStore.mol)
 
 // Title
 const molName: ComputedRef<string> = computed(() => {

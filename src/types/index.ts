@@ -100,30 +100,28 @@ export type FileType =
 // }
 
 // A molecule object, as returned by the API.
-export type Mol =
-	| {
-			index?: number // For the molgrid position
-			identifiers: {
-				name: string
-				inchi: string
-				inchikey: string
-				canonical_smiles: string // The "regular" SMILES
-				cid: string
-				formula: string
-				isomeric_smiles: string
-			}
-			synonyms: string[]
-			properties: {
-				[key: string]: string | number
-			}
-			property_sources: {
-				[key: string]: {
-					[key: string]: string
-				}
-			}
-			analysis: any[]
-	  }
-	| TempMol
+export type Mol = {
+	index?: number // For the molgrid position
+	identifiers: {
+		name: string
+		inchi: string
+		inchikey: string
+		canonical_smiles: string // The "regular" SMILES
+		cid: string
+		formula: string
+		isomeric_smiles: string
+	}
+	synonyms: string[]
+	properties: {
+		[key: string]: string | number
+	}
+	property_sources: {
+		[key: string]: {
+			[key: string]: string
+		}
+	}
+	analysis: any[]
+}
 
 // This lets us set some properties on a molecule
 // before the full molecule is loaded, without ts complaining.
