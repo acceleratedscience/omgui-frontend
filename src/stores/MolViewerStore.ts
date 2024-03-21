@@ -11,9 +11,9 @@ import router from '@/router'
 import { useFileStore } from '@/stores/FileStore'
 
 // Type declarations
-import type { Mol, TempMol } from '@/types'
+import type { Mol } from '@/types'
 type State = {
-	_mol: Mol | TempMol
+	_mol: Mol
 	_sdf: string | null
 	_svg: string | null
 	_molFromMolsetIndex: number
@@ -29,7 +29,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		_molFromMolsetIndex: 0,
 	}),
 	getters: {
-		mol(): Mol | TempMol {
+		mol(): Mol {
 			return this._mol
 		},
 		inchi(): string | null {

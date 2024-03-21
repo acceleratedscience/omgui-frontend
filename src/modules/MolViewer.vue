@@ -66,10 +66,7 @@
 				/>
 			</div> -->
 			<div class="container-2d" v-html="molViewerStore.svg"></div>
-			<div class="container-3d">
-				<IconButton class="icn-btn-taste" icon="icn-full-screen-large" @click="" />
-				<div class="viewer" ref="$container3d"></div>
-			</div>
+			<MolRender3D :sdf="molViewerStore.sdf" :mol="molViewerStore.mol" />
 		</div>
 
 		<!-- Page content -->
@@ -80,6 +77,7 @@
 				<BreadCrumbs
 					v-else-if="sourceType == 'molset'"
 					:pathArray="fileStore.breadCrumbPathArray.concat(['mol #' + molViewerStore.molFromMolsetIndex.toString()])"
+					fileType="molset"
 				/>
 
 				<!-- Title -->
@@ -272,13 +270,14 @@ import IconButton from '@/components/IconButton.vue'
 import SvgServe from '@/components/SvgServe.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
 import BasePagination from '@/components/BasePagination.vue'
+import MolRender3D from '@/components/MolRender3D.vue'
 
 // Utils
 import { capitalize } from '@/utils/helpers'
 import initRDKit from '@/utils/rdkit/initRDKit'
 
 // Type declarations
-import type { Mol, TempMol } from '@/types'
+import type { Mol } from '@/types'
 import type { JSMol } from '@/utils/rdkit/tsTypes'
 
 // Props
@@ -287,20 +286,18 @@ const props = defineProps<{
 }>()
 
 // Definitions
-const $container3d = ref<Element | null>(null)
 const loading = ref<boolean>(false)
 const loadingError = ref<boolean>(false)
 const loadingErrorMsg = ref<string>('')
 const paramColMinWidth: number = 250
 const synonymColMinWidth: number = 150
-let miewViewer: any = null
 
 /**
  * Computed
  */
 
 // Molecule data
-const mol: ComputedRef<Mol | TempMol> = computed(() => molViewerStore.mol)
+const mol: ComputedRef<Mol> = computed(() => molViewerStore.mol)
 
 // Title
 const molName: ComputedRef<string> = computed(() => {
@@ -477,7 +474,6 @@ watch(
  */
 
 function clearMolData() {
-	if ($container3d.value) $container3d.value.innerHTML = ''
 	molViewerStore.clearMol()
 }
 
@@ -574,7 +570,6 @@ async function fetchMolVizData(inchi_or_smiles: string) {
 			if (response.data.svg) {
 				// console.log('fetchMolVizData')
 				molViewerStore.setMolVizData(response.data.svg, response.data.sdf)
-				init3DViewer()
 			}
 		} else {
 			console.error(response.statusText)
@@ -583,109 +578,6 @@ async function fetchMolVizData(inchi_or_smiles: string) {
 		// Catch-all error.
 		console.error('Something went wrong fetching the molecule`s visualization data.', err)
 	}
-}
-
-// Render 3D molecule.
-async function init3DViewer() {
-	if (!$container3d.value || !molViewerStore.sdf) return
-
-	// render3d_3DMol($container3d.value, molViewerStore.sdf) // Using alt 3DMol library - 3dmol.org
-	render3d_miew($container3d.value, molViewerStore.sdf)
-}
-
-// // Setup Miew viewer. We only want to do this once.
-// function init3d_miew($container: Element) {
-// 	const viewer = new Miew({
-// 		container: $container as HTMLDivElement,
-// 		// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
-// 		settings: {
-// 			axes: false,
-// 			fps: false,
-// 			camDistance: 3, // Default 2.5 tends to crop some of the molecule.
-// 			resolution: 'high',
-// 			zooming: false,
-// 			bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg
-// 			// bg: { color: 0xffffff, transparent: true }, // This creates ugly edges
-// 			// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
-// 			// shadow: { // Cool but generates weird artifacts
-// 			// 	on: true,
-// 			// 	type: 'random',
-// 			// 	radius: 1,
-// 			// },
-// 		},
-// 	})
-// }
-
-// 3D mol A --> Using the Miew library - https://lifescience.opensource.epam.com/miew
-function render3d_miew($container: Element, sdf: string) {
-	if (!miewViewer) {
-		miewViewer = new Miew({
-			container: $container as HTMLDivElement,
-			// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
-			settings: {
-				axes: false,
-				fps: false,
-				camDistance: 3, // Default 2.5 tends to crop some of the molecule.
-				resolution: 'high',
-				zooming: false,
-				bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg
-				// bg: { color: 0xffffff, transparent: true }, // This creates ugly edges
-				// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
-				// shadow: { // Cool but generates weird artifacts
-				// 	on: true,
-				// 	type: 'random',
-				// 	radius: 1,
-				// },
-			},
-		})
-		if (miewViewer.init()) {
-			miewViewer.run()
-		}
-	}
-	miewViewer.load(sdf, { sourceType: 'immediate', fileType: 'sdf' })
-}
-
-// 3D mol B --> Using the 3DMol library - https://3dmol.org
-// Doesn't have balls-and-stick visualization, only stick.
-function render3d_3DMol($container: Element, sdf: string) {
-	const config = { backgroundColor: 0xffffff, backgroundAlpha: 0 }
-	const viewer = $3Dmol.createViewer($container, config)
-	viewer.addModel(sdf, 'sdf')
-
-	// Check styling options: https://3dmol.org/tests/example.html
-	// More advances visualizing: https://3dmol.org/viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick&select=chain:B&style=line;sphere&select=resi:19,23,26;chain:B&style=stick;sphere&select=resi:19,23,26;chain:B&labelres=backgroundOpacity:0.8;fontSize:14
-	viewer.setStyle({}, { stick: {} })
-	// viewer.setStyle({}, { sphere: {} })
-	// viewer.setStyle({ hetflag: false }, { cartoon: {} })
-	// viewer.addSurface(
-	// 	$3Dmol.SurfaceType.MS,
-	// 	{
-	// 		map: { prop: 'partialCharge', scheme: new $3Dmol.Gradient.RWB(-0.6, 0.6) },
-	// 		opacity: 0.85,
-	// 	},
-	// 	{ chain: 'B' },
-	// 	{ chain: 'B' },
-	// )
-	// viewer.addSurface(
-	// 	$3Dmol.SurfaceType.VDW,
-	// 	{},
-	// 	{ hetflag: false, chain: 'A' },
-	// 	{ hetflag: false, chain: 'A' },
-	// )
-	viewer.zoomTo()
-	viewer.render()
-	// _colorSS(viewer)
-
-	// function _colorSS(viewer) {
-	// 	var m = viewer.getModel()
-	// 	m.setColorByFunction({}, function (atom) {
-	// 		// console.log(atom, atom.elem, atom.capDrawn, atom.hetflag, atom.bonds, atom.bondOrder)
-	// 		if (atom.elem == 'O') return 'red'
-	// 		else if (atom.elem == 'C') return 'yellow'
-	// 		else return 'gray'
-	// 	})
-	// 	viewer.render()
-	// }
 }
 
 // Toggle synonym truncation.
@@ -730,7 +622,7 @@ function toggleExpand(e: Event) {
 #mol-render.headless {
 	margin-bottom: 20px;
 }
-#mol-render > div {
+#mol-render > div:not(.fullscreen) {
 	width: 50%;
 	height: 100%;
 	position: relative;
@@ -751,47 +643,6 @@ function toggleExpand(e: Event) {
 }
 #mol-render .container-2d:deep() svg rect:first-child {
 	display: none;
-}
-
-// 3D molecule
-#mol-render .container-3d {
-	background: $soft-bg;
-	position: relative;
-}
-#mol-render .container-3d .icn-btn {
-	position: absolute;
-	top: 0;
-	right: 0;
-	z-index: 1;
-}
-#mol-render .container-3d .viewer {
-	width: 100%;
-	height: 100%;
-}
-#mol-render .container-3d canvas {
-	max-width: 100%;
-	outline: none;
-}
-
-// Miew styling
-#mol-render .container-3d:deep() .miew-canvas {
-	// A little hack to make the molecule edges extra smooth.
-	width: 200%;
-	height: 200%;
-	transform: scale(0.5);
-	transform-origin: 0 0;
-}
-
-#mol-render .container-3d:deep() .atom-info {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	pointer-events: initial;
-	color: $black-30;
-}
-#mol-render .container-3d:deep() .atom-info p {
-	font-size: $font-size-small;
-	margin: 0;
 }
 
 /**

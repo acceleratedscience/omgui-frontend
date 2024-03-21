@@ -58,14 +58,7 @@ export type File = {
 }
 
 // Error codes are defined in open_file() in API, see helpers -> general.py
-export type FileErrCode =
-	| null
-	| 'not_found'
-	| 'no_permission'
-	| 'is_dir'
-	| 'decode'
-	| 'io'
-	| 'unknown'
+export type FileErrCode = null | 'not_found' | 'no_permission' | 'is_dir' | 'decode' | 'io' | 'unknown'
 
 // File types are defined in _get_file_type() in API, see workers -> file_system.py
 // They are translated into the corresponsing name / module name in @/types/maps.ts › _map_FileType()
@@ -107,28 +100,30 @@ export type FileType =
 // }
 
 // A molecule object, as returned by the API.
-export type Mol = {
-	index?: number // For the molgrid position
-	identifiers: {
-		name: string
-		inchi: string
-		inchikey: string
-		canonical_smiles: string // The "regular" SMILES
-		cid: string
-		formula: string
-		isomeric_smiles: string
-	}
-	synonyms: string[]
-	properties: {
-		[key: string]: string | number
-	}
-	property_sources: {
-		[key: string]: {
-			[key: string]: string
-		}
-	}
-	analysis: any[]
-}
+export type Mol =
+	| {
+			index?: number // For the molgrid position
+			identifiers: {
+				name: string
+				inchi: string
+				inchikey: string
+				canonical_smiles: string // The "regular" SMILES
+				cid: string
+				formula: string
+				isomeric_smiles: string
+			}
+			synonyms: string[]
+			properties: {
+				[key: string]: string | number
+			}
+			property_sources: {
+				[key: string]: {
+					[key: string]: string
+				}
+			}
+			analysis: any[]
+	  }
+	| TempMol
 
 // This lets us set some properties on a molecule
 // before the full molecule is loaded, without ts complaining.

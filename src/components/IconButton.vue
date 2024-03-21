@@ -97,6 +97,9 @@ function onClick() {
 	padding: 8px;
 	cursor: pointer;
 	border-radius: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 .icn-btn:deep() svg {
 	fill: var(--btn-color);
