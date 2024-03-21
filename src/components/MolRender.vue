@@ -5,24 +5,12 @@
 
 <template>
 	<div v-if="!rdkitLoaded" class="placeholder" :style="dimensions">Loading renderer</div>
-	<div v-else-if="rdkitError" class="placeholder error-msg" :style="dimensions">
-		RDKit<br />Error
-	</div>
-	<div
-		v-else-if="!isValidMolString(structure)"
-		:title="`Cannot render structure: ${structure}`"
-		class="placeholder error-msg"
-		:style="dimensions"
-	>
+	<div v-else-if="rdkitError" class="placeholder error-msg" :style="dimensions">RDKit<br />Error</div>
+	<div v-else-if="!isValidMolString(structure)" :title="`Cannot render structure: ${structure}`" class="placeholder error-msg" :style="dimensions">
 		Invalid<br />mol string
 	</div>
 
-	<div
-		v-else-if="svgMode"
-		:class="`svg-wrap ${className}`"
-		:style="dimensions"
-		v-html="svg"
-	></div>
+	<div v-else-if="svgMode" :class="`svg-wrap ${className}`" :style="dimensions" v-html="svg"></div>
 
 	<div v-else :class="`molecule-canvas-container ${className}`">
 		<canvas :title="structure" :id="id" :width="width" :height="height"></canvas>
@@ -169,10 +157,7 @@ function getMolDetails(mol: JSMol | null, qmol: JSMol | null) {
 		const detailsMerged: { atoms: number[]; bonds: number[] } =
 			details && typeof details[0] === 'object'
 				? details.reduce(
-						(
-							acc: { atoms: number[]; bonds: number[] },
-							{ atoms, bonds }: { atoms: number[]; bonds: number[] },
-						) => ({
+						(acc: { atoms: number[]; bonds: number[] }, { atoms, bonds }: { atoms: number[]; bonds: number[] }) => ({
 							atoms: [...acc.atoms, ...atoms],
 							bonds: [...acc.bonds, ...bonds],
 						}),

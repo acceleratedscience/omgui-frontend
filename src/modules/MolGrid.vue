@@ -1,8 +1,5 @@
 <template>
-	<BreadCrumbs
-		:pathArray="fileStore.breadCrumbPathArray"
-		:slotRight="`${prettyNr(molGridStore.total)} mols`"
-	/>
+	<BreadCrumbs :pathArray="fileStore.breadCrumbPathArray" :slotRight="`${prettyNr(molGridStore.total)} mols`" />
 	<MolProps />
 	<MolActions />
 	<div id="resp-container">
@@ -17,23 +14,15 @@
 				}"
 				@click="(e) => onMolClick(e, mol.index!)"
 			>
-				<cv-checkbox
-					:label="`${mol.index!}`"
-					:value="`${mol.index!}`"
-					:checked="molGridStore.sel.includes(mol.index!)"
-				/>
+				<cv-checkbox :label="`${mol.index!}`" :value="`${mol.index!}`" :checked="molGridStore.sel.includes(mol.index!)" />
 				<IconButton class="icn-btn-smell" icon="icn-smell" @click="previewMolecule(i)" />
-				<IconButton
-					class="icn-btn-taste"
-					icon="icn-taste"
-					@click="molGridStore.openMolecule(mol.index!)"
-				/>
+				<IconButton class="icn-btn-taste" icon="icn-taste" @click="molGridStore.openMolecule(mol.index!)" />
 				<MolRender
 					:id="`mol-svg-${mol.index!}`"
 					:structure="mol.identifiers.isomeric_smiles.toString()"
 					:sub-structure="molGridStore.highlight"
 					:width="190"
-					:height="190"
+					:height="140"
 					svg-mode
 				/>
 
@@ -68,16 +57,7 @@
 
 <script setup lang="ts">
 // Vue
-import {
-	ref,
-	onMounted,
-	onBeforeMount,
-	computed,
-	watch,
-	onUpdated,
-	nextTick,
-	onBeforeUnmount,
-} from 'vue'
+import { ref, onMounted, onBeforeMount, computed, watch, onUpdated, nextTick, onBeforeUnmount } from 'vue'
 import type { ComputedRef } from 'vue'
 
 // Router
@@ -144,11 +124,6 @@ const columns: ComputedRef<number | null> = computed(() => {
  * Note: Data is loaded into the store via ViewerDispatch.vue
  */
 
-window.onbeforeunload = function () {
-	if (molGridStore.hasChanges) return true
-	molGridStore.clear()
-}
-
 /**
  * Hooks
  */
@@ -168,26 +143,25 @@ onMounted(async () => {
 onBeforeUnmount(() => {
 	// Remove key handlers.
 	document.removeEventListener('keydown', onKeyDown)
-
-	// Clear store.
-	molGridStore.clear()
 })
+
+// Block any exit attempt when there are unsaved changes.
+window.onbeforeunload = function () {
+	if (molGridStore.hasChanges) return true
+	molGridStore.clear()
+}
 onBeforeRouteLeave(onBeforeExit)
 onBeforeRouteUpdate(onBeforeExit)
 
-function onBeforeExit(
-	to: RouteLocationNormalized,
-	from: RouteLocationNormalized,
-	next: NavigationGuardNext,
-) {
-	console.log('onBeforeExit')
-	if (molGridStore.hasChanges) {
-		modalStore.alert('You have unsaved changes')
-		next(false)
-	} else {
-		next()
+// Clear store on exit.
+// - - -
+// Note: we're not calling this from within onBeforeUnmount because we
+// don't want to clear the store when opening a molecule from the molset.
+watch(route, (to, from) => {
+	if (to.path != from.path) {
+		molGridStore.clear()
 	}
-}
+})
 
 /**
  * Methods
@@ -253,11 +227,21 @@ function maybeBlur(e: MouseEvent) {
 	molGridStore.unsetFocus()
 }
 
+// Display dialog with molecule properties.
 function previewMolecule(i: number) {
 	const mol = molGridStore.mols ? molGridStore.mols[i] : null
-	console.log(i, mol)
 	if (mol) {
 		modalStore.display('ModalMolPreview', mol)
+	}
+}
+
+// Block route change when there are unsaved changes.
+function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
+	if (molGridStore.hasChanges) {
+		modalStore.alert('You have unsaved changes')
+		next(false)
+	} else {
+		next()
 	}
 }
 
@@ -374,7 +358,6 @@ const keyHandlers: KeyHandlers = {
 
 // Icons
 #mol-grid .mol .icn-btn {
-	// background: $soft-bg;
 	position: absolute;
 	top: 3px;
 	right: 3px;
@@ -464,7 +447,7 @@ const keyHandlers: KeyHandlers = {
 		display: none;
 	}
 	#mol-grid .mol .icn-btn:hover {
-		background: $black-05;
+		background: $soft-bg;
 		border-radius: 2px;
 	}
 	#mol-grid .mol .icn-btn:hover:deep() svg {

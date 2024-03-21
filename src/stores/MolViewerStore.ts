@@ -33,7 +33,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			return this._mol
 		},
 		inchi(): string | null {
-			return this._mol.identifiers.inchi || null
+			return this._mol.identifiers?.inchi || null
 		},
 		// molLoaded(): boolean {
 		// 	return !!this._mol.identifiers.name

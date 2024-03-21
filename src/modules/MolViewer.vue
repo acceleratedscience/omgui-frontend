@@ -77,7 +77,6 @@
 				<BreadCrumbs
 					v-else-if="sourceType == 'molset'"
 					:pathArray="fileStore.breadCrumbPathArray.concat(['mol #' + molViewerStore.molFromMolsetIndex.toString()])"
-					fileType="molset"
 				/>
 
 				<!-- Title -->
@@ -464,6 +463,7 @@ function clearMolData() {
 }
 
 async function fetchMolData(identifier: string | null = null) {
+	console.log('fetchMolData')
 	if (identifier) {
 		fetchMolDataByIdentifier(identifier)
 	} else if (molViewerStore.molFromMolset) {

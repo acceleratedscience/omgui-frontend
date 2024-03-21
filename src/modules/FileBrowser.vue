@@ -11,17 +11,8 @@
 			<template v-for="(column, level) in levels" :key="level">
 				<div class="column" ref="columns">
 					<!-- Column header -->
-					<div
-						class="col-header"
-						:class="{ root: level == 0 }"
-						:title="column.dirname"
-						@click="(e) => resetCol(e, level)"
-					>
-						<button
-							class="btn-workspace"
-							v-if="level == 0"
-							@click="modalStore.display('ModalWorkspaces')"
-						>
+					<div class="col-header" :class="{ root: level == 0 }" :title="column.dirname" @click="(e) => resetCol(e, level)">
+						<button class="btn-workspace" v-if="level == 0" @click="modalStore.display('ModalWorkspaces')">
 							{{ column.dirname }}
 						</button>
 						<template v-else>
@@ -37,15 +28,7 @@
 							class="dir hidden"
 							:class="{ sel: dir_hidden.sel }"
 							:title="dir_hidden.filename"
-							@click="
-								() =>
-									fetchNextLevel(
-										dir_hidden.path,
-										dir_hidden.filename,
-										level + 1,
-										true,
-									)
-							"
+							@click="() => fetchNextLevel(dir_hidden.path, dir_hidden.filename, level + 1, true)"
 						>
 							<div>{{ dir_hidden.filename }}</div>
 							<SvgServe filename="icn-caret-right" :key="dir_hidden.filename" />
@@ -76,10 +59,7 @@
 							@click="() => previewFile(file_hidden, level + 1, true)"
 							@dblclick="openFile(file_hidden)"
 						>
-							<SvgServe
-								:filename="'icn-file-' + file_hidden._meta.fileType"
-								:key="file_hidden._meta.fileType"
-							/>
+							<SvgServe :filename="'icn-file-' + file_hidden._meta.fileType" :key="file_hidden._meta.fileType" />
 							<div>{{ file_hidden.filename }}</div>
 						</div>
 
@@ -95,10 +75,7 @@
 							@click="() => previewFile(file, level + 1, true)"
 							@dblclick="openFile(file)"
 						>
-							<SvgServe
-								:filename="'icn-file-' + file._meta.fileType"
-								:key="file._meta.fileType"
-							/>
+							<SvgServe :filename="'icn-file-' + file._meta.fileType" :key="file._meta.fileType" />
 							<div>{{ file.filename }}</div>
 						</div>
 
@@ -106,10 +83,7 @@
 						<div v-if="column['_meta']['empty']" class="empty">Empty directory</div>
 					</div>
 				</div>
-				<div
-					v-if="(levels && level < levels.length - 1) || filePreview"
-					class="col-split"
-				></div>
+				<div v-if="(levels && level < levels.length - 1) || filePreview" class="col-split"></div>
 			</template>
 
 			<!-- File preview column -->
@@ -212,7 +186,7 @@ watch(
 
 // Parse the route and load the appropriate files.
 async function parseRoute() {
-	console.log('parseRoute')
+	// console.log('fb parseRoute')
 	// When going back or forward in the history while
 	// leaving the fileBrowser module, the popstate
 	// triggers parseRoute before the listener is removed.
@@ -277,12 +251,7 @@ function openFile(file: File) {
 }
 
 // Load the next level of files and add column.
-async function fetchNextLevel(
-	path: string = '',
-	filename: string = '',
-	level: number = 0,
-	fromClick: boolean = false,
-) {
+async function fetchNextLevel(path: string = '', filename: string = '', level: number = 0, fromClick: boolean = false) {
 	// When you go back and forward in the history, going from the
 	// filebrowser module to a file viewer module, parseRoute will
 	// be be called and it will start fetching files for every level
@@ -328,10 +297,7 @@ function markSelected(level: number, type: 'dir' | 'file', filename: string) {
 	// Set selection state for the clicked item.
 	if (levels.value) {
 		const thisLevel = levels.value[level]
-		const items =
-			type == 'dir'
-				? thisLevel.dirs.concat(thisLevel.dirsHidden)
-				: thisLevel.files.concat(thisLevel.filesHidden)
+		const items = type == 'dir' ? thisLevel.dirs.concat(thisLevel.dirsHidden) : thisLevel.files.concat(thisLevel.filesHidden)
 		const item = items.filter((item) => item.filename === filename)[0]
 		if (item) item.sel = true
 	}

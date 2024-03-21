@@ -13,7 +13,7 @@
 	<template v-else>
 		<!-- To do: show breadcrumbs when file is not found, requires some refactoring -->
 		<!-- <BreadCrumbs v-if="!showBreadCrumbs" :path="fileStore.path" /> -->
-		File not found
+		File not found!
 	</template>
 </template>
 
@@ -77,13 +77,23 @@ parseRoute()
  */
 
 // Update file or clear store when route changes.
-watch([() => route.path], () => {
-	parseRoute()
-})
+watch(
+	() => route.path,
+	() => {
+		parseRoute()
+	},
+)
 
 watch(
 	() => fileStore.fileType,
-	() => loadModule(fileStore.moduleName),
+	(newValue, oldValue) => {
+		// When you open a molecule from a molset, the route doesn't change,
+		// so we monitor the fileType. We need to check if the oldValue is not
+		// null to avoid triggering this on intial load.
+		if (newValue && oldValue) {
+			loadModule(fileStore.moduleName)
+		}
+	},
 )
 
 // Clear store when unmounting.
@@ -95,7 +105,7 @@ onBeforeUnmount(fileStore.clear)
 
 // Display a file or directory with the appropriate module.
 async function parseRoute() {
-	// console.log('parseRoute')
+	console.log('dispatch parseRoute')
 	const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
 	const urlQuery: LocationQuery = route.query
 	apiFetch(fileSystemApi.getFile(filePath, urlQuery), {
@@ -104,9 +114,10 @@ async function parseRoute() {
 			console.log('Error in updateMols()', err)
 		},
 		onSuccess: (file: File) => {
+			console.log(333, file)
 			fileStore.loadItem(file)
 
-			if (fileStore.__meta.fileType == 'dir') {
+			if (fileStore.fileType == 'dir') {
 				// Directory
 				if (prevRouteType != 'dir') loadModule('FileBrowser')
 				prevRouteType = 'dir'
@@ -116,11 +127,11 @@ async function parseRoute() {
 				prevRouteType = 'error'
 			} else {
 				// File
-				if (fileStore.__meta.fileType == 'molset') {
+				if (fileStore.fileType == 'molset') {
 					// molGridStore.parseUrlQuery()
 					const data: MolsetApi = file.data
 					molGridStore.setMolset(data)
-				} else if (fileStore.__meta.fileType == 'mol') {
+				} else if (fileStore.fileType == 'mol') {
 					const data: Mol = file.data
 					molViewerStore.setMolData(data)
 				}
