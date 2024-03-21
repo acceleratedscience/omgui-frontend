@@ -1,5 +1,5 @@
 <template>
-	<div id="pages" :class="{ disabled }">
+	<div class="pagination" :class="{ disabled }">
 		<div class="btn" @click="prevPage"><SvgServe filename="icn-caret-left" /></div>
 		<div class="btn" @click="nextPage"><SvgServe filename="icn-caret-right" /></div>
 		<div class="display">
@@ -33,12 +33,10 @@ const props = withDefaults(
 	defineProps<{
 		total: number
 		modelValue: number
-		max?: number
 		disabled?: boolean
 	}>(),
 	{
 		modelValue: 1,
-		max: 10,
 	},
 )
 
@@ -88,13 +86,13 @@ function setPage(page: number | string | undefined) {
 </script>
 
 <style lang="scss" scoped>
-#pages {
+.pagination {
 	height: 40px;
 	display: flex;
 	background: $soft-bg;
 	user-select: none;
 }
-#pages .btn {
+.pagination .btn {
 	width: 40px;
 	display: flex;
 	align-items: center;
@@ -102,17 +100,17 @@ function setPage(page: number | string | undefined) {
 	cursor: pointer;
 	// border-right: solid 1px $black-10;
 }
-#pages .btn.sel {
+.pagination .btn.sel {
 	background: $black;
 	color: white;
 }
-#pages .display {
+.pagination .display {
 	line-height: 40px;
 	padding: 0 16px;
 	position: relative;
 	white-space: nowrap;
 }
-#pages .display select {
+.pagination .display select {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -123,10 +121,10 @@ function setPage(page: number | string | undefined) {
 }
 
 // Disabled state
-#pages.disabled {
+.pagination.disabled {
 	pointer-events: none;
 }
-#pages.disabled .btn {
+.pagination.disabled .btn {
 	color: $black-30;
 }
 
@@ -135,8 +133,8 @@ function setPage(page: number | string | undefined) {
  */
 
 @media (hover: hover) {
-	#pages .btn:not(.sel):hover,
-	#pages .display:hover {
+	.pagination .btn:not(.sel):hover,
+	.pagination .display:hover {
 		background: #e5e5e5;
 	}
 }

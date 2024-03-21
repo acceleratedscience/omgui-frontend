@@ -16,6 +16,7 @@ type MultiMap = {
 // File types are defined in _get_file_type() in file_system.py.
 // prettier-ignore
 const _map_FileType: MultiMap = {
+	dir:    ['directory',    'FileBrowser'],
 	mol:    ['molecule',     'MolViewer'],
 	molset: ['molecule set', 'MolGrid'],
 	json:   ['json',         'JsonViewer'],

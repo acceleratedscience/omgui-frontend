@@ -365,9 +365,6 @@ const keyHandlers: KeyHandlers = {
 #mol-grid .mol .icn-btn-taste {
 	top: 43px;
 }
-#mol-grid .mol .icn-btn:deep() svg {
-	fill: $black-30;
-}
 
 // Image
 #mol-grid .mol .svg-wrap {

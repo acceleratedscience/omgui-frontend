@@ -13,7 +13,7 @@
 	<template v-else>
 		<!-- To do: show breadcrumbs when file is not found, requires some refactoring -->
 		<!-- <BreadCrumbs v-if="!showBreadCrumbs" :path="fileStore.path" /> -->
-		File not found!
+		File not found
 	</template>
 </template>
 
@@ -91,6 +91,7 @@ watch(
 		// so we monitor the fileType. We need to check if the oldValue is not
 		// null to avoid triggering this on intial load.
 		if (newValue && oldValue) {
+			// console.log('A1', newValue, fileStore.moduleName)
 			loadModule(fileStore.moduleName)
 		}
 	},
@@ -114,38 +115,41 @@ async function parseRoute() {
 			console.log('Error in updateMols()', err)
 		},
 		onSuccess: (file: File) => {
-			console.log(333, file)
 			fileStore.loadItem(file)
 
-			if (fileStore.fileType == 'dir') {
-				// Directory
-				if (prevRouteType != 'dir') loadModule('FileBrowser')
-				prevRouteType = 'dir'
-			} else if (fileStore.__meta.errCode) {
+			if (fileStore.errCode) {
 				// Error
 				if (prevRouteType != 'error') loadModule(null)
 				prevRouteType = 'error'
-			} else {
-				// File
-				if (fileStore.fileType == 'molset') {
-					// molGridStore.parseUrlQuery()
-					const data: MolsetApi = file.data
-					molGridStore.setMolset(data)
-				} else if (fileStore.fileType == 'mol') {
+				return
+			}
+
+			// File
+			if (fileStore.fileType == 'molset') {
+				// molGridStore.parseUrlQuery()
+				const data: MolsetApi = file.data
+				molGridStore.setMolset(data)
+				if (route.query.show) {
+					// if (molViewerStore.molFromMolset) {
+					molViewerStore.setMolFromMolsetIndex(+route.query.show, true)
 					const data: Mol = file.data
 					molViewerStore.setMolData(data)
 				}
-
-				// We can force the usage of a different module with ?use=OtherModule.
-				if (prevRouteType != 'file') loadModule(fileStore.moduleName)
-				prevRouteType = 'file'
+			} else if (fileStore.fileType == 'mol') {
+				const data: Mol = file.data
+				molViewerStore.setMolData(data)
 			}
+
+			// We can force the usage of a different module with ?use=OtherModule.
+			if (prevRouteType != 'file') loadModule(fileStore.moduleName)
+			prevRouteType = 'file'
 		},
 	})
 }
 
 // Load the dynamic module.
 function loadModule(moduleName: string | null) {
+	console.log('loadModule', moduleName)
 	loadError.value = false
 	if (!moduleName) {
 		dynamicModule.value = null

@@ -88,15 +88,15 @@ export const useFileStore = defineStore('fileStore', {
 			return !!router.currentRoute.value.query?.use
 		},
 
-		// The final file type, which may be overridden
-		fileType(): FileType {
-			return this.fileTypeOverride
-				? (router.currentRoute.value.query?.use?.toString() as FileType) || this.defaultFileType
-				: this.defaultFileType
-		},
+		// // The final file type, which may be overridden
+		// fileType(): FileType {
+		// 	return this.fileTypeOverride
+		// 		? (router.currentRoute.value.query?.use?.toString() as FileType) || this.defaultFileType
+		// 		: this.defaultFileType
+		// },
 
 		// The final file type, which may be overridden
-		fileType1(): FileType {
+		fileType(): FileType {
 			const molViewerStore = useMolViewerStore()
 			return this.fileTypeOverride
 				? (router.currentRoute.value.query?.use?.toString() as FileType) || this.defaultFileType

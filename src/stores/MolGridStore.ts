@@ -13,24 +13,16 @@ import { nextTick } from 'vue'
 
 // Stores
 import { useFileStore } from '@/stores/FileStore'
-import { useModalStore } from '@/stores/ModalStore'
+import { useMolViewerStore } from '@/stores/MolViewerStore'
 const fileStore = useFileStore()
-const modalStore = useModalStore()
+const molViewerStore = useMolViewerStore()
 
 // API
 import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Constants
 const PAGE_SIZE = 100
-const AVAIL_IDENTIFIERS = [
-	'name',
-	'inchi',
-	'inchikey',
-	'canonical_smiles',
-	'isomeric_smiles',
-	'formula',
-	'pid',
-]
+const AVAIL_IDENTIFIERS = ['name', 'inchi', 'inchikey', 'canonical_smiles', 'isomeric_smiles', 'formula', 'pid']
 const IDFR_DEFAULTS = ['name', 'isomeric_smiles', 'formula']
 const PROP_DEFAULT = ['molecular_weight']
 
@@ -314,23 +306,16 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Remove molecules from our cached working copy.
 		removeMols(indices: number[]) {
-			apiFetch(
-				moleculesApi.removeFromMolset(
-					this._cacheId!,
-					indices,
-					router.currentRoute.value.query,
-				),
-				{
-					onSuccess: (data) => {
-						this.setMolset(data)
-						this.deselectAll()
-						this._hasChanges = true
-					},
-					onError: (err) => {
-						console.log('Error in removeFromMolset()', err)
-					},
+			apiFetch(moleculesApi.removeFromMolset(this._cacheId!, indices, router.currentRoute.value.query), {
+				onSuccess: (data) => {
+					this.setMolset(data)
+					this.deselectAll()
+					this._hasChanges = true
 				},
-			)
+				onError: (err) => {
+					console.log('Error in removeFromMolset()', err)
+				},
+			})
 		},
 
 		// Keep selected molecules and remove the rest.
@@ -514,8 +499,9 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Open the molecule detail page.
 		openMolecule(index: number) {
-			const path = `/~/${fileStore.path}?show=${index}`
-			router.push(path)
+			molViewerStore.setMolFromMolsetIndex(index)
+			// const path = `/~/${fileStore.path}?show=${index}`
+			// router.push(path)
 		},
 
 		// #endregion

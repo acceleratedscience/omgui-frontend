@@ -66,7 +66,10 @@
 				/>
 			</div> -->
 			<div class="container-2d" v-html="molViewerStore.svg"></div>
-			<div class="container-3d" ref="$container3d"></div>
+			<div class="container-3d">
+				<IconButton class="icn-btn-taste" icon="icn-full-screen-large" @click="" />
+				<div class="viewer" ref="$container3d"></div>
+			</div>
 		</div>
 
 		<!-- Page content -->
@@ -92,14 +95,20 @@
 					<h2 id="data-name" data-val="{{ molName }}" :class="{ loading: loading }">
 						{{ capitalize(molName) }}
 					</h2>
-					<IconButton v-if="!loading" icon="icn-star" colorOn="#d3bf0b" />
 					<div class="filler"></div>
+					<IconButton
+						v-if="!loading"
+						icon="icn-star-large-outline"
+						iconHover="icn-star"
+						colorHover="rgba(0,0,0,.3)"
+						colorToggle="#d3bf0b"
+						:toggle="true"
+					/>
 					<BasePagination
 						v-if="molViewerStore.molFromMolset"
 						:modelValue="molViewerStore.molFromMolsetIndex"
 						@update:modelValue="molViewerStore.setMolFromMolsetIndex"
 						:total="molGridStore.total"
-						:max="3"
 					/>
 				</div>
 
@@ -282,9 +291,9 @@ const $container3d = ref<Element | null>(null)
 const loading = ref<boolean>(false)
 const loadingError = ref<boolean>(false)
 const loadingErrorMsg = ref<string>('')
-const molsetPagination = ref<number>(1)
-const paramColMinWidth = 250
-const synonymColMinWidth = 150
+const paramColMinWidth: number = 250
+const synonymColMinWidth: number = 150
+let miewViewer: any = null
 
 /**
  * Computed
@@ -446,9 +455,19 @@ watch(
 // called before the molecule is loaded, so we need to call it again here.
 watch(
 	() => molViewerStore.inchi,
-	(newVal) => {
-		if (newVal && sourceType.value in ['molFile', 'molset']) {
+	(newVal, oldVal) => {
+		if (newVal && oldVal && ['molFile', 'molset'].includes(sourceType.value)) {
 			fetchMolVizData(newVal) // #case-B-2
+		}
+	},
+)
+
+// When exiting a molecule from a molset.
+watch(
+	() => route.query,
+	(newVal, oldVal) => {
+		if (oldVal.show && !newVal.show) {
+			molViewerStore.setMolFromMolsetIndex(0, true)
 		}
 	},
 )
@@ -462,6 +481,7 @@ function clearMolData() {
 	molViewerStore.clearMol()
 }
 
+// Fetch molecule data from the appropriate source.
 async function fetchMolData(identifier: string | null = null) {
 	console.log('fetchMolData')
 	if (identifier) {
@@ -471,6 +491,7 @@ async function fetchMolData(identifier: string | null = null) {
 	}
 }
 
+// Fetch a molecule from a molset.
 function fetchMolDataFromMolset(path: string | null = null) {
 	console.log('Fetch from:', path)
 	if (!path) return
@@ -541,6 +562,7 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 // Fetch visualization data from the API.
 // I.e. a 2D SVG and an SDF string with 3D coordinates.
 async function fetchMolVizData(inchi_or_smiles: string) {
+	console.log('fetchMolVizData')
 	try {
 		// console.time('fetchMolVizData')
 		const response = await moleculesApi.getMolVizData(inchi_or_smiles)
@@ -571,31 +593,56 @@ async function init3DViewer() {
 	render3d_miew($container3d.value, molViewerStore.sdf)
 }
 
+// // Setup Miew viewer. We only want to do this once.
+// function init3d_miew($container: Element) {
+// 	const viewer = new Miew({
+// 		container: $container as HTMLDivElement,
+// 		// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
+// 		settings: {
+// 			axes: false,
+// 			fps: false,
+// 			camDistance: 3, // Default 2.5 tends to crop some of the molecule.
+// 			resolution: 'high',
+// 			zooming: false,
+// 			bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg
+// 			// bg: { color: 0xffffff, transparent: true }, // This creates ugly edges
+// 			// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
+// 			// shadow: { // Cool but generates weird artifacts
+// 			// 	on: true,
+// 			// 	type: 'random',
+// 			// 	radius: 1,
+// 			// },
+// 		},
+// 	})
+// }
+
 // 3D mol A --> Using the Miew library - https://lifescience.opensource.epam.com/miew
 function render3d_miew($container: Element, sdf: string) {
-	const viewer = new Miew({
-		container: $container as HTMLDivElement,
-		// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
-		settings: {
-			axes: false,
-			fps: false,
-			camDistance: 3, // Default 2.5 tends to crop some of the molecule.
-			resolution: 'high',
-			zooming: false,
-			bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg
-			// bg: { color: 0xffffff, transparent: true }, // This creates ugly edges
-			// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
-			// shadow: { // Cool but generates weird artifacts
-			// 	on: true,
-			// 	type: 'random',
-			// 	radius: 1,
-			// },
-		},
-	})
-	if (viewer.init()) {
-		viewer.run()
-		viewer.load(sdf, { sourceType: 'immediate', fileType: 'sdf' })
+	if (!miewViewer) {
+		miewViewer = new Miew({
+			container: $container as HTMLDivElement,
+			// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
+			settings: {
+				axes: false,
+				fps: false,
+				camDistance: 3, // Default 2.5 tends to crop some of the molecule.
+				resolution: 'high',
+				zooming: false,
+				bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg
+				// bg: { color: 0xffffff, transparent: true }, // This creates ugly edges
+				// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
+				// shadow: { // Cool but generates weird artifacts
+				// 	on: true,
+				// 	type: 'random',
+				// 	radius: 1,
+				// },
+			},
+		})
+		if (miewViewer.init()) {
+			miewViewer.run()
+		}
 	}
+	miewViewer.load(sdf, { sourceType: 'immediate', fileType: 'sdf' })
 }
 
 // 3D mol B --> Using the 3DMol library - https://3dmol.org
@@ -709,6 +756,17 @@ function toggleExpand(e: Event) {
 // 3D molecule
 #mol-render .container-3d {
 	background: $soft-bg;
+	position: relative;
+}
+#mol-render .container-3d .icn-btn {
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 1;
+}
+#mol-render .container-3d .viewer {
+	width: 100%;
+	height: 100%;
 }
 #mol-render .container-3d canvas {
 	max-width: 100%;
@@ -744,13 +802,11 @@ function toggleExpand(e: Event) {
 	display: flex;
 	margin-bottom: 16px;
 }
+
 // Molecule Icon
 #title-wrap .v-align {
 	margin-bottom: 10px;
 	margin-right: 5px;
-}
-#title-wrap .filler {
-	flex: 1;
 }
 #title-wrap .icn-file-mol {
 	margin-left: -4px;
@@ -758,6 +814,8 @@ function toggleExpand(e: Event) {
 #title-wrap .icn-file-mol.loading {
 	animation: rotate 3s infinite linear;
 }
+
+// Title
 #title-wrap h1.loading {
 	opacity: 0.3;
 }
@@ -765,6 +823,17 @@ function toggleExpand(e: Event) {
 	content: '';
 	animation: ellipsis 800ms infinite;
 }
+
+// Filler
+#title-wrap .filler {
+	flex: 1;
+}
+
+// Pagination
+#title-wrap .pagination {
+	margin-left: 8px;
+}
+
 #identification div {
 	margin-bottom: 4px;
 }

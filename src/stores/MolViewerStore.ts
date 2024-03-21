@@ -26,7 +26,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		_svg: null,
 		// When viewing a molecule from a molset,
 		// this is controls which molecule to show.
-		_molFromMolsetIndex: 1,
+		_molFromMolsetIndex: 0,
 	}),
 	getters: {
 		mol(): Mol | TempMol {
@@ -48,7 +48,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		// Indicated whether we're viewing a molecule from a molset.
 		molFromMolset(): boolean {
 			const fileStore = useFileStore()
-			return Boolean(fileStore.defaultFileType == 'molset' && Number(router.currentRoute.value.query?.show))
+			return Boolean(fileStore.defaultFileType == 'molset' && this._molFromMolsetIndex)
 		},
 
 		// When viewing a molecule from a molset, this is the index of the molecule.
@@ -84,9 +84,17 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (svg) this._svg = svg
 			if (sdf) this._sdf = sdf
 		},
-		setMolFromMolsetIndex(nr: number) {
-			this._molFromMolsetIndex = nr
-			router.push({ query: { show: nr.toString() } })
+		setMolFromMolsetIndex(index: number, dontPushRoute = false) {
+			console.log(99, index, dontPushRoute)
+			this._molFromMolsetIndex = index
+
+			if (!dontPushRoute) {
+				const fileStore = useFileStore()
+				const query = index ? `?show=${index}` : ''
+				const path = `/~/${fileStore.path}${query}`
+				router.push(path)
+				// router.push({ query: { show: nr.toString() } })
+			}
 		},
 		clearMol() {
 			this._mol = { identifiers: {} }

@@ -1,54 +1,92 @@
 <template>
 	<div
 		class="icn-btn"
-		:class="{ on: toggleState }"
-		@click="toggle"
-		:style="{ '--color-off': colorOff, '--color-on': colorOn }"
+		:class="{
+			on: toggleState,
+			opaque: props.btnStyle == 'opaque',
+			soft: props.btnStyle == 'soft',
+			toggle: props.toggle,
+			'has-hover-icn': props.iconHover,
+		}"
+		@click="onClick"
+		:style="styleParam"
 	>
-		<SvgServe :filename="props.icon" size="large" />
+		<SvgServe class="base-icn" :filename="props.icon" size="large" />
+		<SvgServe v-if="props.iconHover" class="hover-icn" :filename="props.iconHover" size="large" />
 	</div>
 </template>
 
 <script setup lang="ts">
 // Vue
-import { ref } from 'vue'
-import type { PropType } from 'vue'
+import { ref, computed } from 'vue'
 
 // Components
 import SvgServe from '@/components/SvgServe.vue'
 
 // Type declarations
-type Props = {
-	icon: string
-	colorOff: string
-	colorOn: string
+type StyleParam = {
+	'--btn-color': string
+	'--btn-color-hover': string
+	'--btn-color-toggle'?: string
 }
 
 // Props
-const props = defineProps({
-	icon: {
-		type: String as PropType<Props['icon']>,
-		required: true,
+const props = withDefaults(
+	defineProps<{
+		icon: string
+		iconHover?: string
+		btnStyle?: 'default' | 'soft' | 'opaque'
+		toggle?: boolean
+		color?: string
+		colorHover?: string
+		colorToggle?: string
+	}>(),
+	{
+		btnStyle: 'default',
+		colorToggle: '#393939', // $black-10
 	},
-	colorOff: {
-		type: String as PropType<Props['colorOff']>,
-		default: 'rgba(0, 0, 0, 0.1)', // $black-10
-	},
-	colorOn: {
-		type: String as PropType<Props['colorOn']>,
-		default: '#393939', // $black, same as text color
-	},
-})
+)
 
 // Definitions
-const toggleState = ref(false)
+const toggleState = ref<boolean>(false)
+const defaults: { [key: string]: string } = {
+	soft: 'rgba(0,0,0,.3)',
+	semiSoft: 'rgba(0,0,0,.6)',
+	hard: '#393939',
+}
+
+/**
+ * Computed
+ */
+
+const color = computed<string>(() => {
+	return props.color ? props.color : props.btnStyle == 'soft' || props.toggle ? defaults.soft : defaults.hard
+})
+
+const colorHover = computed<string>(() => {
+	return props.colorHover ? props.colorHover : props.btnStyle == 'soft' ? defaults.hard : props.toggle ? defaults.semiSoft : defaults.hard
+})
+
+const styleParam = computed<StyleParam>(() => {
+	const style: StyleParam = {
+		'--btn-color': color.value,
+		'--btn-color-hover': colorHover.value,
+	}
+	if (props.toggle) {
+		style['--btn-color-toggle'] = props.colorToggle
+	}
+
+	return style
+})
 
 /**
  * Methods
  */
 
-function toggle() {
-	toggleState.value = !toggleState.value
+function onClick() {
+	if (props.toggle) {
+		toggleState.value = !toggleState.value
+	}
 }
 </script>
 
@@ -58,20 +96,45 @@ function toggle() {
 	height: 40px;
 	padding: 8px;
 	cursor: pointer;
+	border-radius: 2px;
 }
 .icn-btn:deep() svg {
-	fill: var(--color-off);
+	fill: var(--btn-color);
 }
 .icn-btn.on:deep() svg {
-	fill: var(--color-on);
+	fill: var(--btn-color-toggle);
 }
 
 @media (hover: hover) {
-	.icn-btn:not(.on):hover:deep() svg {
-		fill: $black-30;
+	// Custon hover icon
+	// Note: when toggle mode is used, the hover icon is also used for the on state.
+	.icn-btn.has-hover-icn:not(.on):not(:hover) .hover-icn,
+	.icn-btn.has-hover-icn:hover .base-icn,
+	.icn-btn.has-hover-icn.on .base-icn {
+		display: none;
 	}
+
+	// Default & soft styles
+	.icn-btn:not(.soft):not(.toggle):not(.opaque):hover {
+		background-color: $black-05;
+	}
+	.icn-btn:hover:deep() svg {
+		fill: var(--btn-color-hover);
+	}
+
+	// Opaque style
+	.icn-btn:not(.soft).opaque:hover {
+		background-color: $soft-bg;
+	}
+
+	// Toggle mode style
+	// .icn-btn.toggle:hover:deep() svg {
+	// 	fill: $black-60;
+	// }
+
+	// Toggle mode
 	.icn-btn.on:hover:deep() svg {
-		filter: brightness(80%);
+		fill: var(--btn-color-toggle);
 	}
 }
 </style>

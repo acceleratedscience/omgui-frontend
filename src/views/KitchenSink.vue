@@ -19,9 +19,7 @@
 	>
 		advanced modal</button
 	>&nbsp;
-	<button @click="modalStore.confirm('Are you sure?', { onSubmit, onCancel })">
-		confirm modal
-	</button>
+	<button @click="modalStore.confirm('Are you sure?', { onSubmit, onCancel })">confirm modal</button>
 	<br /><br />
 	<button @click="modalStore.display('_ModalTemplate')">template</button>&nbsp;
 	<button @click="modalStore.display('ModalFileType')">file type</button>&nbsp;
@@ -46,7 +44,7 @@
 		<SvgServe filename="icn-file-mol" />
 		<SvgServe filename="icn-file-molset" />
 		<SvgServe filename="icn-file-data" />
-		<SvgServe filename="icn-file-txt" />
+		<SvgServe filename="icn-file-text" />
 		<SvgServe filename="icn-link" />
 		<SvgServe filename="icn-reaction" />
 		<SvgServe filename="icn-model" />
@@ -66,6 +64,22 @@
 		<CloseIcon />
 		<ChevronRight />
 	</span>
+
+	<br /><br />
+	<hr />
+	<h4>:: Icons</h4>
+	<!-- prettier-ignore -->
+	<div id="icons-wrap">
+		<IconButton icon="icn-full-screen-large" />
+		<IconButton icon="icn-star-large-outline" iconHover="icn-star" colorHover="rgba(0,0,0,.3)" colorToggle="#d3bf0b" :toggle="true" />
+		<IconButton icon="icn-model" title="default" />
+		<IconButton icon="icn-model" title="opaque"              btnStyle="opaque" />
+		<IconButton icon="icn-model" title="soft"                btnStyle="soft" />
+		<IconButton icon="icn-model" title="custom colors"       color="green" colorHover="red" />
+		<IconButton icon="icn-model" title="toggle"              :toggle="true" />
+		<IconButton icon="icn-model" title="toggle custom color" :toggle="true" colorToggle="#d3bf0b" />
+	</div>
+	<span> </span>
 
 	<br /><br />
 	<hr />
@@ -102,6 +116,7 @@ const modalStore = useModalStore()
 
 // Compnents
 import SvgServe from '@/components/SvgServe.vue'
+import IconButton from '@/components/IconButton.vue'
 // @ts-ignore
 import CloseIcon from '@carbon/icons-vue/es/close/16'
 // @ts-ignore
@@ -126,6 +141,12 @@ function onOther() {
 </script>
 
 <style scoped lang="scss">
+#icons-wrap {
+	display: flex;
+	background: #ffd;
+	gap: 20px;
+}
+
 /**
  * Swatches
  */

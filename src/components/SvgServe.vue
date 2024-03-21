@@ -1,10 +1,5 @@
 <template>
-	<SvgComponent
-		v-if="SvgComponent"
-		viewBox="0 0 16 16"
-		class="svg"
-		:style="{ '--svg-dims': dimensions }"
-	/>
+	<SvgComponent v-if="SvgComponent" class="svg" :style="{ '--svg-dims': dimensions }" />
 	<div v-else class="svg-placeholder" :style="{ '--svg-dims': dimensions }"></div>
 </template>
 
@@ -37,7 +32,7 @@ const dimensions = computed(() => {
 // Load component
 onMounted(async () => {
 	const filename = props.filename.replace(/\.svg$/, '')
-	const { default: svgComp } = await import(`@/assets/icons/${filename}.svg?component`)
+	const { default: svgComp } = await import(`@/assets/icons/${filename}.svg?component`) // Possible thanks to vite-svg-loader
 	SvgComponent.value = svgComp
 })
 </script>

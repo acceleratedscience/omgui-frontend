@@ -59,7 +59,7 @@
 							@click="() => previewFile(file_hidden, level + 1, true)"
 							@dblclick="openFile(file_hidden)"
 						>
-							<SvgServe :filename="'icn-file-' + file_hidden._meta.fileType" :key="file_hidden._meta.fileType" />
+							<SvgServe :filename="'icn-file-' + file_hidden._meta.fileType" />
 							<div>{{ file_hidden.filename }}</div>
 						</div>
 
@@ -75,7 +75,7 @@
 							@click="() => previewFile(file, level + 1, true)"
 							@dblclick="openFile(file)"
 						>
-							<SvgServe :filename="'icn-file-' + file._meta.fileType" :key="file._meta.fileType" />
+							<SvgServe :filename="'icn-file-' + file._meta.fileType" />
 							<div>{{ file.filename }}</div>
 						</div>
 
