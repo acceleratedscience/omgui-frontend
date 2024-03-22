@@ -68,16 +68,43 @@
 	<br /><br />
 	<hr />
 	<h4>:: Icons</h4>
-	<!-- prettier-ignore -->
-	<div id="icons-wrap">
-		<IconButton icon="icn-full-screen-large" />
-		<IconButton icon="icn-star-large-outline" iconHover="icn-star" colorHover="rgba(0,0,0,.3)" colorToggle="#d3bf0b" :toggle="true" />
-		<IconButton icon="icn-model" title="default" />
-		<IconButton icon="icn-model" title="opaque"              btnStyle="opaque" />
-		<IconButton icon="icn-model" title="soft"                btnStyle="soft" />
-		<IconButton icon="icn-model" title="custom colors"       color="green" colorHover="red" />
-		<IconButton icon="icn-model" title="toggle"              :toggle="true" />
-		<IconButton icon="icn-model" title="toggle custom color" :toggle="true" colorToggle="#d3bf0b" />
+	<div class="icons-wrap">
+		<div style="background: #ffd">
+			Default
+			<IconButton icon="icn-model" />
+		</div>
+		<div style="background: #ffd">
+			Opaque
+			<IconButton icon="icn-model" title="opaque" btnStyle="opaque" />
+		</div>
+		<div>
+			Soft
+			<IconButton icon="icn-model" title="soft" btnStyle="soft" />
+		</div>
+		<div>
+			Carbon
+			<IconButton icon="icn-model" title="carbon" btnStyle="carbon" />
+		</div>
+		<div>
+			Custom colors
+			<IconButton icon="icn-model" title="custom colors" color="green" colorHover="red" />
+		</div>
+		<div>
+			Toggle
+			<IconButton icon="icn-model" title="toggle" :toggle="true" />
+		</div>
+		<div>
+			Toggle with custom color
+			<IconButton icon="icn-model" title="toggle custom color" :toggle="true" colorToggle="#d3bf0b" />
+		</div>
+	</div>
+	<br />
+	<div class="icons-in-field">
+		Examples
+		<div class="icons-wrap">
+			<IconButton icon="icn-full-screen-large" iconHover="icn-full-screen-large-hover" btnStyle="soft" />
+			<IconButton icon="icn-star-large-outline" iconHover="icn-star" colorHover="rgba(0,0,0,.3)" colorToggle="#d3bf0b" :toggle="true" />
+		</div>
 	</div>
 	<span> </span>
 
@@ -141,10 +168,13 @@ function onOther() {
 </script>
 
 <style scoped lang="scss">
-#icons-wrap {
+.icons-wrap {
 	display: flex;
-	background: #ffd;
 	gap: 20px;
+	font-size: $font-size-small;
+}
+.icons-in-field {
+	font-size: $font-size-small;
 }
 
 /**

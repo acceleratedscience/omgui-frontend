@@ -17,24 +17,18 @@ export default class MoleculesApi extends BaseApi {
 		return this.apiClient.post(`/get-mol-viz-data`, { inchi_or_smiles })
 	}
 
-	// Get one page of a molset, possibly filtered/sorted.
-	getMolset(
-		path: string,
-		cacheId: number | null,
-		query: LocationQuery = {},
-		smartsMode: boolean = false,
-	) {
+	// Get one page of a molset from the working copy, possibly filtered/sorted.
+	getMolset(cacheId: number | null, query: LocationQuery = {}, smartsMode: boolean = false) {
 		console.log(123, 'getMolset', query)
 		return this.apiClient.post('/get-molset', {
-			path,
 			cacheId,
 			query,
 			smartsMode,
 		})
 	}
 
-	async getMolDataFromMolset(path: string, index: number = 0) {
-		return this.apiClient.post('/get-mol-data-from-molset', { path, index })
+	async getMolDataFromMolset(cacheId: number, index: number = 0) {
+		return this.apiClient.post('/get-mol-data-from-molset', { cacheId, index })
 	}
 
 	// Remove molecules from a molset cache.
@@ -44,9 +38,8 @@ export default class MoleculesApi extends BaseApi {
 	}
 
 	// Clear a molset's cached working copy.
-	clearFromCache(cacheId: number) {
-		console.log('clearFromCache')
-		return this.apiClient.post('/clear-from-cache', { cacheId })
+	clearMolsetWorkingCopy(cacheId: number) {
+		return this.apiClient.post('/clear-molset-working-copy', { cacheId })
 	}
 
 	// Save molset changes.

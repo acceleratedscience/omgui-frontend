@@ -101,6 +101,7 @@
 						@update:modelValue="molViewerStore.setMolFromMolsetIndex"
 						:total="molGridStore.total"
 					/>
+					<IconButton icon="icn-close" size="small" btnStyle="carbon" @click="router.push(route.path)" />
 				</div>
 
 				<template v-if="mol">
@@ -109,27 +110,37 @@
 						<div>
 							<b>InChI: </b>
 							<span v-if="mol?.identifiers?.inchi" id="data-inchi">{{ mol?.identifiers?.inchi }}</span>
-							<BaseFetching v-else text="" failText="x" :error="loadingError" />
+							<span v-else class="blank">Missing</span>
+							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>InChIKey: </b>
 							<span v-if="mol?.identifiers?.inchikey" id="data-inchikey">{{ mol?.identifiers?.inchikey }}</span>
-							<BaseFetching v-else text="" failText="x" :error="loadingError" />
+							<span v-else class="blank">Missing</span>
+							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
+						</div>
+						<div v-if="mol?.identifiers?.smiles && (!mol?.identifiers?.canonical_smiles || mol?.identifiers?.isomeric_smiles)">
+							<b>SMILES: </b>
+							<span id="data-smiles">{{ mol?.identifiers?.smiles }}</span>
+							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>Canonical SMILES: </b>
 							<span v-if="mol?.identifiers?.canonical_smiles" id="data-canonical-smiles">{{ mol?.identifiers?.canonical_smiles }}</span>
-							<BaseFetching v-else text="" failText="x" :error="loadingError" />
+							<span v-else class="blank">Missing</span>
+							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>Isomeric SMILES: </b>
 							<span v-if="mol?.identifiers?.isomeric_smiles" id="data-isomeric-smiles">{{ mol?.identifiers?.isomeric_smiles }}</span>
-							<BaseFetching v-else text="" failText="x" :error="loadingError" />
+							<span v-else class="blank">Missing</span>
+							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>Formula: </b>
 							<span v-if="mol?.identifiers?.formula" id="data-isomeric-smiles">{{ mol?.identifiers?.formula }}</span>
-							<BaseFetching v-else text="" failText="x" :error="loadingError" />
+							<span v-else class="blank">Missing</span>
+							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div>
 							<b>PubChem CID: </b>
@@ -140,7 +151,8 @@
 								target="_blank"
 								>{{ mol.identifiers.cid }}</a
 							>
-							<BaseFetching v-else text="" failText="x" :error="loadingError" />
+							<span v-else class="blank">Missing</span>
+							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<br />
 						<router-link to="?use=json" class="dumb">Show JSON</router-link>
@@ -232,7 +244,8 @@ import { ref, onBeforeUnmount, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
 
 // Router
-import { useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+const router = useRouter()
 const route = useRoute()
 
 // Stores
@@ -367,7 +380,11 @@ if (props.identifier) {
 } else if (molViewerStore.inchi) {
 	// When opening a molecule file.
 	fetchMolVizData(molViewerStore.inchi) // #case-B-1
+} else if (molViewerStore.smiles) {
+	// When opening a molecule file.
+	fetchMolVizData(molViewerStore.smiles) // #case-B-1
 }
+console.log(23444, molViewerStore.mol)
 
 // Fetch mol data from the API.
 fetchMolData(props.identifier) // #case-A-1
@@ -436,11 +453,19 @@ watch(
 // When going from one molecule file to another, fetchMolVizData will be
 // called before the molecule is loaded, so we need to call it again here.
 watch(
-	() => molViewerStore.inchi,
-	(newVal, oldVal) => {
-		if (newVal && oldVal && ['molFile', 'molset'].includes(sourceType.value)) {
-			fetchMolVizData(newVal) // #case-B-2
+	() => [molViewerStore.inchi, molViewerStore.smiles],
+	([newInchi, newSmiles], [oldInchi, oldSmiles]) => {
+		console.log(777)
+		if (sourceType.value != 'identifier') {
+			if (newInchi && oldInchi && newInchi != oldInchi) {
+				fetchMolVizData(newInchi as string) // #case-B-2
+			} else if (newSmiles && oldSmiles && newSmiles != oldSmiles) {
+				fetchMolVizData(newSmiles as string) // #case-B-2
+			}
 		}
+		// if (newVal && oldVal && sourceType.value != 'identifier') {
+		// 	fetchMolVizData(newVal) // #case-B-2
+		// }
 	},
 )
 
@@ -468,16 +493,16 @@ async function fetchMolData(identifier: string | null = null) {
 	if (identifier) {
 		fetchMolDataByIdentifier(identifier)
 	} else if (molViewerStore.molFromMolset) {
-		fetchMolDataFromMolset(fileStore.path)
+		fetchMolDataFromMolset(molGridStore.cacheId)
 	}
 }
 
 // Fetch a molecule from a molset.
-function fetchMolDataFromMolset(path: string | null = null) {
-	console.log('Fetch from:', path)
-	if (!path) return
+function fetchMolDataFromMolset(cacheId: number | null = null) {
+	console.log('Fetch from:', cacheId)
+	if (!cacheId) return
 	let index = molViewerStore.molFromMolsetIndex
-	apiFetch(moleculesApi.getMolDataFromMolset(path, index), {
+	apiFetch(moleculesApi.getMolDataFromMolset(cacheId, index), {
 		onSuccess: (data) => {
 			molViewerStore.setMolData(data)
 			if (!molViewerStore.sdf && molViewerStore.inchi) {
@@ -548,6 +573,7 @@ async function fetchMolVizData(inchi_or_smiles: string) {
 		// console.time('fetchMolVizData')
 		const response = await moleculesApi.getMolVizData(inchi_or_smiles)
 		if (response.status == 200) {
+			console.log(994, response.data)
 			// console.timeEnd('fetchMolVizData')
 
 			// This function will also be called with other identifiers,
@@ -672,6 +698,9 @@ function toggleExpand(e: Event) {
 
 #identification div {
 	margin-bottom: 4px;
+}
+#identification .blank {
+	color: $black-30;
 }
 
 /**

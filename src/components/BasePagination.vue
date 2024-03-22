@@ -135,7 +135,7 @@ function setPage(page: number | string | undefined) {
 @media (hover: hover) {
 	.pagination .btn:not(.sel):hover,
 	.pagination .display:hover {
-		background: #e5e5e5;
+		background: $black-05;
 	}
 }
 </style>

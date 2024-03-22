@@ -105,7 +105,6 @@ function getInitialState(): State {
 export const useMolGridStore = defineStore('molGridStore', {
 	state: () => getInitialState(),
 	getters: {
-		// #endregion
 		///////////////////////////////////////////////////////////////
 		//
 		// #region - Status
@@ -114,13 +113,23 @@ export const useMolGridStore = defineStore('molGridStore', {
 			return this._hasChanges
 		},
 
+		// #endregion
 		///////////////////////////////////////////////////////////////
 		//
 		// #region - Data
 
+		cacheId(): number | null {
+			return this._cacheId
+		},
+
 		// Molecules visible on this page
 		mols(): Molset | null {
 			return this._mols
+		},
+
+		// Whatever smiles is available for rendering out 2D graphic.
+		molSmiles(): string[] {
+			return this._mols!.map((mol) => mol.identifiers.isomeric_smiles ?? mol.identifiers.canonical_smiles ?? mol.identifiers.smiles)
 		},
 
 		// Total number of molecules.
@@ -235,8 +244,9 @@ export const useMolGridStore = defineStore('molGridStore', {
 			const query = this._setUrlQuery()
 
 			const smartsMode = this._searchMode == 'smarts'
-			apiFetch(moleculesApi.getMolset(fileStore.path, this._cacheId, query, smartsMode), {
+			apiFetch(moleculesApi.getMolset(this._cacheId, query, smartsMode), {
 				onSuccess: (data) => {
+					console.log(123, data)
 					this.setMolset(data)
 				},
 				onError: (err) => {
@@ -283,7 +293,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Load molecule set into the state.
 		async setMolset(molsData: MolsetApi) {
-			// console.log('setMolset', molsData)
+			console.log('setMolset', molsData)
 			this._disableUpdate = true
 
 			this._cacheId = molsData.cacheId
@@ -341,6 +351,16 @@ export const useMolGridStore = defineStore('molGridStore', {
 				})
 			})
 		},
+
+		// TRASH
+		// // We don't know for sure what smiles are available for a molecule.
+		// getSmiles(index: number) {
+		// 	return (
+		// 		this._mols![index].identifiers.isomeric_smiles ??
+		// 		this._mols![index].identifiers.canonical_smiles ??
+		// 		this._mols![index].identifiers.smiles
+		// 	)
+		// },
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
@@ -522,11 +542,13 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// on your hard disk so you can edit it. We delete
 		// this copy when you close the molset.
 		clearWorkingCopy() {
-			apiFetch(moleculesApi.clearFromCache(this._cacheId!), {
+			apiFetch(moleculesApi.clearMolsetWorkingCopy(this._cacheId!), {
 				onError: (err) => {
-					console.log('Error in clearFromCache()', err)
+					console.log('Error in clearMolsetWorkingCopy()', err)
 				},
 			})
 		},
+
+		// #endregion
 	},
 })

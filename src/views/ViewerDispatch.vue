@@ -130,9 +130,8 @@ async function parseRoute() {
 				const data: MolsetApi = file.data
 				molGridStore.setMolset(data)
 				if (route.query.show) {
-					// if (molViewerStore.molFromMolset) {
 					molViewerStore.setMolFromMolsetIndex(+route.query.show, true)
-					const data: Mol = file.data
+					const data: Mol = file.data?.mols[+route.query.show]
 					molViewerStore.setMolData(data)
 				}
 			} else if (fileStore.fileType == 'mol') {

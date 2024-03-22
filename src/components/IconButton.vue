@@ -2,17 +2,19 @@
 	<div
 		class="icn-btn"
 		:class="{
+			[props.icon]: true,
 			on: toggleState,
 			opaque: props.btnStyle == 'opaque',
 			soft: props.btnStyle == 'soft',
+			carbon: props.btnStyle == 'carbon',
 			toggle: props.toggle,
 			'has-hover-icn': props.iconHover,
 		}"
 		@click="onClick"
 		:style="styleParam"
 	>
-		<SvgServe class="base-icn" :filename="props.icon" size="large" />
-		<SvgServe v-if="props.iconHover" class="hover-icn" :filename="props.iconHover" size="large" />
+		<SvgServe class="base-icn" :filename="props.icon" :size="props.size" />
+		<SvgServe v-if="props.iconHover" class="hover-icn" :filename="props.iconHover" :size="props.size" />
 	</div>
 </template>
 
@@ -35,15 +37,17 @@ const props = withDefaults(
 	defineProps<{
 		icon: string
 		iconHover?: string
-		btnStyle?: 'default' | 'soft' | 'opaque'
+		btnStyle?: 'default' | 'soft' | 'opaque' | 'carbon'
 		toggle?: boolean
 		color?: string
 		colorHover?: string
 		colorToggle?: string
+		size?: 'small' | 'large'
 	}>(),
 	{
 		btnStyle: 'default',
 		colorToggle: '#393939', // $black-10
+		size: 'large',
 	},
 )
 
@@ -101,6 +105,10 @@ function onClick() {
 	align-items: center;
 	justify-content: center;
 }
+.icn-btn.carbon {
+	background: $soft-bg;
+	border-radius: 0;
+}
 .icn-btn:deep() svg {
 	fill: var(--btn-color);
 }
@@ -118,7 +126,7 @@ function onClick() {
 	}
 
 	// Default & soft styles
-	.icn-btn:not(.soft):not(.toggle):not(.opaque):hover {
+	.icn-btn:not(.soft):not(.opaque):not(.carbon):not(.toggle):hover {
 		background-color: $black-05;
 	}
 	.icn-btn:hover:deep() svg {
@@ -128,6 +136,10 @@ function onClick() {
 	// Opaque style
 	.icn-btn:not(.soft).opaque:hover {
 		background-color: $soft-bg;
+	}
+
+	.icn-btn.carbon:hover {
+		background: $soft-bg-hover;
 	}
 
 	// Toggle mode style

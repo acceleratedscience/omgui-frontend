@@ -33,7 +33,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			return this._mol
 		},
 		inchi(): string | null {
-			return this._mol.identifiers?.inchi || null
+			return this._mol?.identifiers?.inchi || null
+		},
+		smiles(): string | null {
+			return this._mol?.identifiers?.isomeric_smiles ?? this._mol?.identifiers?.canonical_smiles ?? this._mol?.identifiers?.smiles
 		},
 		// molLoaded(): boolean {
 		// 	return !!this._mol.identifiers.name
@@ -75,6 +78,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 	},
 	actions: {
 		setMolData(mol: Mol) {
+			console.log('setMolData')
 			this._mol = mol
 		},
 		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {

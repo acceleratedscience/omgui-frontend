@@ -19,7 +19,7 @@
 				<IconButton class="icn-btn-taste" icon="icn-taste" btnStyle="soft" @click="molGridStore.openMolecule(mol.index!)" />
 				<MolRender
 					:id="`mol-svg-${mol.index!}`"
-					:structure="mol.identifiers.isomeric_smiles.toString()"
+					:structure="molGridStore.molSmiles[i]"
 					:sub-structure="molGridStore.highlight"
 					:width="190"
 					:height="140"

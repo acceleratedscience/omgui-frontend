@@ -10,7 +10,6 @@
 					<div class="key">{{ key }}</div>
 					<div class="filler"></div>
 					<div class="val">{{ val ? val : '-' }}</div>
-					z
 				</div>
 			</div>
 

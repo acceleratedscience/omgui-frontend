@@ -107,9 +107,10 @@ export type Mol = {
 		inchi: string
 		inchikey: string
 		canonical_smiles: string // The "regular" SMILES
+		isomeric_smiles: string
+		smiles: string // We don't use this field but when opening SDF files it may be used
 		cid: string
 		formula: string
-		isomeric_smiles: string
 	}
 	synonyms: string[]
 	properties: {

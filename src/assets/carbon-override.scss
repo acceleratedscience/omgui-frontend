@@ -64,8 +64,13 @@ pre {
 
 // Hover states
 @media (hover: hover) {
-	/* Links in carbon css don't have hover state :( */
+	// Links in carbon css don't have hover state :(
 	a:hover {
 		color: $blue-hover;
+	}
+
+	// Dropdowns have a too dark hover color
+	.bx--dropdown:hover {
+		background: $soft-bg-hover;
 	}
 }
