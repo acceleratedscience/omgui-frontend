@@ -105,6 +105,7 @@ onBeforeUnmount(fileStore.clear)
  */
 
 // Display a file or directory with the appropriate module.
+// This gets triggered on initial pageload / reload.
 async function parseRoute() {
 	console.log('dispatch parseRoute')
 	const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')

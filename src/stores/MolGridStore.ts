@@ -244,7 +244,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 			const query = this._setUrlQuery()
 
 			const smartsMode = this._searchMode == 'smarts'
-			apiFetch(moleculesApi.getMolset(this._cacheId, query, smartsMode), {
+			apiFetch(moleculesApi.queryMolset(this._cacheId, query, smartsMode), {
 				onSuccess: (data) => {
 					console.log(123, data)
 					this.setMolset(data)
@@ -518,6 +518,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// Open the molecule detail page.
+		// This gets triggered when clicking the open button.
 		openMolecule(index: number) {
 			molViewerStore.setMolFromMolsetIndex(index)
 			// const path = `/~/${fileStore.path}?show=${index}`

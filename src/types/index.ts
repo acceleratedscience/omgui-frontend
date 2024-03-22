@@ -122,6 +122,7 @@ export type Mol = {
 		}
 	}
 	analysis: any[]
+	enriched: boolean
 }
 
 // This lets us set some properties on a molecule

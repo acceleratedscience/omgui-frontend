@@ -40,25 +40,25 @@
 	<h4>:: Icons</h4>
 
 	<span style="color: red">
-		<a href="#"><SvgServe filename="icn-file-mol" /></a>
-		<SvgServe filename="icn-file-mol" />
-		<SvgServe filename="icn-file-molset" />
-		<SvgServe filename="icn-file-data" />
-		<SvgServe filename="icn-file-text" />
-		<SvgServe filename="icn-link" />
-		<SvgServe filename="icn-reaction" />
-		<SvgServe filename="icn-model" />
-		<SvgServe filename="icn-file-run" />
-		<SvgServe filename="icn-file-json" />
-		<SvgServe filename="icn-file-pdf" />
-		<SvgServe filename="icn-file-svg" />
-		<SvgServe filename="icn-file-md" />
-		<SvgServe filename="icn-file-unk" />
-		<SvgServe filename="icn-caret-left" />
-		<SvgServe filename="icn-caret-right" />
-		<SvgServe filename="icn-caret-up" />
-		<SvgServe filename="icn-caret-down" />
-		<SvgServe filename="icn-file-mol" size="large" />
+		<a href="#"><SvgServe icon="icn-file-mol" /></a>
+		<SvgServe icon="icn-file-mol" />
+		<SvgServe icon="icn-file-molset" />
+		<SvgServe icon="icn-file-data" />
+		<SvgServe icon="icn-file-text" />
+		<SvgServe icon="icn-link" />
+		<SvgServe icon="icn-reaction" />
+		<SvgServe icon="icn-model" />
+		<SvgServe icon="icn-file-run" />
+		<SvgServe icon="icn-file-json" />
+		<SvgServe icon="icn-file-pdf" />
+		<SvgServe icon="icn-file-svg" />
+		<SvgServe icon="icn-file-md" />
+		<SvgServe icon="icn-file-unk" />
+		<SvgServe icon="icn-caret-left" />
+		<SvgServe icon="icn-caret-right" />
+		<SvgServe icon="icn-caret-up" />
+		<SvgServe icon="icn-caret-down" />
+		<SvgServe icon="icn-file-mol" size="large" />
 
 		<!-- Native icons -->
 		<CloseIcon />

@@ -7,14 +7,15 @@
 			opaque: props.btnStyle == 'opaque',
 			soft: props.btnStyle == 'soft',
 			carbon: props.btnStyle == 'carbon',
+			mini: props.mini,
 			toggle: props.toggle,
 			'has-hover-icn': props.iconHover,
 		}"
 		@click="onClick"
 		:style="styleParam"
 	>
-		<SvgServe class="base-icn" :filename="props.icon" :size="props.size" />
-		<SvgServe v-if="props.iconHover" class="hover-icn" :filename="props.iconHover" :size="props.size" />
+		<SvgServe class="base-icn" :icon="props.icon" :size="iconSize" />
+		<SvgServe v-if="props.iconHover" class="hover-icn" :icon="props.iconHover" :size="iconSize" />
 	</div>
 </template>
 
@@ -37,12 +38,13 @@ const props = withDefaults(
 	defineProps<{
 		icon: string
 		iconHover?: string
-		btnStyle?: 'default' | 'soft' | 'opaque' | 'carbon'
+		btnStyle?: 'default' | 'soft' | 'opaque' | 'carbon' // See /kitchen-sink for examples
 		toggle?: boolean
 		color?: string
 		colorHover?: string
 		colorToggle?: string
-		size?: 'small' | 'large'
+		icnSize?: 'small' | 'large'
+		mini?: boolean
 	}>(),
 	{
 		btnStyle: 'default',
@@ -83,6 +85,14 @@ const styleParam = computed<StyleParam>(() => {
 	return style
 })
 
+const iconSize = computed<'small' | 'large'>(() => {
+	if (props.btnStyle == 'mini') {
+		return 'small'
+	} else {
+		return props.size
+	}
+})
+
 /**
  * Methods
  */
@@ -108,6 +118,11 @@ function onClick() {
 .icn-btn.carbon {
 	background: $soft-bg;
 	border-radius: 0;
+}
+.icn-btn.mini {
+	width: 24px;
+	height: 24px;
+	padding: 0;
 }
 .icn-btn:deep() svg {
 	fill: var(--btn-color);

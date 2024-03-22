@@ -1,7 +1,7 @@
 <template>
 	<div class="pagination" :class="{ disabled }">
-		<div class="btn" @click="prevPage"><SvgServe filename="icn-caret-left" /></div>
-		<div class="btn" @click="nextPage"><SvgServe filename="icn-caret-right" /></div>
+		<div class="btn" @click="prevPage"><SvgServe icon="icn-caret-left" /></div>
+		<div class="btn" @click="nextPage"><SvgServe icon="icn-caret-right" /></div>
 		<div class="display">
 			<span>{{ props.modelValue }} / {{ displayTotal }}</span>
 			<select :value="props.modelValue" @change="setPage(($event.target as HTMLSelectElement)?.value)">

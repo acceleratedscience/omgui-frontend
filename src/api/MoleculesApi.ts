@@ -18,9 +18,9 @@ export default class MoleculesApi extends BaseApi {
 	}
 
 	// Get one page of a molset from the working copy, possibly filtered/sorted.
-	getMolset(cacheId: number | null, query: LocationQuery = {}, smartsMode: boolean = false) {
-		console.log(123, 'getMolset', query)
-		return this.apiClient.post('/get-molset', {
+	queryMolset(cacheId: number | null, query: LocationQuery = {}, smartsMode: boolean = false) {
+		console.log(123, 'queryMolset', query)
+		return this.apiClient.post('/query-molset', {
 			cacheId,
 			query,
 			smartsMode,

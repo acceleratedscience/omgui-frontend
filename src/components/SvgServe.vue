@@ -9,7 +9,7 @@ import { shallowRef, computed, onMounted } from 'vue'
 // Props
 const props = withDefaults(
 	defineProps<{
-		filename: string
+		icon: string
 		size?: 'small' | 'large'
 	}>(),
 	{
@@ -31,7 +31,7 @@ const dimensions = computed(() => {
 
 // Load component
 onMounted(async () => {
-	const filename = props.filename.replace(/\.svg$/, '')
+	const filename = props.icon.replace(/\.svg$/, '')
 	const { default: svgComp } = await import(`@/assets/icons/${filename}.svg?component`) // Possible thanks to vite-svg-loader
 	SvgComponent.value = svgComp
 })

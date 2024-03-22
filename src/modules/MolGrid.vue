@@ -70,10 +70,12 @@ import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
 import { useModalStore } from '@/stores/ModalStore'
+import { useMolViewerStore } from '@/stores/MolViewerStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
 const modalStore = useModalStore()
+const molViewerStore = useMolViewerStore()
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
@@ -147,6 +149,18 @@ watch(route, (to, from) => {
 		molGridStore.clear()
 	}
 })
+
+// When going back into a molecule from a molset.
+// Works in tandem with the route.query watcher in
+// MolViewer for going the other direction.
+watch(
+	() => route.query,
+	(newVal, oldVal) => {
+		if (!oldVal.show && newVal.show) {
+			molViewerStore.setMolFromMolsetIndex(+newVal.show, true)
+		}
+	},
+)
 
 /**
  * Methods

@@ -10,6 +10,15 @@
 				<router-link v-else :to="'/~/' + props.pathArray.slice(1, i + 1).join('/')" class="dumb">{{ item }}</router-link>
 				<span v-if="i < props.pathArray.length - 1">&nbsp;&nbsp;&rsaquo;&nbsp;&nbsp;</span>
 			</template>
+			<div class="icn-btn-wrap">
+				<IconButton
+					icon="icn-folder"
+					iconHover="icn-folder-full"
+					btnStyle="soft"
+					mini
+					@click="fileSystemApi.openFileOS(fileStore.pathAbsolute)"
+				/>
+			</div>
 			<a v-if="needsTruncation && !truncate" href="#" class="toggle-hide" @click.prevent="toggleTruncate">hide</a>
 		</div>
 		<a v-if="needsTruncation && truncate" href="#" class="toggle-show" @click.prevent="toggleTruncate">show</a>
@@ -30,7 +39,11 @@ const mainStore = useMainStore()
 const fileStore = useFileStore()
 const modalStore = useModalStore()
 
-// Type declarations
+// API
+import { fileSystemApi } from '@/api/ApiService'
+
+// Components
+import IconButton from '@/components/IconButton.vue'
 
 // Props
 const props = defineProps<{
@@ -73,15 +86,27 @@ function toggleTruncate() {
 #breadcrumbs-wrap {
 	display: flex;
 	font-size: $font-size-small;
-	line-height: $line-height-small;
+	line-height: 20px;
 	color: $black-30;
 }
 #breadcrumbs {
 	flex: 1;
-	margin-bottom: 8px;
+	margin-bottom: 16px;
+	display: flex;
+	vertical-align: flex-end;
+	// background: pink;
 }
 #breadcrumbs a {
 	color: $black-30;
+	display: inline-block;
+	height: 20px;
+	line-height: 20px;
+	// background: brown;
+}
+#breadcrumbs .icn-btn-wrap {
+	margin: -4px 0 -4px 8px;
+	vertical-align: middle;
+	// background: red;
 }
 
 // Truncation at end
@@ -93,6 +118,9 @@ function toggleTruncate() {
 #breadcrumbs-wrap:not(.truncate),
 #breadcrumbs:not(.truncate) {
 	display: block;
+}
+#breadcrumbs:not(.truncate) .icn-btn-wrap {
+	display: inline-block;
 }
 
 // Show-more link for truncated breadcrumbs
@@ -110,7 +138,8 @@ function toggleTruncate() {
 	color: $black;
 	background: $black-10;
 	border: none;
-	padding: 0 4px;
+	padding: 2px 4px;
+	box-sizing: content-box;
 	height: 16px;
 	line-height: 16px;
 	border-radius: 2px;

@@ -86,7 +86,7 @@
 						<SvgServe
 							class="icn-file-mol"
 							:class="{ loading: loading }"
-							:filename="sourceType == 'molset' ? 'icn-file-molset' : 'icn-file-mol'"
+							:icon="sourceType == 'molset' ? 'icn-file-molset' : 'icn-file-mol'"
 							size="large"
 						/>
 					</div>
@@ -98,15 +98,16 @@
 					<BasePagination
 						v-if="molViewerStore.molFromMolset"
 						:modelValue="molViewerStore.molFromMolsetIndex"
-						@update:modelValue="molViewerStore.setMolFromMolsetIndex"
+						@update:modelValue="router.push({ query: { show: $event.toString() } })"
 						:total="molGridStore.total"
 					/>
-					<IconButton icon="icn-close" size="small" btnStyle="carbon" @click="router.push(route.path)" />
+					<IconButton icon="icn-close" icnSize="small" btnStyle="carbon" @click="router.push(route.path)" />
 				</div>
 
 				<template v-if="mol">
 					<!-- Identification -->
 					<div id="identification">
+						@{{ molViewerStore.enriched }}!
 						<div>
 							<b>InChI: </b>
 							<span v-if="mol?.identifiers?.inchi" id="data-inchi">{{ mol?.identifiers?.inchi }}</span>
@@ -435,6 +436,7 @@ onBeforeUnmount(clearMolData)
 watch(
 	() => molViewerStore.molFromMolsetIndex,
 	() => {
+		console.log('fetchMolData!')
 		fetchMolData() // #case-A-2
 	},
 )
@@ -455,26 +457,27 @@ watch(
 watch(
 	() => [molViewerStore.inchi, molViewerStore.smiles],
 	([newInchi, newSmiles], [oldInchi, oldSmiles]) => {
-		console.log(777)
+		console.log([newInchi, newSmiles], [oldInchi, oldSmiles])
 		if (sourceType.value != 'identifier') {
-			if (newInchi && oldInchi && newInchi != oldInchi) {
+			if (newInchi && newInchi != oldInchi) {
 				fetchMolVizData(newInchi as string) // #case-B-2
-			} else if (newSmiles && oldSmiles && newSmiles != oldSmiles) {
+			} else if (newSmiles && newSmiles != oldSmiles) {
 				fetchMolVizData(newSmiles as string) // #case-B-2
 			}
 		}
-		// if (newVal && oldVal && sourceType.value != 'identifier') {
-		// 	fetchMolVizData(newVal) // #case-B-2
-		// }
 	},
 )
 
 // When exiting a molecule from a molset.
+// Works in tandem with the route.query watcher in
+// MolGrid for going the other direction.
 watch(
 	() => route.query,
 	(newVal, oldVal) => {
 		if (oldVal.show && !newVal.show) {
 			molViewerStore.setMolFromMolsetIndex(0, true)
+		} else if (newVal.show) {
+			molViewerStore.setMolFromMolsetIndex(+newVal.show, true)
 		}
 	},
 )

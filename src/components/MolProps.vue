@@ -2,8 +2,8 @@
 	<div id="properties" :class="{ expand }">
 		<div class="header" @click="toggleExpand">
 			<div>Identifiers & properties</div>
-			<SvgServe v-show="expand" filename="icn-chevron-up" />
-			<SvgServe v-show="!expand" filename="icn-chevron-down" />
+			<SvgServe v-show="expand" icon="icn-chevron-up" />
+			<SvgServe v-show="!expand" icon="icn-chevron-down" />
 		</div>
 		<div class="content">
 			<h4>Identifiers</h4>

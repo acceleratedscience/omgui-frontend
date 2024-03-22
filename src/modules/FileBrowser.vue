@@ -31,7 +31,7 @@
 							@click="() => fetchNextLevel(dir_hidden.path, dir_hidden.filename, level + 1, true)"
 						>
 							<div>{{ dir_hidden.filename }}</div>
-							<SvgServe filename="icn-caret-right" :key="dir_hidden.filename" />
+							<SvgServe icon="icn-caret-right" :key="dir_hidden.filename" />
 						</div>
 
 						<!-- Directories -->
@@ -44,7 +44,7 @@
 							@click="() => fetchNextLevel(dir.path, dir.filename, level + 1, true)"
 						>
 							<div>{{ dir.filename }}</div>
-							<SvgServe filename="icn-caret-right" :key="dir.filename" />
+							<SvgServe icon="icn-caret-right" :key="dir.filename" />
 						</div>
 
 						<!-- Hidden files -->
@@ -59,7 +59,7 @@
 							@click="() => previewFile(file_hidden, level + 1, true)"
 							@dblclick="openFile(file_hidden)"
 						>
-							<SvgServe :filename="'icn-file-' + file_hidden._meta.fileType" />
+							<SvgServe :icon="'icn-file-' + file_hidden._meta.fileType" />
 							<div>{{ file_hidden.filename }}</div>
 						</div>
 
@@ -75,7 +75,7 @@
 							@click="() => previewFile(file, level + 1, true)"
 							@dblclick="openFile(file)"
 						>
-							<SvgServe :filename="'icn-file-' + file._meta.fileType" />
+							<SvgServe :icon="'icn-file-' + file._meta.fileType" />
 							<div>{{ file.filename }}</div>
 						</div>
 

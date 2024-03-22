@@ -33,6 +33,11 @@ export default class FileSystemApi extends BaseApi {
 		return this.apiClient.post('/get-file', { path, query })
 	}
 
+	// Open a file in its OS application.
+	openFileOS(path: string = '') {
+		return this.apiClient.post('/open-file-os', { path })
+	}
+
 	test() {
 		return this.apiClient(`/test`)
 	}

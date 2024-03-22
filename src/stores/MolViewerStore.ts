@@ -38,6 +38,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		smiles(): string | null {
 			return this._mol?.identifiers?.isomeric_smiles ?? this._mol?.identifiers?.canonical_smiles ?? this._mol?.identifiers?.smiles
 		},
+		enriched(): boolean {
+			return (this._mol as Mol)?.enriched
+		},
 		// molLoaded(): boolean {
 		// 	return !!this._mol.identifiers.name
 		// },
@@ -89,7 +92,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (sdf) this._sdf = sdf
 		},
 		setMolFromMolsetIndex(index: number, dontPushRoute = false) {
-			console.log(99, index, dontPushRoute)
+			console.log(99, 'setMolFromMolsetIndex:', index)
 			this._molFromMolsetIndex = index
 
 			if (!dontPushRoute) {
