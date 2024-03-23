@@ -73,12 +73,21 @@
 		<div id="content-wrap">
 			<!-- Left main column -->
 			<div class="col-left">
-				<BreadCrumbs v-if="sourceType == 'molFile'" :pathArray="fileStore.breadCrumbPathArray" />
 				<BreadCrumbs
-					v-else-if="sourceType == 'molset'"
-					:pathArray="fileStore.breadCrumbPathArray.concat(['mol #' + molViewerStore.molFromMolsetIndex.toString()])"
-					fileType="molset"
-				/>
+					:pathArray="
+						sourceType == 'molFile'
+							? fileStore.breadCrumbPathArray
+							: fileStore.breadCrumbPathArray.concat(['mol #' + molViewerStore.molFromMolsetIndex.toString()])
+					"
+				>
+					<IconButton
+						icon="icn-file-json"
+						iconHover="icn-file-json-hover"
+						btnStyle="soft"
+						mini
+						@click="router.push({ query: { use: 'json' } })"
+					/>
+				</BreadCrumbs>
 
 				<!-- Title -->
 				<div id="title-wrap">
@@ -107,17 +116,17 @@
 				<template v-if="mol">
 					<!-- Identification -->
 					<div id="identification">
-						@{{ molViewerStore.enriched }}!
-						<div>
+						<!-- @{{ molViewerStore.enriched }}! -->
+						<div v-if="molViewerStore.enriched || mol?.identifiers?.inchi">
 							<b>InChI: </b>
 							<span v-if="mol?.identifiers?.inchi" id="data-inchi">{{ mol?.identifiers?.inchi }}</span>
-							<span v-else class="blank">Missing</span>
+							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
-						<div>
+						<div v-if="molViewerStore.enriched || mol?.identifiers?.inchikey">
 							<b>InChIKey: </b>
 							<span v-if="mol?.identifiers?.inchikey" id="data-inchikey">{{ mol?.identifiers?.inchikey }}</span>
-							<span v-else class="blank">Missing</span>
+							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div v-if="mol?.identifiers?.smiles && (!mol?.identifiers?.canonical_smiles || mol?.identifiers?.isomeric_smiles)">
@@ -125,38 +134,38 @@
 							<span id="data-smiles">{{ mol?.identifiers?.smiles }}</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
-						<div>
+						<div v-if="molViewerStore.enriched || mol?.identifiers?.canonical_smiles">
 							<b>Canonical SMILES: </b>
 							<span v-if="mol?.identifiers?.canonical_smiles" id="data-canonical-smiles">{{ mol?.identifiers?.canonical_smiles }}</span>
-							<span v-else class="blank">Missing</span>
+							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
-						<div>
+						<div v-if="molViewerStore.enriched || mol?.identifiers?.isomeric_smiles">
 							<b>Isomeric SMILES: </b>
 							<span v-if="mol?.identifiers?.isomeric_smiles" id="data-isomeric-smiles">{{ mol?.identifiers?.isomeric_smiles }}</span>
-							<span v-else class="blank">Missing</span>
+							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
-						<div>
+						<div v-if="molViewerStore.enriched || mol?.identifiers?.formula">
 							<b>Formula: </b>
 							<span v-if="mol?.identifiers?.formula" id="data-isomeric-smiles">{{ mol?.identifiers?.formula }}</span>
-							<span v-else class="blank">Missing</span>
+							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
-						<div>
+						<div v-if="molViewerStore.enriched || mol.identifiers?.cid">
 							<b>PubChem CID: </b>
 							<a
 								v-if="mol?.identifiers?.cid"
 								id="data-cid"
-								:href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`"
+								:href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers?.cid}`"
 								target="_blank"
 								>{{ mol.identifiers.cid }}</a
 							>
-							<span v-else class="blank">Missing</span>
+							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<br />
-						<router-link to="?use=json" class="dumb">Show JSON</router-link>
+						<cv-button v-if="!molViewerStore.enriched" size="small" kind="secondary">Enrich</cv-button>
 					</div>
 
 					<hr />

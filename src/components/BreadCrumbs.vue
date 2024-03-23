@@ -22,7 +22,10 @@
 			<a v-if="needsTruncation && !truncate" href="#" class="toggle-hide" @click.prevent="toggleTruncate">hide</a>
 		</div>
 		<a v-if="needsTruncation && truncate" href="#" class="toggle-show" @click.prevent="toggleTruncate">show</a>
-		<span v-if="props.slotRight" class="slot">{{ props.slotRight }}</span>
+		<div class="bc-right">
+			<slot></slot>
+			<span v-if="props.slotRight" class="slot">{{ props.slotRight }}</span>
+		</div>
 	</div>
 </template>
 
@@ -83,29 +86,31 @@ function toggleTruncate() {
 </script>
 
 <style lang="scss" scoped>
+$br-height: 20px;
+
 #breadcrumbs-wrap {
 	display: flex;
 	font-size: $font-size-small;
-	line-height: 20px;
+	line-height: $br-height;
 	color: $black-30;
 }
 #breadcrumbs {
 	flex: 1;
 	margin-bottom: 16px;
 	display: flex;
-	vertical-align: flex-end;
 	// background: pink;
 }
 #breadcrumbs a {
 	color: $black-30;
 	display: inline-block;
-	height: 20px;
-	line-height: 20px;
+	height: $br-height;
+	line-height: $br-height;
 	// background: brown;
 }
 #breadcrumbs .icn-btn-wrap {
-	margin: -4px 0 -4px 8px;
+	margin: -2px 0 -2px 8px;
 	vertical-align: middle;
+	display: flex;
 	// background: red;
 }
 
@@ -131,6 +136,16 @@ function toggleTruncate() {
 #breadcrumbs-wrap .toggle-show::before,
 #breadcrumbs-wrap .toggle-hide::before {
 	content: '\a0\a0';
+}
+
+// Right side
+#breadcrumbs ~ .bc-right {
+	display: flex;
+	height: $br-height;
+	line-height: $br-height;
+}
+#breadcrumbs:deep() ~ .bc-right .icn-btn {
+	margin: -2px 0 -2px 8px;
 }
 
 // File type button

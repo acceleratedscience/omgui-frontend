@@ -47,7 +47,7 @@ export const useFileStore = defineStore('fileStore', {
 	state: () => getInitialState(),
 
 	getters: {
-		data(): string | undefined {
+		data(): any {
 			return this._data
 		},
 		path(): string {

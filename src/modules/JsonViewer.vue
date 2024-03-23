@@ -1,6 +1,8 @@
 <template>
-	<main id="module">This is the JSON viewer component {{ path }}</main>
-	<pre v-if="molData" id="file-content">{{ molData }}</pre>
+	<!-- <main id="module"a>This is the JSON viewer component {{ path }}</main> -->
+	<pre v-if="jsonData" id="json-data">
+		<div v-for="line, i in jsonDataLines" :key="i">{{ line }}</div>
+	</pre>
 	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
 </template>
 
@@ -43,18 +45,46 @@ const path = computed(() => {
 	return route.query.path
 })
 
-const molData = computed(() => {
-	return props.data || fileStore.data
+const jsonData = computed(() => {
+	if (props.data) {
+		return props.data
+	}
+
+	const fileStoreData = fileStore.data
+
+	if (fileStoreData?.cacheId && fileStoreData?.mols) {
+		// mol.json files --> extract file data without meta wrapper.
+		return fileStoreData.mols
+	} else {
+		return {}
+	}
+})
+
+const jsonDataLines = computed(() => {
+	if (!jsonData.value) return []
+	const jsonStr = JSON.stringify(jsonData.value, null, '\t')
+	return jsonStr.split('\n')
 })
 </script>
 
-<style lang="css" scoped>
-#module {
-	background: beige;
-	padding: 4px;
-	margin-bottom: 20px;
-}
-#file-content {
+<style lang="scss" scoped>
+#json-data {
 	white-space: pre-wrap;
+	font-size: $font-size-small;
+	border-top: solid 1px $black-10;
+}
+#json-data {
+	counter-reset: line;
+}
+#json-data div:before {
+	counter-increment: line;
+	content: counter(line);
+	display: inline-block;
+	width: 30px;
+	border-right: 1px solid #ddd;
+	padding: 0 5px;
+	margin-right: 5px;
+	text-align: right;
+	color: $black-30;
 }
 </style>

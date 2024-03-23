@@ -1,5 +1,7 @@
 <template>
-	<BreadCrumbs :pathArray="fileStore.breadCrumbPathArray" :slotRight="`${prettyNr(molGridStore.total)} mols`" />
+	<BreadCrumbs :pathArray="fileStore.breadCrumbPathArray" :slotRight="`${prettyNr(molGridStore.total)} mols`">
+		<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push({ query: { use: 'json' } })" />
+	</BreadCrumbs>
 	<MolProps />
 	<MolActions />
 	<div id="resp-container">
@@ -61,8 +63,9 @@ import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue'
 import type { ComputedRef } from 'vue'
 
 // Router
-import { useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
+import { useRouter, useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
+const router = useRouter()
 const route = useRoute()
 
 // Stores
