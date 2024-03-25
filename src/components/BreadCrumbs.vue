@@ -166,7 +166,7 @@ $br-height: 20px;
 }
 
 /**
- * Hover states
+ * Hover
  */
 
 @media (hover: hover) {

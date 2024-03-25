@@ -3,19 +3,33 @@
 		class="icn-btn"
 		:class="{
 			[props.icon]: true,
-			on: toggleState,
-			opaque: props.btnStyle == 'opaque',
+
+			// Size
+			mini: props.mini,
+
+			// Button styles
+			default: props.btnStyle == 'default',
 			soft: props.btnStyle == 'soft',
 			carbon: props.btnStyle == 'carbon',
-			mini: props.mini,
+
+			// Toggle type
 			toggle: props.toggle,
-			'has-hover-icn': props.iconHover,
+			'toggle-on': toggleState,
+
+			// Selection state
+			sel: props.sel,
+
+			// Custom colors
+			'has-secondary-icn': props.iconHover,
+			'has-custom-color': !!props.color,
+			'has-custom-hover-color': !!props.colorHover,
+			'has-custom-toggle-color': !!props.colorToggle,
 		}"
 		@click="onClick"
 		:style="styleParam"
 	>
 		<SvgServe class="base-icn" :icon="props.icon" :size="iconSize" />
-		<SvgServe v-if="props.iconHover" class="hover-icn" :icon="props.iconHover" :size="iconSize" />
+		<SvgServe v-if="props.iconHover" class="secondary-icn" :icon="props.iconHover" :size="iconSize" />
 	</div>
 </template>
 
@@ -28,8 +42,8 @@ import SvgServe from '@/components/SvgServe.vue'
 
 // Type declarations
 type StyleParam = {
-	'--btn-color': string
-	'--btn-color-hover': string
+	'--btn-color'?: string
+	'--btn-color-hover'?: string
 	'--btn-color-toggle'?: string
 }
 
@@ -38,24 +52,24 @@ const props = withDefaults(
 	defineProps<{
 		icon: string
 		iconHover?: string
-		btnStyle?: 'default' | 'soft' | 'opaque' | 'carbon' // See /kitchen-sink for examples
+		btnStyle?: 'default' | 'soft' | 'carbon' // See /kitchen-sink for examples
 		toggle?: boolean
 		color?: string
 		colorHover?: string
 		colorToggle?: string
 		icnSize?: 'small' | 'large'
 		mini?: boolean
+		sel?: boolean
 	}>(),
 	{
 		btnStyle: 'default',
-		colorToggle: '#393939', // $black-10
-		size: 'large',
+		icnSize: 'small',
 	},
 )
 
 // Definitions
 const toggleState = ref<boolean>(false)
-const defaults: { [key: string]: string } = {
+const defaultColors: { [key: string]: string } = {
 	soft: 'rgba(0,0,0,.3)',
 	semiSoft: 'rgba(0,0,0,.6)',
 	hard: '#393939',
@@ -65,31 +79,26 @@ const defaults: { [key: string]: string } = {
  * Computed
  */
 
-const color = computed<string>(() => {
-	return props.color ? props.color : props.btnStyle == 'soft' || props.toggle ? defaults.soft : defaults.hard
-})
-
-const colorHover = computed<string>(() => {
-	return props.colorHover ? props.colorHover : props.btnStyle == 'soft' ? defaults.hard : props.toggle ? defaults.semiSoft : defaults.hard
-})
-
 const styleParam = computed<StyleParam>(() => {
-	const style: StyleParam = {
-		'--btn-color': color.value,
-		'--btn-color-hover': colorHover.value,
+	const style: StyleParam = {}
+	if (props.color) {
+		style['--btn-color'] = props.color ? props.color : defaultColors.soft
 	}
-	if (props.toggle) {
-		style['--btn-color-toggle'] = props.colorToggle
+	if (props.colorHover) {
+		style['--btn-color-hover'] = props.colorHover ? props.colorHover : defaultColors.hard
+	}
+	if (props.colorToggle) {
+		style['--btn-color-toggle'] = props.colorToggle ? props.colorToggle : defaultColors.hard
 	}
 
 	return style
 })
 
 const iconSize = computed<'small' | 'large'>(() => {
-	if (props.btnStyle == 'mini') {
+	if (props.mini || props.icnSize == 'small') {
 		return 'small'
 	} else {
-		return props.size
+		return props.icnSize
 	}
 })
 
@@ -110,61 +119,92 @@ function onClick() {
 	height: 40px;
 	padding: 8px;
 	cursor: pointer;
-	border-radius: 2px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	color: $black;
 }
-.icn-btn.carbon {
-	background: $soft-bg;
-	border-radius: 0;
-}
+
+// Mini
 .icn-btn.mini {
 	width: 24px;
 	height: 24px;
 	padding: 0;
 }
-.icn-btn:deep() svg {
-	fill: var(--btn-color);
+
+// Soft
+.icn-btn.soft {
+	color: $black-30;
 }
-.icn-btn.on:deep() svg {
-	fill: var(--btn-color-toggle);
+
+// Carbon
+.icn-btn.carbon {
+	background: $soft-bg;
+}
+
+// Toggle
+.icn-btn.toggle {
+	color: $black-30;
+}
+.icn-btn.toggle.toggle-on {
+	color: $black;
+}
+.icn-btn.has-secondary-icn:not(.toggle-on):not(:hover):not(.sel) .secondary-icn,
+.icn-btn.has-secondary-icn.toggle-on .base-icn,
+.icn-btn.has-secondary-icn.sel .base-icn {
+	display: none;
+}
+
+// Custom colors
+.icn-btn.has-custom-color {
+	color: var(--btn-color);
+}
+.icn-btn.has-custom-toggle-color.toggle-on {
+	color: var(--btn-color-toggle);
 }
 
 @media (hover: hover) {
-	// Custon hover icon
-	// Note: when toggle mode is used, the hover icon is also used for the on state.
-	.icn-btn.has-hover-icn:not(.on):not(:hover) .hover-icn,
-	.icn-btn.has-hover-icn:hover .base-icn,
-	.icn-btn.has-hover-icn.on .base-icn {
-		display: none;
+	// Default
+	.icn-btn:hover {
+		background: $black-05;
+		border-radius: 2px;
 	}
 
-	// Default & soft styles
-	.icn-btn:not(.soft):not(.opaque):not(.carbon):not(.toggle):hover {
-		background-color: $black-05;
-	}
-	.icn-btn:hover:deep() svg {
-		fill: var(--btn-color-hover);
+	// Soft
+	.icn-btn.soft:hover {
+		color: $black;
+		background: none;
 	}
 
-	// Opaque style
-	.icn-btn:not(.soft).opaque:hover {
-		background-color: $soft-bg;
-	}
-
+	// Carbon
 	.icn-btn.carbon:hover {
 		background: $soft-bg-hover;
 	}
 
-	// Toggle mode style
-	// .icn-btn.toggle:hover:deep() svg {
-	// 	fill: $black-60;
-	// }
+	// Toggle
+	.icn-btn.toggle:hover {
+		color: $black;
+		background: none;
+	}
+	.icn-btn.has-secondary-icn:hover .base-icn {
+		display: none;
+	}
+	.icn-btn.toggle-on:hover {
+		color: $black-60;
+		background: none;
+	}
+	.icn-btn.has-custom-toggle-color:hover {
+		background: none;
+	}
+	.icn-btn.has-custom-toggle-color.toggle-on:hover {
+		color: var(--btn-color-toggle);
+		filter: brightness(0.9);
+	}
 
-	// Toggle mode
-	.icn-btn.on:hover:deep() svg {
-		fill: var(--btn-color-toggle);
+	// Custom colors
+	.icn-btn.has-custom-hover-color:hover {
+		color: var(--btn-color-hover);
+		background: none;
 	}
 }
 </style>

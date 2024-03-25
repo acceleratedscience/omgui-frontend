@@ -47,6 +47,7 @@ $aux-green-hover: darken($aux-green, 5%);
 
 // Responsive breakpoints.
 // Should be used as max values.
+$bp-xlarge: 1800px; // The point where we snap content width to window
 $bp-large: 1200px;
 $bp-medium: 1000px;
 $bp-small: 700px;

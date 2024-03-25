@@ -551,7 +551,7 @@ async function fetchWorkspaceFiles(path = '') {
 }
 
 /**
- * Hover states
+ * Hover
  */
 
 @media (hover: hover) {

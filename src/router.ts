@@ -16,8 +16,7 @@ const routes = [
 	{
 		path: '/~/:path(.*)?',
 		name: 'filebrowser',
-		component: () =>
-			import(/* webpackChunkName: 'viewer-dispatch' */ `@/views/ViewerDispatch.vue`),
+		component: () => import(/* webpackChunkName: 'viewer-dispatch' */ `@/views/ViewerDispatch.vue`),
 	},
 	{
 		path: '/',
@@ -26,8 +25,7 @@ const routes = [
 	{
 		path: '/molviewer',
 		name: 'molviewer-input',
-		component: () =>
-			import(/* webpackChunkName: 'molviewer-input' */ '@/modules/MolViewerInput.vue'),
+		component: () => import(/* webpackChunkName: 'molviewer-input' */ '@/modules/MolViewerInput.vue'),
 	},
 	{
 		path: '/molviewer/:identifier',
@@ -56,8 +54,8 @@ const routes = [
 		component: () => import(/* webpackChunkName: 'textviewer' */ '@/modules/TextViewer.vue'),
 	},
 	{
-		path: '/commandline',
-		name: 'commandline',
+		path: '/cli',
+		name: 'cli',
 		component: () => import(/* webpackChunkName: 'commandline' */ '@/modules/CommandLine.vue'),
 	},
 	{

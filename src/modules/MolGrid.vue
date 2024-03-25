@@ -424,7 +424,7 @@ const keyHandlers: KeyHandlers = {
 }
 
 /**
- * Hover states
+ * Hover
  */
 
 @media (hover: hover) {

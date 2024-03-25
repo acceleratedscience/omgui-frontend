@@ -23,12 +23,7 @@
 	</template>
 
 	<!-- Load a headless module (wrapper + loader) -->
-	<div
-		v-else-if="mainStore.headless"
-		ref="$headlessWrap"
-		id="headless-wrap"
-		:class="{ 'file-browser': fileStore.isDir }"
-	>
+	<div v-else-if="mainStore.headless" ref="$headlessWrap" id="headless-wrap" :class="{ 'file-browser': fileStore.isDir }">
 		<router-view />
 		<!-- <RouterView v-slot="{ Component }">
 			<KeepAlive>
@@ -40,25 +35,23 @@
 
 	<!-- Load the full application -->
 	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir }">
-		<header>
-			<nav>
-				<router-link :to="{ name: 'home' }">Home</router-link>
-				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<router-link :to="{ name: 'filebrowser' }">File Browser</router-link>
-				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<router-link :to="{ name: 'molviewer-input' }">Molecule Viewer</router-link>
-				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<router-link :to="{ name: 'molgrid' }">Molecule Grid</router-link>
-				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<router-link :to="{ name: 'dataviewer' }">Data Viewer</router-link>
-				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<router-link :to="{ name: 'jsonviewer' }">JSON Viewer</router-link>
-				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<router-link :to="{ name: 'textviewer' }">Text Viewer</router-link>
-				&nbsp;&nbsp;|&nbsp;&nbsp;
-				<router-link :to="{ name: 'commandline' }">Command Line</router-link>
-			</nav>
-		</header>
+		<NavMain />
+		<!-- <header>Hello world</header> -->
+		<!-- <router-link :to="{ name: 'home' }">Home</router-link>
+			&nbsp;&nbsp;|&nbsp;&nbsp;
+			<router-link :to="{ name: 'filebrowser' }">File Browser</router-link>
+			&nbsp;&nbsp;|&nbsp;&nbsp;
+			<router-link :to="{ name: 'molviewer-input' }">Molecule Viewer</router-link>
+			&nbsp;&nbsp;|&nbsp;&nbsp;
+			<router-link :to="{ name: 'molgrid' }">Molecule Grid</router-link>
+			&nbsp;&nbsp;|&nbsp;&nbsp;
+			<router-link :to="{ name: 'dataviewer' }">Data Viewer</router-link>
+			&nbsp;&nbsp;|&nbsp;&nbsp;
+			<router-link :to="{ name: 'jsonviewer' }">JSON Viewer</router-link>
+			&nbsp;&nbsp;|&nbsp;&nbsp;
+			<router-link :to="{ name: 'textviewer' }">Text Viewer</router-link>
+			&nbsp;&nbsp;|&nbsp;&nbsp;
+			<router-link :to="{ name: 'commandline' }">Command Line</router-link> -->
 		<div id="body">
 			<router-view />
 			<!-- <RouterView v-slot="{ Component }">
@@ -87,6 +80,7 @@ import { fileSystemApi } from '@/api/ApiService'
 
 // Components
 import TheModal from '@/components/TheModal.vue'
+import NavMain from '@/components/NavMain.vue'
 
 // Utils
 import { debounce } from '@/utils/helpers'
@@ -119,15 +113,13 @@ const isRawPath = computed(() => {
 
 // Store the name of your current workspace.
 if (fileSystemApi) {
-	fileSystemApi
-		.getWorkspace()
-		.then((result: { data: string; status: number; statusText: string }) => {
-			if (result.status != 200) {
-				console.error('Failed to get workspace name:', result.statusText)
-				return
-			}
-			mainStore.setWorkspace(result.data)
-		})
+	fileSystemApi.getWorkspace().then((result: { data: string; status: number; statusText: string }) => {
+		if (result.status != 200) {
+			console.error('Failed to get workspace name:', result.statusText)
+			return
+		}
+		mainStore.setWorkspace(result.data)
+	})
 }
 
 /**
@@ -173,6 +165,12 @@ function storeScreenWidth() {
 </script>
 
 <style scoped lang="scss">
+header {
+	width: 100%;
+	flex: 0 0 auto;
+	background: pink;
+}
+
 /**
  * Headless
  */
@@ -196,7 +194,7 @@ function storeScreenWidth() {
 #main-wrap {
 	display: flex;
 	flex-direction: column;
-	position: relative;
+	// position: relative;
 	padding-bottom: 0;
 	box-sizing: border-box;
 	height: min-content; // Required for bottom patting to show
@@ -214,22 +212,10 @@ function storeScreenWidth() {
 #main-wrap.file-browser {
 	padding-bottom: 0;
 	height: 100%; // Required for file-browser to stretch to the bottom.
+	max-width: none;
+	padding: 0 40px;
 }
-header {
-	width: 100%;
-	min-height: 40px;
-	margin-bottom: 20px;
-	flex: 0 0 auto;
-}
-nav {
-	min-height: 40px;
-	line-height: 30px;
-	padding-bottom: 10px;
-	position: sticky;
-	top: 20px;
-	left: 40px;
-	display: inline-block;
-}
+
 #body {
 	flex: 1;
 }
@@ -243,9 +229,17 @@ nav {
  * Responsive
  */
 
+@media (max-width: $bp-xlarge) {
+	#main-wrap {
+		max-width: none;
+		// padding-top: 80px;
+	}
+}
+
 @media (max-width: $bp-medium) {
 	#main-wrap {
 		padding: 40px;
+		// padding-top: 80px;
 	}
 }
 @media (max-width: $bp-small) {

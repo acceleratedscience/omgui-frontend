@@ -101,7 +101,7 @@ export type FileType =
 
 // A molecule object, as returned by the API.
 export type Mol = {
-	index?: number // For the molgrid position
+	index?: number // For the position in the molset
 	identifiers: {
 		name: string
 		inchi: string
