@@ -4,6 +4,9 @@
 
 import { defineStore } from 'pinia'
 
+// Utils
+import { lockScroll } from '@/utils/helpers'
+
 // Type declarations
 type Size = 'xs' | 'sm' | 'md' | 'lg'
 type State = {
@@ -104,9 +107,13 @@ export const useModalStore = defineStore('modalStore', {
 	actions: {
 		show() {
 			this._visible = true
+			lockScroll(true)
+			console.log('modalStore show')
 		},
 		hide() {
 			this._visible = false
+			lockScroll(false)
+			console.log('modalStore hide')
 		},
 
 		// Display a custom modal.
@@ -163,6 +170,7 @@ export const useModalStore = defineStore('modalStore', {
 			this._primaryBtn = null
 			this._secondaryBtn = null
 			this._otherBtn = null
+			lockScroll(false)
 		},
 	},
 })

@@ -107,14 +107,17 @@ export const useFileStore = defineStore('fileStore', {
 
 		// The filename of the module we'll use to view the file.
 		moduleName(): string {
-			const molViewerStore = useMolViewerStore()
-			if (molViewerStore.molFromMolset) {
-				// When opening a molset, you can view a single
-				// molecule by adding ?show=<index> to the URL.
-				return 'MolViewer'
-			} else {
-				return map_fileType2Module[this.fileType || 'unk']
-			}
+			return map_fileType2Module[this.fileType || 'unk']
+
+			// DOn't think we need this?? TRASH
+			// const molViewerStore = useMolViewerStore()
+			// if (molViewerStore.molFromMolset) {
+			// 	// When opening a molset, you can view a single
+			// 	// molecule by adding ?show=<index> to the URL.
+			// 	return 'MolViewer'
+			// } else {
+			// 	return map_fileType2Module[this.fileType || 'unk']
+			// }
 		},
 
 		// Indicates whether we recognize the file's extension.

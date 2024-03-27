@@ -19,21 +19,12 @@
 		<div class="filler-2"></div>
 
 		<!-- Sort -->
-		<SortDropdown
-			id="dd-sort"
-			:class="{ default: !molGridStore.sort }"
-			:items="sortItems"
-			:disabledItems="disabledSortItems"
-			:modelValue="molGridStore.sort"
-			@update:modelValue="molGridStore.setSort"
-		/>
+		<SortDropdown id="dd-sort" v-model="sortKey" :items="sortItems" :disabledItems="disabledSortItems" />
 
 		<!-- Selection actions -->
 		<cv-dropdown id="dd-select" v-model="selectActionsSelect" :key="forceSelectReload">
 			<cv-dropdown-item value="default" hidden>
-				<template v-if="molGridStore.sel.length > 0">
-					({{ molGridStore.sel.length }}) selected
-				</template>
+				<template v-if="molGridStore.sel.length > 0"> ({{ molGridStore.sel.length }}) selected </template>
 				<template v-else>Select</template>
 			</cv-dropdown-item>
 			<cv-dropdown-item
@@ -47,12 +38,7 @@
 		</cv-dropdown>
 
 		<!-- Main actions -->
-		<cv-dropdown
-			id="dd-actions"
-			v-model="mainActionsSelect"
-			:disabled="!molGridStore.sel.length"
-			@change="dispatchMainAction"
-		>
+		<cv-dropdown id="dd-actions" v-model="mainActionsSelect" :disabled="!molGridStore.sel.length" @change="dispatchMainAction">
 			<cv-dropdown-item value="default" hidden>Actions</cv-dropdown-item>
 			<cv-dropdown-item v-for="(action, i) in mainActions" :key="i" :value="action">
 				{{ action }}
@@ -97,13 +83,19 @@ const sortItems: ComputedRef<string[]> = computed(() => {
 	return ['name'].concat(molGridStore.showProps)
 })
 const disabledSortItems: ComputedRef<string[]> = computed(() => {
-	return sortItems.value.length == 1 ? ['Activate properties to sort'] : []
+	return sortItems.value.length <= 2 ? ['activate properties to sort'] : []
 })
 
 // The selected ticker doesn't automnatically
 // update when the selected items change.
 const forceSelectReload: ComputedRef<string> = computed(() => {
 	return molGridStore.sel.join('-')
+})
+
+// Model value for the sort dropdown.
+const sortKey = computed({
+	get: () => molGridStore.sort,
+	set: (newValue) => molGridStore.setSort(newValue),
 })
 
 /**
@@ -203,7 +195,7 @@ async function dispatchMainAction(action: string) {
 }
 
 // Sort, select & actions
-
+#dd-sort,
 #dd-actions,
 #dd-select {
 	flex: 150px 0 0;

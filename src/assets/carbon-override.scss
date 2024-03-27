@@ -62,6 +62,11 @@ pre {
 	line-height: $line-height;
 }
 
+// Dropdowns
+.bx--dropdown {
+	transition: none; // This interferes with the sorting dropdown arrow overlay hover state
+}
+
 // Hover states
 @media (hover: hover) {
 	// Links in carbon css don't have hover state :(

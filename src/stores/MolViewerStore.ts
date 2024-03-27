@@ -96,9 +96,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			this._molFromMolsetIndex = index
 
 			if (!dontPushRoute) {
-				const fileStore = useFileStore()
+				// const fileStore = useFileStore()
 				const query = index ? `?show=${index}` : ''
-				const path = `/~/${fileStore.path}${query}`
+				// const path = `/~/${fileStore.path}${query}`
+				const path = router.currentRoute.value.path + query
 				router.push(path)
 				// router.push({ query: { show: nr.toString() } })
 			}

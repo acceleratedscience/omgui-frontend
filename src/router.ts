@@ -5,7 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useMainStore } from '@/stores/MainStore'
 
 // Components
-import HomeView from '@/views/HomeView.vue'
+import HomeView from '@/pages/HomeView.vue'
 
 const routes = [
 	{
@@ -16,7 +16,7 @@ const routes = [
 	{
 		path: '/~/:path(.*)?',
 		name: 'filebrowser',
-		component: () => import(/* webpackChunkName: 'viewer-dispatch' */ `@/views/ViewerDispatch.vue`),
+		component: () => import(/* webpackChunkName: 'viewer-dispatch' */ `@/pages/ViewerDispatch.vue`),
 	},
 	{
 		path: '/',
@@ -25,38 +25,38 @@ const routes = [
 	{
 		path: '/molviewer',
 		name: 'molviewer-input',
-		component: () => import(/* webpackChunkName: 'molviewer-input' */ '@/modules/MolViewerInput.vue'),
+		component: () => import(/* webpackChunkName: 'molviewer-input' */ '@/viewers/MolViewerInput.vue'),
 	},
 	{
 		path: '/molviewer/:identifier',
 		name: 'molviewer',
 		props: true,
-		component: () => import(/* webpackChunkName: 'molviewer' */ '@/modules/MolViewer.vue'),
+		component: () => import(/* webpackChunkName: 'molviewer' */ '@/viewers/MolViewer.vue'),
 	},
 	{
-		path: '/molgrid',
-		name: 'molgrid',
-		component: () => import(/* webpackChunkName: 'molgrid' */ '@/modules/MolGrid.vue'),
+		path: '/my-mols',
+		name: 'my-mols',
+		component: () => import(/* webpackChunkName: 'molgrid' */ '@/pages/MyMols.vue'),
 	},
 	{
 		path: '/dataviewer',
 		name: 'dataviewer',
-		component: () => import(/* webpackChunkName: 'dataviewer' */ '@/modules/DataViewer.vue'),
+		component: () => import(/* webpackChunkName: 'dataviewer' */ '@/viewers/DataViewer.vue'),
 	},
 	{
 		path: '/jsonviewer',
 		name: 'jsonviewer',
-		component: () => import(/* webpackChunkName: 'jsonviewer' */ '@/modules/JsonViewer.vue'),
+		component: () => import(/* webpackChunkName: 'jsonviewer' */ '@/viewers/JsonViewer.vue'),
 	},
 	{
 		path: '/textviewer',
 		name: 'textviewer',
-		component: () => import(/* webpackChunkName: 'textviewer' */ '@/modules/TextViewer.vue'),
+		component: () => import(/* webpackChunkName: 'textviewer' */ '@/viewers/TextViewer.vue'),
 	},
 	{
 		path: '/cli',
 		name: 'cli',
-		component: () => import(/* webpackChunkName: 'commandline' */ '@/modules/CommandLine.vue'),
+		component: () => import(/* webpackChunkName: 'commandline' */ '@/pages/CommandLine.vue'),
 	},
 	{
 		path: '/svg/:filename',
@@ -67,13 +67,18 @@ const routes = [
 	{
 		path: '/kitchen-sink',
 		name: 'kitchen-sink',
-		component: () => import(/* webpackChunkName: 'kitchen-sink' */ '@/views/KitchenSink.vue'),
+		component: () => import(/* webpackChunkName: 'kitchen-sink' */ '@/pages/KitchenSink.vue'),
 	},
-	// {
-	// 	path: '/:pathMatch(.*)*',
-	// 	name: 'not-found',
-	// 	component: () => import(/* webpackChunkName: 'not-found' */ '@/views/NotFound.vue'),
-	// },
+	{
+		path: '/sandbox',
+		name: 'sandbox',
+		component: () => import(/* webpackChunkName: 'sandbox' */ '@/pages/Sandbox.vue'),
+	},
+	{
+		path: '/:pathMatch(.*)*',
+		name: 'not-found',
+		component: () => import(/* webpackChunkName: 'not-found' */ '@/pages/NotFound.vue'),
+	},
 ]
 
 // Duplicate each route with a '/headless' prefix and a 'headless' meta field
@@ -105,6 +110,6 @@ router.beforeEach((to, from, next) => {
 	}
 })
 
-// This lets us import the rouyer to any pinia store:
+// This lets us import the router to any pinia store:
 // import { router } from '@/router'
 export default router

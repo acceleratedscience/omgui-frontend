@@ -80,13 +80,7 @@
 							: fileStore.breadCrumbPathArray.concat(['mol #' + molViewerStore.molFromMolsetIndex.toString()])
 					"
 				>
-					<IconButton
-						icon="icn-file-json"
-						iconHover="icn-file-json-hover"
-						btnStyle="soft"
-						mini
-						@click="router.push({ query: { use: 'json' } })"
-					/>
+					<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
 				</BreadCrumbs>
 
 				<!-- Title -->
@@ -273,7 +267,7 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
-import JsonViewer from '@/modules/JsonViewer.vue'
+import JsonViewer from '@/viewers/JsonViewer.vue'
 import IconButton from '@/components/IconButton.vue'
 import SvgServe from '@/components/SvgServe.vue'
 import BaseFetching from '@/components/BaseFetching.vue'

@@ -10,21 +10,12 @@
 				<router-link v-else :to="'/~/' + props.pathArray.slice(1, i + 1).join('/')" class="dumb">{{ item }}</router-link>
 				<span v-if="i < props.pathArray.length - 1">&nbsp;&nbsp;&rsaquo;&nbsp;&nbsp;</span>
 			</template>
-			<div class="icn-btn-wrap">
-				<IconButton
-					icon="icn-folder"
-					iconHover="icn-folder-full"
-					btnStyle="soft"
-					mini
-					@click="fileSystemApi.openFileOS(fileStore.pathAbsolute)"
-				/>
-			</div>
 			<a v-if="needsTruncation && !truncate" href="#" class="toggle-hide" @click.prevent="toggleTruncate">hide</a>
 		</div>
 		<a v-if="needsTruncation && truncate" href="#" class="toggle-show" @click.prevent="toggleTruncate">show</a>
 		<div class="bc-right">
 			<slot></slot>
-			<span v-if="props.slotRight" class="slot">{{ props.slotRight }}</span>
+			<IconButton icon="icn-doc" iconHover="icn-doc-full" btnStyle="soft" mini @click="fileSystemApi.openFileOS(fileStore.pathAbsolute)" />
 		</div>
 	</div>
 </template>
@@ -51,7 +42,6 @@ import IconButton from '@/components/IconButton.vue'
 // Props
 const props = defineProps<{
 	pathArray: string[]
-	slotRight?: string
 	fileType?: string
 }>()
 
@@ -107,12 +97,6 @@ $br-height: 20px;
 	line-height: $br-height;
 	// background: brown;
 }
-#breadcrumbs .icn-btn-wrap {
-	margin: -2px 0 -2px 8px;
-	vertical-align: middle;
-	display: flex;
-	// background: red;
-}
 
 // Truncation at end
 #breadcrumbs.truncate {
@@ -123,9 +107,6 @@ $br-height: 20px;
 #breadcrumbs-wrap:not(.truncate),
 #breadcrumbs:not(.truncate) {
 	display: block;
-}
-#breadcrumbs:not(.truncate) .icn-btn-wrap {
-	display: inline-block;
 }
 
 // Show-more link for truncated breadcrumbs
@@ -145,7 +126,11 @@ $br-height: 20px;
 	line-height: $br-height;
 }
 #breadcrumbs:deep() ~ .bc-right .icn-btn {
-	margin: -2px 0 -2px 8px;
+	margin: -2px 0;
+	// background: pink;
+}
+#breadcrumbs:deep() ~ .bc-right .icn-btn:first-of-type {
+	margin-left: 4px;
 }
 
 // File type button

@@ -161,7 +161,7 @@ hr {
 	animation: copy-blink 100ms 3;
 	color: $success;
 }
-@keyframes copy-blink {
+@keyframes blink {
 	0% {
 		opacity: 1;
 	}

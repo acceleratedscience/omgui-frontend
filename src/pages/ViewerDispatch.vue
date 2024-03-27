@@ -5,7 +5,7 @@
  -->
 
 <template>
-	<BreadCrumbs v-if="showBreadCrumbs" :pathArray="fileStore.breadCrumbPathArray" />
+	<!-- <BreadCrumbs v-if="showBreadCrumbs" :pathArray="fileStore.breadCrumbPathArray" /> -->
 	<p v-if="fileStore.invalidExt" class="error-msg">We don't recognize this file's extension ({{ fileStore.ext }})</p>
 	<div v-if="loadError" class="error-msg">The requested module '{{ fileStore.moduleName }}' was not found.</div>
 	<BaseFetching v-else-if="loading && !fileStore.isDir" text="Fetching file" failText="Failed to fetch file" />
@@ -107,7 +107,7 @@ onBeforeUnmount(fileStore.clear)
 // Display a file or directory with the appropriate module.
 // This gets triggered on initial pageload / reload.
 async function parseRoute() {
-	console.log('dispatch parseRoute')
+	// console.log('dispatch parseRoute')
 	const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
 	const urlQuery: LocationQuery = route.query
 	apiFetch(fileSystemApi.getFile(filePath, urlQuery), {
@@ -149,14 +149,14 @@ async function parseRoute() {
 
 // Load the dynamic module.
 function loadModule(moduleName: string | null) {
-	console.log('loadModule', moduleName)
+	// console.log('loadModule', moduleName)
 	loadError.value = false
 	if (!moduleName) {
 		dynamicModule.value = null
 		return
 	}
 	dynamicModule.value = defineAsyncComponent(() =>
-		import(`../modules/${moduleName}.vue`).catch(() => {
+		import(`../viewers/${moduleName}.vue`).catch(() => {
 			loadError.value = true
 		}),
 	)

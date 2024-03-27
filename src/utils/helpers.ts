@@ -2,6 +2,13 @@
  * This file holds a varietry pack of general helper functions.
  */
 
+// Router
+import router from '@/router'
+
+// Type declarations
+import type { LocationQueryValue } from 'vue-router'
+import type { FileType } from '@/types'
+
 // const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] // prettier-ignore
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] // prettier-ignore
 
@@ -183,3 +190,47 @@ export function throttle(func: Function, delay: number = 3000) {
 		setTimeout(timeoutFunc, delay)
 	}
 }
+
+// This locks the page in its current scroll position
+// and hides the scroll bar. Used when overlaying the
+// carousel or search.
+export function lockScroll(state: boolean) {
+	if (state) {
+		return _lock()
+	} else {
+		_unlock()
+	}
+
+	//
+	//
+
+	function _lock() {
+		const scrollbarWidth = window.innerWidth - document.body.clientWidth
+		document.body.style.marginRight = scrollbarWidth + 'px'
+		document.body.style.overflow = 'hidden'
+		return scrollbarWidth
+	}
+	function _unlock() {
+		document.body.removeAttribute('style')
+	}
+}
+
+// Take a query object and return a query URL string.
+export function query2UrlQuery(query: Record<string, string | number | boolean | LocationQueryValue | LocationQueryValue[]>) {
+	let urlQuery = Object.keys(query)
+		.map((key) => `${key}=${query[key]}`)
+		.join('&')
+	urlQuery = urlQuery.length ? `?${urlQuery}` : ''
+	return urlQuery
+}
+
+// // Open a file in a different viewer.
+// // Adds ?use=xxx to the current URL.
+// export function useOtherViewer(fileType: FileType) {
+// 	const query = router.currentRoute.value.query
+// 	query.use = fileType
+// 	const urlQuery = query2UrlQuery(query)
+// 	const newPath = router.currentRoute.value.path + urlQuery
+// 	console.log(444, newPath)
+// 	router.push('?use=json')
+// }

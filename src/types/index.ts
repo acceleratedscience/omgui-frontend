@@ -139,6 +139,7 @@ export type MolsetApi = {
 	cacheId: number
 	mols: Molset // Paginated subset of the molset
 	searchStr: string
+	searchMode: SearchMode
 	sort: string
 	matching: number[]
 	total: number
@@ -146,6 +147,7 @@ export type MolsetApi = {
 	pageSize: number
 	pageTotal: number
 }
+export type SearchMode = 'text' | 'smarts'
 
 // The URL query object as part of the route.
 export type UrlQuery = Record<string, string | (string | null)[]>

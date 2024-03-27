@@ -79,7 +79,7 @@ function render3d_miew(forceReInit = false) {
 				camDistance: 3, // Default 2.5 tends to crop some of the molecule.
 				resolution: 'high',
 				zooming: false,
-				bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg
+				bg: { color: 0x444444 }, // Equivalent of $soft-bg
 				// bg: { color: 0xffffff, transparent: true }, // This creates ugly edges
 				// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
 				// shadow: { // Cool but generates weird artifacts and slows down a lot

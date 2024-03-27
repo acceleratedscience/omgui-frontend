@@ -1,22 +1,28 @@
 <template>
-	<!-- <header> -->
-	<nav>
+	<nav :class="{ inverse: commandLineStore.active, 'hide-brand': commandLineStore.active }">
+		<!-- <div class="align-left"> -->
 		<div class="brand">
 			<div class="main">% OpenAD</div>
 			<div class="title">Workspace</div>
 		</div>
 		<div class="filler"></div>
 		<div class="items">
-			<IconButton icon="icn-terminal" iconHover="icn-terminal-full" :sel="sel == 'cli'" @click="goTo('cli')" />
+			<IconButton
+				v-if="commandLineStore.active"
+				class="terminal-sel"
+				icon="icn-terminal-full"
+				iconHover="icn-close"
+				@click="commandLineStore.setActive(false)"
+			/>
+			<IconButton v-else icon="icn-terminal" iconHover="icn-terminal-full" :sel="sel == 'cli'" @click="commandLineStore.setActive(true)" />
 			<IconButton icon="icn-chat" iconHover="icn-chat-full" :sel="sel == 'assistant'" @click="goTo('assistant')" />
-			<IconButton icon="icn-file-molset" iconHover="icn-file-molset-full" :sel="sel == 'molset'" @click="goTo('molgrid')" />
+			<IconButton icon="icn-file-molset" iconHover="icn-file-molset-full" :sel="sel == 'molset'" @click="goTo('my-mols')" />
 			<IconButton icon="icn-file-mol" iconHover="icn-file-mol-full" :sel="sel == 'mol'" @click="goTo('molviewer-input')" />
 			<IconButton icon="icn-folder" iconHover="icn-folder-full" :sel="sel == 'dir'" @click="goTo('filebrowser')" />
 			<div class="display"></div>
-			<!-- {{ route.name }} -->
 		</div>
+		<!-- </div> -->
 	</nav>
-	<!-- </header> -->
 </template>
 
 <script setup lang="ts">
@@ -31,7 +37,9 @@ const router = useRouter()
 
 // Stores
 import { useFileStore } from '@/stores/FileStore'
+import { useCommandLineStore } from '@/stores/CommandLineStore'
 const fileStore = useFileStore()
+const commandLineStore = useCommandLineStore()
 
 // Components
 import IconButton from '@/components/IconButton.vue'
@@ -40,11 +48,15 @@ import IconButton from '@/components/IconButton.vue'
 type Sel = 'dir' | 'mol' | 'molset' | 'assistant' | 'cli'
 
 const sel: ComputedRef<Sel | null> = computed(() => {
-	if (route.name == 'filebrowser') {
+	if (commandLineStore.active) {
+		return 'cli'
+	} else if (route.name == 'filebrowser') {
 		// return fileStore.fileType as Sel
 		return 'dir'
 	} else if (route.name == 'molviewer-input') {
 		return 'mol'
+	} else if (route.name == 'my-mols') {
+		return 'molset'
 	}
 	return null
 })
@@ -58,26 +70,20 @@ function goTo(name: string) {
 nav {
 	min-height: 40px;
 	line-height: 30px;
-	left: 40px;
 	display: flex;
 	justify-content: flex-end;
-	left: 0;
-	right: 0;
-
-	// Bottom
+	padding-right: 20px;
 	position: fixed;
-	right: 0;
+	z-index: 40;
+	left: 0;
 	bottom: 0;
-	z-index: 1;
+
+	// Setting the width to the viewport ensures
+	// that the icons don't jump whenever the
+	// scrollbar appears or disappears.
+	width: 100vw;
 }
 
-// File browser is always full width
-#main-wrap.file-browser nav {
-	background: white;
-	box-shadow: 0 -1px 0 $black-10;
-}
-
-// Flex layout
 nav .brand {
 	display: flex;
 	flex-direction: row;
@@ -86,8 +92,34 @@ nav .items {
 	display: flex;
 	flex-direction: row-reverse;
 }
+nav .items .icn-btn.terminal-sel:not(:hover) {
+	color: $yellow;
+}
 nav .filler {
 	flex: 1;
+}
+
+// Inverse style
+nav.inverse,
+nav.inverse .icn-btn {
+	color: $white-80;
+}
+nav.inverse .icn-btn.sel {
+	color: $blue-light;
+}
+nav.inverse .title {
+	color: $white-50;
+}
+
+// Hide branding
+nav.hide-brand .brand {
+	display: none;
+}
+
+// File browser is always full width
+#main-wrap.file-browser nav:not(.inverse) {
+	background: white;
+	box-shadow: 0 -1px 0 $black-10;
 }
 
 // Brand left
@@ -116,7 +148,6 @@ nav .icn-btn {
 }
 nav .icn-btn.sel {
 	color: $blue;
-	// pointer-events: none;
 }
 
 // Display
@@ -140,6 +171,9 @@ nav .display::after {
 	nav .icn-btn:hover ~ .display::after {
 		color: $black-60;
 	}
+	nav.inverse .icn-btn:hover ~ .display::after {
+		color: $white-50;
+	}
 
 	// File browser
 	// nav .icn-folder.sel ~ .display::after,
@@ -153,10 +187,10 @@ nav .display::after {
 		content: 'Molecule viewer';
 	}
 
-	// Molecule list
+	// My Molecules
 	// nav .icn-file-molset.sel ~ .display::after,
 	nav .icn-file-molset:hover ~ .display::after {
-		content: 'Molecule list';
+		content: 'My Molecules';
 	}
 
 	// AI Assistant
@@ -175,8 +209,7 @@ nav .display::after {
  */
 
 @media (max-width: $bp-xlarge) {
-	nav {
-		background: white;
+	nav:not(.inverse) {
 		z-index: 1;
 		background: white;
 		box-shadow: 0 -1px 0 $black-10;

@@ -9,6 +9,9 @@
 		/>
 	</template>
 
+	<!-- Command line overlay -->
+	<CommandLine v-if="commandLineStore.active" />
+
 	<!-- Modal overlay -->
 	<TheModal />
 
@@ -36,22 +39,6 @@
 	<!-- Load the full application -->
 	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir }">
 		<NavMain />
-		<!-- <header>Hello world</header> -->
-		<!-- <router-link :to="{ name: 'home' }">Home</router-link>
-			&nbsp;&nbsp;|&nbsp;&nbsp;
-			<router-link :to="{ name: 'filebrowser' }">File Browser</router-link>
-			&nbsp;&nbsp;|&nbsp;&nbsp;
-			<router-link :to="{ name: 'molviewer-input' }">Molecule Viewer</router-link>
-			&nbsp;&nbsp;|&nbsp;&nbsp;
-			<router-link :to="{ name: 'molgrid' }">Molecule Grid</router-link>
-			&nbsp;&nbsp;|&nbsp;&nbsp;
-			<router-link :to="{ name: 'dataviewer' }">Data Viewer</router-link>
-			&nbsp;&nbsp;|&nbsp;&nbsp;
-			<router-link :to="{ name: 'jsonviewer' }">JSON Viewer</router-link>
-			&nbsp;&nbsp;|&nbsp;&nbsp;
-			<router-link :to="{ name: 'textviewer' }">Text Viewer</router-link>
-			&nbsp;&nbsp;|&nbsp;&nbsp;
-			<router-link :to="{ name: 'commandline' }">Command Line</router-link> -->
 		<div id="body">
 			<router-view />
 			<!-- <RouterView v-slot="{ Component }">
@@ -70,8 +57,10 @@ import { computed, onBeforeMount, onMounted, ref } from 'vue'
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
+import { useCommandLineStore } from '@/stores/CommandLineStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
+const commandLineStore = useCommandLineStore()
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
@@ -81,6 +70,7 @@ import { fileSystemApi } from '@/api/ApiService'
 // Components
 import TheModal from '@/components/TheModal.vue'
 import NavMain from '@/components/NavMain.vue'
+import CommandLine from '@/pages/CommandLine.vue'
 
 // Utils
 import { debounce } from '@/utils/helpers'
@@ -130,15 +120,15 @@ onMounted(() => {
 	storeScreenWidth()
 
 	// Add blur handler
-	document.body.removeEventListener('click', mainStore.onBlurFn)
+	document.body.removeEventListener('click', mainStore.onClickAnywhere)
 	document.body.addEventListener('click', (e) => {
-		mainStore.onBlurFn(e)
+		mainStore.onClickAnywhere(e)
 	})
 })
 
 onBeforeMount(() => {
 	// Remove blur handler
-	document.body.removeEventListener('click', mainStore.onBlurFn)
+	document.body.removeEventListener('click', mainStore.onClickAnywhere)
 })
 
 /**

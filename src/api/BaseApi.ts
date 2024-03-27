@@ -50,8 +50,8 @@ class BaseApi implements BaseApiType {
 			},
 		})
 
-		console.log('Registered API module:', apiName)
-		// apiName
+		// console.log('Registered API module:', apiName)
+		apiName
 
 		this.setupInterceptors()
 		this.altPort = DEFAULT_PORT
@@ -138,13 +138,9 @@ class BaseApi implements BaseApiType {
 						'You can ignore the API errors above.',
 						'',
 					]
-					console.log(
-						warnMsg.join('\n'),
-						'color:orange;font-weight:bold;font-size:14px;text-transform:uppercase',
-						'',
-					)
+					console.log(warnMsg.join('\n'), 'color:orange;font-weight:bold;font-size:14px;text-transform:uppercase', '')
 				} else {
-					console.log(`The OpenAD API is available on ${API_URL()}`)
+					// console.log(`The OpenAD API is available on ${API_URL()}`)
 				}
 			} else {
 				if (this.altPort < DEFAULT_PORT + 10) {
@@ -164,11 +160,7 @@ class BaseApi implements BaseApiType {
 							'- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -',
 							'',
 						]
-						console.log(
-							errorMsg.join('\n'),
-							'color:#d00;font-weight:bold;font-size:14px;text-transform:uppercase',
-							'',
-						)
+						console.log(errorMsg.join('\n'), 'color:#d00;font-weight:bold;font-size:14px;text-transform:uppercase', '')
 					}, 0)
 				}
 			}

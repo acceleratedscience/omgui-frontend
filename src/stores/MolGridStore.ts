@@ -20,6 +20,9 @@ const molViewerStore = useMolViewerStore()
 // API
 import { apiFetch, moleculesApi } from '@/api/ApiService'
 
+// Utils
+import { query2UrlQuery } from '@/utils/helpers'
+
 // Constants
 const PAGE_SIZE = 100
 const AVAIL_IDENTIFIERS = ['name', 'inchi', 'inchikey', 'canonical_smiles', 'isomeric_smiles', 'formula', 'pid']
@@ -27,8 +30,7 @@ const IDFR_DEFAULTS = ['name', 'isomeric_smiles', 'formula']
 const PROP_DEFAULT = ['molecular_weight']
 
 // Type declarations
-import type { Molset, MolsetApi } from '@/types'
-type SearchMode = 'text' | 'smarts'
+import type { Molset, MolsetApi, SearchMode } from '@/types'
 type State = {
 	// Status
 	_disableUpdate: boolean
@@ -243,10 +245,9 @@ export const useMolGridStore = defineStore('molGridStore', {
 		async updateMols() {
 			const query = this._setUrlQuery()
 
-			const smartsMode = this._searchMode == 'smarts'
-			apiFetch(moleculesApi.queryMolset(this._cacheId, query, smartsMode), {
+			apiFetch(moleculesApi.queryMolset(this._cacheId, query), {
 				onSuccess: (data) => {
-					console.log(123, data)
+					// console.log(123, data)
 					this.setMolset(data)
 				},
 				onError: (err) => {
@@ -265,6 +266,13 @@ export const useMolGridStore = defineStore('molGridStore', {
 				delete query.search
 			}
 
+			// Search mode
+			if (this.searchMode == 'smarts') {
+				query.smarts = '1'
+			} else {
+				delete query.smnarts
+			}
+
 			// Pagination
 			if (this.page == 1) {
 				delete query.page
@@ -280,11 +288,11 @@ export const useMolGridStore = defineStore('molGridStore', {
 			}
 
 			// Turn query into string and update router
-			let queryStr = Object.keys(query)
-				.map((key) => `${key}=${query[key]}`)
-				.join('&')
-			queryStr = queryStr.length ? `?${queryStr}` : ''
-			const newPath = '/~/' + router.currentRoute.value.params.path + queryStr
+			const urlQuery = query2UrlQuery(query)
+
+			// const newPath = '/~/' + router.currentRoute.value.params.path + queryStr
+			const newPath = router.currentRoute.value.path + urlQuery
+			// console.log(22, newPath, router.currentRoute.value)
 			router.push(newPath)
 
 			// Return quuery object so we can send teh API request
@@ -293,17 +301,23 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Load molecule set into the state.
 		async setMolset(molsData: MolsetApi) {
-			console.log('setMolset', molsData)
+			// console.log('setMolset', molsData)
 			this._disableUpdate = true
 
 			this._cacheId = molsData.cacheId
 			this._mols = molsData.mols
 			this._searchStr = molsData.searchStr
+			this._searchMode = molsData.searchMode
 			this._sort = molsData.sort ?? ''
 			this._matching = molsData.matching
 			this._total = molsData.total
 			this._pageSize = molsData.pageSize
 			this._page = molsData.page
+
+			// Set highlight substructure.
+			if (molsData.searchMode == 'smarts') {
+				this._highlight = molsData.searchStr
+			}
 
 			// Store the available properties to show.
 			if (molsData.mols[0]) {
@@ -371,7 +385,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		setSearchStr(searchStr: string) {
 			// console.log('****setHighlight')
 			this._searchStr = searchStr || ''
-			if (this._searchMode == 'smarts') {
+			if (this.searchMode == 'smarts') {
 				this.setHighlight(searchStr)
 			}
 			if (!this._disableUpdate) {
@@ -387,6 +401,10 @@ export const useMolGridStore = defineStore('molGridStore', {
 				this.setHighlight(this._searchStr)
 			}
 			this._searchMode = mode
+
+			if (!this._disableUpdate) {
+				this.updateMols()
+			}
 		},
 
 		// #endregion
@@ -424,6 +442,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// #region - Sort & Filters
 
 		setSort(sort: string) {
+			console.log('setSort', sort)
 			if (sort) {
 				this._sort = sort
 			} else {
@@ -503,7 +522,9 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Toggle which properties are displayed.
 		toggleProp(key: string) {
-			if (key == 'name') return
+			console.log('** enableProp', key)
+			key = key.replace(/^-/, '')
+			if (key == 'name') return // name is not in props, we don't want it to be added double.
 			if (this._showProps.includes(key)) {
 				this._showProps = this._showProps.filter((i) => i !== key)
 			} else {
@@ -511,7 +532,9 @@ export const useMolGridStore = defineStore('molGridStore', {
 			}
 		},
 		enableProp(key: string) {
-			if (key == 'name') return
+			console.log('>> enableProp', key)
+			key = key.replace(/^-/, '')
+			if (key == 'name') return // name is not in props, we don't want it to be added double.
 			if (!this._showProps.includes(key)) {
 				this._showProps.push(key)
 			}
@@ -532,6 +555,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Clear
 		async clear() {
+			console.log('C L EA R')
 			this._disableUpdate = true
 			this.clearWorkingCopy()
 			Object.assign(this, getInitialState())

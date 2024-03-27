@@ -1,6 +1,7 @@
 <template>
-	<BreadCrumbs :pathArray="fileStore.breadCrumbPathArray" :slotRight="`${prettyNr(molGridStore.total)} mols`">
-		<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push({ query: { use: 'json' } })" />
+	<BreadCrumbs v-if="route.name == 'filebrowser'" :pathArray="fileStore.breadCrumbPathArray">
+		{{ prettyNr(molGridStore.total) }}
+		<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
 	</BreadCrumbs>
 	<MolProps />
 	<MolActions />
@@ -17,8 +18,6 @@
 				@click="(e) => onMolClick(e, mol.index!)"
 			>
 				<cv-checkbox :label="`${mol.index!}`" :value="`${mol.index!}`" :checked="molGridStore.sel.includes(mol.index!)" />
-				<IconButton class="icn-btn-smell" icon="icn-smell" btnStyle="soft" @click="previewMolecule(i)" />
-				<IconButton class="icn-btn-taste" icon="icn-taste" btnStyle="soft" @click="molGridStore.openMolecule(mol.index!)" />
 				<MolRender
 					:id="`mol-svg-${mol.index!}`"
 					:structure="molGridStore.molSmiles[i]"
@@ -27,6 +26,8 @@
 					:height="140"
 					svg-mode
 				/>
+				<IconButton class="icn-btn-smell" icon="icn-smell" icnSize="large" btnStyle="soft" @click="previewMolecule(i)" />
+				<IconButton class="icn-btn-taste" icon="icn-taste" icnSize="large" btnStyle="soft" @click="molGridStore.openMolecule(mol.index!)" />
 
 				<!-- prettier-ignore -->
 				<template v-if="1">
@@ -123,11 +124,14 @@ onMounted(async () => {
 	document.addEventListener('keydown', onKeyDown)
 
 	// Add blur listener.
-	mainStore.SetOnBlurFn(maybeBlur)
+	mainStore.setOnClickAnywhere(maybeBlur)
 
 	// If we're sorting by a non-default property,
 	// we need to activate it in the store.
-	if (route.query.sort) molGridStore.enableProp(route.query.sort.toString())
+	// if (route.query.sort) molGridStore.enableProp(route.query.sort.toString())
+	if (route.query.sort && !['index', '-index'].includes(route.query.sort as string)) {
+		molGridStore.enableProp(route.query.sort.toString())
+	}
 })
 
 onBeforeUnmount(() => {
@@ -142,16 +146,6 @@ window.onbeforeunload = function () {
 }
 onBeforeRouteLeave(onBeforeExit)
 onBeforeRouteUpdate(onBeforeExit)
-
-// Clear store on exit.
-// - - -
-// Note: we're not calling this from within onBeforeUnmount because we
-// don't want to clear the store when opening a molecule from the molset.
-watch(route, (to, from) => {
-	if (to.path != from.path) {
-		molGridStore.clear()
-	}
-})
 
 // When going back into a molecule from a molset.
 // Works in tandem with the route.query watcher in
@@ -244,6 +238,7 @@ function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized
 		next(false)
 	} else {
 		next()
+		if (to.path != from.path) molGridStore.clear()
 	}
 }
 
@@ -254,6 +249,7 @@ function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized
 function onKeyDown(e: KeyboardEvent) {
 	// Check if there's any input in focus
 	if (document.activeElement?.tagName == 'INPUT') return
+	if (document.activeElement?.tagName == 'TEXTAREA') return
 
 	// Listen
 	if (e.key in keyHandlers) {
@@ -363,14 +359,33 @@ const keyHandlers: KeyHandlers = {
 	position: absolute;
 	top: 3px;
 	right: 3px;
+	z-index: 1;
 }
 #mol-grid .mol .icn-btn-taste {
 	top: 43px;
 }
+#mol-grid .mol .icn-btn::after {
+	content: '';
+	display: block;
+	position: absolute;
+	z-index: -1;
+	top: -5px;
+	left: -5px;
+	right: -5px;
+	bottom: -5px;
+	background: white;
+	border-radius: 20px;
+	filter: blur(12px);
+	transition: filter 0.2s;
+}
+#mol-grid .mol.sel .icn-btn::after {
+	background: $blue-10;
+}
 
 // Image
 #mol-grid .mol .svg-wrap {
-	margin: 0 -3px;
+	margin: 0 auto;
+	max-width: 100%;
 }
 
 // Identifiers
@@ -436,6 +451,7 @@ const keyHandlers: KeyHandlers = {
 		position: absolute;
 		left: 0;
 		top: 0;
+		z-index: 2;
 		background: $highlight-soft;
 		mix-blend-mode: multiply;
 		pointer-events: none;
@@ -445,15 +461,11 @@ const keyHandlers: KeyHandlers = {
 	#mol-grid .mol:not(:hover) .icn-btn {
 		display: none;
 	}
-	#mol-grid .mol .icn-btn:hover {
-		background: white;
-		border-radius: 2px;
-		z-index: 1;
-		box-shadow: 0 0 0 1px $black-10;
+	#mol-grid .mol .icn-btn:hover::after {
+		filter: blur(8px);
 	}
 	#mol-grid .mol .icn-btn:hover:deep() svg {
-		fill: $black;
-		pointer-events: none; // Avoid this as e.target
+		pointer-events: none; // To avoid this as e.target
 	}
 }
 

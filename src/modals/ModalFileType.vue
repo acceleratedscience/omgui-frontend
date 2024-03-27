@@ -1,22 +1,12 @@
 <template>
-	<cv-modal
-		:visible="modalStore.visible"
-		size="xs"
-		@primary-click="onSubmit"
-		:primaryButtonDisabled="submitDisabled"
-	>
-		<template v-slot:title>{{ capitalize(fileStore.fileType) }} viewer</template>
+	<cv-modal :visible="modalStore.visible" size="xs" @primary-click="onSubmit" :primaryButtonDisabled="submitDisabled">
+		<template v-slot:title>{{ capitalize(fileStore.fileType ?? '') }} viewer</template>
 		<template v-slot:content>
 			<p v-if="fileStore.fileTypeOverride" class="error-msg">
-				This is a <b>{{ displayDefaultFileType }}</b> file, but you are currently viewing it
-				in the <b>{{ displayFileType }}</b> viewer.
+				This is a <b>{{ displayDefaultFileType }}</b> file, but you are currently viewing it in the <b>{{ displayFileType }}</b> viewer.
 			</p>
 			<cv-dropdown v-model="selectedFileType" label="Select viewer">
-				<cv-dropdown-item
-					v-for="[fileType, displayFileType] in fileTypeList"
-					:key="fileType"
-					:value="fileType"
-				>
+				<cv-dropdown-item v-for="[fileType, displayFileType] in fileTypeList" :key="fileType" :value="fileType">
 					{{ displayFileType }}
 					<template v-if="fileType == fileStore.defaultFileType">(default)</template>
 				</cv-dropdown-item>
@@ -52,22 +42,18 @@ const emit = defineEmits(['mounted'])
  */
 
 // Mapping needed to displat file type "mol" as "molecule" etc.
-const displayFileType: ComputedRef<string> = computed(
-	() => map_fileType2DisplayFT[fileStore.fileType],
-)
-const displayDefaultFileType: ComputedRef<string> = computed(
-	() => map_fileType2DisplayFT[fileStore.defaultFileType],
+const displayFileType: ComputedRef<string | null> = computed(() => (fileStore.fileType ? map_fileType2DisplayFT[fileStore.fileType] : null))
+const displayDefaultFileType: ComputedRef<string | null> = computed(() =>
+	fileStore.defaultFileType ? map_fileType2DisplayFT[fileStore.defaultFileType] : null,
 )
 const fileTypeList: ComputedRef<string[][]> = computed(() => {
 	let fileTypes: string[][] = Object.entries(map_fileType2DisplayFT)
 	fileTypes = fileTypes.filter(([ft]) => ft != 'unknown')
 	return fileTypes
 })
-const selectedFileType = ref<string>(fileStore.defaultFileType)
+const selectedFileType = ref<string | null>(fileStore.defaultFileType)
 const submitText: ComputedRef<string> = computed(() =>
-	fileStore.fileTypeOverride && selectedFileType.value == fileStore.defaultFileType
-		? 'Reset'
-		: 'Switch',
+	fileStore.fileTypeOverride && selectedFileType.value == fileStore.defaultFileType ? 'Reset' : 'Switch',
 )
 const submitDisabled: ComputedRef<boolean> = computed(() => {
 	return selectedFileType.value == fileStore.fileType
