@@ -26,7 +26,7 @@ import { query2UrlQuery } from '@/utils/helpers'
 // Constants
 const PAGE_SIZE = 100
 const AVAIL_IDENTIFIERS = ['name', 'inchi', 'inchikey', 'canonical_smiles', 'isomeric_smiles', 'formula', 'pid']
-const IDFR_DEFAULTS = ['name', 'isomeric_smiles', 'formula']
+const IDFR_DEFAULTS = ['name', 'canonical_smiles', 'formula']
 const PROP_DEFAULT = ['molecular_weight']
 
 // Type declarations

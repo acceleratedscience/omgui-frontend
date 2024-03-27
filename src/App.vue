@@ -4,7 +4,7 @@
 		<input
 			type="checkbox"
 			@click="mainStore.toggleHeadless(true)"
-			style="position: fixed; top: 2px; right: 2px; z-index: 10"
+			style="position: fixed; top: 2px; right: 2px; z-index: 10; opacity: 0"
 			:checked="!mainStore.headless"
 		/>
 	</template>

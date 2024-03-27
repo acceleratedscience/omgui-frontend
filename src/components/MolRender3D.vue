@@ -14,9 +14,12 @@
 <script setup lang="ts">
 // Libraries
 // import Miew from 'miew' // Waiting for fix, self-hosting until then - see https://github.com/epam/miew/issues/524
+console.log(123)
 // @ts-ignore
 import Miew from '@/TEMP/miew/dist/miew.module'
 import '@/TEMP/miew/dist/miew.min.css'
+
+console.log(345, Miew)
 
 // Vue
 import { ref, watch, nextTick } from 'vue'
@@ -79,7 +82,7 @@ function render3d_miew(forceReInit = false) {
 				camDistance: 3, // Default 2.5 tends to crop some of the molecule.
 				resolution: 'high',
 				zooming: false,
-				bg: { color: 0x444444 }, // Equivalent of $soft-bg
+				bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg
 				// bg: { color: 0xffffff, transparent: true }, // This creates ugly edges
 				// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
 				// shadow: { // Cool but generates weird artifacts and slows down a lot
@@ -90,6 +93,7 @@ function render3d_miew(forceReInit = false) {
 			},
 		})
 		if (miewViewer.init()) {
+			miewViewer.enableHotKeys(false) // Prevent Miew hotkeys to interfere with our app
 			miewViewer.run()
 		}
 	}
@@ -174,6 +178,10 @@ async function toggleFullScreen(state: boolean) {
 	margin: 20px;
 	font-size: $font-size-small;
 	line-height: $line-height-small;
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 1;
 }
 .container-3d .info h4 {
 	margin-bottom: 4px;

@@ -1,7 +1,7 @@
 import type { Directive } from 'vue'
 
 // Validator function that can block the functianlity.
-let validator: (() => boolean) | null = null
+let validator: (() => boolean) | boolean = true
 
 // Allow elements to be copied to the clipboard when clicked.
 // <div v-copy-on-click>ABC</div>
@@ -9,8 +9,9 @@ let validator: (() => boolean) | null = null
 // <div v-copy-on-click data-copy="XYZ">ABC</div>
 const copyOnClick: Directive = {
 	beforeMount(el, binding) {
+		// console.log('Validator: ', binding.value)
 		validator = binding.value
-		// if (binding.value === false) return
+		if (binding.value === false) return
 		if (!el.classList.contains('click-copy')) el.classList.add('click-copy')
 		el.addEventListener('click', _onClick)
 	},
@@ -20,7 +21,10 @@ const copyOnClick: Directive = {
 }
 
 function _onClick(e: MouseEvent) {
-	if (validator && !validator()) return
+	// if (validator instanceof Function) {
+	// 	console.log('Validator result:', validator())
+	// }
+	if (!validator || (validator instanceof Function && !validator())) return
 	const el: HTMLElement | null = e.target as HTMLElement
 	if (!el) return
 	const text = el.getAttribute('data-copy') || el.innerText

@@ -73,10 +73,6 @@
 			Default
 			<IconButton icon="icn-star" />
 		</div>
-		<div style="background: #ffd">
-			Opaque
-			<IconButton icon="icn-star" btnStyle="opaque" />
-		</div>
 		<div>
 			Soft
 			<IconButton icon="icn-star" btnStyle="soft" />

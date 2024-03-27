@@ -7,9 +7,9 @@
 			<h3>Identifiers</h3>
 			<div class="param-wrap">
 				<div v-for="(val, key) in mol?.identifiers" :key="key" :class="{ empty: !val }">
-					<div class="key">{{ key }}</div>
+					<div v-copy-on-click="!!val" :data-copy="`${key}: ${val}`" class="key">{{ key }}</div>
 					<div class="filler"></div>
-					<div class="val">{{ val ? val : '-' }}</div>
+					<div v-copy-on-click="!!val" class="val">{{ val ? val : '-' }}</div>
 				</div>
 			</div>
 
@@ -23,9 +23,9 @@
 					:title="molViewerStore.propertiesString[key]"
 					:class="{ empty: !val && val !== 0 }"
 				>
-					<div class="key">{{ key }}</div>
+					<div v-copy-on-click="!!val || val === 0" :data-copy="`${key}: ${val}`" class="key">{{ key }}</div>
 					<div class="filler"></div>
-					<div class="val">{{ val || val === 0 ? val : '-' }}</div>
+					<div v-copy-on-click="!!val || val === 0" class="val">{{ val || val === 0 ? val : '-' }}</div>
 				</div>
 			</div>
 		</template>
@@ -104,6 +104,7 @@ async function onSubmit() {
 .param-wrap > div .key {
 	flex: 0 0 auto;
 	padding-right: 4px;
+	font-style: italic;
 
 	/* Truncation */
 	white-space: nowrap;

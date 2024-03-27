@@ -39,6 +39,7 @@
 		When we're opening a file, there's general viewer override
 		logic which lives in the fileStore, see fileTypeOverride.
 	 -->
+	<input type="text" /><br /><br /><br />
 	<template v-if="mol && route.query.use">
 		<JsonViewer :data="mol" />
 	</template>
@@ -66,7 +67,7 @@
 				/>
 			</div> -->
 			<div class="container-2d" v-html="molViewerStore.svg"></div>
-			<MolRender3D :sdf="molViewerStore.sdf" :mol="molViewerStore.mol" />
+			<!-- <MolRender3D :sdf="molViewerStore.sdf" :mol="molViewerStore.mol" /> -->
 		</div>
 
 		<!-- Page content -->
@@ -112,46 +113,42 @@
 					<div id="identification">
 						<!-- @{{ molViewerStore.enriched }}! -->
 						<div v-if="molViewerStore.enriched || mol?.identifiers?.inchi">
-							<b v-copy-on-click :data-copy="`InChI: ${mol?.identifiers?.inchi}`">InChI: </b>
-							<span v-if="mol?.identifiers?.inchi" id="data-inchi" v-copy-on-click>{{ mol?.identifiers?.inchi }}</span>
+							<b>InChI: </b>
+							<span v-if="mol?.identifiers?.inchi" id="data-inchi">{{ mol?.identifiers?.inchi }}</span>
 							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div v-if="molViewerStore.enriched || mol?.identifiers?.inchikey">
-							<b v-copy-on-click :data-copy="`InChIKey: ${mol?.identifiers?.inchikey}`">InChIKey: </b>
-							<span v-if="mol?.identifiers?.inchikey" id="data-inchikey" v-copy-on-click>{{ mol?.identifiers?.inchikey }}</span>
+							<b>InChIKey: </b>
+							<span v-if="mol?.identifiers?.inchikey" id="data-inchikey">{{ mol?.identifiers?.inchikey }}</span>
 							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div v-if="mol?.identifiers?.smiles && (!mol?.identifiers?.canonical_smiles || mol?.identifiers?.isomeric_smiles)">
-							<b v-copy-on-click :data-copy="`SMILES: ${mol?.identifiers?.smiles}`">SMILES: </b>
-							<span id="data-smiles" v-copy-on-click>{{ mol?.identifiers?.smiles }}</span>
+							<b>SMILES: </b>
+							<span id="data-smiles">{{ mol?.identifiers?.smiles }}</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div v-if="molViewerStore.enriched || mol?.identifiers?.canonical_smiles">
-							<b v-copy-on-click :data-copy="`Canonical SMILES: ${mol?.identifiers?.canonical_smiles}`">Canonical SMILES: </b>
-							<span v-if="mol?.identifiers?.canonical_smiles" id="data-canonical-smiles" v-copy-on-click>{{
-								mol?.identifiers?.canonical_smiles
-							}}</span>
+							<b>Canonical SMILES: </b>
+							<span v-if="mol?.identifiers?.canonical_smiles" id="data-canonical-smiles">{{ mol?.identifiers?.canonical_smiles }}</span>
 							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div v-if="molViewerStore.enriched || mol?.identifiers?.isomeric_smiles">
-							<b v-copy-on-click :data-copy="`Isomeric SMILES: ${mol?.identifiers?.isomeric_smiles}`">Isomeric SMILES: </b>
-							<span v-if="mol?.identifiers?.isomeric_smiles" id="data-isomeric-smiles" v-copy-on-click>{{
-								mol?.identifiers?.isomeric_smiles
-							}}</span>
+							<b>Isomeric SMILES: </b>
+							<span v-if="mol?.identifiers?.isomeric_smiles" id="data-isomeric-smiles">{{ mol?.identifiers?.isomeric_smiles }}</span>
 							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div v-if="molViewerStore.enriched || mol?.identifiers?.formula">
-							<b v-copy-on-click :data-copy="`Formula: ${mol?.identifiers?.formula}`">Formula: </b>
-							<span v-if="mol?.identifiers?.formula" id="data-isomeric-smiles" v-copy-on-click>{{ mol?.identifiers?.formula }}</span>
+							<b>Formula: </b>
+							<span v-if="mol?.identifiers?.formula" id="data-isomeric-smiles">{{ mol?.identifiers?.formula }}</span>
 							<span v-else class="blank">-</span>
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<div v-if="molViewerStore.enriched || mol.identifiers?.cid">
-							<b v-copy-on-click :data-copy="`PubChem CID: ${mol.identifiers.cid}`">PubChem CID: </b>
+							<b>PubChem CID: </b>
 							<a
 								v-if="mol?.identifiers?.cid"
 								id="data-cid"
@@ -195,13 +192,7 @@
 
 								<div v-if="synonymCount && 'synonyms' in mol" class="cloak">
 									<div class="synonyms-wrap" :style="{ height: synonymsHeight }">
-										<div
-											v-for="(synonym, i) in mol?.synonyms"
-											:key="i"
-											:title="synonym"
-											:style="{ width: synonymColWidth }"
-											v-copy-on-click
-										>
+										<div v-for="(synonym, i) in mol?.synonyms" :key="i" :title="synonym" :style="{ width: synonymColWidth }">
 											{{ synonym }}
 										</div>
 									</div>
@@ -224,9 +215,9 @@
 									:class="{ empty: !val && val !== 0 }"
 									:style="{ width: propColWidth }"
 								>
-									<div v-copy-on-click :data-copy="`${key}: ${val}`" class="key">{{ key }}:</div>
+									<div class="key">{{ key }}:</div>
 									<div class="filler"></div>
-									<div v-copy-on-click class="val">{{ val || val === 0 ? val : '-' }}</div>
+									<div class="val">{{ val || val === 0 ? val : '-' }}</div>
 								</div>
 							</div>
 						</div>

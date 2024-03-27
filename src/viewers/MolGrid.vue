@@ -6,7 +6,7 @@
 	<MolProps />
 	<MolActions />
 	<div id="resp-container">
-		<div id="mol-grid" ref="$molGrid">
+		<div id="mol-grid" ref="$molGrid" :class="{ 'sel-mode': molGridStore.hasSel }">
 			<div
 				v-for="(mol, i) in molGridStore.mols"
 				:key="i"
@@ -28,6 +28,8 @@
 				/>
 				<IconButton class="icn-btn-smell" icon="icn-smell" icnSize="large" btnStyle="soft" @click="previewMolecule(i)" />
 				<IconButton class="icn-btn-taste" icon="icn-taste" icnSize="large" btnStyle="soft" @click="molGridStore.openMolecule(mol.index!)" />
+
+				<div class="filler"></div>
 
 				<!-- prettier-ignore -->
 				<template v-if="1">
@@ -173,7 +175,6 @@ function onMolClick(e: MouseEvent, i: number) {
 		(e.target as HTMLElement).classList.contains('key') ||
 		(e.target as HTMLElement).classList.contains('value') ||
 		(e.target as HTMLElement).classList.contains('icn-btn')
-	console.log(targetsToIgnore, e.target as HTMLElement)
 	if (!molGridStore.sel.length && targetsToIgnore) return
 
 	// Select and focus clicked molecule.
@@ -212,7 +213,7 @@ function onMolClick(e: MouseEvent, i: number) {
 	lastSelectedRowIndex.value = currentItemIndex
 }
 
-// Validator that disables the click-to-copy feature when items are selected.
+// Validator that disables the copy-on-click feature when items are selected.
 function nothingSelected() {
 	return !molGridStore.hasSel
 }
@@ -322,6 +323,11 @@ const keyHandlers: KeyHandlers = {
 	position: relative;
 	cursor: pointer;
 	user-select: none;
+	display: flex;
+	flex-direction: column;
+}
+#mol-grid .mol .filler {
+	flex: 1;
 }
 
 // Selection state
@@ -383,7 +389,8 @@ const keyHandlers: KeyHandlers = {
 }
 
 // Image
-#mol-grid .mol .svg-wrap {
+#mol-grid .mol .svg-wrap,
+#mol-grid .mol .placeholder {
 	margin: 0 auto;
 	max-width: 100%;
 }
@@ -455,6 +462,11 @@ const keyHandlers: KeyHandlers = {
 		background: $highlight-soft;
 		mix-blend-mode: multiply;
 		pointer-events: none;
+	}
+
+	// Disable copy-on-click hover style whil selecting
+	#mol-grid.sel-mode .click-copy:hover {
+		text-decoration: none;
 	}
 
 	// Icons

@@ -1,7 +1,7 @@
 <template>
 	<div id="breadcrumbs-wrap" :class="{ truncate }">
 		<div id="breadcrumbs" ref="$breadcrumbs" :class="{ truncate, 'needs-truncated': needsTruncation }">
-			<button id="file-type" @click="modalStore.display('ModalFileType')">
+			<button v-if="fileType" id="file-type" @click="modalStore.display('ModalFileType')">
 				{{ fileType }}
 			</button>
 			<template v-for="(item, i) in props.pathArray" :key="i">
@@ -15,7 +15,14 @@
 		<a v-if="needsTruncation && truncate" href="#" class="toggle-show" @click.prevent="toggleTruncate">show</a>
 		<div class="bc-right">
 			<slot></slot>
-			<IconButton icon="icn-doc" iconHover="icn-doc-full" btnStyle="soft" mini @click="fileSystemApi.openFileOS(fileStore.pathAbsolute)" />
+			<IconButton
+				v-if="fileType"
+				icon="icn-doc"
+				iconHover="icn-doc-full"
+				btnStyle="soft"
+				mini
+				@click="fileSystemApi.openFileOS(fileStore.pathAbsolute)"
+			/>
 		</div>
 	</div>
 </template>

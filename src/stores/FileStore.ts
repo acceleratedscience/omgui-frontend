@@ -88,13 +88,6 @@ export const useFileStore = defineStore('fileStore', {
 			return !!router.currentRoute.value.query?.use
 		},
 
-		// // The final file type, which may be overridden
-		// fileType(): FileType {
-		// 	return this.fileTypeOverride
-		// 		? (router.currentRoute.value.query?.use?.toString() as FileType) || this.defaultFileType
-		// 		: this.defaultFileType
-		// },
-
 		// The final file type, which may be overridden
 		fileType(): FileType {
 			const molViewerStore = useMolViewerStore()
@@ -108,16 +101,6 @@ export const useFileStore = defineStore('fileStore', {
 		// The filename of the module we'll use to view the file.
 		moduleName(): string {
 			return map_fileType2Module[this.fileType || 'unk']
-
-			// DOn't think we need this?? TRASH
-			// const molViewerStore = useMolViewerStore()
-			// if (molViewerStore.molFromMolset) {
-			// 	// When opening a molset, you can view a single
-			// 	// molecule by adding ?show=<index> to the URL.
-			// 	return 'MolViewer'
-			// } else {
-			// 	return map_fileType2Module[this.fileType || 'unk']
-			// }
 		},
 
 		// Indicates whether we recognize the file's extension.

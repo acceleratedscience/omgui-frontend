@@ -12,8 +12,9 @@
 	<component v-else-if="dynamicModule" :is="dynamicModule" />
 	<template v-else>
 		<!-- To do: show breadcrumbs when file is not found, requires some refactoring -->
-		<!-- <BreadCrumbs v-if="!showBreadCrumbs" :path="fileStore.path" /> -->
-		File not found
+		<BreadCrumbs v-if="!showBreadCrumbs" :pathArray="fileStore.breadCrumbPathArray" />
+		<p>File not found</p>
+		<cv-button size="small" @click="router.push(parentLink)">Exit</cv-button>
 	</template>
 </template>
 
@@ -23,7 +24,8 @@ import { defineAsyncComponent, ref, shallowRef, watch, onBeforeUnmount, computed
 import type { Component } from 'vue'
 
 // Router
-import { useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+const router = useRouter()
 const route = useRoute()
 
 // Stores
@@ -63,6 +65,13 @@ const showBreadCrumbs = computed(() => {
 	if (fileStore.moduleName == 'MolViewer') return false // The molecule viewer has its own breadcrumbs.
 	if (fileStore.moduleName == 'MolGrid') return false // The molecule viewer has its own breadcrumbs.
 	return true
+})
+
+// File not found exit link
+const parentLink = computed(() => {
+	const pathArray = fileStore.breadCrumbPathArray.slice(1)
+	const parentPath = '/~/' + pathArray.slice(0, -1).join('/')
+	return parentPath
 })
 
 /**
