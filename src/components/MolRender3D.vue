@@ -5,8 +5,15 @@
 			<!-- <div>{{ mol.identifiers.inchi }}</div> -->
 			<!-- <div>{{ mol.identifiers.canonical_smiles }}</div> -->
 		</div>
-		<IconButton v-if="fullscreen" icon="icn-close" btnStyle="soft" @click="toggleFullScreen(false)" />
-		<IconButton v-else icon="icn-full-screen-large" iconHover="icn-full-screen-large-hover" btnStyle="soft" @click="toggleFullScreen(true)" />
+		<IconButton v-if="fullscreen" icon="icn-close" btnStyle="soft" icnSize="large" @click="toggleFullScreen(false)" />
+		<IconButton
+			v-else
+			icon="icn-full-screen-large"
+			iconHover="icn-full-screen-large-hover"
+			icnSize="large"
+			btnStyle="soft"
+			@click="toggleFullScreen(true)"
+		/>
 		<div class="viewer" ref="$container3d"></div>
 	</div>
 </template>
@@ -14,12 +21,9 @@
 <script setup lang="ts">
 // Libraries
 // import Miew from 'miew' // Waiting for fix, self-hosting until then - see https://github.com/epam/miew/issues/524
-console.log(123)
 // @ts-ignore
 import Miew from '@/TEMP/miew/dist/miew.module'
 import '@/TEMP/miew/dist/miew.min.css'
-
-console.log(345, Miew)
 
 // Vue
 import { ref, watch, nextTick } from 'vue'
@@ -62,17 +66,21 @@ async function init3DViewer() {
 
 	// Triggered whenever we clear the molViewerStore.
 	if (props.sdf == null) {
-		miewViewer.unload()
+		miewViewer.term()
+		miewViewer = null
 		return
 	}
 
 	render3d_miew()
 }
 
-// 3D mol A --> Using the Miew library - https://lifescience.opensource.epam.com/miew
+// 3D mol A --> Using the Miew library - https://lifescience.opensource.epam.com/miew/index.html
 function render3d_miew(forceReInit = false) {
-	console.log('render3d_miew')
-	if (!miewViewer || forceReInit) {
+	if (forceReInit) {
+		miewViewer.term()
+		miewViewer = null
+	}
+	if (!miewViewer) {
 		miewViewer = new Miew({
 			container: $container3d.value as HTMLDivElement,
 			// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`

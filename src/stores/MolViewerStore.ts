@@ -81,7 +81,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 	},
 	actions: {
 		setMolData(mol: Mol) {
-			console.log('setMolData')
+			// console.log('setMolData')
 			this._mol = mol
 		},
 		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
@@ -92,7 +92,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (sdf) this._sdf = sdf
 		},
 		setMolFromMolsetIndex(index: number, dontPushRoute = false) {
-			console.log(99, 'setMolFromMolsetIndex:', index)
+			// console.log(99, 'setMolFromMolsetIndex:', index)
 			this._molFromMolsetIndex = index
 
 			if (!dontPushRoute) {

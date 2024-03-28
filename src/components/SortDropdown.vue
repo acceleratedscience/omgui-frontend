@@ -19,7 +19,7 @@
 <script setup lang="ts">
 // Vue
 import { ref, watch, computed } from 'vue'
-import type { ModelRef, ComputedRef } from 'vue'
+import type { ModelRef, ComputedRef, WritableComputedRef } from 'vue'
 
 // Props
 const props = withDefaults(
@@ -45,8 +45,8 @@ const sortReversed: ComputedRef<boolean> = computed(() => {
 })
 
 // Sort key without direction.
-const sortKeyNeutral = computed({
-	get: () => sortKey.value?.replace(/^-/, ''),
+const sortKeyNeutral: WritableComputedRef<string> = computed({
+	get: () => sortKey.value?.replace(/^-/, '') || '',
 	set: (newValue) => {
 		if (newValue != sortKey.value?.replace(/^-/, '')) {
 			console.log('set')

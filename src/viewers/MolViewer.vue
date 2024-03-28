@@ -22,7 +22,6 @@
 	- Go from one molecule file to another
 	- Go from one molecule file to a molecule-by-identifier
 	- Go from one molecule-by-identifier to a molecule file
-
  -->
 
 <template>
@@ -98,12 +97,7 @@
 					</h2>
 					<div class="filler"></div>
 					<IconButton icon="icn-star-large-outline" iconHover="icn-star" colorHover="rgba(0,0,0,.3)" colorToggle="#d3bf0b" :toggle="true" />
-					<BasePagination
-						v-if="molViewerStore.molFromMolset"
-						:modelValue="molViewerStore.molFromMolsetIndex"
-						@update:modelValue="router.push({ query: { show: $event.toString() } })"
-						:total="molGridStore.total"
-					/>
+					<BasePagination v-if="molViewerStore.molFromMolset" v-model="pagination" :total="molGridStore.total" />
 					<IconButton icon="icn-close" icnSize="small" btnStyle="carbon" @click="router.push(route.path)" />
 				</div>
 
@@ -255,7 +249,7 @@
 <script setup lang="ts">
 // Vue
 import { ref, onBeforeUnmount, computed, watch } from 'vue'
-import type { ComputedRef } from 'vue'
+import type { ComputedRef, WritableComputedRef } from 'vue'
 
 // Router
 import { useRouter, useRoute } from 'vue-router'
@@ -311,11 +305,6 @@ const synonymColMinWidth: number = 150
 // Molecule data
 const mol: ComputedRef<Mol | TempMol> = computed(() => molViewerStore.mol)
 
-// Title
-const molName: ComputedRef<string> = computed(() => {
-	return mol.value?.identifiers?.name ? mol.value.identifiers.name : loading.value ? 'Loading' : 'Unnamed Molecule'
-})
-
 // The molecule viewer is used for differenbt sources with different routes.
 // - identifier: /molviewer/dopamine
 // - molFile:    /~/dopamine.mol.json
@@ -330,6 +319,21 @@ const sourceType: ComputedRef<'identifier' | 'molFile' | 'molset'> = computed(()
 			return 'molFile'
 		}
 	}
+})
+
+// Title
+const molName: ComputedRef<string> = computed(() => {
+	return mol.value?.identifiers?.name ? mol.value.identifiers.name : loading.value ? 'Loading' : 'Unnamed Molecule'
+})
+
+// Pagination model
+const pagination: WritableComputedRef<number> = computed({
+	get: () => molViewerStore.molFromMolsetIndex,
+	set: molViewerStore.setMolFromMolsetIndex,
+	// set: (val) => {
+	// 	console.log(val)
+	// 	router.push({ query: { show: val } })
+	// },
 })
 
 // Synonyms section
@@ -394,7 +398,6 @@ if (props.identifier) {
 	// When opening a molecule file.
 	fetchMolVizData(molViewerStore.smiles) // #case-B-1
 }
-console.log(23444, molViewerStore.mol)
 
 // Fetch mol data from the API.
 fetchMolData(props.identifier) // #case-A-1
@@ -445,7 +448,7 @@ onBeforeUnmount(clearMolData)
 watch(
 	() => molViewerStore.molFromMolsetIndex,
 	() => {
-		console.log('fetchMolData!')
+		// console.log('fetchMolData!')
 		fetchMolData() // #case-A-2
 	},
 )
@@ -466,7 +469,6 @@ watch(
 watch(
 	() => [molViewerStore.inchi, molViewerStore.smiles],
 	([newInchi, newSmiles], [oldInchi, oldSmiles]) => {
-		console.log([newInchi, newSmiles], [oldInchi, oldSmiles])
 		if (sourceType.value != 'identifier') {
 			if (newInchi && newInchi != oldInchi) {
 				fetchMolVizData(newInchi as string) // #case-B-2
@@ -480,16 +482,16 @@ watch(
 // When exiting a molecule from a molset.
 // Works in tandem with the route.query watcher in
 // MolGrid for going the other direction.
-watch(
-	() => route.query,
-	(newVal, oldVal) => {
-		if (oldVal.show && !newVal.show) {
-			molViewerStore.setMolFromMolsetIndex(0, true)
-		} else if (newVal.show) {
-			molViewerStore.setMolFromMolsetIndex(+newVal.show, true)
-		}
-	},
-)
+// watch(
+// 	() => route.query,
+// 	(newVal, oldVal) => {
+// 		if (oldVal.show && !newVal.show) {
+// 			molViewerStore.setMolFromMolsetIndex(0, true)
+// 		} else if (newVal.show) {
+// 			molViewerStore.setMolFromMolsetIndex(+newVal.show, true)
+// 		}
+// 	},
+// )
 
 /**
  * Methods
@@ -501,7 +503,7 @@ function clearMolData() {
 
 // Fetch molecule data from the appropriate source.
 async function fetchMolData(identifier: string | null = null) {
-	console.log('fetchMolData')
+	// console.log('fetchMolData')
 	if (identifier) {
 		fetchMolDataByIdentifier(identifier)
 	} else if (molViewerStore.molFromMolset) {
@@ -511,7 +513,7 @@ async function fetchMolData(identifier: string | null = null) {
 
 // Fetch a molecule from a molset.
 function fetchMolDataFromMolset(cacheId: number | null = null) {
-	console.log('Fetch from:', cacheId)
+	// console.log('Fetch from:', cacheId)
 	if (!cacheId) return
 	let index = molViewerStore.molFromMolsetIndex
 	apiFetch(moleculesApi.getMolDataFromMolset(cacheId, index), {
@@ -580,12 +582,12 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 // Fetch visualization data from the API.
 // I.e. a 2D SVG and an SDF string with 3D coordinates.
 async function fetchMolVizData(inchi_or_smiles: string) {
-	console.log('fetchMolVizData')
+	// console.log('fetchMolVizData')
 	try {
 		// console.time('fetchMolVizData')
 		const response = await moleculesApi.getMolVizData(inchi_or_smiles)
 		if (response.status == 200) {
-			console.log(994, response.data)
+			// console.log(994, response.data)
 			// console.timeEnd('fetchMolVizData')
 
 			// This function will also be called with other identifiers,

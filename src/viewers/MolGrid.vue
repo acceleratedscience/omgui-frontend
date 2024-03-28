@@ -152,14 +152,14 @@ onBeforeRouteUpdate(onBeforeExit)
 // When going back into a molecule from a molset.
 // Works in tandem with the route.query watcher in
 // MolViewer for going the other direction.
-watch(
-	() => route.query,
-	(newVal, oldVal) => {
-		if (!oldVal.show && newVal.show) {
-			molViewerStore.setMolFromMolsetIndex(+newVal.show, true)
-		}
-	},
-)
+// watch(
+// 	() => route.query,
+// 	(newVal, oldVal) => {
+// 		if (!oldVal.show && newVal.show) {
+// 			molViewerStore.setMolFromMolsetIndex(+newVal.show, true)
+// 		}
+// 	},
+// )
 
 /**
  * Methods
