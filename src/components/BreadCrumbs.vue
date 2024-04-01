@@ -1,7 +1,7 @@
 <template>
 	<div id="breadcrumbs-wrap" :class="{ truncate }">
 		<div id="breadcrumbs" ref="$breadcrumbs" :class="{ truncate, 'needs-truncated': needsTruncation }">
-			<button v-if="fileType" id="file-type" @click="modalStore.display('ModalFileType')">
+			<button v-if="fileType" id="file-type" @click="modalStore.display('ModalViewer')">
 				{{ fileType }}
 			</button>
 			<template v-for="(item, i) in props.pathArray" :key="i">

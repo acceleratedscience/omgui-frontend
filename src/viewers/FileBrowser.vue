@@ -59,7 +59,7 @@
 							@click="() => previewFile(file_hidden, level + 1, true)"
 							@dblclick="openFile(file_hidden)"
 						>
-							<SvgServe :icon="'icn-file-' + file_hidden._meta.fileType" />
+							<SvgServe :icon="'icn-file-' + file_hidden._meta.fileType" :key="String(file_hidden._meta.fileType)" />
 							<div>{{ file_hidden.filename }}</div>
 						</div>
 
@@ -75,7 +75,7 @@
 							@click="() => previewFile(file, level + 1, true)"
 							@dblclick="openFile(file)"
 						>
-							<SvgServe :icon="'icn-file-' + file._meta.fileType" />
+							<SvgServe :icon="'icn-file-' + file._meta.fileType" :key="String(file._meta.fileType)" />
 							<div>{{ file.filename }}</div>
 						</div>
 
@@ -102,6 +102,7 @@
 							Created: {{ filePreview.dispTimeCreated }}<br />
 							Last edit: {{ filePreview.dispTimeEdited }}
 						</div>
+						<cv-button size="small" kind="secondary" @click="openFile(filePreview)">open</cv-button>
 					</small>
 				</div>
 			</div>
@@ -209,7 +210,12 @@ async function parseRoute() {
 		const thisLevel = levels.value[levels.value.length - 1]
 		const files = thisLevel.files.concat(thisLevel.filesHidden)
 		const file = files.filter((file) => file.filename === filename)[0]
-		previewFile(file, levels.value.length)
+		if (file) {
+			previewFile(file, levels.value.length)
+		} else {
+			// Remove the hash from the route
+			router.push({ path: route.path, query: route.query })
+		}
 	}
 }
 
@@ -548,6 +554,7 @@ async function fetchWorkspaceFiles(path = '') {
 }
 #file-preview .soft {
 	margin-top: 8px;
+	margin-bottom: 8px;
 }
 
 /**

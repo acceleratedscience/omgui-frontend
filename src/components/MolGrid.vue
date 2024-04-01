@@ -122,7 +122,6 @@ onMounted(async () => {
 
 	// If we're sorting by a non-default property,
 	// we need to activate it in the store.
-	// if (route.query.sort) molGridStore.enableProp(route.query.sort.toString())
 	if (route.query.sort && !['index', '-index'].includes(route.query.sort as string)) {
 		molGridStore.enableProp(route.query.sort.toString())
 	}
@@ -139,7 +138,9 @@ window.onbeforeunload = function () {
 	molGridStore.clear()
 }
 onBeforeRouteLeave(onBeforeExit)
-onBeforeRouteUpdate(onBeforeExit)
+onBeforeRouteUpdate((to, from, next) => {
+	if (to.path != from.path) onBeforeExit(to, from, next)
+})
 
 /**
  * Methods
@@ -213,10 +214,15 @@ function previewMolecule(i: number) {
 }
 
 // Block route change when there are unsaved changes.
-function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
+async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
 	if (molGridStore.hasChanges) {
-		modalStore.alert('You have unsaved changes')
-		next(false)
+		await modalStore.alert('If you leave, all changes will be lost.', {
+			title: 'Unsaved changes',
+			primaryBtn: 'Stay',
+			secondaryBtn: 'Discard changes',
+			onCancel: () => next(),
+			onSubmit: () => next(false),
+		})
 	} else {
 		next()
 		if (to.path != from.path) molGridStore.clear()

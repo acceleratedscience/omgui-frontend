@@ -1,12 +1,21 @@
 <template>
+	<!-- {{ molViewerStore.molFromMolset }}<br /><br /><br /> -->
+	<!-- <div v-show="molViewerStore.molFromMolset">
+		<MolViewer />
+	</div> -->
 	<MolViewer v-if="molViewerStore.molFromMolset" />
+	<!-- <div v-show="!molViewerStore.molFromMolset"> -->
 	<template v-else>
 		<BreadCrumbs v-if="breadcrumbs" :pathArray="fileStore.breadCrumbPathArray">
-			{{ prettyNr(molGridStore.total) }}
+			<template v-if="molGridStore.resultCount < molGridStore.total">
+				Showing {{ prettyNr(molGridStore.resultCount) }} / {{ prettyNr(molGridStore.total) }}
+			</template>
+			<template v-else>Total: {{ prettyNr(molGridStore.total) }}</template>
 			<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
 		</BreadCrumbs>
 		<MolGrid />
 	</template>
+	<!-- </div> -->
 </template>
 
 <script setup lang="ts">
@@ -57,13 +66,15 @@ parseMolFromMolsetUrlQuery()
 watch(
 	() => route.query,
 	() => {
-		if (molViewerStore.molFromMolset) {
-			// Looking at a molecules inside a molset.
-			parseMolFromMolsetUrlQuery()
-		} else {
-			// Looking at the molset.
-			molGridStore.parseUrlQuery()
-		}
+		console.log('ROUTE CHANGE')
+		parseMolFromMolsetUrlQuery()
+		// if (molViewerStore.molFromMolset) {
+		// 	// Looking at a molecules inside a molset.
+		// 	parseMolFromMolsetUrlQuery()
+		// } else {
+		// 	// Looking at the molset.
+		// 	molGridStore.parseUrlQuery()
+		// }
 	},
 )
 
@@ -72,6 +83,7 @@ watch(
  */
 
 function parseMolFromMolsetUrlQuery() {
+	console.log('** parseMolFromMolsetUrlQuery')
 	const query = router.currentRoute.value.query
 	if (query?.show) {
 		const index = Number(query.show)

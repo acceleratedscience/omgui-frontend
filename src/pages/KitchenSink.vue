@@ -1,7 +1,8 @@
 <template>
 	<hr />
 	<h4>:: Modals</h4>
-	<button @click="modalStore.alert('Hello world')">simple modal</button>&nbsp;
+	<button @click="modalStore.alert('Hello world')">simple alert</button>
+	&nbsp;
 	<button
 		@click="
 			modalStore.alert('Hello <span style=\'color: red\'>world</span>', {
@@ -17,12 +18,17 @@
 			})
 		"
 	>
-		advanced modal</button
-	>&nbsp;
+		advanced alert
+	</button>
+	&nbsp;
+	<button @click="alertPromise">alert promise</button>
+	&nbsp;
+	<button @click="confirmPromise">confirm promise</button>
+	&nbsp;
 	<button @click="modalStore.confirm('Are you sure?', { onSubmit, onCancel })">confirm modal</button>
 	<br /><br />
 	<button @click="modalStore.display('_ModalTemplate')">template</button>&nbsp;
-	<button @click="modalStore.display('ModalFileType')">file type</button>&nbsp;
+	<button @click="modalStore.display('ModalViewer')">file type</button>&nbsp;
 	<button @click="modalStore.display('ModalWorkspaces')">workspaces</button>&nbsp;
 
 	<br /><br /><br /><br />
@@ -152,6 +158,31 @@ import ChevronRight from '@carbon/icons-vue/es/chevron--right/16'
 /**
  * Methods
  */
+
+async function alertPromise() {
+	const result = await modalStore.alert('Hello world', {
+		title: 'I block the thread',
+		secondaryBtn: true,
+		onSubmit,
+		onCancel,
+	})
+
+	if (result) {
+		console.log('Continue after SUBMIT')
+	} else {
+		console.log('Continue after CANCEL')
+	}
+}
+
+async function confirmPromise() {
+	const result = await modalStore.confirm('Are you sure?', { onSubmit, onCancel })
+
+	if (result) {
+		console.log('Continue after SUBMIT')
+	} else {
+		console.log('Continue after CANCEL')
+	}
+}
 
 function onSubmit() {
 	alert('yes')

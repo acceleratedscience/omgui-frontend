@@ -77,6 +77,7 @@ type State = {
 	_cacheId: number | null
 	_mols: Molset | null
 	_total: number
+	_resultCount: number
 
 	// Search
 	_searchStr: string
@@ -170,6 +171,10 @@ export const useMolGridStore = defineStore('molGridStore', {
 			return this._mols!.map((mol) => mol.identifiers.isomeric_smiles ?? mol.identifiers.canonical_smiles ?? mol.identifiers.smiles)
 		},
 
+		resultCount(): number {
+			return this._resultCount
+		},
+
 		// Total number of molecules.
 		total(): number {
 			return this._total
@@ -200,7 +205,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		pageTotal(): number {
-			return Math.ceil(this._total / this._pageSize)
+			return Math.ceil(this._resultCount / this._pageSize)
 		},
 
 		pageSize(): number {
@@ -385,16 +390,17 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// Load molecule set into the state.
 		async setMolset(molsData: MolsetApi) {
 			console.log('setMolset ((')
-			console.log('setMolset', molsData.searchMode)
 			this._disableUpdate = true
 
 			this._cacheId = molsData.cacheId
 			this._mols = molsData.mols
+			this._total = molsData.total
+			this._resultCount = molsData.resultCount
+
 			this._searchStr = molsData.searchStr
 			this._searchMode = molsData.searchMode
 			this._sort = molsData.sort ?? ''
 			this._matching = molsData.matching
-			this._total = molsData.total
 			this._pageSize = molsData.pageSize
 			this._page = molsData.page
 
@@ -620,8 +626,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// This gets triggered when clicking the open button.
 		openMolecule(index: number) {
 			molViewerStore.setMolFromMolsetIndex(index)
-			// const path = `/~/${fileStore.path}?show=${index}`
-			// router.push(path)
 		},
 
 		// #endregion

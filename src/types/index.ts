@@ -138,11 +138,12 @@ export type Molset = Mol[]
 export type MolsetApi = {
 	cacheId: number
 	mols: Molset // Paginated subset of the molset
+	total: number
+	resultCount: number
 	searchStr: string
 	searchMode: SearchMode
 	sort: string
 	matching: number[]
-	total: number
 	page: number
 	pageSize: number
 	pageTotal: number

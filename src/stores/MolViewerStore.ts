@@ -7,9 +7,6 @@
 import { defineStore } from 'pinia'
 import router from '@/router'
 
-// Stores
-import { useFileStore } from '@/stores/FileStore'
-
 // API
 import { apiFetch, moleculesApi } from '@/api/ApiService'
 
@@ -35,6 +32,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		mol(): Mol | TempMol {
 			return this._mol
 		},
+		isEmpty(): boolean {
+			return !Object.keys(this._mol.identifiers).length
+		},
 		inchi(): string | null {
 			return this._mol?.identifiers?.inchi || null
 		},
@@ -56,15 +56,14 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		// Indicated whether we're viewing a molecule from a molset.
 		molFromMolset(): boolean {
+			console.log('RECORD molFromMolset', Boolean(this._molFromMolsetIndex))
+			// return true
 			return Boolean(this._molFromMolsetIndex)
-			// const fileStore = useFileStore()
-			// return Boolean(fileStore.defaultFileType == 'molset' && this._molFromMolsetIndex)
 		},
 
 		// When viewing a molecule from a molset, this is the index of the molecule.
 		molFromMolsetIndex(): number | null {
 			return this._molFromMolsetIndex
-			// return Number(router.currentRoute.value.query?.show)
 		},
 
 		// A combination string of "key: value" pairs used as tooltip.
@@ -110,17 +109,20 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (sdf) this._sdf = sdf
 		},
 		setMolFromMolsetIndex(index: number | null, dontPushRoute = false) {
-			// console.log(99, 'setMolFromMolsetIndex:', index)
+			console.log(99, 'setMolFromMolsetIndex:', index, dontPushRoute)
 			this._molFromMolsetIndex = index
 
 			if (!dontPushRoute) {
-				// const fileStore = useFileStore()
 				const query = index ? `?show=${index}` : ''
-				// const path = `/~/${fileStore.path}${query}`
 				const path = router.currentRoute.value.path + query
 				router.push(path)
-				// router.push({ query: { show: nr.toString() } })
 			}
+
+			// // Timeout needed for route.query watcher in MolsetViewer to trigger.
+			// // Not super clear why this is needed...
+			// setTimeout(() => {
+			// 	this._molFromMolsetIndex = index
+			// }, 1)
 		},
 
 		// parseUrlQuery() {
@@ -132,7 +134,8 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		// 		}
 		// 	}
 		// },
-		clearMol() {
+		clear() {
+			// console.log('clear MolViewerStore')
 			this._mol = { identifiers: {} }
 			this._sdf = null
 			this._svg = null

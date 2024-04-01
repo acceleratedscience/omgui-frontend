@@ -108,12 +108,12 @@ export const useModalStore = defineStore('modalStore', {
 		show() {
 			this._visible = true
 			lockScroll(true)
-			console.log('modalStore show')
+			// console.log('modalStore show')
 		},
 		hide() {
 			this._visible = false
 			lockScroll(false)
-			console.log('modalStore hide')
+			// console.log('modalStore hide')
 		},
 
 		// Display a custom modal.
@@ -132,31 +132,50 @@ export const useModalStore = defineStore('modalStore', {
 				html?: boolean
 				size?: Size
 				title?: string
-				primaryBtn?: string
-				secondaryBtn?: string
+				primaryBtn?: string | boolean
+				secondaryBtn?: string | boolean
 				otherBtn?: string
 				onSubmit?: Function
 				onCancel?: Function
 				onOther?: Function
 			} = {},
-			confirm: boolean = false, // Confirm/Cancel buttons instead of Ok button
 		) {
-			this._modalName = 'ModalMain'
-			this._content = content
-			this._html = options.html || false
-			this._size = options.size || null
-			this._title = options.title || null
-			this._primaryBtn = options.primaryBtn || confirm ? 'Confirm' : 'Ok'
-			this._secondaryBtn = options.secondaryBtn || confirm ? 'Cancel' : null
-			this._otherBtn = options.otherBtn || null
-			this._onSubmit = options.onSubmit || null
-			this._onCancel = options.onCancel || null
-			this._onOther = options.onOther || null
+			return new Promise((resolve) => {
+				this._modalName = 'ModalMain'
+				this._content = content
+				this._html = options.html || false
+				this._size = options.size || null
+				this._title = options.title || null
+				this._primaryBtn = options.primaryBtn === true ? 'Ok' : options.primaryBtn ? options.primaryBtn : 'Ok'
+				this._secondaryBtn = options.secondaryBtn === true ? 'Cancel' : options.secondaryBtn ? options.secondaryBtn : null
+				this._otherBtn = options.otherBtn || null
+				this._onSubmit = () => {
+					if (options.onSubmit) options.onSubmit()
+					this.hide()
+					resolve(true)
+				}
+				this._onCancel = () => {
+					if (options.onCancel) options.onCancel()
+					this.hide()
+					resolve(false)
+				}
+				this._onOther = options.onOther || null
+			})
+		},
+
+		alertPromise(content: string, options: Record<string, any> = {}) {
+			return new Promise((resolve) => {
+				options.onSubmit = () => resolve(true)
+				options.onCancel = () => resolve(false)
+				this.alert(content, options)
+			})
 		},
 
 		// Display a confirm modal.
-		confirm(content: string, options: object = {}) {
-			this.alert(content, options, true)
+		confirm(content: string, options: Record<string, any> = {}) {
+			options.primaryBtn = 'Confirm'
+			options.secondaryBtn = 'Cancel'
+			return this.alert(content, options)
 		},
 
 		clear() {

@@ -169,9 +169,14 @@
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<br />
-						<cv-button v-if="!molViewerStore.enriched && !mol.identifiers.cid" size="small" kind="secondary" @click="enrichMolecule"
-							>Enrich</cv-button
+						<cv-button
+							v-if="!loading && !molViewerStore.enriched && !mol.identifiers?.cid"
+							size="small"
+							kind="secondary"
+							@click="enrichMolecule"
 						>
+							Enrich
+						</cv-button>
 					</div>
 
 					<hr />
@@ -189,7 +194,7 @@
 							</div>
 						</div>
 						<div>
-							<cv-button kind="danger" size="field" @click="fetchMolData">Retry</cv-button>
+							<cv-button kind="danger" size="field" @click="fetchMolDataByIdentifier">Retry</cv-button>
 						</div>
 					</div>
 
@@ -313,6 +318,16 @@ const loadingErrorMsg = ref<string>('')
 const paramColMinWidth: number = 250
 const synonymColMinWidth: number = 150
 
+function testtt() {
+	console.log(11111, 'testtt')
+	molViewerStore.setMolFromMolsetIndex(null)
+	// molViewerStore._molFromMolsetIndex = null
+	setTimeout(() => {
+		console.log('ROUTER PUSH')
+		router.push(route.path + '?x=1')
+	}, 2000)
+}
+
 /**
  * Computed
  */
@@ -397,6 +412,19 @@ const stylePropWrap: ComputedRef<{ height?: string }> = computed(() => {
  * Logic
  */
 
+// Fetch mol data from the API.
+// For molecule files, data is loaded from within ViewerDispatch.vue -> molViewerStore.setMolData()
+if (props.identifier) {
+	console.log('by identifier')
+	fetchMolDataByIdentifier(props.identifier) // #case-A-1
+} else {
+	console.log('by file', molViewerStore.isEmpty)
+	if (molViewerStore.isEmpty) {
+		const data: Mol = fileStore.data
+		molViewerStore.setMolData(data)
+	}
+}
+
 // While waiting for the API, prepopulate the UI where possible.
 if (props.identifier) {
 	if (props.identifier.startsWith('InChI=')) {
@@ -417,59 +445,12 @@ if (props.identifier) {
 	fetchMolVizData(molViewerStore.smiles) // #case-B-1
 }
 
-// Fetch mol data from the API.
-fetchMolData(props.identifier) // #case-A-1
-
 /**
  * Hooks
  */
 
-// If the identifier is a SMILES, we can use rdkit-js to generate
-// most other identifiers and generate the SVG on the fly, without
-// having to wait for the API.
-async function tryPrepopulateFromSmiles(identifier: string) {
-	await initRDKit()
-	let rdkMol: JSMol | null = window.RDKit.get_mol(identifier)
-
-	// If the identifier is anything other than a SMILES,
-	// rdkMol will be null and we abort.
-	if (!rdkMol) return
-
-	// Prepopulate
-	const inchi = rdkMol.get_inchi()
-	molViewerStore.setMolIdentifier('canonical_smiles', identifier) // This will trigger the SVG rendering
-	molViewerStore.setMolIdentifier('inchi', inchi)
-	molViewerStore.setMolIdentifier('inchikey', window.RDKit.get_inchikey_for_inchi(inchi))
-
-	// // Rendering the  3D Molecule from the frontend is
-	// // currently not possible with rdkit-js, but when it is,
-	// // we can use the following code to generate the 3D molecule.
-	// // https://github.com/rdkit/rdkit-js/issues/338
-	//
-	// // Add explicit hydrogen atoms, which are
-	// // displayed as spikes in the 3D render.
-	// rdkMol.add_hs()
-	//
-	// // Generate 3D coordinates.
-	// // Functionality missing :(
-	//
-	// // Generate SDF format.
-	// const sdf = rdkMol.get_molblock()
-	// molViewerStore.setMolVizData(null, sdf)
-	// init3DViewer()
-}
-
 // Clear store on exit.
 onBeforeUnmount(clearMolData)
-
-// When cycling between molecules in a molset.
-watch(
-	() => molViewerStore.molFromMolsetIndex,
-	() => {
-		// console.log('fetchMolData!')
-		fetchMolData() // #case-A-2
-	},
-)
 
 // Update data when going from one mol-by-identifier to another.
 watch(
@@ -477,7 +458,7 @@ watch(
 	(newVal) => {
 		clearMolData()
 		if (newVal) {
-			fetchMolData(newVal) // #case-A-2
+			fetchMolDataByIdentifier(newVal) // #case-A-2
 		}
 	},
 )
@@ -497,41 +478,17 @@ watch(
 	},
 )
 
-// When exiting a molecule from a molset.
-// Works in tandem with the route.query watcher in
-// MolGrid for going the other direction.
-// watch(
-// 	() => route.query,
-// 	(newVal, oldVal) => {
-// 		if (oldVal.show && !newVal.show) {
-// 			molViewerStore.setMolFromMolsetIndex(0, true)
-// 		} else if (newVal.show) {
-// 			molViewerStore.setMolFromMolsetIndex(+newVal.show, true)
-// 		}
-// 	},
-// )
-
 /**
  * Methods
  */
 
 function clearMolData() {
-	molViewerStore.clearMol()
-}
-
-// Fetch molecule data from the appropriate source.
-async function fetchMolData(identifier: string | null = null) {
-	// console.log('fetchMolData')
-	if (identifier) {
-		fetchMolDataByIdentifier(identifier)
-	} else if (molViewerStore.molFromMolset) {
-		// fetchMolDataFromMolset(molGridStore.cacheId)
-	}
+	molViewerStore.clear()
 }
 
 // Fetch molecule data from the API based on the identifier.
 async function fetchMolDataByIdentifier(identifier: string | null = null) {
-	// console.log('fetchMolData')
+	// console.log('fetchMolData', identifier)
 	if (!identifier) return
 
 	let success = false
@@ -575,6 +532,41 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 		console.error(loadingError.value, err)
 	}
 	return success
+}
+
+// If the identifier is a SMILES, we can use rdkit-js to generate
+// most other identifiers and generate the SVG on the fly, without
+// having to wait for the API.
+async function tryPrepopulateFromSmiles(identifier: string) {
+	await initRDKit()
+	let rdkMol: JSMol | null = window.RDKit.get_mol(identifier)
+
+	// If the identifier is anything other than a SMILES,
+	// rdkMol will be null and we abort.
+	if (!rdkMol) return
+
+	// Prepopulate
+	const inchi = rdkMol.get_inchi()
+	molViewerStore.setMolIdentifier('canonical_smiles', identifier) // This will trigger the SVG rendering
+	molViewerStore.setMolIdentifier('inchi', inchi)
+	molViewerStore.setMolIdentifier('inchikey', window.RDKit.get_inchikey_for_inchi(inchi))
+
+	// // Rendering the  3D Molecule from the frontend is
+	// // currently not possible with rdkit-js, but when it is,
+	// // we can use the following code to generate the 3D molecule.
+	// // https://github.com/rdkit/rdkit-js/issues/338
+	//
+	// // Add explicit hydrogen atoms, which are
+	// // displayed as spikes in the 3D render.
+	// rdkMol.add_hs()
+	//
+	// // Generate 3D coordinates.
+	// // Functionality missing :(
+	//
+	// // Generate SDF format.
+	// const sdf = rdkMol.get_molblock()
+	// molViewerStore.setMolVizData(null, sdf)
+	// init3DViewer()
 }
 
 // TO BE REPLACES WITH STORE FUNCTION

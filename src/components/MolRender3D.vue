@@ -68,6 +68,7 @@ async function init3DViewer() {
 	if (props.sdf == null) {
 		miewViewer.term()
 		miewViewer = null
+		$container3d.value.innerHTML = ''
 		return
 	}
 

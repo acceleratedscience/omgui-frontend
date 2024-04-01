@@ -1,7 +1,7 @@
 <template>
 	<div id="breadcrumbs">
 		<div id="truncation" ref="$truncation" :class="{ truncate, 'is-truncated': isTruncated }">
-			<button id="file-type" @click="modalStore.display('ModalFileType')">
+			<button id="file-type" @click="modalStore.display('ModalViewer')">
 				{{ fileStore.fileType }}
 			</button>
 			<template v-for="(item, i) in pathArr" :key="i">
