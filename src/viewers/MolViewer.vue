@@ -38,7 +38,7 @@
 		When we're opening a file, there's general viewer override
 		logic which lives in the fileStore, see fileTypeOverride.
 	 -->
-	<template v-if="mol && route.query.use">
+	<template v-if="mol && route.query.use == 'json'">
 		<JsonViewer :data="mol" />
 	</template>
 
@@ -72,13 +72,11 @@
 		<div id="content-wrap">
 			<!-- Left main column -->
 			<div class="col-left">
-				<BreadCrumbs
-					:pathArray="
-						sourceType == 'molFile'
-							? fileStore.breadCrumbPathArray
-							: fileStore.breadCrumbPathArray.concat(['mol #' + molViewerStore.molFromMolsetIndex.toString()])
-					"
-				>
+				<!-- {{ sourceType }} -->
+				<BreadCrumbsNot v-if="sourceType == 'identifier'" :backto="{ name: 'molviewer-input' }">
+					<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
+				</BreadCrumbsNot>
+				<BreadCrumbs v-else :pathArray="pathArray">
 					<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
 				</BreadCrumbs>
 
@@ -97,8 +95,22 @@
 					</h2>
 					<div class="filler"></div>
 					<IconButton icon="icn-star-large-outline" iconHover="icn-star" colorHover="rgba(0,0,0,.3)" colorToggle="#d3bf0b" :toggle="true" />
-					<BasePagination v-if="molViewerStore.molFromMolset" v-model="pagination" :total="molGridStore.total" />
-					<IconButton icon="icn-close" icnSize="small" btnStyle="carbon" @click="router.push(route.path)" />
+					<BasePagination v-if="molViewerStore.molFromMolset" v-model="modelPagination" :total="molGridStore.total" />
+					<IconButton
+						v-if="molViewerStore.molFromMolset"
+						icon="icn-close"
+						icnSize="small"
+						btnStyle="carbon"
+						@click="molViewerStore.setMolFromMolsetIndex(null)"
+					/>
+					<IconButton
+						v-else
+						icon="icn-close"
+						icnSize="small"
+						btnStyle="default"
+						@click="fileStore.exitViewer"
+						:style="{ 'margin-right': '-8px' }"
+					/>
 				</div>
 
 				<template v-if="mol">
@@ -157,7 +169,9 @@
 							<BaseFetching v-if="loading" text="" failText="x" :error="loadingError" />
 						</div>
 						<br />
-						<cv-button v-if="!molViewerStore.enriched" size="small" kind="secondary" @click="enrichMolecule">Enrich</cv-button>
+						<cv-button v-if="!molViewerStore.enriched && !mol.identifiers.cid" size="small" kind="secondary" @click="enrichMolecule"
+							>Enrich</cv-button
+						>
 					</div>
 
 					<hr />
@@ -271,6 +285,7 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
+import BreadCrumbsNot from '@/components/BreadCrumbsNot.vue'
 import JsonViewer from '@/viewers/JsonViewer.vue'
 import IconButton from '@/components/IconButton.vue'
 import SvgServe from '@/components/SvgServe.vue'
@@ -321,19 +336,22 @@ const sourceType: ComputedRef<'identifier' | 'molFile' | 'molset'> = computed(()
 	}
 })
 
+// Path array for breadcrumbs
+const pathArray: ComputedRef<string[]> = computed(() => {
+	return sourceType.value == 'molset'
+		? fileStore.breadCrumbPathArray.concat(['mol #' + molViewerStore.molFromMolsetIndex?.toString()])
+		: fileStore.breadCrumbPathArray
+})
+
 // Title
 const molName: ComputedRef<string> = computed(() => {
 	return mol.value?.identifiers?.name ? mol.value.identifiers.name : loading.value ? 'Loading' : 'Unnamed Molecule'
 })
 
 // Pagination model
-const pagination: WritableComputedRef<number> = computed({
-	get: () => molViewerStore.molFromMolsetIndex,
+const modelPagination: WritableComputedRef<number> = computed({
+	get: () => molViewerStore.molFromMolsetIndex || 1,
 	set: molViewerStore.setMolFromMolsetIndex,
-	// set: (val) => {
-	// 	console.log(val)
-	// 	router.push({ query: { show: val } })
-	// },
 })
 
 // Synonyms section
@@ -507,28 +525,8 @@ async function fetchMolData(identifier: string | null = null) {
 	if (identifier) {
 		fetchMolDataByIdentifier(identifier)
 	} else if (molViewerStore.molFromMolset) {
-		fetchMolDataFromMolset(molGridStore.cacheId)
+		// fetchMolDataFromMolset(molGridStore.cacheId)
 	}
-}
-
-// Fetch a molecule from a molset.
-function fetchMolDataFromMolset(cacheId: number | null = null) {
-	// console.log('Fetch from:', cacheId)
-	if (!cacheId) return
-	let index = molViewerStore.molFromMolsetIndex
-	apiFetch(moleculesApi.getMolDataFromMolset(cacheId, index), {
-		onSuccess: (data) => {
-			molViewerStore.setMolData(data)
-			if (!molViewerStore.sdf && molViewerStore.inchi) {
-				fetchMolVizData(molViewerStore.inchi) // #case-B-3
-			}
-		},
-		onError: (err) => {
-			console.log('Error in getMolDataFromMolset()', err)
-		},
-		loading: loading,
-		loadingError: loadingErrorMsg,
-	})
 }
 
 // Fetch molecule data from the API based on the identifier.
@@ -579,6 +577,7 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 	return success
 }
 
+// TO BE REPLACES WITH STORE FUNCTION
 // Fetch visualization data from the API.
 // I.e. a 2D SVG and an SDF string with 3D coordinates.
 async function fetchMolVizData(inchi_or_smiles: string) {
@@ -627,6 +626,7 @@ function toggleExpand(e: Event) {
 }
 #content-wrap .col-left {
 	flex: 1 1;
+	max-width: 100%;
 	// max-width: calc(100% - 290px); // Enable this line to enable the right column. #enableright
 }
 #content-wrap .col-right {
@@ -818,6 +818,7 @@ function toggleExpand(e: Event) {
 	flex: 0 1 auto;
 	padding-left: 4px;
 	min-width: 0;
+	// font-style: italic;
 
 	/* Truncation */
 	white-space: nowrap;

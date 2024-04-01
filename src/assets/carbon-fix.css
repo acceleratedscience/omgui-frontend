@@ -8,6 +8,9 @@
 .bx--modal-content {
 	overflow: visible;
 }
+.cv-modal.scrollable .bx--modal-content {
+	overflow: auto;
+}
 
 /* Remove focus outline from modal content. */
 .bx--modal-content:focus {
@@ -26,7 +29,4 @@
 
 .bx--modal-container {
 	max-height: calc(100% - 40px) !important;
-}
-.bx--modal-content {
-	overflow: auto;
 }

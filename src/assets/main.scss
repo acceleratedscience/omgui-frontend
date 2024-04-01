@@ -55,6 +55,15 @@ hr {
 	align-items: center;
 }
 
+// Code
+span.code {
+	background: $extra-soft-bg;
+	border: solid 1px $black-10;
+	border-radius: 2px;
+	padding: 0 5px;
+	font-family: 'IBM Plex Mono', monospace;
+}
+
 /**
  * Settings Panel
  */

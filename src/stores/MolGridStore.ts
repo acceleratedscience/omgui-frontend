@@ -6,10 +6,47 @@
  * cmd + k, cmd + j, cmd + k, cmd + 3
  */
 
+/**
+
+Routing architecture
+- - - - - - - - - - -
+This is a little hard to untangle, so for the record.
+Please note the role of _disableUpdate to prevent double API calls.
+
+Scenario A:
+1.	User loads page (with URL query)
+2.	File data is loaded into the fileStore via ViewerDispatch.vue -> fileStore.loadItem()
+3.	Data is loaded from the fileStore into the molGridStore via MolSetViewer.vue -> molGridStore.setMolset()
+4.	The values from the URL query were parsed in the backend and are part of the API response,
+	so the state is updated with the query values, also via setMolset()
+Scenario B:
+1.	User changes search/page/sort via UI
+2.	v-model pushes changes to store via setter functions, eg. setSort()
+3.	Setter function calls updateMols(), which:
+	A:	Updates the URL query
+		--> The route.query watcher in MolSetViewer.vue calls parseUrlQuery()
+		--> parseUrlQuery() compares URL query with store values, doesn't find any changes and does nothing
+	B:	Calls API to fetch updated list of molecules
+		--> On success, the store is updated with new molecules via setMolset()
+		--> Also via setMolset(), the state is updated with the query values returned from the API
+			but this doesn't do anything because the values are the same as the store values
+Scenario C:
+1.	User goes back or forward in browser history
+2.	The route.query watcher in MolSetViewer.vue calls parseUrlQuery()
+3.	parseUrlQuery() compares URL query with store values, detects the changes,
+	updates the store with the new values, and then calls updateMols(fromUrlQuery=true)
+4.	Because of (fromUrlQuery=true), updateMols() doesn't update to the URL query,
+	instead fetches new molecules from the API using the values of the current urlQuery.
+5.	On success, the store is updated with new molecules via setMolset()
+6.	Also via setMolset(), the state is updated with the query values returned from the API
+
+**/
+
 // Vue
 import { defineStore } from 'pinia'
 import router from '@/router'
 import { nextTick } from 'vue'
+import type { LocationQuery } from 'vue-router'
 
 // Stores
 import { useFileStore } from '@/stores/FileStore'
@@ -66,13 +103,12 @@ type State = {
 function getInitialState(): State {
 	return {
 		// Status
-		// When the user changes any of the filter/sort values, we launch
-		// an API request to update the molecules (updateMols). But because
-		// the UI elements are linked to the store values by means of
-		// :modelValue/@update:modelValue, programmatically changing any
-		// of these values will trigger the UI elements to update which in
-		// turn will also trigger the API request. To avoid this, we set
-		// _disableUpdate to true whenever we are updating the store.
+		// - - -
+		// Because the filter/sort UI elements are linked to the store's query values
+		// by means of v-model, programmatically changing any of these values when
+		// processing an API request triggers the UI elements values to update which in
+		// turn would trigger a second API request. To avoid this, _disableUpdate prevents
+		// the setter functions linked to the v-model from calling the API.
 		_disableUpdate: true,
 		_hasChanges: false,
 
@@ -242,8 +278,8 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// every time any value changes.
 		// - Update the URL
 		// - Fetch new molecules from the API.
-		async updateMols() {
-			const query = this._setUrlQuery()
+		async updateMols(fromUrlQuery: boolean = false) {
+			const query = fromUrlQuery ? { ...router.currentRoute.value.query } : this._setUrlQuery()
 
 			apiFetch(moleculesApi.queryMolset(this._cacheId, query), {
 				onSuccess: (data) => {
@@ -258,8 +294,9 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Update URL query.
 		_setUrlQuery() {
+			// console.log('_setUrlQuery')
 			const query = { ...router.currentRoute.value.query }
-			// Query
+			// Search string
 			if (this.searchStr) {
 				query.search = this.searchStr
 			} else {
@@ -270,10 +307,10 @@ export const useMolGridStore = defineStore('molGridStore', {
 			if (this.searchMode == 'smarts') {
 				query.smarts = '1'
 			} else {
-				delete query.smnarts
+				delete query.smarts
 			}
 
-			// Pagination
+			// Page
 			if (this.page == 1) {
 				delete query.page
 			} else {
@@ -289,19 +326,66 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 			// Turn query into string and update router
 			const urlQuery = query2UrlQuery(query)
-
-			// const newPath = '/~/' + router.currentRoute.value.params.path + queryStr
 			const newPath = router.currentRoute.value.path + urlQuery
-			// console.log(22, newPath, router.currentRoute.value)
 			router.push(newPath)
 
 			// Return quuery object so we can send teh API request
 			return query
 		},
 
+		// Compare the values in the URL query with the store values,
+		// and if changes are detected, update the store and update
+		// the molecules.
+		// This is called every time the route query changes, but
+		// will only do anything when the user is going back or forward
+		// in the browser history.
+		async parseUrlQuery() {
+			const query: LocationQuery = router.currentRoute.value.query
+			this._disableUpdate = true
+			// console.log(11, this._searchStr, query.search)
+			// await nextTick()
+			// console.log(12, this._searchStr, query.search)
+			let hasChanges: boolean = false
+
+			// Search string
+			if (query.search && this._searchStr != String(query.search)) {
+				// console.log('A')
+				this._searchStr = (query.search as string) || ''
+				hasChanges = true
+			}
+
+			// Search mode
+			if (this._searchMode != (query.smarts ? 'smarts' : 'text')) {
+				// console.log('B')
+				this._searchMode = query.smarts ? 'smarts' : 'text'
+				hasChanges = true
+			}
+
+			// Page
+			if (query.page && this._page != Number(query.page)) {
+				// console.log('C')
+				this._page = Number(query.page)
+				hasChanges = true
+			}
+
+			// Sort
+			if (this._sort != ((query.sort as string) || '')) {
+				// console.log('D')
+				this._sort = (query.sort as string) || ''
+				hasChanges = true
+			}
+
+			await nextTick()
+			this._disableUpdate = false
+
+			// console.log('parseUrlQuery', hasChanges ? '--> UPDATE MOLS' : '')
+			if (hasChanges) this.updateMols(true)
+		},
+
 		// Load molecule set into the state.
 		async setMolset(molsData: MolsetApi) {
-			// console.log('setMolset', molsData)
+			console.log('setMolset ((')
+			console.log('setMolset', molsData.searchMode)
 			this._disableUpdate = true
 
 			this._cacheId = molsData.cacheId
@@ -326,6 +410,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 			await nextTick()
 			this._disableUpdate = false
+			console.log(')) setMolset')
 		},
 
 		// Remove molecules from our cached working copy.
@@ -365,17 +450,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 				})
 			})
 		},
-
-		// TRASH
-		// // We don't know for sure what smiles are available for a molecule.
-		// getSmiles(index: number) {
-		// 	return (
-		// 		this._mols![index].identifiers.isomeric_smiles ??
-		// 		this._mols![index].identifiers.canonical_smiles ??
-		// 		this._mols![index].identifiers.smiles
-		// 	)
-		// },
-
 		// #endregion
 		///////////////////////////////////////////////////////////////
 		//
@@ -383,13 +457,13 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Set search string
 		setSearchStr(searchStr: string) {
-			// console.log('****setHighlight')
+			console.log('** setSearchStr')
 			this._searchStr = searchStr || ''
 			if (this.searchMode == 'smarts') {
 				this.setHighlight(searchStr)
 			}
 			if (!this._disableUpdate) {
-				this.updateMols() // This calls _updateUrlQuery
+				this.updateMols() // This calls _setUrlQuery
 			}
 		},
 
@@ -401,6 +475,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 				this.setHighlight(this._searchStr)
 			}
 			this._searchMode = mode
+			console.log('setSearMode %%', mode)
 
 			if (!this._disableUpdate) {
 				this.updateMols()
@@ -414,6 +489,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Set page
 		setPage(page: number) {
+			console.log('setPage')
 			this._page = page
 
 			if (!this._disableUpdate) {
@@ -522,7 +598,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Toggle which properties are displayed.
 		toggleProp(key: string) {
-			console.log('** enableProp', key)
+			// console.log('** enableProp', key)
 			key = key.replace(/^-/, '')
 			if (key == 'name') return // name is not in props, we don't want it to be added double.
 			if (this._showProps.includes(key)) {
@@ -532,7 +608,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 			}
 		},
 		enableProp(key: string) {
-			console.log('>> enableProp', key)
+			// console.log('>> enableProp', key)
 			key = key.replace(/^-/, '')
 			if (key == 'name') return // name is not in props, we don't want it to be added double.
 			if (!this._showProps.includes(key)) {
@@ -555,7 +631,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Clear
 		async clear() {
-			console.log('C L EA R')
 			this._disableUpdate = true
 			this.clearWorkingCopy()
 			Object.assign(this, getInitialState())

@@ -1,10 +1,6 @@
 <template>
-	<BreadCrumbs v-if="route.name == 'filebrowser'" :pathArray="fileStore.breadCrumbPathArray">
-		{{ prettyNr(molGridStore.total) }}
-		<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
-	</BreadCrumbs>
 	<MolProps />
-	<MolActions />
+	<MolGridActions />
 	<div id="resp-container">
 		<div id="mol-grid" ref="$molGrid" :class="{ 'sel-mode': molGridStore.hasSel }">
 			<div
@@ -84,14 +80,10 @@ const modalStore = useModalStore()
 const molViewerStore = useMolViewerStore()
 
 // Components
-import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import MolProps from '@/components/MolProps.vue'
 import MolRender from '@/components/MolRender.vue'
-import MolActions from '@/components/MolActions.vue'
+import MolGridActions from '@/components/MolGridActions.vue'
 import IconButton from '@/components/IconButton.vue'
-
-// Utils
-import { prettyNr } from '@/utils/helpers'
 
 // Type declarations
 type KeyHandlers = {
@@ -148,18 +140,6 @@ window.onbeforeunload = function () {
 }
 onBeforeRouteLeave(onBeforeExit)
 onBeforeRouteUpdate(onBeforeExit)
-
-// When going back into a molecule from a molset.
-// Works in tandem with the route.query watcher in
-// MolViewer for going the other direction.
-// watch(
-// 	() => route.query,
-// 	(newVal, oldVal) => {
-// 		if (!oldVal.show && newVal.show) {
-// 			molViewerStore.setMolFromMolsetIndex(+newVal.show, true)
-// 		}
-// 	},
-// )
 
 /**
  * Methods

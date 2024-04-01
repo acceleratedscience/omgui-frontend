@@ -10,13 +10,16 @@ import router from '@/router'
 // Stores
 import { useFileStore } from '@/stores/FileStore'
 
+// API
+import { apiFetch, moleculesApi } from '@/api/ApiService'
+
 // Type declarations
 import type { Mol, TempMol } from '@/types'
 type State = {
 	_mol: Mol | TempMol
 	_sdf: string | null
 	_svg: string | null
-	_molFromMolsetIndex: number
+	_molFromMolsetIndex: number | null
 }
 
 export const useMolViewerStore = defineStore('molViewerStore', {
@@ -26,7 +29,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		_svg: null,
 		// When viewing a molecule from a molset,
 		// this is controls which molecule to show.
-		_molFromMolsetIndex: 0,
+		_molFromMolsetIndex: null,
 	}),
 	getters: {
 		mol(): Mol | TempMol {
@@ -53,12 +56,13 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		// Indicated whether we're viewing a molecule from a molset.
 		molFromMolset(): boolean {
-			const fileStore = useFileStore()
-			return Boolean(fileStore.defaultFileType == 'molset' && this._molFromMolsetIndex)
+			return Boolean(this._molFromMolsetIndex)
+			// const fileStore = useFileStore()
+			// return Boolean(fileStore.defaultFileType == 'molset' && this._molFromMolsetIndex)
 		},
 
 		// When viewing a molecule from a molset, this is the index of the molecule.
-		molFromMolsetIndex(): number {
+		molFromMolsetIndex(): number | null {
 			return this._molFromMolsetIndex
 			// return Number(router.currentRoute.value.query?.show)
 		},
@@ -87,11 +91,25 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
 			this._mol.identifiers[identifier] = value
 		},
+		async fetchMolVizData(inchi_or_smiles: string) {
+			// console.log('fetchMolVizData')
+			apiFetch(moleculesApi.getMolVizData(inchi_or_smiles), {
+				onSuccess: (data) => {
+					if (data.svg) {
+						// console.log('fetchMolVizData')
+						this.setMolVizData(data.svg, data.sdf)
+					}
+				},
+				onError: (err) => {
+					console.log('Error in getMolVizData()', err)
+				},
+			})
+		},
 		setMolVizData(svg: string, sdf: string) {
 			if (svg) this._svg = svg
 			if (sdf) this._sdf = sdf
 		},
-		setMolFromMolsetIndex(index: number, dontPushRoute = false) {
+		setMolFromMolsetIndex(index: number | null, dontPushRoute = false) {
 			// console.log(99, 'setMolFromMolsetIndex:', index)
 			this._molFromMolsetIndex = index
 
@@ -104,10 +122,21 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 				// router.push({ query: { show: nr.toString() } })
 			}
 		},
+
+		// parseUrlQuery() {
+		// 	const query = router.currentRoute.value.query
+		// 	if (query?.show) {
+		// 		const index = Number(query.show)
+		// 		if (index != this.molFromMolsetIndex) {
+		// 			this.setMolFromMolsetIndex(index, true)
+		// 		}
+		// 	}
+		// },
 		clearMol() {
 			this._mol = { identifiers: {} }
 			this._sdf = null
 			this._svg = null
+			this._molFromMolsetIndex = null
 		},
 	},
 })

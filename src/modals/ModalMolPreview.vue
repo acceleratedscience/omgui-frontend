@@ -1,5 +1,5 @@
 <template>
-	<cv-modal :visible="modalStore.visible" size="xs" @primary-click="onSubmit" class="TEST">
+	<cv-modal :visible="modalStore.visible" size="xs" @primary-click="onSubmit" class="scrollable">
 		<template v-slot:title>
 			<h2>{{ capitalize(mol.identifiers.name) || 'Unnamed Molecule' }}</h2>
 		</template>

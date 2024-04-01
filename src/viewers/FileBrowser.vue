@@ -537,7 +537,7 @@ async function fetchWorkspaceFiles(path = '') {
  */
 
 #file-preview {
-	background: #fafafa;
+	background: $extra-soft-bg;
 	padding: 16px;
 	margin: 8px;
 	min-width: 200px;

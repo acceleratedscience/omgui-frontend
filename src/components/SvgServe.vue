@@ -1,10 +1,20 @@
 <template>
-	<SvgComponent v-if="SvgComponent" class="svg" :style="{ '--svg-dims': dimensions }" />
-	<div v-else class="svg-placeholder" :style="{ '--svg-dims': dimensions }"></div>
+	<SvgComponent v-if="SvgComponent" class="svg" :style="{ '--svg-dims': widthHeightPx }" />
+	<svg
+		v-else
+		:width="widthHeight"
+		:height="widthHeight"
+		:viewBox="`0 0 ${widthHeight} ${widthHeight}`"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<rect :width="widthHeight" :height="widthHeight" />
+	</svg>
 </template>
 
 <script lang="ts" setup>
 import { shallowRef, computed, onMounted } from 'vue'
+import type { ComputedRef } from 'vue'
 
 // Props
 const props = withDefaults(
@@ -21,12 +31,15 @@ const props = withDefaults(
 const SvgComponent = shallowRef<{ template?: string } | null>(null)
 
 // Calculate dimensions
-const dimensions = computed(() => {
+const widthHeight: ComputedRef<number> = computed(() => {
 	if (props.size === 'large') {
-		return '24px'
+		return 24
 	} else {
-		return '16px'
+		return 16
 	}
+})
+const widthHeightPx: ComputedRef<string> = computed(() => {
+	return `${widthHeight.value}px`
 })
 
 // Load component

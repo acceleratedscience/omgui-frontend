@@ -1,49 +1,77 @@
 <template>
-	<main id="module">This is the Text viewer component {{ path }}</main>
-	<div v-if="fileStore.data" id="file-content">{{ fileStore.data }}</div>
+	<BreadCrumbs :pathArray="fileStore.breadCrumbPathArray">
+		<IconButton icon="icn-close" btnStyle="soft" mini @click="fileStore.exitViewer" />
+	</BreadCrumbs>
+	<pre v-if="textData" id="json-data"><div v-for="line, i in textDataLines" :key="i">{{ line }}</div></pre>
 	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
 </template>
 
 <script setup lang="ts">
 // Vue
 import { computed } from 'vue'
-import type { PropType } from 'vue'
-
-// Router
-import { useRoute, useRouter } from 'vue-router'
-const route = useRoute()
-const router = useRouter()
 
 // Stores
 import { useFileStore } from '@/stores/FileStore'
 const fileStore = useFileStore()
 
-// Type declarations
-type Props = {
-	filePath: string
-}
+// Components
+import BreadCrumbs from '@/components/BreadCrumbs.vue'
+import IconButton from '@/components/IconButton.vue'
 
 // Props
-const props = defineProps({
-	filePath: String as PropType<Props['filePath']>,
-})
+const props = defineProps<{
+	filePath?: string
+	data?: Record<string, any>
+}>()
 
 /**
  * Computed
  */
 
-const path = computed(() => {
-	return route.query.path
+const textData = computed(() => {
+	if (props.data) return props.data
+	const fileStoreData = fileStore.data
+	if (fileStoreData?.cacheId && fileStoreData?.mols) {
+		// mol.json files --> extract file data without meta wrapper.
+		return fileStoreData.mols
+	} else {
+		return fileStoreData
+	}
+})
+
+// Spltting up the data into lines
+// so we can add line numbers with CSS.
+const textDataLines = computed(() => {
+	if (!textData.value) return []
+	return String(textData.value).split('\n')
 })
 </script>
 
-<style lang="css" scoped>
-#module {
-	background: peachpuff;
-	padding: 4px;
-	margin-bottom: 20px;
-}
-#file-content {
+<style lang="scss" scoped>
+#json-data {
 	white-space: pre-wrap;
+	font-size: $font-size-small;
+	border: solid 1px $black-10;
+	background: $extra-soft-bg;
+}
+#json-data {
+	counter-reset: line;
+}
+#json-data div:before {
+	counter-increment: line;
+	content: counter(line);
+	display: inline-block;
+	width: 40px;
+	border-right: 1px solid $black-10;
+	padding: 0 5px;
+	margin-right: 20px;
+	text-align: right;
+	color: $black-30;
+}
+#json-data div:first-child:before {
+	padding-top: 10px;
+}
+#json-data div:last-child:before {
+	padding-bottom: 10px;
 }
 </style>

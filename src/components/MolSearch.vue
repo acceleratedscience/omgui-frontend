@@ -1,8 +1,7 @@
 <template>
 	<div id="search-wrap">
 		<cv-search
-			:modelValue="molGridStore.searchStr"
-			@update:modelValue="molGridStore.setSearchStr"
+			v-model="vmodelSearchStr"
 			label="TextSmarts"
 			size="lg"
 			type="text"
@@ -10,50 +9,37 @@
 			:hide-label="true"
 		></cv-search>
 		<div class="toggle">
-			<div
-				class="close"
-				:class="{ show: molGridStore.searchStr.length > 0 }"
-				@click="molGridStore.setSearchStr('')"
-			>
+			<div class="close" :class="{ show: molGridStore.searchStr.length > 0 }" @click="molGridStore.setSearchStr('')">
 				<CloseIcon />
 			</div>
-			<div
-				class="option op-text"
-				:class="{ sel: molGridStore.searchMode == 'text' }"
-				@click="molGridStore.setSearchMode('text')"
-			></div>
-			<div
-				class="option op-smarts"
-				:class="{ sel: molGridStore.searchMode == 'smarts' }"
-				@click="molGridStore.setSearchMode('smarts')"
-			></div>
+			<div class="option op-text" :class="{ sel: molGridStore.searchMode == 'text' }" @click="molGridStore.setSearchMode('text')"></div>
+			<div class="option op-smarts" :class="{ sel: molGridStore.searchMode == 'smarts' }" @click="molGridStore.setSearchMode('smarts')"></div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 // Vue
-import { watch } from 'vue'
-
-// Router
-import { useRoute } from 'vue-router'
-const route = useRoute()
+import { computed } from 'vue'
+import type { WritableComputedRef } from 'vue'
 
 // Stores
-import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
-const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
-
-// API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Components
 // @ts-ignore
 import CloseIcon from '@carbon/icons-vue/es/close/16'
 
-// Utils
-import { debounce, throttle } from '@/utils/helpers'
+/**
+ * Computed
+ */
+
+// Model value for the pagination component.
+const vmodelSearchStr: WritableComputedRef<string> = computed({
+	get: () => molGridStore.searchStr,
+	set: molGridStore.setSearchStr,
+})
 </script>
 
 <style lang="scss" scoped>

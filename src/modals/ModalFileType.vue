@@ -5,10 +5,18 @@
 			<p v-if="fileStore.fileTypeOverride" class="error-msg">
 				This is a <b>{{ displayDefaultFileType }}</b> file, but you are currently viewing it in the <b>{{ displayFileType }}</b> viewer.
 			</p>
-			<cv-dropdown v-model="selectedFileType" label="Select viewer">
+			<!-- Previous version listed file types instead of viewers, but that doesn't make sense I think -->
+			<!-- Can be deleted - see // Trash below -->
+			<!-- <cv-dropdown v-model="selectedFileType" label="Select viewer">
 				<cv-dropdown-item v-for="[fileType, displayFileType] in fileTypeList" :key="fileType" :value="fileType">
 					{{ displayFileType }}
 					<template v-if="fileType == fileStore.defaultFileType">(default)</template>
+				</cv-dropdown-item>
+			</cv-dropdown> -->
+			<cv-dropdown v-model="selectedViewer" label="Select viewer">
+				<cv-dropdown-item v-for="[viewerName, viewerDisplayName] in viewerList" :key="viewerName" :value="viewerName">
+					{{ viewerDisplayName }}
+					<template v-if="viewerName == fileStore.moduleName">(default)</template>
 				</cv-dropdown-item>
 			</cv-dropdown>
 		</template>
@@ -41,22 +49,32 @@ const emit = defineEmits(['mounted'])
  * Computed
  */
 
-// Mapping needed to displat file type "mol" as "molecule" etc.
+// Mapping needed to display file type "mol" as "molecule" etc.
 const displayFileType: ComputedRef<string | null> = computed(() => (fileStore.fileType ? map_fileType2DisplayFT[fileStore.fileType] : null))
 const displayDefaultFileType: ComputedRef<string | null> = computed(() =>
 	fileStore.defaultFileType ? map_fileType2DisplayFT[fileStore.defaultFileType] : null,
 )
-const fileTypeList: ComputedRef<string[][]> = computed(() => {
-	let fileTypes: string[][] = Object.entries(map_fileType2DisplayFT)
-	fileTypes = fileTypes.filter(([ft]) => ft != 'unknown')
-	return fileTypes
-})
-const selectedFileType = ref<string | null>(fileStore.defaultFileType)
+// const fileTypeList: ComputedRef<string[][]> = computed(() => { // Trash
+// 	let fileTypes: string[][] = Object.entries(map_fileType2DisplayFT)
+// 	fileTypes = fileTypes.filter(([key]) => key != 'unk')
+// 	return fileTypes
+// })
+const viewerList: string[][] = [
+	['TextViewer', 'text viewer', 'text'],
+	['JsonViewer', 'JSON viewer', 'json'],
+	['DataViewer', 'data viewer', 'data'],
+	['MolViewer', 'molecule viewer', 'mol'],
+	['MolsetViewer', 'molecule set viewer', 'molset'],
+]
+// const selectedFileType = ref<string | null>(fileStore.defaultFileType) // Trash
+const selectedViewer = ref<string | null>(fileStore.moduleName)
 const submitText: ComputedRef<string> = computed(() =>
-	fileStore.fileTypeOverride && selectedFileType.value == fileStore.defaultFileType ? 'Reset' : 'Switch',
+	// fileStore.fileTypeOverride && selectedFileType.value == fileStore.defaultFileType ? 'Reset' : 'Switch', // Trash
+	fileStore.fileTypeOverride && selectedViewer.value == fileStore.moduleName ? 'Reset' : 'Switch',
 )
 const submitDisabled: ComputedRef<boolean> = computed(() => {
-	return selectedFileType.value == fileStore.fileType
+	// return selectedFileType.value == fileStore.fileType // Trash
+	return selectedViewer.value == fileStore.moduleName
 })
 
 /*
@@ -69,11 +87,21 @@ onMounted(() => emit('mounted'))
  * Functions
  */
 
+// async function onSubmit() { // Archive
+// 	if (selectedFileType.value == fileStore.defaultFileType) {
+// 		router.push({ path: router.currentRoute.value.path })
+// 	} else {
+// 		router.push('?use=' + selectedFileType.value)
+// 	}
+// 	modalStore.hide()
+// }
 async function onSubmit() {
-	if (selectedFileType.value == fileStore.defaultFileType) {
+	if (selectedViewer.value == fileStore.defaultModuleName) {
 		router.push({ path: router.currentRoute.value.path })
 	} else {
-		router.push('?use=' + selectedFileType.value)
+		const selectedViewerFileTypeFiltered: string[][] | null = viewerList.filter(([viewerName]) => viewerName == selectedViewer.value)
+		const selectedViewerFileType: string | null = selectedViewerFileTypeFiltered ? selectedViewerFileTypeFiltered[0][2] : null
+		if (selectedViewerFileType) router.push('?use=' + selectedViewerFileType)
 	}
 	modalStore.hide()
 }

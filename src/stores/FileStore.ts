@@ -90,17 +90,23 @@ export const useFileStore = defineStore('fileStore', {
 
 		// The final file type, which may be overridden
 		fileType(): FileType {
-			const molViewerStore = useMolViewerStore()
+			// const molViewerStore = useMolViewerStore()
 			return this.fileTypeOverride
 				? (router.currentRoute.value.query?.use?.toString() as FileType) || this.defaultFileType
-				: molViewerStore.molFromMolset
-					? 'mol'
-					: this.defaultFileType
+				: this.defaultFileType
+			// : molViewerStore.molFromMolset
+			// 	? 'mol'
+			// 	: this.defaultFileType
 		},
 
 		// The filename of the module we'll use to view the file.
 		moduleName(): string {
 			return map_fileType2Module[this.fileType || 'unk']
+		},
+
+		// The filename of the module we'll use to view the file.
+		defaultModuleName(): string {
+			return map_fileType2Module[this.defaultFileType || 'unk']
 		},
 
 		// Indicates whether we recognize the file's extension.
@@ -126,6 +132,21 @@ export const useFileStore = defineStore('fileStore', {
 			this._path = file.path || ''
 			this._pathAbsolute = file.pathAbsolute || ''
 			this._data = file.data || ''
+		},
+
+		// Return to a file's parent folder in the filebrowser,
+		// or remove the ?use query parameter if we're viewing
+		// a file with a non-default viewer.
+		exitViewer() {
+			const route = router.currentRoute.value
+			if (route.query.use) {
+				router.push({ path: router.currentRoute.value.path })
+			} else {
+				const path = ['/~'].concat(this._path.split('/'))
+				path.pop()
+				console.log('>', path.join('/'))
+				router.push({ path: path.join('/') })
+			}
 		},
 
 		// Clear store.

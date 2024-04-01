@@ -18,7 +18,7 @@ type MultiMap = {
 const _map_FileType: MultiMap = {
 	dir:    ['directory',    'FileBrowser'],
 	mol:    ['molecule',     'MolViewer'],
-	molset: ['molecule set', 'MolGrid'],
+	molset: ['molecule set', 'MolsetViewer'],
 	json:   ['json',         'JsonViewer'],
 	data:   ['data',         'DataViewer'],
 	text:   ['text',         'TextViewer'],
@@ -32,7 +32,6 @@ const _map_FileType: MultiMap = {
 	rxn:    ['reaction',     'TextViewer'], // Viewer TBD
 	md:     ['markdown',     'TextViewer'], // Viewer TBD
 	unk:    ['unknown',      'TextViewer'],
-	// sdf: ['sdf', 'SdfViewer'], // should become part of mol
 }
 
 // Splitting up the above map into two separate maps.

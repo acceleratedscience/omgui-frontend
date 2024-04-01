@@ -7,19 +7,13 @@
 		<MolSearch />
 
 		<!-- Pagination -->
-		<BasePagination
-			:modelValue="molGridStore.page"
-			@update:modelValue="molGridStore.setPage"
-			:total="molGridStore.pageTotal"
-			:max="3"
-			:disabled="molGridStore.pageTotal == 1"
-		/>
+		<BasePagination v-model="vmodelPagination" :total="molGridStore.pageTotal" :max="3" :disabled="molGridStore.pageTotal == 1" />
 
 		<div class="filler-1"></div>
 		<div class="filler-2"></div>
 
 		<!-- Sort -->
-		<SortDropdown id="dd-sort" v-model="sortKey" :items="sortItems" :disabledItems="disabledSortItems" />
+		<SortDropdown id="dd-sort" v-model="vmodelSort" :items="sortItems" :disabledItems="disabledSortItems" />
 
 		<!-- Selection actions -->
 		<cv-dropdown id="dd-select" v-model="selectActionsSelect" :key="forceSelectReload">
@@ -53,7 +47,7 @@
 <script setup lang="ts">
 // Vue
 import { ref, computed, watch, nextTick } from 'vue'
-import type { ComputedRef } from 'vue'
+import type { ComputedRef, WritableComputedRef } from 'vue'
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'
@@ -93,9 +87,15 @@ const forceSelectReload: ComputedRef<string> = computed(() => {
 })
 
 // Model value for the sort dropdown.
-const sortKey = computed({
+const vmodelSort: WritableComputedRef<string> = computed({
 	get: () => molGridStore.sort,
 	set: (newValue) => molGridStore.setSort(newValue),
+})
+
+// Model value for the pagination component.
+const vmodelPagination: WritableComputedRef<number> = computed({
+	get: () => molGridStore.page,
+	set: molGridStore.setPage,
 })
 
 /**

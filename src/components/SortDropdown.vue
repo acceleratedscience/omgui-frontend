@@ -1,7 +1,5 @@
 <template>
 	<div class="sort-wrap">
-		<!-- +{{ sortKey }}+ / +{{ sortKeyNeutral }}+ / blank:{{ isBlank }} -->
-		<!-- {{ items }} -->
 		<div class="sort-direction" @click="reverseSort">{{ sortReversed ? '&uarr;' : '&darr;' }}</div>
 		<cv-dropdown v-model="sortKeyNeutral" class="dd-sort" :class="{ blank: isBlank }">
 			<cv-dropdown-item value="">&nbsp;</cv-dropdown-item>
@@ -11,14 +9,14 @@
 			<!-- When sort is set to index, index needs to be in the items
 				or the carbon dropdown will display 'Choose an option'  -->
 			<cv-dropdown-item :value="props.default" hidden>&nbsp;</cv-dropdown-item>
-			<cv-dropdown-item v-for="(item, i) in disabledItems" :key="i" :value="item" disabled>{{ item }}</cv-dropdown-item>
+			<cv-dropdown-item v-for="(item, i) in disabledItems" :key="i" :value="item" disabled :title="item">{{ item }}</cv-dropdown-item>
 		</cv-dropdown>
 	</div>
 </template>
 
 <script setup lang="ts">
 // Vue
-import { ref, watch, computed } from 'vue'
+import { computed } from 'vue'
 import type { ModelRef, ComputedRef, WritableComputedRef } from 'vue'
 
 // Props
@@ -60,10 +58,6 @@ const isBlank: ComputedRef<boolean> = computed(() => {
 })
 
 /**
- * Hooks
- */
-
-/**
  * Methods
  */
 
@@ -82,7 +76,6 @@ function reverseSort() {
 <style lang="scss" scoped>
 // Wrap
 .sort-wrap {
-	// border: solid 1px red;
 	position: relative;
 }
 
@@ -99,8 +92,6 @@ function reverseSort() {
 	justify-content: center;
 	cursor: pointer;
 	user-select: none;
-	// background: rgba(255, 0, 0, 0.1);
-	// display: none;
 }
 
 // Sort dropdown
@@ -122,14 +113,11 @@ function reverseSort() {
 }
 .dd-sort:deep() .bx--list-box__field {
 	padding-left: 37px;
-	// background: pink;
 }
-// .dd-sort:deep() .bx--list-box__label {
-// 	// Truncate
-// 	white-space: nowrap;
-// 	text-overflow: ellipsis;
-// 	overflow: hidden;
-// }
+
+/**
+ * Hover
+ */
 
 @media (hover: hover) {
 	.sort-direction:hover {

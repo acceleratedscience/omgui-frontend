@@ -9,7 +9,7 @@
 	<p v-if="fileStore.invalidExt" class="error-msg">We don't recognize this file's extension ({{ fileStore.ext }})</p>
 	<div v-if="loadError" class="error-msg">The requested module '{{ fileStore.moduleName }}' was not found.</div>
 	<BaseFetching v-else-if="loading && !fileStore.isDir" text="Fetching file" failText="Failed to fetch file" />
-	<component v-else-if="dynamicModule" :is="dynamicModule" />
+	<component v-else-if="dynamicModule" :is="dynamicModule" /><!-- :data="fileStore.data" -->
 	<template v-else>
 		<!-- To do: show breadcrumbs when file is not found, requires some refactoring -->
 		<BreadCrumbs v-if="!showBreadCrumbs" :pathArray="fileStore.breadCrumbPathArray" />
@@ -122,7 +122,7 @@ async function parseRoute() {
 	apiFetch(fileSystemApi.getFile(filePath, urlQuery), {
 		loading: loading,
 		onError: (err) => {
-			console.log('Error in updateMols()', err)
+			console.log('Error in getFile()', err)
 		},
 		onSuccess: (file: File) => {
 			fileStore.loadItem(file)
@@ -139,11 +139,6 @@ async function parseRoute() {
 				// molGridStore.parseUrlQuery()
 				const data: MolsetApi = file.data
 				molGridStore.setMolset(data)
-				if (route.query.show) {
-					molViewerStore.setMolFromMolsetIndex(+route.query.show, true)
-					const data: Mol = file.data?.mols[+route.query.show]
-					molViewerStore.setMolData(data)
-				}
 			} else if (fileStore.fileType == 'mol') {
 				const data: Mol = file.data
 				molViewerStore.setMolData(data)
