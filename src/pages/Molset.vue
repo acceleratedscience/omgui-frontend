@@ -1,17 +1,6 @@
 <template>
-	<h3>My Molecules</h3>
 	<BaseFetching v-if="loading" />
-	<template v-else-if="status == 204">
-		<p>You haven't saved any molecules yet.</p>
-		<p>To add molecules to your working set, run <span class="code">add molecule &lt;identifier&gt;</span> in your terminal.</p>
-	</template>
-	<template v-else>
-		<p v-if="!molViewerStore.molFromMolset">
-			This is your working set of molecules, it is cleared at the end of your session.<br />
-			If you want to preserve this molecule set, you can save it to your workspace.
-		</p>
-		<MolsetViewer :breadcrumbs="false" />
-	</template>
+	<MolsetViewer v-else :breadcrumbs="false" />
 </template>
 
 <script setup lang="ts">
@@ -38,13 +27,17 @@ const loading = ref<boolean>(false)
 const loadingError = ref<string>('')
 const status = ref<number | null>(null)
 
+const props = defineProps<{
+	cacheId: number
+}>()
+
 /**
  * Hooks
  */
 
 onMounted(() => {
 	const query = molGridStore._setUrlQuery()
-	apiFetch(moleculesApi.getMyMols(query), {
+	apiFetch(moleculesApi.getMolset(props.cacheId, query), {
 		onSuccess: (data) => {
 			console.log(133, data)
 			molGridStore.setMolset(data)

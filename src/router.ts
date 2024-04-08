@@ -25,13 +25,19 @@ const routes = [
 	{
 		path: '/molviewer',
 		name: 'molviewer-input',
-		component: () => import(/* webpackChunkName: 'molviewer-input' */ '@/viewers/MolViewerInput.vue'),
+		component: () => import(/* webpackChunkName: 'molviewer-input' */ '@/pages/MolViewerInput.vue'),
 	},
 	{
 		path: '/molviewer/:identifier',
 		name: 'molviewer',
 		props: true,
 		component: () => import(/* webpackChunkName: 'molviewer' */ '@/viewers/MolViewer.vue'),
+	},
+	{
+		path: '/molset/:cacheId',
+		name: 'molset',
+		props: true,
+		component: () => import(/* webpackChunkName: 'molset' */ '@/pages/Molset.vue'),
 	},
 	{
 		path: '/my-mols',

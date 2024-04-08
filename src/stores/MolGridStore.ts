@@ -287,7 +287,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		async updateMols(fromUrlQuery: boolean = false) {
 			const query = fromUrlQuery ? { ...router.currentRoute.value.query } : this._setUrlQuery()
 
-			apiFetch(moleculesApi.queryMolset(this._cacheId, query), {
+			apiFetch(moleculesApi.getMolset(this._cacheId, query), {
 				onSuccess: (data) => {
 					// console.log(123, data)
 					this.setMolset(data)

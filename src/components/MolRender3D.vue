@@ -67,7 +67,7 @@ watch(() => props.sdf, init3DViewer)
 
 // Render 3D molecule.
 function init3DViewer() {
-	console.log('3D INIT')
+	// console.log('init3DViewer')
 	if (!$container3d.value) return
 
 	// Triggered whenever we clear the molViewerStore.
@@ -78,7 +78,7 @@ function init3DViewer() {
 		return
 	}
 
-	console.log('3D INIT!!!')
+	// console.log('init3DViewer >>> OK')
 	render3d_miew()
 }
 
