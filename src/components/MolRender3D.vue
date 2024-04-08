@@ -26,7 +26,7 @@ import Miew from '@/TEMP/miew/dist/miew.module'
 import '@/TEMP/miew/dist/miew.min.css'
 
 // Vue
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted } from 'vue'
 
 // Components
 import IconButton from '@/components/IconButton.vue'
@@ -49,19 +49,25 @@ let miewViewer: any = null
  * Hooks
  */
 
-watch(
-	() => props.sdf,
-	async () => {
-		await init3DViewer()
-	},
-)
+// When you look at molecule-by-identifier as JSON (?use=json), then return to the molecule,
+// the watcher won't trigger because ?use=JSON is handled in MolViewer.vue (see #json-only)
+// and molviewerStore.sdf remains unchanged.
+// When looking at molecule via filebrowser, the ?use=json is handler by ViewerDispatch.vue,
+// which resets molViewerStore.sdf, triggering the watcher.
+onMounted(() => {
+	if (props.sdf) init3DViewer()
+})
+
+// As soon as the SDF data is loaded into the store, render the 3D molecule.
+watch(() => props.sdf, init3DViewer)
 
 /**
  * Methods
  */
 
 // Render 3D molecule.
-async function init3DViewer() {
+function init3DViewer() {
+	console.log('3D INIT')
 	if (!$container3d.value) return
 
 	// Triggered whenever we clear the molViewerStore.
@@ -72,10 +78,13 @@ async function init3DViewer() {
 		return
 	}
 
+	console.log('3D INIT!!!')
 	render3d_miew()
 }
 
-// 3D mol A --> Using the Miew library - https://lifescience.opensource.epam.com/miew/index.html
+// Render 3D mol using the Miew library - https://lifescience.opensource.epam.com/miew/index.html
+// Miew is not well documented, but it's the best 3D viewer we've found so far.
+// Uses WebGL and has a few nice features like displaying atom info on click, and setting the rotation center on doubleclick.
 function render3d_miew(forceReInit = false) {
 	if (forceReInit) {
 		miewViewer.term()
@@ -88,11 +97,11 @@ function render3d_miew(forceReInit = false) {
 			settings: {
 				axes: false,
 				fps: false,
-				camDistance: 3, // Default 2.5 tends to crop some of the molecule.
+				camDistance: 3, // Default 2.5 tends to crop some of the molecule, depending on the shape. Eg. with penguinone.
 				resolution: 'high',
 				zooming: false,
-				bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg
-				// bg: { color: 0xffffff, transparent: true }, // This creates ugly edges
+				bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg.
+				// bg: { color: 0xffffff, transparent: true }, // Transparent background creates ugly edges
 				// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
 				// shadow: { // Cool but generates weird artifacts and slows down a lot
 				// 	on: true,

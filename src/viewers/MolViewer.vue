@@ -32,9 +32,10 @@
 	<router-link to="/molviewer/serotonin">idfr B</router-link>
 	<br /><br /><br /> -->
 
-	<!-- JSON-only view -->
+	<!-- JSON-only view #json-only -->
 	<!--
-		Note: this is only used when molviewer is loaded directly.
+		Note: this is only used when molviewer is loaded directly,
+		i.e. looking up a molecule by its identifier.
 		When we're opening a file, there's general viewer override
 		logic which lives in the fileStore, see fileTypeOverride.
 	 -->
@@ -498,16 +499,18 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 			// loading.value = false
 			// return
 
-			// Update HTML
-			molViewerStore.setMolData(response.data)
-			success = true
-
 			// If the molviewer is loaded directly with a smiles or inchi as
 			// the identifier, we pre-loaded the visualisation data with a
 			// separate API call. But for any other identifier, we need to
 			// wait until we get the inchi back.
-			if (!molViewerStore.sdf && molViewerStore.inchi) {
-				fetchMolVizData(molViewerStore.inchi) // #case-B-3
+			const needsVizData = !molViewerStore.inchi
+
+			// Update HTML
+			molViewerStore.setMolData(response.data)
+			success = true
+
+			if (needsVizData) {
+				fetchMolVizData(molViewerStore.inchi!) // #case-B-3
 			}
 		} else {
 			// Handle API errors.
