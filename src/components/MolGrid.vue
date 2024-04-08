@@ -22,8 +22,20 @@
 					:height="140"
 					svg-mode
 				/>
-				<IconButton class="icn-btn-smell" icon="icn-smell" icnSize="large" btnStyle="soft" @click="previewMolecule(i)" />
-				<IconButton class="icn-btn-taste" icon="icn-taste" icnSize="large" btnStyle="soft" @click="molGridStore.openMolecule(mol.index!)" />
+				<IconButton
+					class="icn-btn-smell"
+					icon="icn-smell"
+					icnSize="large"
+					btnStyle="soft"
+					@click="nothingSelected() ? previewMolecule(i) : null"
+				/>
+				<IconButton
+					class="icn-btn-taste"
+					icon="icn-taste"
+					icnSize="large"
+					btnStyle="soft"
+					@click="nothingSelected() ? molGridStore.openMolecule(mol.index!) : null"
+				/>
 
 				<div class="filler"></div>
 
@@ -161,8 +173,8 @@ function onMolClick(e: MouseEvent, i: number) {
 		(e.target as HTMLElement).classList.contains('value') ||
 		(e.target as HTMLElement).classList.contains('icn-btn')
 
-	console.log(2222, ignoreTarget)
-	if (molGridStore.sel.length && ignoreTarget) return
+	// console.log(2222, ignoreTarget)
+	if (!molGridStore.hasSel && ignoreTarget) return
 
 	// Select and focus clicked molecule.
 	molGridStore.toggleSel(i)
@@ -177,7 +189,7 @@ function onMolClick(e: MouseEvent, i: number) {
 
 	// Batch select with shift
 	if (e.shiftKey && lastSelectedItemSelState.value != null) {
-		if (molGridStore.sel.length && lastSelectedRowIndex.value !== null) {
+		if (molGridStore.hasSel && lastSelectedRowIndex.value !== null) {
 			let lowIndex = Math.min(lastSelectedRowIndex.value, currentItemIndex)
 			let highIndex = Math.max(lastSelectedRowIndex.value, currentItemIndex)
 
@@ -462,6 +474,7 @@ const keyHandlers: KeyHandlers = {
 	}
 
 	// Icons
+	#mol-grid.sel-mode .mol .icn-btn,
 	#mol-grid .mol:not(:hover) .icn-btn {
 		display: none;
 	}

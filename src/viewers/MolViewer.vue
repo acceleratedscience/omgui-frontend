@@ -66,7 +66,7 @@
 				/>
 			</div> -->
 			<div class="container-2d" v-html="molViewerStore.svg"></div>
-			<MolRender3D :sdf="molViewerStore.sdf" :mol="molViewerStore.mol" />
+			<MolRender3D :sdf="molViewerStore.sdf" :molName="molViewerStore.mol.identifiers?.name ?? ''" />
 		</div>
 
 		<!-- Page content -->

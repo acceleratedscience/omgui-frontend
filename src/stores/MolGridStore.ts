@@ -445,7 +445,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(moleculesApi.saveMolsetChanges(fileStore.path, this._cacheId!), {
 					onSuccess: () => {
-						console.log(444, this._hasChanges)
 						this._hasChanges = false
 						resolve(true)
 						// this.clearWorkingCopy()

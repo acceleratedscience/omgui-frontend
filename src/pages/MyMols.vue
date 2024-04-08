@@ -1,5 +1,5 @@
 <template>
-	<h3>My Molecules</h3>
+	<h3 v-if="!molViewerStore.molFromMolset">My Molecules</h3>
 	<BaseFetching v-if="loading" />
 	<template v-else-if="status == 204">
 		<p>You haven't saved any molecules yet.</p>
@@ -46,7 +46,6 @@ onMounted(() => {
 	const query = molGridStore._setUrlQuery()
 	apiFetch(moleculesApi.getMyMols(query), {
 		onSuccess: (data) => {
-			console.log(133, data)
 			molGridStore.setMolset(data)
 			// molsetData.value = data
 		},

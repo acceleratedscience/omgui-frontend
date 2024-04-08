@@ -1,7 +1,7 @@
 <template>
 	<div class="container-3d" :class="{ fullscreen }">
 		<div class="info" v-if="fullscreen">
-			<h4>{{ capitalize(mol.identifiers.name) }}</h4>
+			<h4 v-if="molName">{{ capitalize(molName) }}</h4>
 			<!-- <div>{{ mol.identifiers.inchi }}</div> -->
 			<!-- <div>{{ mol.identifiers.canonical_smiles }}</div> -->
 		</div>
@@ -38,7 +38,7 @@ import { capitalize } from '@/utils/helpers'
 import type { Mol, TempMol } from '@/types'
 
 // Props
-const props = defineProps<{ sdf: string | null; mol: Mol | TempMol }>()
+const props = defineProps<{ sdf: string | null; molName: string | null }>()
 
 // Definitions
 const $container3d = ref<Element | null>(null)

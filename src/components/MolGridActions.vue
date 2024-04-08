@@ -18,7 +18,7 @@
 		<!-- Selection actions -->
 		<cv-dropdown id="dd-select" v-model="selectActionsSelect" :key="forceSelectReload">
 			<cv-dropdown-item value="default" hidden>
-				<template v-if="molGridStore.sel.length > 0"> ({{ molGridStore.sel.length }}) selected </template>
+				<template v-if="molGridStore.hasSel"> ({{ molGridStore.sel.length }}) selected </template>
 				<template v-else>Select</template>
 			</cv-dropdown-item>
 			<cv-dropdown-item
@@ -32,7 +32,7 @@
 		</cv-dropdown>
 
 		<!-- Main actions -->
-		<cv-dropdown id="dd-actions" v-model="mainActionsSelect" :disabled="!molGridStore.sel.length" @change="dispatchMainAction">
+		<cv-dropdown id="dd-actions" v-model="mainActionsSelect" :disabled="!molGridStore.hasSel" @change="dispatchMainAction">
 			<cv-dropdown-item value="default" hidden>Actions</cv-dropdown-item>
 			<cv-dropdown-item v-for="(action, i) in mainActions" :key="i" :value="action">
 				{{ action }}
