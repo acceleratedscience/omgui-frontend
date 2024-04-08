@@ -65,17 +65,11 @@ parseMolFromMolsetUrlQuery()
 
 watch(
 	() => route.query,
-	() => {
-		console.log('ROUTE CHANGE')
-		parseMolFromMolsetUrlQuery()
-		// if (molViewerStore.molFromMolset) {
-		// 	// Looking at a molecules inside a molset.
-		// 	parseMolFromMolsetUrlQuery()
-		// } else {
-		// 	// Looking at the molset.
-		// 	molGridStore.parseUrlQuery()
-		// }
-	},
+	parseMolFromMolsetUrlQuery,
+	// () => {
+	// 	console.log('ROUTE CHANGE')
+	// 	parseMolFromMolsetUrlQuery()
+	// },
 )
 
 /**
@@ -83,7 +77,7 @@ watch(
  */
 
 function parseMolFromMolsetUrlQuery() {
-	console.log('** parseMolFromMolsetUrlQuery')
+	// console.log('** parseMolFromMolsetUrlQuery')
 	const query = router.currentRoute.value.query
 	if (query?.show) {
 		const index = Number(query.show)
@@ -91,6 +85,8 @@ function parseMolFromMolsetUrlQuery() {
 			molViewerStore.setMolFromMolsetIndex(index, true)
 		}
 		_fetchMolDataFromMolset(molGridStore.cacheId, index)
+	} else {
+		molViewerStore.setMolFromMolsetIndex(null, true)
 	}
 }
 

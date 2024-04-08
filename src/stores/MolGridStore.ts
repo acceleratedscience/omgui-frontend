@@ -117,6 +117,7 @@ function getInitialState(): State {
 		_cacheId: null,
 		_mols: null,
 		_total: 0,
+		_resultCount: 0,
 
 		// Search
 		_searchStr: '',

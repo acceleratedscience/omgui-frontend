@@ -3,7 +3,7 @@
 		<!-- <div class="align-left"> -->
 		<div class="brand">
 			<div class="main">% OpenAD</div>
-			<div class="title">Workspace</div>
+			<!-- <div class="title">Workspace</div> -->
 		</div>
 		<div class="filler"></div>
 		<div class="items">

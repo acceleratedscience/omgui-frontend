@@ -46,8 +46,8 @@
 		<!-- Visualization -->
 		<div id="mol-render" :class="{ headless: mainStore.headless }">
 			<!--
-				We could use the MolRender component to render the SVG in the frontend,
-				the same way we do it in the MolGrid module. However, MolRender requires
+				We could use the MolRender2D component to render the SVG in the frontend,
+				the same way we do it in the MolGrid module. However, MolRender2D requires
 				a SMILES string as input structure and rdkit-js doesn't let us convert
 				InChI to SMILES, so when the identifier string is an InChI, we have to
 				wait for the main fetchMolData API call to complete in order to get the
@@ -55,7 +55,7 @@
 				the API together with the 3D data in a separate call, which is much faster.
 			-->
 			<!-- <div class="container-2d">
-				<MolRender
+				<MolRender2D
 					v-if="mol.identifiers.canonical_smiles"
 					id="mol-svg"
 					:structure="mol.identifiers.canonical_smiles.toString()"
@@ -318,16 +318,6 @@ const loadingErrorMsg = ref<string>('')
 const paramColMinWidth: number = 250
 const synonymColMinWidth: number = 150
 
-function testtt() {
-	console.log(11111, 'testtt')
-	molViewerStore.setMolFromMolsetIndex(null)
-	// molViewerStore._molFromMolsetIndex = null
-	setTimeout(() => {
-		console.log('ROUTER PUSH')
-		router.push(route.path + '?x=1')
-	}, 2000)
-}
-
 /**
  * Computed
  */
@@ -415,10 +405,10 @@ const stylePropWrap: ComputedRef<{ height?: string }> = computed(() => {
 // Fetch mol data from the API.
 // For molecule files, data is loaded from within ViewerDispatch.vue -> molViewerStore.setMolData()
 if (props.identifier) {
-	console.log('by identifier')
+	// console.log('by identifier')
 	fetchMolDataByIdentifier(props.identifier) // #case-A-1
 } else {
-	console.log('by file', molViewerStore.isEmpty)
+	// console.log('by file', molViewerStore.isEmpty)
 	if (molViewerStore.isEmpty) {
 		const data: Mol = fileStore.data
 		molViewerStore.setMolData(data)
@@ -573,7 +563,7 @@ async function tryPrepopulateFromSmiles(identifier: string) {
 // Fetch visualization data from the API.
 // I.e. a 2D SVG and an SDF string with 3D coordinates.
 async function fetchMolVizData(inchi_or_smiles: string) {
-	// console.log('fetchMolVizData')
+	console.log('fetchMolVizData')
 	try {
 		// console.time('fetchMolVizData')
 		const response = await moleculesApi.getMolVizData(inchi_or_smiles)

@@ -14,7 +14,7 @@
 				@click="(e) => onMolClick(e, mol.index!)"
 			>
 				<cv-checkbox :label="`${mol.index!}`" :value="`${mol.index!}`" :checked="molGridStore.sel.includes(mol.index!)" />
-				<MolRender
+				<MolRender2D
 					:id="`mol-svg-${mol.index!}`"
 					:structure="molGridStore.molSmiles[i]"
 					:sub-structure="molGridStore.highlight"
@@ -81,7 +81,7 @@ const molViewerStore = useMolViewerStore()
 
 // Components
 import MolProps from '@/components/MolProps.vue'
-import MolRender from '@/components/MolRender.vue'
+import MolRender2D from '@/components/MolRender2D.vue'
 import MolGridActions from '@/components/MolGridActions.vue'
 import IconButton from '@/components/IconButton.vue'
 
@@ -139,7 +139,11 @@ window.onbeforeunload = function () {
 }
 onBeforeRouteLeave(onBeforeExit)
 onBeforeRouteUpdate((to, from, next) => {
-	if (to.path != from.path) onBeforeExit(to, from, next)
+	if (to.path != from.path) {
+		onBeforeExit(to, from, next)
+	} else {
+		next()
+	}
 })
 
 /**
@@ -151,12 +155,14 @@ let lastSelectedItemSelState = ref<boolean | null>(null)
 
 function onMolClick(e: MouseEvent, i: number) {
 	// Abort molecule selection when the target has its own click handler.
-	const targetsToIgnore =
+	const ignoreTarget =
 		(e.target as HTMLElement).classList.contains('idfr') ||
 		(e.target as HTMLElement).classList.contains('key') ||
 		(e.target as HTMLElement).classList.contains('value') ||
 		(e.target as HTMLElement).classList.contains('icn-btn')
-	if (!molGridStore.sel.length && targetsToIgnore) return
+
+	console.log(2222, ignoreTarget)
+	if (molGridStore.sel.length && ignoreTarget) return
 
 	// Select and focus clicked molecule.
 	molGridStore.toggleSel(i)

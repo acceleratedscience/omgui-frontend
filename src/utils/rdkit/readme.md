@@ -1,17 +1,9 @@
+### About RDKit
 RDKit is used for rendering molecule structures.
-
-### Links
-https://github.com/rdkit/rdkit-js
-https://vue.rdkitjs.com/
-
-### RDKit Files
-- /public/rdkit/* --> js + wasm
-- /src/utils/rdkit/* --> TS types & initialisation
-- /src/components/MolRender.vue --> Render molecule structures
 
 ### About RDKit implementation
 The RDKit library is not loaded from the npm package but instead from
-a copy hosted by us, per the official instructions:
+a copy hosted by us, in the public folder, per the official instructions:
 https://github.com/rdkit/rdkit-js?tab=readme-ov-file#option-1-use-the-npm-package-distribution-files
 
 The RDKit library uses WebAssembly to run its C++ code in the browser.
@@ -29,3 +21,12 @@ That's why the RDKit library instructs you to copy the .js and .wasm
 files to your public assets directory and load the .js file with a
 <script> tag. This way, the .js file can fetch the .wasm file from the
 same origin, satisfying the security restrictions.
+
+### Links
+https://github.com/rdkit/rdkit-js
+https://vue.rdkitjs.com/
+
+### RDKit Files
+- /public/rdkit/* --> js + wasm
+- /src/utils/rdkit/* --> TS types & initialisation
+- /src/components/MolRender2D.vue --> Render molecule structures
