@@ -1,5 +1,5 @@
 <template>
-	<MolViewer v-if="molViewerStore.molFromMolset" />
+	<MolViewer v-if="molViewerStore.molFromMolset" context="molset" />
 	<template v-else>
 		<BreadCrumbs :pathArray="fileStore.breadCrumbPathArray">
 			<template v-if="molGridStore.resultCount < molGridStore.total">
@@ -8,7 +8,7 @@
 			<template v-else>Total: {{ prettyNr(molGridStore.total) }}</template>
 			<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
 		</BreadCrumbs>
-		<MolGrid />
+		<MolGrid :retainCache="retainCache" />
 	</template>
 	<!-- </div> -->
 </template>
@@ -42,25 +42,23 @@ import MolViewer from '@/viewers/MolViewer.vue'
 // Utils
 import { prettyNr } from '@/utils/helpers'
 
+// Props
+defineProps<{
+	retainCache?: boolean
+}>()
+
 /**
  * Logic
  */
 
-// Open molecule if ?view is set in the URL.
+// Open molecule if ?show is set in the URL query.
 parseMolFromMolsetUrlQuery()
 
 /**
  * Hooks
  */
 
-watch(
-	() => route.query,
-	parseMolFromMolsetUrlQuery,
-	// () => {
-	// 	console.log('ROUTE CHANGE')
-	// 	parseMolFromMolsetUrlQuery()
-	// },
-)
+watch(() => route.query, parseMolFromMolsetUrlQuery)
 
 /**
  * Methods
@@ -87,15 +85,11 @@ function _fetchMolDataFromMolset(cacheId: number | null = null, index: number) {
 	apiFetch(moleculesApi.getMolDataFromMolset(cacheId, index), {
 		onSuccess: (data) => {
 			molViewerStore.setMolData(data)
-			if (!molViewerStore.sdf && molViewerStore.inchi) {
-				molViewerStore.fetchMolVizData(molViewerStore.inchi)
-			}
+			if (molViewerStore.inchi) molViewerStore.fetchMolVizData(molViewerStore.inchi)
 		},
 		onError: (err) => {
 			console.log('Error in getMolDataFromMolset()', err)
 		},
-		// loading: loading,
-		// loadingError: loadingErrorMsg,
 	})
 }
 </script>

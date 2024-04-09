@@ -84,14 +84,14 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 	},
 	actions: {
 		setMolData(mol: Mol) {
-			// console.log('setMolData')
+			console.log('setMolData')
 			this._mol = mol
 		},
 		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
 			this._mol.identifiers[identifier] = value
 		},
 		async fetchMolVizData(inchi_or_smiles: string) {
-			// console.log('fetchMolVizData')
+			console.log('fetchMolVizData')
 			apiFetch(moleculesApi.getMolVizData(inchi_or_smiles), {
 				onSuccess: (data) => {
 					if (data.svg) {
@@ -123,6 +123,17 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			// setTimeout(() => {
 			// 	this._molFromMolsetIndex = index
 			// }, 1)
+		},
+		async enrichMolecule() {
+			console.log('E N R I C H')
+			// apiFetch(moleculesApi.enrichMolecule(inchi), {
+			// 	onSuccess: (data) => {
+
+			// 	},
+			// 	onError: (err) => {
+
+			// 	},
+			// })
 		},
 
 		// parseUrlQuery() {

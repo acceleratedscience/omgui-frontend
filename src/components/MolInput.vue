@@ -14,12 +14,7 @@
 	<form id="input-form" @submit.prevent="displayMol">
 		<div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
 		<div class="fields">
-			<cv-text-input
-				v-model="ipIdentifier"
-				type="text"
-				placeholder="dopamine"
-				:hide-label="true"
-			/>
+			<cv-text-input v-model="ipIdentifier" type="text" placeholder="dopamine" :hide-label="true" />
 			<cv-button size="default">Display</cv-button>
 		</div>
 	</form>
@@ -34,8 +29,8 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 // Definitions
-const ipIdentifier = ref<String>('')
-const errorMsg = ref<String>('')
+const ipIdentifier = ref<string>('')
+const errorMsg = ref<string>('')
 
 /**
  * Methods
@@ -67,7 +62,7 @@ function fillIn(idKey: string) {
 function displayMol() {
 	if (ipIdentifier.value) {
 		router.push({
-			name: 'molviewer',
+			name: 'mol',
 			params: { identifier: ipIdentifier.value.toString() },
 		})
 	} else {

@@ -17,7 +17,7 @@
 			<IconButton v-else icon="icn-terminal" iconHover="icn-terminal-full" :sel="sel == 'cli'" @click="commandLineStore.setActive(true)" />
 			<IconButton icon="icn-chat" iconHover="icn-chat-full" :sel="sel == 'assistant'" @click="goTo('assistant')" />
 			<IconButton icon="icn-file-molset" iconHover="icn-file-molset-full" :sel="sel == 'molset'" @click="goTo('my-mols')" />
-			<IconButton icon="icn-file-mol" iconHover="icn-file-mol-full" :sel="sel == 'mol'" @click="goTo('molviewer-input')" />
+			<IconButton icon="icn-file-mol" iconHover="icn-file-mol-full" :sel="sel == 'mol'" @click="goTo('mol')" />
 			<IconButton icon="icn-folder" iconHover="icn-folder-full" :sel="sel == 'dir'" @click="goTo('filebrowser')" />
 			<div class="display"></div>
 		</div>
@@ -53,7 +53,7 @@ const sel: ComputedRef<Sel | null> = computed(() => {
 	} else if (route.name == 'filebrowser') {
 		// return fileStore.fileType as Sel
 		return 'dir'
-	} else if (route.name == 'molviewer-input') {
+	} else if (route.name == 'mol') {
 		return 'mol'
 	} else if (route.name == 'my-mols') {
 		return 'molset'

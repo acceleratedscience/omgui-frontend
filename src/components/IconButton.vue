@@ -123,6 +123,7 @@ function onClick() {
 	align-items: center;
 	justify-content: center;
 	color: $black;
+	border-radius: 2px;
 }
 
 // Mini
@@ -140,6 +141,7 @@ function onClick() {
 // Carbon
 .icn-btn.carbon {
 	background: $soft-bg;
+	border-radius: 0;
 }
 
 // Toggle
@@ -167,7 +169,6 @@ function onClick() {
 	// Default
 	.icn-btn:hover {
 		background: $black-05;
-		border-radius: 2px;
 	}
 
 	// Soft

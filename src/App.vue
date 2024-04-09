@@ -38,7 +38,7 @@
 
 	<!-- Load the full application -->
 	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir }">
-		<NavMain />
+		<TheNav />
 		<div id="body">
 			<router-view />
 			<!-- <RouterView v-slot="{ Component }">
@@ -69,7 +69,7 @@ import { fileSystemApi } from '@/api/ApiService'
 
 // Components
 import TheModal from '@/components/TheModal.vue'
-import NavMain from '@/components/NavMain.vue'
+import TheNav from '@/components/TheNav.vue'
 import CommandLine from '@/pages/CommandLine.vue'
 
 // Utils

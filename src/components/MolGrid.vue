@@ -1,3 +1,7 @@
+<!-- 
+	Note: never import this MolGrid component directly, always
+	import MolViewer instead, which handles the opening of molecules.
+ -->
 <template>
 	<MolProps />
 	<MolGridActions />
@@ -71,26 +75,21 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
 import type { ComputedRef } from 'vue'
 
 // Router
-import { useRouter, useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
+import { useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
-const router = useRouter()
 const route = useRoute()
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
-import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
 import { useModalStore } from '@/stores/ModalStore'
-import { useMolViewerStore } from '@/stores/MolViewerStore'
 const mainStore = useMainStore()
-const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
 const modalStore = useModalStore()
-const molViewerStore = useMolViewerStore()
 
 // Components
 import MolProps from '@/components/MolProps.vue'
@@ -109,7 +108,12 @@ type KeyHandlers = {
 // Definitions
 const $molGrid = ref<HTMLElement | null>(null)
 
+// Props
 const props = defineProps<{
+	// Cache is always cleared when leaving the molgrid,
+	// either when opening molset files or when checking my-mols.
+	// However when a molset is opened by its cacheId, then
+	// the cache is retained (/molset/1234)
 	retainCache?: boolean
 }>()
 

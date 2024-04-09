@@ -1,6 +1,6 @@
 <template>
 	<BaseFetching v-if="loading" />
-	<MolGrid :retainCache="true" />
+	<MolsetViewer :retainCache="true" />
 </template>
 
 <script setup lang="ts">
@@ -19,7 +19,7 @@ const molGridStore = useMolGridStore()
 const molViewerStore = useMolViewerStore()
 
 // Components
-import MolGrid from '@/components/MolGrid.vue'
+import MolsetViewer from '@/viewers/MolsetViewer.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
 
 // Definitions
