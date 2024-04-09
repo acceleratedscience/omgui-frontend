@@ -15,7 +15,7 @@
 					:class="{ sel: molGridStore.showIdentifiers.includes(idfr) }"
 					@click="molGridStore.toggleIdentifier(idfr)"
 				>
-					{{ idfr }}
+					{{ cleanKeys(idfr) }}
 				</div>
 			</div>
 
@@ -28,7 +28,7 @@
 					:class="{ sel: molGridStore.showProps.includes(prop) }"
 					@click="molGridStore.toggleProp(prop)"
 				>
-					{{ prop }}
+					{{ cleanKeys(prop) }}
 				</div>
 			</div>
 		</div>
@@ -43,8 +43,11 @@ import { ref } from 'vue'
 import { useMolGridStore } from '@/stores/MolGridStore'
 const molGridStore = useMolGridStore()
 
-// Compnents
+// Components
 import SvgServe from '@/components/SvgServe.vue'
+
+// Utils
+import { cleanKeys } from '@/utils/helpers'
 
 // Definitions
 const expand = ref(false)

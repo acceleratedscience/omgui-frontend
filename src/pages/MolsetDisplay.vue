@@ -1,6 +1,6 @@
 <template>
 	<BaseFetching v-if="loading" />
-	<MolsetViewer v-else :breadcrumbs="false" />
+	<MolGrid :retainCache="true" />
 </template>
 
 <script setup lang="ts">
@@ -19,7 +19,7 @@ const molGridStore = useMolGridStore()
 const molViewerStore = useMolViewerStore()
 
 // Components
-import MolsetViewer from '@/viewers/MolsetViewer.vue'
+import MolGrid from '@/components/MolGrid.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
 
 // Definitions
@@ -27,8 +27,9 @@ const loading = ref<boolean>(false)
 const loadingError = ref<string>('')
 const status = ref<number | null>(null)
 
+// Props
 const props = defineProps<{
-	cacheId: number
+	cacheId: string
 }>()
 
 /**
@@ -37,9 +38,8 @@ const props = defineProps<{
 
 onMounted(() => {
 	const query = molGridStore._setUrlQuery()
-	apiFetch(moleculesApi.getMolset(props.cacheId, query), {
+	apiFetch(moleculesApi.getMolset(+props.cacheId, query), {
 		onSuccess: (data) => {
-			console.log(133, data)
 			molGridStore.setMolset(data)
 			// molsetData.value = data
 		},

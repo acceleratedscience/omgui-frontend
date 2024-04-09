@@ -63,7 +63,9 @@ import { query2UrlQuery } from '@/utils/helpers'
 // Constants
 const PAGE_SIZE = 100
 const AVAIL_IDENTIFIERS = ['name', 'inchi', 'inchikey', 'canonical_smiles', 'isomeric_smiles', 'formula', 'pid']
-const IDFR_DEFAULTS = ['name', 'canonical_smiles', 'formula']
+// RDKit-enriched molecules will come with 'canonical_smiles' and 'isomeric_smiles',
+// but SDF files and other data sources often just have 'smiles'. They shouldn't be shown together.
+const IDFR_DEFAULTS = ['name', 'canonical_smiles', 'smiles', 'formula']
 const PROP_DEFAULT = ['molecular_weight']
 
 // Type declarations
@@ -135,7 +137,7 @@ function getInitialState(): State {
 		_focus: null, // Index of the focused molecule
 		_sel: [], // Array with selected indices
 		_matching: [], // Array with indices of molecules matching the query
-		_availIdentifiers: AVAIL_IDENTIFIERS, // List of available identifiers
+		_availIdentifiers: [], // AVAIL_IDENTIFIERS, // List of available identifiers
 		_showIdentifiers: IDFR_DEFAULTS, // List of identifiers to show
 		_availProps: [], // List of available properties
 		_showProps: PROP_DEFAULT, // List of properties to show
@@ -197,7 +199,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Pagination
 
 		// Page number.
@@ -269,7 +270,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// List of properties to show.
 		showProps(): string[] {
-			return this._showProps
+			return this._showProps.filter((i) => this.availProps.includes(i))
 		},
 
 		// #endregion
@@ -410,10 +411,19 @@ export const useMolGridStore = defineStore('molGridStore', {
 				this._highlight = molsData.searchStr
 			}
 
-			// Store the available properties to show.
-			if (molsData.mols[0]) {
-				this._availProps = Object.keys(molsData.mols[0].properties)
-			}
+			// Loop through all molecules and collect all available identifiers and properties.
+			molsData.mols.forEach((mol) => {
+				Object.keys(mol.properties).forEach((prop) => {
+					if (!this._availProps.includes(prop) && mol.properties[prop] != null) {
+						this._availProps.push(prop)
+					}
+				})
+				Object.keys(mol.identifiers).forEach((idfr) => {
+					if (!this._availIdentifiers.includes(idfr) && mol.identifiers[idfr] != null) {
+						this._availIdentifiers.push(idfr)
+					}
+				})
+			})
 
 			await nextTick()
 			this._disableUpdate = false

@@ -1,0 +1,1 @@
+Viewers are components used to display the contents of a file opened from the filebrowser.

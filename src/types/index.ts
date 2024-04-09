@@ -111,6 +111,7 @@ export type Mol = {
 		smiles: string // We don't use this field but when opening SDF files it may be used
 		cid: string
 		formula: string
+		[key: string]: string // To shut up ts errors.
 	}
 	synonyms: string[]
 	properties: {

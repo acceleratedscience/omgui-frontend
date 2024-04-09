@@ -1,12 +1,7 @@
 <template>
-	<!-- {{ molViewerStore.molFromMolset }}<br /><br /><br /> -->
-	<!-- <div v-show="molViewerStore.molFromMolset">
-		<MolViewer />
-	</div> -->
 	<MolViewer v-if="molViewerStore.molFromMolset" />
-	<!-- <div v-show="!molViewerStore.molFromMolset"> -->
 	<template v-else>
-		<BreadCrumbs v-if="breadcrumbs" :pathArray="fileStore.breadCrumbPathArray">
+		<BreadCrumbs :pathArray="fileStore.breadCrumbPathArray">
 			<template v-if="molGridStore.resultCount < molGridStore.total">
 				Showing {{ prettyNr(molGridStore.resultCount) }} / {{ prettyNr(molGridStore.total) }}
 			</template>
@@ -46,11 +41,6 @@ import MolViewer from '@/viewers/MolViewer.vue'
 
 // Utils
 import { prettyNr } from '@/utils/helpers'
-
-// Props
-withDefaults(defineProps<{ breadcrumbs?: boolean }>(), {
-	breadcrumbs: true,
-})
 
 /**
  * Logic

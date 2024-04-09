@@ -42,21 +42,22 @@
 				<!-- prettier-ignore -->
 				<template v-if="1">
 					<!-- Identifiers -->
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('name') && mol?.identifiers?.name" class="idfr name">{{ mol.identifiers.name }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchi') && mol?.identifiers?.inchi" class="idfr">{{ mol.identifiers.inchi }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchikey') && mol?.identifiers?.inchikey" class="idfr">{{ mol.identifiers.inchikey }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('canonical_smiles') && mol?.identifiers?.canonical_smiles" class="idfr">{{ mol.identifiers.canonical_smiles }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('isomeric_smiles') && mol?.identifiers?.isomeric_smiles" class="idfr">{{ mol.identifiers.isomeric_smiles }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('formula') && mol?.identifiers?.formula" class="idfr formula">{{ mol.identifiers.formula }}</div>
-					<a v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('cid') && mol?.identifiers?.cid" :href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`" target="_blank" class="idfr">{{ mol.identifiers.cid }}</a>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('name') && mol?.identifiers?.name" class="idfr name" title="name">{{ mol.identifiers.name }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchi') && mol?.identifiers?.inchi" class="idfr" title="InChI">{{ mol.identifiers.inchi }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchikey') && mol?.identifiers?.inchikey" class="idfr" title="InChIKey">{{ mol.identifiers.inchikey }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('canonical_smiles') && mol?.identifiers?.canonical_smiles" class="idfr" title="canonical SMILES">{{ mol.identifiers.canonical_smiles }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('isomeric_smiles') && mol?.identifiers?.isomeric_smiles" class="idfr" title="isomeric SMILES">{{ mol.identifiers.isomeric_smiles }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('smiles') && mol?.identifiers?.smiles" class="idfr" title="SMILES">{{ mol.identifiers.smiles }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('formula') && mol?.identifiers?.formula" class="idfr formula" title="formula">{{ mol.identifiers.formula }}</div>
+					<a v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('cid') && mol?.identifiers?.cid" :href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`" target="_blank" class="idfr" title="PubChem CID">{{ mol.identifiers.cid }}</a>
 				</template>
 
 				<!-- prettier-ignore -->
 				<div v-if="molGridStore.showProps.length" class="props-wrap">
+					<!-- Properties -->
 					<template v-for="(key, i) in molGridStore.showProps" :key="i">
-						<!-- Properties -->
 						<div class="prop" :title="`${key}:\n${mol.properties[key] || mol.properties[key] === 0 ? mol.properties[key] : '-'}`">
-							<div class="key" @click="molGridStore.setSort(key)">{{ key }}</div>
+							<div class="key" @click="molGridStore.setSort(key)">{{ cleanKeys(key) }}</div>
 							<div v-copy-on-click="nothingSelected" class="value" :class="{ empty: !mol.properties[key] && mol.properties[key] !== 0 }">
 								{{ mol.properties[key] || mol.properties[key] === 0 ? mol.properties[key] : '-' }}
 							</div>
@@ -97,6 +98,9 @@ import MolRender2D from '@/components/MolRender2D.vue'
 import MolGridActions from '@/components/MolGridActions.vue'
 import IconButton from '@/components/IconButton.vue'
 
+// Utils
+import { cleanKeys } from '@/utils/helpers'
+
 // Type declarations
 type KeyHandlers = {
 	[key: string]: () => void
@@ -104,6 +108,10 @@ type KeyHandlers = {
 
 // Definitions
 const $molGrid = ref<HTMLElement | null>(null)
+
+const props = defineProps<{
+	retainCache?: boolean
+}>()
 
 /**
  * Computed
@@ -147,7 +155,7 @@ onBeforeUnmount(() => {
 // Block any exit attempt when there are unsaved changes.
 window.onbeforeunload = function () {
 	if (molGridStore.hasChanges) return true
-	molGridStore.clear()
+	if (!props.retainCache) molGridStore.clear()
 }
 onBeforeRouteLeave(onBeforeExit)
 onBeforeRouteUpdate((to, from, next) => {
@@ -243,7 +251,7 @@ async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNorm
 		})
 	} else {
 		next()
-		if (to.path != from.path) molGridStore.clear()
+		if (to.path != from.path && !props.retainCache) molGridStore.clear()
 	}
 }
 

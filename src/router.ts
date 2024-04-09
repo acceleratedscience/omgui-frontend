@@ -37,12 +37,12 @@ const routes = [
 		path: '/molset/:cacheId',
 		name: 'molset',
 		props: true,
-		component: () => import(/* webpackChunkName: 'molset' */ '@/pages/Molset.vue'),
+		component: () => import(/* webpackChunkName: 'molset-display' */ '@/pages/MolsetDisplay.vue'),
 	},
 	{
 		path: '/my-mols',
 		name: 'my-mols',
-		component: () => import(/* webpackChunkName: 'molgrid' */ '@/pages/MyMols.vue'),
+		component: () => import(/* webpackChunkName: 'my-mols' */ '@/pages/MyMols.vue'),
 	},
 	{
 		path: '/dataviewer',

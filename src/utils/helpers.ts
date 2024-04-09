@@ -234,3 +234,59 @@ export function query2UrlQuery(query: Record<string, string | number | boolean |
 // 	console.log(444, newPath)
 // 	router.push('?use=json')
 // }
+
+// Make molecules properties and identifiers display-friendly on the fly.
+export function cleanKeys(str: string) {
+	// prettier-ignore
+	return str.replace(/\b(_|smiles|inchikey|inchi[^k]|splash|h bond|iupac|xlogp|logp| bonded|logd|omim|nmr|mona|pdbe|dili|fda|ghs|ms|id|ph|logie)\b/gi, (match) => {
+		switch (match.toLowerCase()) {
+			case '_': return ' ';
+			case 'smiles': return 'SMILES';
+			case 'inchikey': return 'InChIKey';
+			case 'inchi': return 'InChI';
+			case 'splash': return 'SPLASH';
+			case 'h bond': return 'H-bond';
+			case 'iupac': return 'IUPAC';
+			case 'xlogp': return 'XLogP';
+			case 'logp': return 'logP';
+			case ' bonded': return '-bonded';
+			case 'logd': return 'logD';
+			case 'omim': return 'OMIM';
+			case 'nmr': return 'NMR';
+			case 'mona': return 'MoNA';
+			case 'pdbe': return 'PDBe';
+			case 'dili': return 'DILI ';
+			case 'fda': return 'FDA';
+			case 'ghs': return 'GHS';
+			case 'ms': return 'MS';
+			case 'id': return 'ID';
+			case 'ph': return 'pH';
+			case 'logie': return 'logIE';
+			default: return match;
+		}
+	});
+	// return str
+	// 	.replace(/_/g, ' ')
+	// 	.replace(/\bsmiles\b/gi, 'SMILES')
+	// 	.replace(/\binchikey\b/gi, 'InChIKey')
+	// 	.replace(/\binchi[^k]\b/gi, 'InChI')
+	// 	.replace(/\bsplash\b/gi, 'SPLASH')
+	// 	.replace(/\bh bond\b/gi, 'H-bond')
+	// 	.replace(/\biupac\b/gi, 'IUPAC')
+	// 	.replace(/\bxlogp\b/gi, 'XLogP')
+	// 	.replace(/\blogp\b/gi, 'logP')
+	// 	.replace(/ bonded\b/gi, '-bonded')
+	// 	.replace(/\blogd\b/gi, 'logD')
+	// 	.replace(/\bomim\b/gi, 'OMIM')
+	// 	.replace(/\bnmr\b/gi, 'NMR')
+	// 	.replace(/\bmona\b/gi, 'MoNA')
+	// 	.replace(/\bpdbe\b/gi, 'PDBe')
+	// 	.replace(/\bpdbe\b/gi, 'PDBe')
+	// 	.replace(/\bdili\b/gi, 'DILI ')
+	// 	.replace(/\bfda\b/gi, 'FDA')
+	// 	.replace(/\bghs\b/gi, 'GHS')
+	// 	.replace(/\bms\b/gi, 'MS')
+	// 	.replace(/\bid\b/gi, 'ID')
+	// 	.replace(/^ph$/gi, 'pH')
+	// 	.replace(/^logie$/gi, 'logIE')
+}

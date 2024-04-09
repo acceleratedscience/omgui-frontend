@@ -10,7 +10,7 @@
 			This is your working set of molecules, it is cleared at the end of your session.<br />
 			If you want to preserve this molecule set, you can save it to your workspace.
 		</p>
-		<MolsetViewer :breadcrumbs="false" />
+		<MolGrid />
 	</template>
 </template>
 
@@ -30,6 +30,7 @@ const molGridStore = useMolGridStore()
 const molViewerStore = useMolViewerStore()
 
 // Components
+import MolGrid from '@/components/MolGrid.vue'
 import MolsetViewer from '@/viewers/MolsetViewer.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
 
