@@ -1,13 +1,18 @@
 <template>
 	<MolViewer v-if="molViewerStore.molFromMolset" context="molset" />
 	<template v-else>
-		<BreadCrumbs :pathArray="fileStore.breadCrumbPathArray">
+		<BreadCrumbs v-if="fileStore.active" :pathArray="fileStore.breadCrumbPathArray">
 			<template v-if="molGridStore.resultCount < molGridStore.total">
 				Showing {{ prettyNr(molGridStore.resultCount) }} / {{ prettyNr(molGridStore.total) }}
 			</template>
 			<template v-else>Total: {{ prettyNr(molGridStore.total) }}</template>
-			<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
 		</BreadCrumbs>
+		<BreadCrumbsNot v-else :collapsed="true">
+			<template v-if="molGridStore.resultCount < molGridStore.total">
+				Showing {{ prettyNr(molGridStore.resultCount) }} / {{ prettyNr(molGridStore.total) }}
+			</template>
+			<template v-else>Total: {{ prettyNr(molGridStore.total) }}</template>
+		</BreadCrumbsNot>
 		<MolGrid :retainCache="retainCache" />
 	</template>
 	<!-- </div> -->
@@ -35,6 +40,7 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
+import BreadCrumbsNot from '@/components/BreadCrumbsNot.vue'
 import MolGrid from '@/components/MolGrid.vue'
 import IconButton from '@/components/IconButton.vue'
 import MolViewer from '@/viewers/MolViewer.vue'
@@ -53,12 +59,19 @@ defineProps<{
 
 // Open molecule if ?show is set in the URL query.
 parseMolFromMolsetUrlQuery()
+// molGridStore.parseUrlQuery()
 
 /**
  * Hooks
  */
 
-watch(() => route.query, parseMolFromMolsetUrlQuery)
+watch(
+	() => route.query,
+	() => {
+		parseMolFromMolsetUrlQuery()
+		molGridStore.parseUrlQuery()
+	},
+)
 
 /**
  * Methods

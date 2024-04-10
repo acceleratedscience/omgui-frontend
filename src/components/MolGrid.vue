@@ -38,7 +38,7 @@
 					icon="icn-taste"
 					icnSize="large"
 					btnStyle="soft"
-					@click="nothingSelected() ? molGridStore.openMolecule(mol.index!) : null"
+					@click="nothingSelected() ? molViewerStore.setMolFromMolsetIndex(mol.index!) : null"
 				/>
 
 				<div class="filler"></div>
@@ -86,9 +86,11 @@ const route = useRoute()
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
+import { useMolViewerStore } from '@/stores/MolViewerStore'
 import { useModalStore } from '@/stores/ModalStore'
 const mainStore = useMainStore()
 const molGridStore = useMolGridStore()
+const molViewerStore = useMolViewerStore()
 const modalStore = useModalStore()
 
 // Components

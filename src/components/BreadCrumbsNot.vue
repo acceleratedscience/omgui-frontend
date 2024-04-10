@@ -3,7 +3,7 @@
 	breadcrumbs go, while maintaining the same breadrumb style
 -->
 <template>
-	<div id="not-breadrumbs">
+	<div id="not-breadrumbs" :class="{ collapsed }">
 		<router-link v-if="backto" :to="backto" class="backto"><SvgServe icon="icn-arrow-left" /> Back</router-link>
 		<div class="filler"></div>
 		<slot></slot>
@@ -19,17 +19,27 @@ import SvgServe from '@/components/SvgServe.vue'
 
 // Props
 defineProps<{
-	backto: RouteLocation | Record<string, string>
+	backto?: RouteLocation | Record<string, string>
+	// Fit the not-breadrumbs into the existing page
+	// margin, not take up any vertical space.
+	collapsed?: boolean
 }>()
 </script>
 
 <style lang="scss" scoped>
+$br-height: 20px;
+
 #not-breadrumbs {
 	display: flex;
-	margin-bottom: 16px;
 	color: $black-30;
 	align-items: center;
 	font-size: $font-size-small;
+	line-height: 20px;
+	margin-bottom: 8px;
+}
+#not-breadrumbs.collapsed {
+	margin-bottom: 10px;
+	margin-top: -30px;
 }
 #not-breadrumbs a.backto {
 	display: flex;
@@ -49,6 +59,16 @@ defineProps<{
 @media (hover: hover) {
 	#not-breadrumbs a:hover {
 		color: $black-60;
+	}
+}
+
+/**
+ * Responsive
+ */
+
+@media (max-width: $bp-small) {
+	#not-breadrumbs.collapsed {
+		margin-top: -10px;
 	}
 }
 </style>

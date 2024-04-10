@@ -1,7 +1,7 @@
 <template>
 	<cv-button
 		ref="$btn"
-		size="sm"
+		size="field"
 		@click="onClick"
 		:disabled="props.disabled && !complete"
 		:class="{ loading, error, complete }"

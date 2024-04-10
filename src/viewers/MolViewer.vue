@@ -73,9 +73,9 @@
 				</h2>
 				<div class="filler"></div>
 				<IconButton icon="icn-star-large-outline" iconHover="icn-star" colorHover="rgba(0,0,0,.3)" colorToggle="#d3bf0b" :toggle="true" />
-				<BasePagination v-if="molViewerStore.molFromMolset" v-model="modelPagination" :total="molGridStore.total" />
+				<BasePagination v-if="context == 'molset'" v-model="modelPagination" :total="molGridStore.total" />
 				<IconButton
-					v-if="molViewerStore.molFromMolset"
+					v-if="context == 'molset'"
 					icon="icn-close"
 					icnSize="small"
 					btnStyle="carbon"
@@ -86,7 +86,7 @@
 					icon="icn-close"
 					icnSize="small"
 					btnStyle="default"
-					@click="fileStore.exitViewer"
+					@click="context == 'file' ? fileStore.exitViewer : context == 'identifier' ? router.push({ name: 'mol' }) : null"
 					:style="{ 'margin-right': '-8px' }"
 				/>
 			</div>
@@ -164,12 +164,10 @@
 
 				<!-- Fetching error -->
 				<!-- To test, see #fetching-error below -->
-				<div v-else-if="loadingError" id="fetch-fail" class="error-msg">
-					<div>
-						Something went wrong fetching the molecule data.
-						<div class="status-msg" v-if="loadingError">
-							{{ loadingError }}
-						</div>
+				<div v-else-if="loadingError" id="fetch-fail">
+					<div class="error-msg">Something went wrong fetching the molecule data.</div>
+					<div class="status-msg" v-if="loadingError">
+						{{ loadingError }}
 					</div>
 					<div>
 						<cv-button kind="danger" size="field" @click="emit('retryLoad')">Retry</cv-button>
@@ -515,12 +513,6 @@ function toggleExpand(e: Event) {
 	flex-direction: column;
 	gap: 16px;
 	margin: 40px 0;
-}
-#fetch-fail .status-msg {
-	color: $black-30;
-	font-size: $font-size-small;
-	line-height: $line-height-small;
-	margin-top: 4px;
 }
 
 /*

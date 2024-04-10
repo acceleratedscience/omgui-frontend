@@ -116,6 +116,10 @@ export const useFileStore = defineStore('fileStore', {
 			if (this.isDir || !this.path) return false
 			return this.defaultFileType == 'unk' && !this.fileTypeOverride
 		},
+
+		active(): boolean {
+			return !!this._filename
+		},
 	},
 	actions: {
 		// Load file or directory.

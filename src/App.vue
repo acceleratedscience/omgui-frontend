@@ -237,4 +237,62 @@ header {
 		padding: 20px;
 	}
 }
+
+/**
+ * UNCOMMENT TO TEST
+ * RESPONSIVE BREAKPOINTS
+ */
+
+// #main-wrap {
+// 	background: rgba(255, 0, 0);
+// }
+// #main-wrap::after {
+// 	content: 'unrestricted';
+// 	position: fixed;
+// 	top: 0;
+// 	left: 0;
+// 	padding: 4px;
+// 	background: white;
+// 	text-transform: uppercase;
+// }
+// @media (max-width: $bp-xlarge) {
+// 	#main-wrap {
+// 		background: rgba(200, 50, 0);
+// 	}
+// 	#main-wrap::after {
+// 		content: 'xlarge';
+// 	}
+// }
+// @media (max-width: $bp-large) {
+// 	#main-wrap {
+// 		background: rgba(150, 100, 0);
+// 	}
+// 	#main-wrap::after {
+// 		content: 'large';
+// 	}
+// }
+// @media (max-width: $bp-medium) {
+// 	#main-wrap {
+// 		background: rgba(100, 150, 0);
+// 	}
+// 	#main-wrap::after {
+// 		content: 'medium';
+// 	}
+// }
+// @media (max-width: $bp-small) {
+// 	#main-wrap {
+// 		background: rgba(50, 200, 0);
+// 	}
+// 	#main-wrap::after {
+// 		content: 'small';
+// 	}
+// }
+// @media (max-width: $bp-xsmall) {
+// 	#main-wrap {
+// 		background: rgba(0, 255, 0);
+// 	}
+// 	#main-wrap::after {
+// 		content: 'xsmall';
+// 	}
+// }
 </style>

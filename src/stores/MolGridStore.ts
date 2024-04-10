@@ -19,6 +19,7 @@ Scenario A:
 3.	Data is loaded from the fileStore into the molGridStore via MolSetViewer.vue -> molGridStore.setMolset()
 4.	The values from the URL query were parsed in the backend and are part of the API response,
 	so the state is updated with the query values, also via setMolset()
+
 Scenario B:
 1.	User changes search/page/sort via UI
 2.	v-model pushes changes to store via setter functions, eg. setSort()
@@ -30,6 +31,7 @@ Scenario B:
 		--> On success, the store is updated with new molecules via setMolset()
 		--> Also via setMolset(), the state is updated with the query values returned from the API
 			but this doesn't do anything because the values are the same as the store values
+
 Scenario C:
 1.	User goes back or forward in browser history
 2.	The route.query watcher in MolSetViewer.vue calls parseUrlQuery()
@@ -62,7 +64,6 @@ import { query2UrlQuery } from '@/utils/helpers'
 
 // Constants
 const PAGE_SIZE = 100
-const AVAIL_IDENTIFIERS = ['name', 'inchi', 'inchikey', 'canonical_smiles', 'isomeric_smiles', 'formula', 'pid']
 // RDKit-enriched molecules will come with 'canonical_smiles' and 'isomeric_smiles',
 // but SDF files and other data sources often just have 'smiles'. They shouldn't be shown together.
 const IDFR_DEFAULTS = ['name', 'canonical_smiles', 'smiles', 'formula']
@@ -137,7 +138,7 @@ function getInitialState(): State {
 		_focus: null, // Index of the focused molecule
 		_sel: [], // Array with selected indices
 		_matching: [], // Array with indices of molecules matching the query
-		_availIdentifiers: [], // AVAIL_IDENTIFIERS, // List of available identifiers
+		_availIdentifiers: [], // List of available identifiers
 		_showIdentifiers: IDFR_DEFAULTS, // List of identifiers to show
 		_availProps: [], // List of available properties
 		_showProps: PROP_DEFAULT, // List of properties to show
@@ -199,6 +200,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
+		//
 		// #region - Pagination
 
 		// Page number.
@@ -385,13 +387,13 @@ export const useMolGridStore = defineStore('molGridStore', {
 			await nextTick()
 			this._disableUpdate = false
 
-			// console.log('parseUrlQuery', hasChanges ? '--> UPDATE MOLS' : '')
+			console.log('parseUrlQuery', hasChanges ? '--> UPDATE MOLS' : '')
 			if (hasChanges) this.updateMols(true)
 		},
 
 		// Load molecule set into the state.
 		async setMolset(molsData: MolsetApi) {
-			console.log('setMolset ((')
+			// console.log('setMolset ((')
 			this._disableUpdate = true
 
 			this._cacheId = molsData.cacheId
@@ -427,7 +429,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 			await nextTick()
 			this._disableUpdate = false
-			console.log(')) setMolset')
+			// console.log(')) setMolset')
 		},
 
 		// Remove molecules from our cached working copy.
@@ -630,12 +632,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 			if (!this._showProps.includes(key)) {
 				this._showProps.push(key)
 			}
-		},
-
-		// Open the molecule detail page.
-		// This gets triggered when clicking the open button.
-		openMolecule(index: number) {
-			molViewerStore.setMolFromMolsetIndex(index)
 		},
 
 		// #endregion

@@ -6,19 +6,14 @@
 			<!-- <div class="title">Workspace</div> -->
 		</div>
 		<div class="filler"></div>
+		<!-- prettier-ignore -->
 		<div class="items">
-			<IconButton
-				v-if="commandLineStore.active"
-				class="terminal-sel"
-				icon="icn-terminal-full"
-				iconHover="icn-close"
-				@click="commandLineStore.setActive(false)"
-			/>
+			<IconButton v-if="commandLineStore.active" class="terminal-sel" icon="icn-terminal-full" iconHover="icn-close" @click="commandLineStore.setActive(false)" />
 			<IconButton v-else icon="icn-terminal" iconHover="icn-terminal-full" :sel="sel == 'cli'" @click="commandLineStore.setActive(true)" />
-			<IconButton icon="icn-chat" iconHover="icn-chat-full" :sel="sel == 'assistant'" @click="goTo('assistant')" />
-			<IconButton icon="icn-file-molset" iconHover="icn-file-molset-full" :sel="sel == 'molset'" @click="goTo('my-mols')" />
-			<IconButton icon="icn-file-mol" iconHover="icn-file-mol-full" :sel="sel == 'mol'" @click="goTo('mol')" />
-			<IconButton icon="icn-folder" iconHover="icn-folder-full" :sel="sel == 'dir'" @click="goTo('filebrowser')" />
+			<IconButton icon="icn-chat" iconHover="icn-chat-full" :sel="sel == 'assistant'" @click="commandLineStore.setActive(false)" />
+			<router-link :to="{ name: 'my-mols' }"><IconButton icon="icn-file-molset" iconHover="icn-file-molset-full" :sel="sel == 'molset'" /></router-link>
+			<router-link :to="{ name: 'mol' }"><IconButton icon="icn-file-mol" iconHover="icn-file-mol-full" :sel="sel == 'mol'" /></router-link>
+			<router-link :to="{ name: 'filebrowser' }"><IconButton icon="icn-folder" iconHover="icn-folder-full" :sel="sel == 'dir'" /></router-link>
 			<div class="display"></div>
 		</div>
 		<!-- </div> -->

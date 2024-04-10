@@ -13,6 +13,12 @@ body {
 .error-msg {
 	color: $error;
 }
+.status-msg {
+	color: $black-30;
+	font-size: $font-size-small;
+	line-height: $line-height-small;
+	margin-top: 4px;
+}
 
 // For the success message to be centered.
 html,

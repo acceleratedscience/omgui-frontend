@@ -1,22 +1,26 @@
 <template>
 	<BaseFetching v-if="loading" />
-	<MolsetViewer :retainCache="true" />
+	<template v-else-if="loadingError">
+		<div class="error-msg">Something went wrong loading this molecule set.</div>
+		<div class="status-msg" v-if="loadingError">{{ status }}: {{ loadingError }}</div>
+	</template>
+	<MolsetViewer v-else :retainCache="true" />
 </template>
 
 <script setup lang="ts">
 // Vue
 import { ref, onMounted } from 'vue'
 
+// Router
+import { useRoute } from 'vue-router'
+const route = useRoute()
+
 // API
 import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Stores
-import { useMainStore } from '@/stores/MainStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
-import { useMolViewerStore } from '@/stores/MolViewerStore'
-const mainStore = useMainStore()
 const molGridStore = useMolGridStore()
-const molViewerStore = useMolViewerStore()
 
 // Components
 import MolsetViewer from '@/viewers/MolsetViewer.vue'
@@ -37,18 +41,17 @@ const props = defineProps<{
  */
 
 onMounted(() => {
-	const query = molGridStore._setUrlQuery()
+	const query = route.query
 	apiFetch(moleculesApi.getMolset(+props.cacheId, query), {
 		onSuccess: (data) => {
 			molGridStore.setMolset(data)
-			// molsetData.value = data
 		},
 		onError: (err) => {
 			console.log('Error in getMolset()', err)
 		},
 		loading: loading,
+		loadingError: loadingError,
 		status: status,
-		// loadingError: loadingError,
 	})
 })
 </script>

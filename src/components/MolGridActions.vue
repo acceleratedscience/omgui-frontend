@@ -9,8 +9,8 @@
 		<!-- Pagination -->
 		<BasePagination v-model="vmodelPagination" :total="molGridStore.pageTotal" :max="3" :disabled="molGridStore.pageTotal == 1" />
 
-		<div class="filler-1"></div>
-		<div class="filler-2"></div>
+		<div class="breaker-1"></div>
+		<div class="filler"></div>
 
 		<!-- Sort -->
 		<SortDropdown id="dd-sort" v-model="vmodelSort" :items="sortItems" :disabledItems="disabledSortItems" />
@@ -30,6 +30,8 @@
 				{{ selAction }}
 			</cv-dropdown-item>
 		</cv-dropdown>
+
+		<div class="breaker-2"></div>
 
 		<!-- Main actions -->
 		<cv-dropdown id="dd-actions" v-model="mainActionsSelect" :disabled="!molGridStore.hasSel" @change="dispatchMainAction">
@@ -204,32 +206,30 @@ async function dispatchMainAction(action: string) {
 /**
  * Responsive
  */
-.filler-1,
-.filler-2 {
+
+// Note: filler is not used, but may be useful in the future.
+.breaker-1,
+.breaker-2,
+.filler {
 	display: none;
 }
-#actions > .filler-1 {
+#actions .breaker-1,
+#actions .breaker-2 {
 	height: 0;
 	line-height: 0;
 	flex: 0 0 100%;
-	background: pink;
 	margin-bottom: 0;
-	// border: solid 1px red;
+	// border: solid 1px blue;
 }
-.filler-2 {
+.filler {
 	flex: 1 1 1px;
 	min-width: 0;
-	// background: red;
+	background: purple;
 }
+
 @media (max-width: $bp-large) {
-	.filler-1,
-	.filler-2 {
+	.breaker-1 {
 		display: block;
-	}
-}
-@media (max-width: $bp-large) {
-	.filler-2 {
-		display: none;
 	}
 	#dd-sort,
 	#dd-select,
@@ -237,8 +237,18 @@ async function dispatchMainAction(action: string) {
 		flex: 1;
 	}
 }
+@media (max-width: $bp-medium) {
+	.breaker-1 {
+		display: block;
+	}
+}
+@media (max-width: 630px) {
+	.breaker-2 {
+		display: block;
+	}
+}
 @media (max-width: $bp-small) {
-	#pages:deep() .display {
+	.pagination:deep() .display {
 		display: none;
 	}
 }

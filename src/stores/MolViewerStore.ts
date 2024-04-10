@@ -56,8 +56,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		// Indicated whether we're viewing a molecule from a molset.
 		molFromMolset(): boolean {
-			console.log('RECORD molFromMolset', Boolean(this._molFromMolsetIndex))
-			// return true
+			// console.log('molFromMolset', Boolean(this._molFromMolsetIndex))
 			return Boolean(this._molFromMolsetIndex)
 		},
 
@@ -109,7 +108,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (sdf) this._sdf = sdf
 		},
 		setMolFromMolsetIndex(index: number | null, dontPushRoute = false) {
-			console.log(99, 'setMolFromMolsetIndex:', index, dontPushRoute)
+			// console.log('setMolFromMolsetIndex:', index, dontPushRoute)
 			this._molFromMolsetIndex = index
 
 			if (!dontPushRoute) {
@@ -118,8 +117,8 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 				router.push(path)
 			}
 
-			// // Timeout needed for route.query watcher in MolsetViewer to trigger.
-			// // Not super clear why this is needed...
+			// TRASH - no longer needed
+			// Timeout needed for route.query watcher in MolsetViewer to trigger.
 			// setTimeout(() => {
 			// 	this._molFromMolsetIndex = index
 			// }, 1)
@@ -136,6 +135,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			// })
 		},
 
+		// TRASH - no longer needed
 		// parseUrlQuery() {
 		// 	const query = router.currentRoute.value.query
 		// 	if (query?.show) {

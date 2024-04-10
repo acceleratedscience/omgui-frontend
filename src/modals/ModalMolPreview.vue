@@ -81,7 +81,7 @@ onMounted(() => {
  */
 
 async function onSubmit() {
-	molGridStore.openMolecule(mol.value.index!)
+	molViewerStore.setMolFromMolsetIndex(mol.value.index!)
 	modalStore.hide()
 }
 </script>
