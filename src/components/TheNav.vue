@@ -1,19 +1,66 @@
 <template>
-	<nav :class="{ inverse: commandLineStore.active, 'hide-brand': commandLineStore.active }">
-		<!-- <div class="align-left"> -->
+	<nav :class="{ inverse }">
 		<div class="brand">
 			<div class="main">% OpenAD</div>
 			<!-- <div class="title">Workspace</div> -->
 		</div>
 		<div class="filler"></div>
-		<!-- prettier-ignore -->
 		<div class="items">
-			<IconButton v-if="commandLineStore.active" class="terminal-sel" icon="icn-terminal-full" iconHover="icn-close" @click="commandLineStore.setActive(false)" />
-			<IconButton v-else icon="icn-terminal" iconHover="icn-terminal-full" :sel="sel == 'cli'" @click="commandLineStore.setActive(true)" />
-			<IconButton icon="icn-chat" iconHover="icn-chat-full" :sel="sel == 'assistant'" @click="commandLineStore.setActive(false)" />
-			<router-link :to="{ name: 'my-mols' }"><IconButton icon="icn-file-molset" iconHover="icn-file-molset-full" :sel="sel == 'molset'" /></router-link>
-			<router-link :to="{ name: 'mol' }"><IconButton icon="icn-file-mol" iconHover="icn-file-mol-full" :sel="sel == 'mol'" /></router-link>
-			<router-link :to="{ name: 'filebrowser' }"><IconButton icon="icn-folder" iconHover="icn-folder-full" :sel="sel == 'dir'" /></router-link>
+			<!-- Terminal -->
+			<BaseIconButton
+				v-if="commandLineStore.active"
+				icon="icn-terminal"
+				iconHover="icn-close"
+				iconSel="icn-terminal-full"
+				:sel="sel == 'cli'"
+				@click="commandLineStore.setActive(!commandLineStore.active)"
+			/>
+			<BaseIconButton
+				v-else
+				icon="icn-terminal"
+				iconHover="icn-terminal-full"
+				iconSel="icn-terminal-full"
+				:sel="sel == 'cli'"
+				@click="commandLineStore.setActive(!commandLineStore.active)"
+			/>
+
+			<!-- AI Assistant -->
+			<BaseIconButton
+				v-if="assistantStore.active"
+				icon="icn-chat"
+				iconHover="icn-close"
+				iconSel="icn-chat-full"
+				:sel="sel == 'assistant'"
+				@click="assistantStore.setActive(!assistantStore.active)"
+			/>
+			<BaseIconButton
+				v-else
+				icon="icn-chat"
+				iconHover="icn-chat-full"
+				iconSel="icn-chat-full"
+				:sel="sel == 'assistant'"
+				@click="assistantStore.setActive(!assistantStore.active)"
+			/>
+
+			<!-- My mols -->
+			<router-link :to="{ name: 'my-mols' }" class="my-mols">
+				<BaseIconButton icon="icn-bookmark" iconHover="icn-bookmark-full" iconSel="icn-bookmark-full" :sel="sel == 'my-mols'" />
+			</router-link>
+
+			<!-- Result -->
+			<router-link :to="{ name: 'result' }" class="result">
+				<BaseIconButton icon="icn-result" iconHover="icn-result-full" iconSel="icn-result-full" :sel="sel == 'result'" />
+			</router-link>
+
+			<!-- Molecule viewer -->
+			<router-link :to="{ name: 'mol' }" class="mol-viewer">
+				<BaseIconButton icon="icn-file-mol" iconHover="icn-file-mol-full" iconSel="icn-file-mol-full" :sel="sel == 'mol'" />
+			</router-link>
+
+			<!-- File browser -->
+			<router-link :to="{ name: 'filebrowser' }" class="file-browser">
+				<BaseIconButton icon="icn-folder" iconHover="icn-folder-full" iconSel="icn-folder-full" :sel="sel == 'dir'" />
+			</router-link>
 			<div class="display"></div>
 		</div>
 		<!-- </div> -->
@@ -23,42 +70,48 @@
 <script setup lang="ts">
 // Vue
 import { computed } from 'vue'
-import type { ComputedRef } from 'vue'
 
 // Router
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 const route = useRoute()
-const router = useRouter()
 
 // Stores
-import { useFileStore } from '@/stores/FileStore'
 import { useCommandLineStore } from '@/stores/CommandLineStore'
-const fileStore = useFileStore()
+import { useAssistantStore } from '@/stores/AssistantStore'
 const commandLineStore = useCommandLineStore()
+const assistantStore = useAssistantStore()
 
 // Components
-import IconButton from '@/components/IconButton.vue'
+import BaseIconButton from '@/components/BaseIconButton.vue'
 
 // Type declarations
-type Sel = 'dir' | 'mol' | 'molset' | 'assistant' | 'cli'
+import type { ComputedRef } from 'vue'
+type Sel = 'dir' | 'mol' | 'result' | 'my-mols' | 'assistant' | 'cli'
+
+/**
+ * Computed
+ */
+
+const inverse: ComputedRef<boolean> = computed(() => {
+	return commandLineStore.active || assistantStore.active
+})
 
 const sel: ComputedRef<Sel | null> = computed(() => {
-	if (commandLineStore.active) {
+	if (assistantStore.active) {
+		return 'assistant'
+	} else if (commandLineStore.active) {
 		return 'cli'
 	} else if (route.name == 'filebrowser') {
-		// return fileStore.fileType as Sel
 		return 'dir'
 	} else if (route.name == 'mol') {
 		return 'mol'
+	} else if (route.name == 'result') {
+		return 'result'
 	} else if (route.name == 'my-mols') {
-		return 'molset'
+		return 'my-mols'
 	}
 	return null
 })
-
-function goTo(name: string) {
-	router.push({ name: name })
-}
 </script>
 
 <style lang="scss" scoped>
@@ -67,7 +120,7 @@ nav {
 	line-height: 30px;
 	display: flex;
 	justify-content: flex-end;
-	padding-right: 20px;
+	padding: 0 26px 0 15px;
 	position: fixed;
 	z-index: 40;
 	left: 0;
@@ -87,9 +140,9 @@ nav .items {
 	display: flex;
 	flex-direction: row-reverse;
 }
-nav .items .icn-btn.terminal-sel:not(:hover) {
-	color: $yellow;
-}
+// nav .items .icn-btn.terminal-sel:not(:hover) {
+// 	color: $yellow;
+// }
 nav .filler {
 	flex: 1;
 }
@@ -100,14 +153,12 @@ nav.inverse .icn-btn {
 	color: $white-80;
 }
 nav.inverse .icn-btn.sel {
-	color: $blue-light;
+	color: $yellow;
 }
 nav.inverse .title {
 	color: $white-50;
 }
-
-// Hide branding
-nav.hide-brand .brand {
+nav.inverse .brand {
 	display: none;
 }
 
@@ -125,7 +176,6 @@ nav .title {
 }
 nav .main {
 	font-weight: 600;
-	margin-left: 16px;
 }
 nav .title {
 	font-weight: 300;
@@ -171,31 +221,39 @@ nav .display::after {
 	}
 
 	// File browser
-	// nav .icn-folder.sel ~ .display::after,
-	nav .icn-folder:hover ~ .display::after {
+	nav a.file-browser:hover ~ .display::after {
 		content: 'File browser';
 	}
 
 	// Molecule viewer
-	// nav .icn-file-mol.sel ~ .display::after,
-	nav .icn-file-mol:hover ~ .display::after {
+	nav a.mol-viewer:hover ~ .display::after {
 		content: 'Molecule viewer';
 	}
 
 	// My Molecules
-	// nav .icn-file-molset.sel ~ .display::after,
-	nav .icn-file-molset:hover ~ .display::after {
+	nav a.my-mols:hover ~ .display::after {
 		content: 'My Molecules';
 	}
 
+	// Result
+	nav a.result:hover ~ .display::after {
+		content: 'Result';
+	}
+
 	// AI Assistant
-	nav .icn-chat:hover ~ .display::after {
+	nav .icn-chat:not(.sel):hover ~ .display::after {
 		content: 'AI Assistant';
 	}
 
 	// Command Line
-	nav .icn-terminal:hover ~ .display::after {
+	nav .icn-terminal:not(.sel):hover ~ .display::after {
 		content: 'Command line';
+	}
+
+	// Exit
+	nav .icn-chat.sel:hover ~ .display::after,
+	nav .icn-terminal.sel:hover ~ .display::after {
+		content: 'Exit';
 	}
 }
 

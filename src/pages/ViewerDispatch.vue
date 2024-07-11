@@ -135,10 +135,16 @@ async function parseRoute() {
 			}
 
 			// File
-			if (fileStore.fileType == 'molset') {
-				// molGridStore.parseUrlQuery()
+			if (['molset', 'sdf', 'smi'].includes(fileStore.fileType || '')) {
 				const data: MolsetApi = file.data
 				molGridStore.setMolset(data)
+				if (fileStore.ext == 'json') {
+					molGridStore.setContext('json')
+				} else if (fileStore.ext == 'sdf') {
+					molGridStore.setContext('sdf-file')
+				} else if (fileStore.ext == 'smi') {
+					molGridStore.setContext('smi-file')
+				}
 			} else if (fileStore.fileType == 'mol') {
 				const data: Mol = file.data
 				molViewerStore.setMolData(data)

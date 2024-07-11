@@ -20,7 +20,8 @@
 			sel: props.sel,
 
 			// Custom colors
-			'has-secondary-icn': props.iconHover,
+			'has-hover-icn': props.iconHover,
+			'has-sel-icn': props.iconSel,
 			'has-custom-color': !!props.color,
 			'has-custom-hover-color': !!props.colorHover,
 			'has-custom-toggle-color': !!props.colorToggle,
@@ -28,8 +29,9 @@
 		@click="onClick"
 		:style="styleParam"
 	>
-		<SvgServe class="base-icn" :icon="props.icon" :size="iconSize" />
-		<SvgServe v-if="props.iconHover" class="secondary-icn" :icon="props.iconHover" :size="iconSize" />
+		<BaseSvgServe class="base-icn" :icon="props.icon" :size="iconSize" />
+		<BaseSvgServe v-if="props.iconHover" class="hover-icn" :icon="props.iconHover" :size="iconSize" />
+		<BaseSvgServe v-if="props.iconSel" class="sel-icn" :icon="props.iconSel" :size="iconSize" />
 	</div>
 </template>
 
@@ -38,7 +40,7 @@
 import { ref, computed } from 'vue'
 
 // Components
-import SvgServe from '@/components/SvgServe.vue'
+import BaseSvgServe from '@/components/BaseSvgServe.vue'
 
 // Type declarations
 type StyleParam = {
@@ -46,18 +48,20 @@ type StyleParam = {
 	'--btn-color-hover'?: string
 	'--btn-color-toggle'?: string
 }
+type IcnSize = 'small' | 'large'
 
 // Props
 const props = withDefaults(
 	defineProps<{
 		icon: string
 		iconHover?: string
+		iconSel?: string
 		btnStyle?: 'default' | 'soft' | 'carbon' // See /kitchen-sink for examples
 		toggle?: boolean
 		color?: string
 		colorHover?: string
 		colorToggle?: string
-		icnSize?: 'small' | 'large'
+		icnSize?: IcnSize
 		mini?: boolean
 		sel?: boolean
 	}>(),
@@ -94,11 +98,11 @@ const styleParam = computed<StyleParam>(() => {
 	return style
 })
 
-const iconSize = computed<'small' | 'large'>(() => {
+const iconSize = computed<IcnSize>(() => {
 	if (props.mini || props.icnSize == 'small') {
 		return 'small'
 	} else {
-		return props.icnSize
+		return 'large'
 	}
 })
 
@@ -151,9 +155,10 @@ function onClick() {
 .icn-btn.toggle.toggle-on {
 	color: $black;
 }
-.icn-btn.has-secondary-icn:not(.toggle-on):not(:hover):not(.sel) .secondary-icn,
-.icn-btn.has-secondary-icn.toggle-on .base-icn,
-.icn-btn.has-secondary-icn.sel .base-icn {
+.icn-btn.has-hover-icn:not(:hover) .hover-icn,
+.icn-btn.has-sel-icn:not(.toggle-on):not(.sel) .sel-icn,
+.icn-btn.has-sel-icn.toggle-on .base-icn,
+.icn-btn.has-sel-icn.sel .base-icn {
 	display: none;
 }
 
@@ -187,7 +192,8 @@ function onClick() {
 		color: $black;
 		background: none;
 	}
-	.icn-btn.has-secondary-icn:hover .base-icn {
+	.icn-btn.has-hover-icn:hover .base-icn,
+	.icn-btn.has-hover-icn:hover .sel-icn {
 		display: none;
 	}
 	.icn-btn.toggle-on:hover {

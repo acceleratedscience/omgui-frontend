@@ -84,7 +84,7 @@ const submitDisabled: ComputedRef<boolean> = computed(() => {
 onMounted(() => emit('mounted'))
 
 /*
- * Functions
+ * Methods
  */
 
 // async function onSubmit() { // Archive

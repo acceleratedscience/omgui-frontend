@@ -17,10 +17,13 @@ type MultiMap = {
 // prettier-ignore
 const _map_FileType: MultiMap = {
 	dir:    ['directory',    'FileBrowser'],
+	mdl:    ['molfile',      'MolViewer'],
 	mol:    ['molecule',     'MolViewer'],
 	molset: ['molecule set', 'MolsetViewer'],
+	sdf:	['sdf',          'MolsetViewer'],
 	json:   ['json',         'JsonViewer'],
 	data:   ['data',         'DataViewer'],
+	smi:	['smiles',       'MolsetViewer'],
 	text:   ['text',         'TextViewer'],
 	html:   ['html',         'TextViewer'], // Viewer TBD
 	img:    ['image',        'TextViewer'], // Viewer TBD

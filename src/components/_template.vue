@@ -1,13 +1,24 @@
-<template>
-	<main>I'm a component</main>
-</template>
+<template>xxx</template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+// Vue
+import { onMounted, watch } from 'vue'
 
-<style lang="css" scoped>
-main {
-	background: #ebb;
-	padding: 24px;
-	border: solid 1px;
-}
-</style>
+// Stores
+import { useModalStore } from '@/stores/ModalStore'
+const modalStore = useModalStore()
+
+/*
+ * Computed
+ */
+
+/*
+ * Hooks
+ */
+
+/*
+ * Methods
+ */
+</script>
+
+<style lang="scss" scoped></style>

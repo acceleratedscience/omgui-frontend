@@ -52,9 +52,9 @@ import type { LocationQuery } from 'vue-router'
 
 // Stores
 import { useFileStore } from '@/stores/FileStore'
-import { useMolViewerStore } from '@/stores/MolViewerStore'
+import { useModalStore } from '@/stores/ModalStore'
 const fileStore = useFileStore()
-const molViewerStore = useMolViewerStore()
+const modalStore = useModalStore()
 
 // API
 import { apiFetch, moleculesApi } from '@/api/ApiService'
@@ -66,12 +66,29 @@ import { query2UrlQuery } from '@/utils/helpers'
 const PAGE_SIZE = 100
 // RDKit-enriched molecules will come with 'canonical_smiles' and 'isomeric_smiles',
 // but SDF files and other data sources often just have 'smiles'. They shouldn't be shown together.
-const IDFR_DEFAULTS = ['name', 'canonical_smiles', 'smiles', 'formula']
+const IDFR_DEFAULTS = ['name', 'isomeric_smiles', 'molecular_formula']
 const PROP_DEFAULT = ['molecular_weight']
 
 // Type declarations
-import type { Molset, MolsetApi, SearchMode } from '@/types'
+import type { Mol, Molset, MolsetApi, SearchMode } from '@/types'
+type Context = 'json' | 'sdf-file' | 'csv-file' | 'smi-file' | 'result-mols' | 'my-mols' | null
+type SaveAsJSONOptions = {
+	newFile?: boolean
+}
+type SaveAsSDFOptions = {
+	removeInvalidMols?: boolean
+	newFile?: boolean
+}
+type SaveAsCSVOptions = {
+	newFile?: boolean
+}
+type SaveAsSmilesOptions = {
+	newFile?: boolean
+}
 type State = {
+	// Context
+	_context: Context
+
 	// Status
 	_disableUpdate: boolean
 	_hasChanges: boolean
@@ -97,7 +114,8 @@ type State = {
 	_highlight: string
 	_focus: number | null
 	_sel: number[]
-	_matching: number[]
+	_allIndices: number[]
+	_matchingIndices: number[]
 	_availIdentifiers: string[]
 	_showIdentifiers: string[]
 	_availProps: string[]
@@ -106,6 +124,44 @@ type State = {
 
 function getInitialState(): State {
 	return {
+		// Context
+		// The different situations in which the molgrid is loaded:
+		//
+		// - json:
+		//   A .molset.json file with our own OpenAD molecule format.
+		//   --> Saving changes will update the JSON file.
+		//   URL: /~/path/to/results.molset.json
+		//
+		// - sdf-file:
+		//   An .sdf file with molecule data.
+		//   --> Saving changes will give you the option to update
+		//   the SDF file or create a new .molset.json file.
+		//   URL: /~/path/to/results.sdf
+		//
+		// - csv-file:
+		//   A .csv file with molecule data (with SMILES or InChI column)
+		//	 that was opened in the molset viewer.
+		//	 --> Saving changes will give you the option to update
+		//	 the CSV file or create a new .molset.json file.
+		//	 URL: /csv-molset/path/to/results.csv -- TO DO
+		//
+		// - smi-file:
+		//   A .smi file that was opened in the molset viewer.
+		//	 --> Saving changes will give you the option to update
+		//	 the SMILES file or create a new .molset.json file.
+		//	 URL: /~/path/to/results.smi
+		//
+		// - cache:
+		//   When looking at molecule data from the CLI memory.
+		//	 --> Saving changes will update the dataframe stored in memory.
+		//	 URL: /molset/123456789
+		//
+		// - my-mols:
+		//   When looking at the molecules list.
+		//   --> Saving changes will update the molecules stored in the cmd_pointer memory.
+		//   URL: /my-mols
+		_context: null,
+
 		// Status
 		// - - -
 		// Because the filter/sort UI elements are linked to the store's query values
@@ -135,9 +191,10 @@ function getInitialState(): State {
 
 		// Display
 		_highlight: '', // Substring that will be highlighted in the SVG
-		_focus: null, // Index of the focused molecule
+		_focus: null, // Index of the molecule in focus
 		_sel: [], // Array with selected indices
-		_matching: [], // Array with indices of molecules matching the query
+		_allIndices: [], // Array with all indices
+		_matchingIndices: [], // Array with indices of molecules matching the query
 		_availIdentifiers: [], // List of available identifiers
 		_showIdentifiers: IDFR_DEFAULTS, // List of identifiers to show
 		_availProps: [], // List of available properties
@@ -149,8 +206,19 @@ export const useMolGridStore = defineStore('molGridStore', {
 	state: () => getInitialState(),
 	getters: {
 		///////////////////////////////////////////////////////////////
-		//
+		// #region - Context
+
+		context(): Context {
+			return this._context
+		},
+
+		// #endregion
+		///////////////////////////////////////////////////////////////
 		// #region - Status
+
+		active(): boolean {
+			return Boolean(this._cacheId)
+		},
 
 		hasChanges(): boolean {
 			return this._hasChanges
@@ -158,7 +226,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Data
 
 		cacheId(): number | null {
@@ -172,7 +239,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Whatever smiles is available for rendering out 2D graphic.
 		molSmiles(): string[] {
-			return this._mols!.map((mol) => mol.identifiers.isomeric_smiles ?? mol.identifiers.canonical_smiles ?? mol.identifiers.smiles)
+			return this._mols!.map((mol) => mol.identifiers.isomeric_smiles || mol.identifiers.canonical_smiles || mol.identifiers.smiles)
 		},
 
 		resultCount(): number {
@@ -186,7 +253,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Search
 
 		searchStr(): string {
@@ -200,7 +266,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Pagination
 
 		// Page number.
@@ -218,7 +283,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Sort & Filters
 
 		sort(): string {
@@ -227,7 +291,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Display
 
 		// Substring that will be highlighted in the SVG.
@@ -250,9 +313,14 @@ export const useMolGridStore = defineStore('molGridStore', {
 			return this._sel.length > 0
 		},
 
+		// Array with all indices.
+		allIndices(): number[] {
+			return this._allIndices
+		},
+
 		// Array with matching indices
-		matching(): number[] {
-			return this._matching
+		matchingIndices(): number[] {
+			return this._matchingIndices
 		},
 
 		// List of all identifiers.
@@ -279,7 +347,23 @@ export const useMolGridStore = defineStore('molGridStore', {
 	},
 	actions: {
 		///////////////////////////////////////////////////////////////
-		//
+		// #region - Context
+
+		setContext(context: Context) {
+			this._context = context
+		},
+
+		// #endregion
+		///////////////////////////////////////////////////////////////
+		// #region - Status
+
+		setHasChanges(hasChanges: boolean) {
+			console.log('>> ', hasChanges)
+			this._hasChanges = hasChanges
+		},
+
+		// #endregion
+		///////////////////////////////////////////////////////////////
 		// #region - Data
 
 		// Update the molecule set with filtered data.
@@ -351,49 +435,41 @@ export const useMolGridStore = defineStore('molGridStore', {
 		async parseUrlQuery() {
 			const query: LocationQuery = router.currentRoute.value.query
 			this._disableUpdate = true
-			// console.log(11, this._searchStr, query.search)
-			// await nextTick()
-			// console.log(12, this._searchStr, query.search)
-			let hasChanges: boolean = false
+			let changed: boolean = false
 
 			// Search string
 			if (query.search && this._searchStr != String(query.search)) {
-				// console.log('A')
 				this._searchStr = (query.search as string) || ''
-				hasChanges = true
+				changed = true
 			}
 
 			// Search mode
 			if (this._searchMode != (query.smarts ? 'smarts' : 'text')) {
-				// console.log('B')
 				this._searchMode = query.smarts ? 'smarts' : 'text'
-				hasChanges = true
+				changed = true
 			}
 
 			// Page
 			if (query.page && this._page != Number(query.page)) {
-				// console.log('C')
 				this._page = Number(query.page)
-				hasChanges = true
+				changed = true
 			}
 
 			// Sort
 			if (this._sort != ((query.sort as string) || '')) {
-				// console.log('D')
 				this._sort = (query.sort as string) || ''
-				hasChanges = true
+				changed = true
 			}
 
 			await nextTick()
 			this._disableUpdate = false
 
-			console.log('parseUrlQuery', hasChanges ? '--> UPDATE MOLS' : '')
-			if (hasChanges) this.updateMols(true)
+			if (changed) this.updateMols(true)
 		},
 
 		// Load molecule set into the state.
 		async setMolset(molsData: MolsetApi) {
-			// console.log('setMolset ((')
+			// console.log('setMolset ((', molsData)
 			this._disableUpdate = true
 
 			this._cacheId = molsData.cacheId
@@ -404,9 +480,28 @@ export const useMolGridStore = defineStore('molGridStore', {
 			this._searchStr = molsData.searchStr
 			this._searchMode = molsData.searchMode
 			this._sort = molsData.sort ?? ''
-			this._matching = molsData.matching
+			this._allIndices = molsData.allIndices
+			this._matchingIndices = molsData.matchingIndices
 			this._pageSize = molsData.pageSize
 			this._page = molsData.page
+
+			// If no isomeric_smiles are available, we'll display
+			// the canonical_smiles or smiles.
+			// - - -
+			// This is relevant when opening SDF or CSV datasets,
+			// where we just display what's available as opposed
+			// to calculate our preferred properties and identifiers,
+			// as is the case when opening a .smi file.
+			const firstMol = molsData.mols[0]
+			if (!firstMol.properties.isomeric_smiles) {
+				if (firstMol.properties.canonical_smiles) {
+					this.setIdentifier('canonical_smiles', true)
+					this.setIdentifier('isomeric_smiles', false)
+				} else if (firstMol.properties.smiles) {
+					this.setIdentifier('smiles', true)
+					this.setIdentifier('isomeric_smiles', false)
+				}
+			}
 
 			// Set highlight substructure.
 			if (molsData.searchMode == 'smarts') {
@@ -438,7 +533,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 				onSuccess: (data) => {
 					this.setMolset(data)
 					this.deselectAll()
-					this._hasChanges = true
+					this.setHasChanges(true)
 				},
 				onError: (err) => {
 					console.log('Error in removeFromMolset()', err)
@@ -448,34 +543,191 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Keep selected molecules and remove the rest.
 		async keepMols(indices: number[]) {
-			const indicesToRemove = this._matching.filter((i) => !indices.includes(i))
+			const indicesToRemove = this._matchingIndices.filter((i) => !indices.includes(i))
 			this.removeMols(indicesToRemove)
 		},
 
-		// Save changes to the molecule set.
-		saveChanges() {
+		// Replace a molecule in a .molset.json file or in my-mols.
+		// This is used when saving changes to a molecule inside a molset.
+		replaceMolInMolset(destinationPath: string, mol: Mol, context: 'json' | 'my-mols'): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolsetChanges(fileStore.path, this._cacheId!), {
+				apiFetch(moleculesApi.replaceMolInMolset(destinationPath, mol, context, this._cacheId!), {
 					onSuccess: () => {
-						this._hasChanges = false
+						this.setHasChanges(true)
 						resolve(true)
-						// this.clearWorkingCopy()
+					},
+					onError: (response) => reject(response),
+				})
+			})
+		},
+
+		// Store changes to an existing JSON (.molset.json) file.
+		updateMolset(): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.updateMolset(fileStore.path, this._cacheId!), {
+					onSuccess: () => {
+						this.setHasChanges(false)
+						resolve(true)
 					},
 					onError: (err) => {
-						console.log('Error in saveMolsetChanges()', err)
-						reject(err)
+						console.log('Error in updateMolset()', err)
+						reject(true)
 					},
 				})
 			})
 		},
+
+		// Export molset as a JSON (.molset.json) file.
+		saveMolsetAsJSON(destinationPath: string, { newFile = false }: SaveAsJSONOptions = {}): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolsetAsJSON(destinationPath, this._cacheId!, newFile), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
+		// Export molset as SDF (.sdf) file.
+		async saveMolsetAsSDF(destinationPath: string, options: SaveAsSDFOptions): Promise<boolean> {
+			try {
+				return await this._saveMolsetAsSDF(destinationPath, options)
+			} catch (err: any) {
+				this._maybeShowInvalidMolsModal(err, {
+					callback: this.saveMolsetAsSDF,
+					destinationPath,
+					options,
+				})
+				return Promise.resolve(false)
+			}
+		},
+		_saveMolsetAsSDF(destinationPath: string, { removeInvalidMols = false, newFile = false }: SaveAsSDFOptions = {}): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolsetAsSDF(destinationPath, this._cacheId!, removeInvalidMols, newFile), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
+				})
+			})
+		},
+
+		// Export molset as CSV (.csv) file.
+		async saveMolsetAsCSV(destinationPath: string, options: SaveAsCSVOptions = {}): Promise<boolean> {
+			try {
+				return await this._saveMolsetAsCSV(destinationPath, options)
+			} catch (err: any) {
+				this._maybeShowInvalidMolsModal(err, {
+					callback: this.saveMolsetAsCSV,
+					destinationPath,
+					options,
+				})
+				return Promise.resolve(false)
+			}
+		},
+		_saveMolsetAsCSV(destinationPath: string, { newFile = false }: SaveAsCSVOptions = {}): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolsetAsCSV(destinationPath, this._cacheId!, newFile), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
+		// Save molset as SMILES (.smi) file.
+		async saveMolsetAsSmiles(destinationPath: string, options: SaveAsSmilesOptions = {}): Promise<boolean> {
+			try {
+				console.log('@', options)
+				return await this._saveMolsetAsSmiles(destinationPath, options)
+			} catch (err: any) {
+				this._maybeShowInvalidMolsModal(err, {
+					callback: this.saveMolsetAsSmiles,
+					destinationPath,
+					options,
+				})
+				return Promise.resolve(false)
+			}
+		},
+		_saveMolsetAsSmiles(destinationPath: string, { newFile = false }: SaveAsSmilesOptions): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolsetAsSmiles(destinationPath, this._cacheId!, newFile), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
+		// When trying to save a molset to a format that requires processing by RDKit
+		// and some of the molecules can't be parsed, the API will return a 422 error
+		// with a list of invalid molecules. This list is then used to display a modal,
+		// allowing the user to try again while discarding the invalid molecules.
+		_maybeShowInvalidMolsModal(
+			err: { data: { invalidMols?: Mol[] } },
+			{ callback, destinationPath, options }: { callback: Function; destinationPath: string; options: SaveAsSDFOptions },
+		) {
+			// Ignore string error messages.
+			if (!err || typeof err !== 'object') return
+
+			const { data } = err as { data: any }
+			if (data.invalidMols) {
+				console.log(`The following ${data.invalidMols.length} molecules are invalid:`) // Leave this
+				const list = data.invalidMols
+					.map((mol: Mol) => {
+						if (mol) {
+							const name = mol['identifiers']['name'] ? mol['identifiers']['name'] + '<br>' : ''
+							const smiles =
+								mol['identifiers']['isomeric_smiles'] || mol['identifiers']['canonical_smiles'] || mol['identifiers']['smiles']
+							console.log(mol.index, smiles) // Leave this
+							return `<li><b>${mol.index}</b>: ${name}${smiles}</li>`
+						} else {
+							return null
+						}
+					})
+					.join('\n')
+				return new Promise<boolean>((resolve) => {
+					modalStore.alert(
+						`The following molecule${data.invalidMols.length > 1 ? 's' : ''} could not be processed by RDKit and will be removed:</p><ul>${list}</ul>`,
+						{
+							title: 'Invalid molecules detected',
+							html: true,
+							size: 'md',
+							primaryBtn: 'Continue',
+							secondaryBtn: true,
+							onSubmit: () => {
+								const options2: SaveAsSDFOptions = { ...options }
+								options2.removeInvalidMols = true
+								callback(destinationPath, options2)
+								resolve(true)
+							},
+						},
+					)
+				})
+			}
+		},
+
+		// Update the molecule working list.
+		updateMolset_mymols(): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.updateMolset_mymols(this._cacheId!), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
+		// Update the result dataframe stored in memory.
+		updateMolset_result(): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.updateMolset_result(this._cacheId!), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Search
 
 		// Set search string
 		setSearchStr(searchStr: string) {
-			console.log('** setSearchStr')
 			this._searchStr = searchStr || ''
 			if (this.searchMode == 'smarts') {
 				this.setHighlight(searchStr)
@@ -502,7 +754,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Pagination
 
 		// Set page
@@ -532,7 +783,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Sort & Filters
 
 		setSort(sort: string) {
@@ -556,12 +806,11 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// to the position of the molecule as it is displayed,
 		// after filtering and sorting.
 		getDisplayIndex(index: number) {
-			return this._matching.indexOf(index) + 1
+			return this._matchingIndices.indexOf(index) + 1
 		},
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Display
 
 		// Highlight substring in the SVG.
@@ -614,6 +863,15 @@ export const useMolGridStore = defineStore('molGridStore', {
 			}
 		},
 
+		// Set an identifier to (not) be displayed.
+		setIdentifier(key: string, state: boolean) {
+			if (state === false) {
+				this._showIdentifiers = this._showIdentifiers.filter((i) => i !== key)
+			} else if (state === true) {
+				this._showIdentifiers.push(key)
+			}
+		},
+
 		// Toggle which properties are displayed.
 		toggleProp(key: string) {
 			// console.log('** enableProp', key)
@@ -636,7 +894,6 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// #endregion
 		///////////////////////////////////////////////////////////////
-		//
 		// #region - Clearing
 
 		// Clear

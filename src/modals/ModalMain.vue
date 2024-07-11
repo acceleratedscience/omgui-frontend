@@ -1,7 +1,5 @@
 <template>
 	<cv-modal :visible="modalStore.visible" :size="modalStore.size" @primary-click="onSubmit" @secondary-click="onCancel" @other-btn-click="onOther">
-		<!-- :autoHideOff="true"
-	:class="{ 'hide-close': true }" -->
 		<template v-if="label" v-slot:label>{{ label }}</template>
 		<template v-slot:title>{{ title || 'Alert' }}</template>
 		<template v-if="content" v-slot:content>
@@ -48,12 +46,9 @@ const onOther = computed(() => modalStore.onOther)
 onMounted(() => emit('mounted'))
 </script>
 
-<style lang="scss" scoped>
-// For some reason this CSS doesn't do anything...
-// .cv-modal.hide-close {
-// 	border: solid 10px red !important;
-// }
-.cv-modal.hide-close:deep() .bx--modal-close {
+<style lang="scss">
+// Not being used
+.cv-modal.hide-close .bx--modal-close {
 	display: none;
 }
 </style>

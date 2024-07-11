@@ -28,20 +28,11 @@ const routes = [
 		props: true,
 		component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
 	},
-	// {
-	// 	path: '/mol',
-	// 	name: 'mol-input',
-	// 	component: () => import(/* webpackChunkName: 'MolInput' */ '@/pages/MolInput.vue'),
-	// },
-	// {
-	// 	path: '/mol/:identifier',
-	// 	name: 'mol',
-	// 	props: true,
-	// 	component: () => import(/* webpackChunkName: 'MolViewer' */ '@/viewers/MolViewer.vue'),
-	// },
 	{
-		path: '/molset/:cacheId',
-		name: 'molset',
+		// This route doesn't serve anything... it's the previous version of /result but keeping
+		// it around for now, may be useful to edit the cached working copy molsets directly?
+		path: '/cache/:cacheId',
+		name: 'cache',
 		props: true,
 		component: () => import(/* webpackChunkName: 'MolsetPage' */ '@/pages/MolsetPage.vue'),
 	},
@@ -49,6 +40,12 @@ const routes = [
 		path: '/my-mols',
 		name: 'my-mols',
 		component: () => import(/* webpackChunkName: 'MyMols' */ '@/pages/MyMols.vue'),
+	},
+	{
+		path: '/result',
+		name: 'result',
+		props: true,
+		component: () => import(/* webpackChunkName: 'ResultPage' */ '@/pages/ResultPage.vue'),
 	},
 	{
 		path: '/dataviewer',
@@ -74,7 +71,7 @@ const routes = [
 		path: '/svg/:filename',
 		name: 'svg',
 		props: true,
-		component: () => import(/* webpackChunkName: 'SvgServe' */ '@/components/SvgServe.vue'),
+		component: () => import(/* webpackChunkName: 'BaseSvgServe' */ '@/components/BaseSvgServe.vue'),
 	},
 	{
 		path: '/kitchen-sink',

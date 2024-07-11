@@ -9,11 +9,12 @@ import { lockScroll } from '@/utils/helpers'
 
 // Type declarations
 type Size = 'xs' | 'sm' | 'md' | 'lg'
+type Data = { [key: string]: any }
 type State = {
 	_visible: boolean
 	//
 	_modalName: string | null
-	_data: object | null
+	_data: Data
 	//
 	_html: boolean
 	_content: string | null
@@ -36,7 +37,10 @@ export const useModalStore = defineStore('modalStore', {
 		// When this is set, a custom template is displayed
 		// and all other parameters are ignored.
 		_modalName: null,
-		_data: null, // Currently not used, but we can pass data to the modal.
+		// Data object with key-value pairs that can be used in the dialog.
+		// This is useful for dialog-specific v-model bindings etc.
+		// See ModalSaveFile for an example.
+		_data: {},
 
 		// When no template is set, ModalMain is loaded,
 		// and the following parameters are used.
@@ -65,7 +69,7 @@ export const useModalStore = defineStore('modalStore', {
 		modalName(): string | null {
 			return this._modalName
 		},
-		data(): object | null {
+		data(): Data {
 			return this._data
 		},
 
@@ -117,12 +121,34 @@ export const useModalStore = defineStore('modalStore', {
 		},
 
 		// Display a custom modal.
-		display(templateName: string, data: object | null = null) {
+		display(
+			templateName: string,
+			data: Data | null = null,
+			options: {
+				onSubmit?: Function
+				onCancel?: Function
+				onOther?: Function
+			} = {},
+		): Promise<boolean> {
 			this._modalName = templateName
-			this._data = data
+			if (data) this._data = data
 			// this.show() is triggered in the onMounted hook
 			// with a few ms delay, to ensure the intro animation
 			// is played. See _ModalTemplate.vue.
+
+			return new Promise((resolve) => {
+				this._onSubmit = (submitData: Record<string, any>) => {
+					if (options.onSubmit) options.onSubmit(submitData)
+					this.hide()
+					resolve(true)
+				}
+				this._onCancel = () => {
+					if (options.onCancel) options.onCancel()
+					this.hide()
+					resolve(false)
+				}
+				this._onOther = options.onOther || null
+			})
 		},
 
 		// Display a regular text modal.
@@ -139,16 +165,16 @@ export const useModalStore = defineStore('modalStore', {
 				onCancel?: Function
 				onOther?: Function
 			} = {},
-		) {
+		): Promise<boolean> {
+			this._modalName = 'ModalMain'
+			this._content = content
+			this._html = options.html || false
+			this._size = options.size || null
+			this._title = options.title || null
+			this._primaryBtn = options.primaryBtn === true ? 'Ok' : options.primaryBtn ? options.primaryBtn : 'Ok'
+			this._secondaryBtn = options.secondaryBtn === true ? 'Cancel' : options.secondaryBtn ? options.secondaryBtn : null
+			this._otherBtn = options.otherBtn || null
 			return new Promise((resolve) => {
-				this._modalName = 'ModalMain'
-				this._content = content
-				this._html = options.html || false
-				this._size = options.size || null
-				this._title = options.title || null
-				this._primaryBtn = options.primaryBtn === true ? 'Ok' : options.primaryBtn ? options.primaryBtn : 'Ok'
-				this._secondaryBtn = options.secondaryBtn === true ? 'Cancel' : options.secondaryBtn ? options.secondaryBtn : null
-				this._otherBtn = options.otherBtn || null
 				this._onSubmit = () => {
 					if (options.onSubmit) options.onSubmit()
 					this.hide()
@@ -178,11 +204,17 @@ export const useModalStore = defineStore('modalStore', {
 			return this.alert(content, options)
 		},
 
+		setData(data: Data) {
+			for (const key in data) {
+				this._data[key] = data[key]
+			}
+		},
+
 		clear() {
 			// console.log('modalStore clear')
 			this._visible = false
 			this._modalName = null
-			this._data = null
+			this._data = {}
 			this._label = null
 			this._title = null
 			this._content = null

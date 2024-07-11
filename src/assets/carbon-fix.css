@@ -27,6 +27,7 @@
 	display: none;
 }
 
+/* Fit the modals tightly in the window */
 .bx--modal-container {
 	max-height: calc(100% - 40px) !important;
 }

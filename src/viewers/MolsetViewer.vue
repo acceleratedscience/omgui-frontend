@@ -13,7 +13,7 @@
 			</template>
 			<template v-else>Total: {{ prettyNr(molGridStore.total) }}</template>
 		</BreadCrumbsNot>
-		<MolGrid :retainCache="retainCache" />
+		<TheMolGrid :retainCache="retainCache" />
 	</template>
 	<!-- </div> -->
 </template>
@@ -23,7 +23,7 @@
 import { watch } from 'vue'
 
 // Router
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 
@@ -31,9 +31,11 @@ const route = useRoute()
 import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
+import { useModalStore } from '@/stores/ModalStore'
 const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
 const molViewerStore = useMolViewerStore()
+const modalStore = useModalStore()
 
 // API
 import { apiFetch, moleculesApi } from '@/api/ApiService'
@@ -41,15 +43,18 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import BreadCrumbsNot from '@/components/BreadCrumbsNot.vue'
-import MolGrid from '@/components/MolGrid.vue'
-import IconButton from '@/components/IconButton.vue'
+import TheMolGrid from '@/components/TheMolGrid.vue'
+import BaseIconButton from '@/components/BaseIconButton.vue'
 import MolViewer from '@/viewers/MolViewer.vue'
 
 // Utils
 import { prettyNr } from '@/utils/helpers'
 
+// Type declarations
+import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
+
 // Props
-defineProps<{
+const props = defineProps<{
 	retainCache?: boolean
 }>()
 
@@ -64,6 +69,14 @@ parseMolFromMolsetUrlQuery()
 /**
  * Hooks
  */
+
+// Block any exit attempt when there are unsaved changes.
+window.onbeforeunload = function () {
+	if (molGridStore.hasChanges) return true
+	if (!props.retainCache) molGridStore.clear()
+}
+onBeforeRouteLeave(onBeforeExit)
+onBeforeRouteUpdate(onBeforeExit)
 
 watch(
 	() => route.query,
@@ -98,12 +111,38 @@ function _fetchMolDataFromMolset(cacheId: number | null = null, index: number) {
 	apiFetch(moleculesApi.getMolDataFromMolset(cacheId, index), {
 		onSuccess: (data) => {
 			molViewerStore.setMolData(data)
-			if (molViewerStore.inchi) molViewerStore.fetchMolVizData(molViewerStore.inchi)
+			const identifier = molViewerStore.inchi || molViewerStore.smiles
+			if (identifier) molViewerStore.fetchMolVizData(identifier)
 		},
 		onError: (err) => {
 			console.log('Error in getMolDataFromMolset()', err)
 		},
 	})
+}
+
+// Block route change when there are unsaved changes.
+async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
+	// console.log('onBeforeExit MOLSET', molGridStore.hasChanges)
+	console.log('on before exit', molGridStore.hasChanges)
+	if (molGridStore.hasChanges) {
+		await modalStore.alert('If you leave, all molset changes will be lost.', {
+			title: 'Unsaved molset changes',
+			primaryBtn: 'Stay',
+			secondaryBtn: 'Discard',
+			onCancel: () => {
+				if (to.path != from.path && !props.retainCache) {
+					molGridStore.clear()
+				}
+				next()
+			},
+			onSubmit: () => next(false),
+		})
+	} else {
+		if (to.path != from.path && !props.retainCache) {
+			molGridStore.clear()
+		}
+		next()
+	}
 }
 </script>
 

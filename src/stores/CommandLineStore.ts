@@ -2,8 +2,11 @@
  * This store is responsible for
  */
 
+// Vue
 import { defineStore } from 'pinia'
-// import router from '@/router'
+
+// Stores
+import { useAssistantStore } from '@/stores/AssistantStore'
 
 // API
 import { apiFetch, mainApi } from '@/api/ApiService'
@@ -59,6 +62,10 @@ export const useCommandLineStore = defineStore('commandLineStore', {
 	actions: {
 		setActive(state: boolean = true) {
 			this._active = state
+			if (state) {
+				const assistantStore = useAssistantStore()
+				assistantStore.setActive(false)
+			}
 			lockScroll(state)
 		},
 		setLoading(state: boolean = true) {

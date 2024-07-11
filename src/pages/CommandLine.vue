@@ -1,6 +1,6 @@
 <template>
 	<div id="cli" ref="$cli">
-		<IconButton icon="icn-close" @click="commandLineStore.setActive(false)" btnStyle="soft" />
+		<BaseIconButton icon="icn-close" @click="commandLineStore.setActive(false)" btnStyle="soft" />
 
 		<pre v-for="(output, i) in commandLineStore.output" :key="i">{{ output }}</pre>
 
@@ -33,7 +33,7 @@ import { useCommandLineStore } from '@/stores/CommandLineStore'
 const commandLineStore = useCommandLineStore()
 
 // Components
-import IconButton from '@/components/IconButton.vue'
+import BaseIconButton from '@/components/BaseIconButton.vue'
 
 // Definitions
 const $cli = ref<HTMLDivElement | null>(null)

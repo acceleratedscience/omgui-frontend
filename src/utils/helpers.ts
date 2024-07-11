@@ -7,12 +7,11 @@ import router from '@/router'
 
 // Type declarations
 import type { LocationQueryValue } from 'vue-router'
-import type { FileType } from '@/types'
 
 // const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] // prettier-ignore
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] // prettier-ignore
 
-// Return timestamp as "10 days ago"
+// Return timestamp as "10 days ago" or as full date.
 export function timeAgo(dateParam: Date | string | number | null): string {
 	if (!dateParam) return ''
 
@@ -29,15 +28,15 @@ export function timeAgo(dateParam: Date | string | number | null): string {
 	if (seconds < 5) {
 		return 'now'
 	} else if (seconds < 60) {
-		return `${seconds} seconds ago`
+		return `less than a min ago`
 	} else if (seconds < 90) {
 		return 'about a minute ago'
 	} else if (minutes < 60) {
-		return `${minutes} minutes ago`
+		return `${minutes} min ago`
 	} else if (isToday) {
-		return _prettyDate(date, 'Today') // Today at 10:20
+		return _prettyDate(date, 'today') // Today at 10:20
 	} else if (isYesterday) {
-		return _prettyDate(date, 'Yesterday') // Yesterday at 10:20
+		return _prettyDate(date, 'yesterday') // Yesterday at 10:20
 	} else if (isThisYear) {
 		return _prettyDate(date, null, true) // Jan 10 at 10:20
 	}
@@ -224,20 +223,10 @@ export function query2UrlQuery(query: Record<string, string | number | boolean |
 	return urlQuery
 }
 
-// // Open a file in a different viewer.
-// // Adds ?use=xxx to the current URL.
-// export function useOtherViewer(fileType: FileType) {
-// 	const query = router.currentRoute.value.query
-// 	query.use = fileType
-// 	const urlQuery = query2UrlQuery(query)
-// 	const newPath = router.currentRoute.value.path + urlQuery
-// 	console.log(444, newPath)
-// 	router.push('?use=json')
-// }
-
 // Make molecules properties and identifiers display-friendly on the fly.
 export function cleanKeys(str: string) {
 	// prettier-ignore
+	// Note: a single regex function is a lot faster than multiple regexes.
 	return str.replace(/\b(_|smiles|inchikey|inchi[^k]|splash|h bond|iupac|xlogp|logp| bonded|logd|omim|nmr|mona|pdbe|dili|fda|ghs|ms|id|ph|logie)\b/gi, (match) => {
 		switch (match.toLowerCase()) {
 			case '_': return ' ';
@@ -265,28 +254,20 @@ export function cleanKeys(str: string) {
 			default: return match;
 		}
 	});
-	// return str
-	// 	.replace(/_/g, ' ')
-	// 	.replace(/\bsmiles\b/gi, 'SMILES')
-	// 	.replace(/\binchikey\b/gi, 'InChIKey')
-	// 	.replace(/\binchi[^k]\b/gi, 'InChI')
-	// 	.replace(/\bsplash\b/gi, 'SPLASH')
-	// 	.replace(/\bh bond\b/gi, 'H-bond')
-	// 	.replace(/\biupac\b/gi, 'IUPAC')
-	// 	.replace(/\bxlogp\b/gi, 'XLogP')
-	// 	.replace(/\blogp\b/gi, 'logP')
-	// 	.replace(/ bonded\b/gi, '-bonded')
-	// 	.replace(/\blogd\b/gi, 'logD')
-	// 	.replace(/\bomim\b/gi, 'OMIM')
-	// 	.replace(/\bnmr\b/gi, 'NMR')
-	// 	.replace(/\bmona\b/gi, 'MoNA')
-	// 	.replace(/\bpdbe\b/gi, 'PDBe')
-	// 	.replace(/\bpdbe\b/gi, 'PDBe')
-	// 	.replace(/\bdili\b/gi, 'DILI ')
-	// 	.replace(/\bfda\b/gi, 'FDA')
-	// 	.replace(/\bghs\b/gi, 'GHS')
-	// 	.replace(/\bms\b/gi, 'MS')
-	// 	.replace(/\bid\b/gi, 'ID')
-	// 	.replace(/^ph$/gi, 'pH')
-	// 	.replace(/^logie$/gi, 'logIE')
+}
+
+// Take a file's path and return the path of the
+// parent folder with the file in focus. For example:
+// Input: /foo/bar/baz.json
+// Output: /foo/bar#baz.json
+export function path2FileBrowserPath(path: string) {
+	const pathArr = path.split('/')
+	const filename = pathArr.pop()
+	const filebrowserPath = pathArr.join('/') + '#' + filename
+	return filebrowserPath
+}
+
+// Remove capitals and replaces spaces with dashes.
+export function slugify(str: string) {
+	return str.toLowerCase().replace(/\s+/g, '-')
 }

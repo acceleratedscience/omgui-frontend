@@ -1,8 +1,9 @@
 <template>
-	<template v-if="molViewerStore.mol && route.query.use == 'json'">
+	<BaseFetching v-if="molViewerStore.loading" />
+	<template v-else-if="route.query.use == 'json'">
 		<JsonViewer :data="molViewerStore.mol" />
 	</template>
-	<MolViewer context="identifier" :loading="loading" :loadingError="loadingError" @retryLoad="fetchMolDataByIdentifier(identifier)" />
+	<MolViewer v-else context="identifier" :loading="loading" :loadingError="loadingError" @retryLoad="fetchMolDataByIdentifier(identifier)" />
 </template>
 
 <script setup lang="ts">
@@ -23,6 +24,7 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 // Components
 import JsonViewer from '@/viewers/JsonViewer.vue'
 import MolViewer from '@/viewers/MolViewer.vue'
+import BaseFetching from '@/components/BaseFetching.vue'
 
 // Props
 const props = defineProps<{
@@ -79,10 +81,10 @@ watch(
 
 // Fetch molecule data from the API based on the identifier.
 async function fetchMolDataByIdentifier(identifier: string | null = null) {
-	console.log('fetchMolData', identifier)
+	// console.log('fetchMolData', identifier)
 	if (!identifier) return
 
-	let success = false
+	let success: boolean = false
 	loading.value = true
 	loadingError.value = ''
 

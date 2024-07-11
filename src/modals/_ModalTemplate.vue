@@ -31,7 +31,7 @@ const emit = defineEmits(['mounted']) // <--
 onMounted(() => emit('mounted')) // <--
 
 /*
- * Functions
+ * Methods
  */
 
 async function onSubmit() {

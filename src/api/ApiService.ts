@@ -43,6 +43,13 @@ export async function apiFetch(
 			if (loadingError) loadingError.value = response.statusText
 			if (setLoadingError) setLoadingError(response.statusText)
 			if (onError) onError(response)
+			const data = response.data && typeof response.data === 'string' ? `\n${response.data}` : ''
+			console.log(
+				`\n%cAPI Error ${response.status}:%c ${response.statusText}%c${data}\n`,
+				'color:#d00;text-transform:uppercase',
+				'text-transform:uppercase',
+				'font-style:italic',
+			)
 		}
 		if (status) status.value = response.status
 		if (setStatus) setStatus(response.status)

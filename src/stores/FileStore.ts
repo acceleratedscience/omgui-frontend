@@ -23,6 +23,9 @@ type AddUnderscore<T> = {
 	[P in keyof T as `_${string & P}`]: T[P]
 }
 
+// API
+import { apiFetch, fileSystemApi } from '@/api/ApiService'
+
 // Initial state
 function getInitialState(): State {
 	return {
@@ -50,8 +53,22 @@ export const useFileStore = defineStore('fileStore', {
 		data(): any {
 			return this._data
 		},
+		filename(): string {
+			return this._filename
+		},
+		// Filename without extension.
+		filenameNaked(): string {
+			const regex1 = new RegExp(`\\.${this.ext}$`)
+			const regex2 = new RegExp(`\\.${this.ext2}$`)
+			return this._filename.replace(regex1, '').replace(regex2, '')
+		},
 		path(): string {
 			return this._path
+		},
+		// The path without the filename.
+		pathDir(): string {
+			const regex = new RegExp(`\\/?${this._filename}$`)
+			return this._path.replace(regex, '')
 		},
 		breadCrumbPathArray(): string[] {
 			const mainStore = useMainStore()
@@ -142,6 +159,7 @@ export const useFileStore = defineStore('fileStore', {
 		// or remove the ?use query parameter if we're viewing
 		// a file with a non-default viewer.
 		exitViewer() {
+			console.log('exitViewer')
 			const route = router.currentRoute.value
 			if (route.query.use) {
 				router.push({ path: router.currentRoute.value.path })
@@ -151,6 +169,20 @@ export const useFileStore = defineStore('fileStore', {
 				console.log('>', path.join('/'))
 				router.push({ path: path.join('/') })
 			}
+		},
+
+		// Delete a file.
+		deleteFile(pathAbsolute: string) {
+			return new Promise<boolean>((resolve, reject) => {
+				if (!pathAbsolute) {
+					console.error('fileStore.deleteFile(): No file path provided.')
+					return reject(false)
+				}
+				apiFetch(fileSystemApi.deleteFile(pathAbsolute), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
+				})
+			})
 		},
 
 		// Clear store.

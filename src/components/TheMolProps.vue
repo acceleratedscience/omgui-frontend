@@ -2,8 +2,8 @@
 	<div id="properties" :class="{ expand }">
 		<div class="header" @click="toggleExpand">
 			<div>Identifiers & properties</div>
-			<SvgServe v-show="expand" icon="icn-chevron-up" />
-			<SvgServe v-show="!expand" icon="icn-chevron-down" />
+			<BaseSvgServe v-show="expand" icon="icn-chevron-up" />
+			<BaseSvgServe v-show="!expand" icon="icn-chevron-down" />
 		</div>
 		<div class="content">
 			<h4>Identifiers</h4>
@@ -44,7 +44,7 @@ import { useMolGridStore } from '@/stores/MolGridStore'
 const molGridStore = useMolGridStore()
 
 // Components
-import SvgServe from '@/components/SvgServe.vue'
+import BaseSvgServe from '@/components/BaseSvgServe.vue'
 
 // Utils
 import { cleanKeys } from '@/utils/helpers'

@@ -1,12 +1,12 @@
 <template>
-	<MolFromIdentifier v-if="identifier" :identifier="identifier" />
-	<MolInput v-else />
+	<TheMolFromIdentifier v-if="identifier" :identifier="identifier" />
+	<TheMolInput v-else />
 </template>
 
 <script setup lang="ts">
 // Components
-import MolFromIdentifier from '@/components/MolFromIdentifier.vue'
-import MolInput from '@/components/MolInput.vue'
+import TheMolFromIdentifier from '@/components/TheMolFromIdentifier.vue'
+import TheMolInput from '@/components/TheMolInput.vue'
 
 // Props
 defineProps<{

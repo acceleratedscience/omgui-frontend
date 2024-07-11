@@ -34,8 +34,13 @@ export default class FileSystemApi extends BaseApi {
 	}
 
 	// Open a file in its OS application.
-	openFileOS(path: string = '') {
-		return this.apiClient.post('/open-file-os', { path })
+	openFileOS(path_absolute: string = '') {
+		return this.apiClient.post('/open-file-os', { path_absolute })
+	}
+
+	// Delete a file.
+	deleteFile(path_absolute: string = '') {
+		return this.apiClient.post('/delete-file', { path_absolute })
 	}
 
 	test() {

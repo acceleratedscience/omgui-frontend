@@ -3,8 +3,8 @@
 	import MolViewer instead, which handles the opening of molecules.
  -->
 <template>
-	<MolProps />
-	<MolGridActions />
+	<TheMolProps />
+	<TheMolGridActions />
 	<div id="resp-container">
 		<div id="mol-grid" ref="$molGrid" :class="{ 'sel-mode': molGridStore.hasSel }">
 			<div
@@ -26,17 +26,10 @@
 					:height="140"
 					svg-mode
 				/>
-				<IconButton
-					class="icn-btn-smell"
-					icon="icn-smell"
-					icnSize="large"
-					btnStyle="soft"
-					@click="nothingSelected() ? previewMolecule(i) : null"
-				/>
-				<IconButton
-					class="icn-btn-taste"
+				<BaseBookmark :mol="mol" />
+				<BaseIconButton icon="icn-smell" btnStyle="soft" @click="nothingSelected() ? previewMolecule(i) : null" />
+				<BaseIconButton
 					icon="icn-taste"
-					icnSize="large"
 					btnStyle="soft"
 					@click="nothingSelected() ? molViewerStore.setMolFromMolsetIndex(mol.index!) : null"
 				/>
@@ -49,10 +42,10 @@
 					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('name') && mol?.identifiers?.name" class="idfr name" title="name">{{ mol.identifiers.name }}</div>
 					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchi') && mol?.identifiers?.inchi" class="idfr" title="InChI">{{ mol.identifiers.inchi }}</div>
 					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchikey') && mol?.identifiers?.inchikey" class="idfr" title="InChIKey">{{ mol.identifiers.inchikey }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('canonical_smiles') && mol?.identifiers?.canonical_smiles" class="idfr" title="canonical SMILES">{{ mol.identifiers.canonical_smiles }}</div>
 					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('isomeric_smiles') && mol?.identifiers?.isomeric_smiles" class="idfr" title="isomeric SMILES">{{ mol.identifiers.isomeric_smiles }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('canonical_smiles') && mol?.identifiers?.canonical_smiles" class="idfr" title="canonical SMILES">{{ mol.identifiers.canonical_smiles }}</div>
 					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('smiles') && mol?.identifiers?.smiles" class="idfr" title="SMILES">{{ mol.identifiers.smiles }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('formula') && mol?.identifiers?.formula" class="idfr formula" title="formula">{{ mol.identifiers.formula }}</div>
+					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('molecular_formula') && mol?.identifiers?.molecular_formula" class="idfr formula" title="formula">{{ mol.identifiers.molecular_formula }}</div>
 					<a v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('cid') && mol?.identifiers?.cid" :href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`" target="_blank" class="idfr" title="PubChem CID">{{ mol.identifiers.cid }}</a>
 				</template>
 
@@ -79,8 +72,7 @@ import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
 import type { ComputedRef } from 'vue'
 
 // Router
-import { useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
-import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
+import { useRoute } from 'vue-router'
 const route = useRoute()
 
 // Stores
@@ -94,10 +86,11 @@ const molViewerStore = useMolViewerStore()
 const modalStore = useModalStore()
 
 // Components
-import MolProps from '@/components/MolProps.vue'
+import TheMolProps from '@/components/TheMolProps.vue'
 import MolRender2D from '@/components/MolRender2D.vue'
-import MolGridActions from '@/components/MolGridActions.vue'
-import IconButton from '@/components/IconButton.vue'
+import TheMolGridActions from '@/components/TheMolGridActions.vue'
+import BaseIconButton from '@/components/BaseIconButton.vue'
+import BaseBookmark from '@/components/BaseBookmark.vue'
 
 // Utils
 import { cleanKeys } from '@/utils/helpers'
@@ -114,8 +107,8 @@ const $molGrid = ref<HTMLElement | null>(null)
 const props = defineProps<{
 	// Cache is always cleared when leaving the molgrid,
 	// either when opening molset files or when checking my-mols.
-	// However when a molset is opened by its cacheId, then
-	// the cache is retained (/molset/1234)
+	// However when a molset is opened by its cacheId (/molset/1234),
+	// then the cache is retained when opening a molecule in the molset.
 	retainCache?: boolean
 }>()
 
@@ -158,20 +151,6 @@ onBeforeUnmount(() => {
 	document.removeEventListener('keydown', onKeyDown)
 })
 
-// Block any exit attempt when there are unsaved changes.
-window.onbeforeunload = function () {
-	if (molGridStore.hasChanges) return true
-	if (!props.retainCache) molGridStore.clear()
-}
-onBeforeRouteLeave(onBeforeExit)
-onBeforeRouteUpdate((to, from, next) => {
-	if (to.path != from.path) {
-		onBeforeExit(to, from, next)
-	} else {
-		next()
-	}
-})
-
 /**
  * Methods
  */
@@ -210,7 +189,7 @@ function onMolClick(e: MouseEvent, i: number) {
 			// Create array with selected range indices.
 			const range = []
 			for (let i = lowIndex; i < highIndex; i++) {
-				range.push(molGridStore.matching[i])
+				range.push(molGridStore.matchingIndices[i])
 			}
 
 			if (lastSelectedItemSelState.value) {
@@ -242,22 +221,6 @@ function previewMolecule(i: number) {
 	const mol = molGridStore.mols ? molGridStore.mols[i] : null
 	if (mol) {
 		modalStore.display('ModalMolPreview', mol)
-	}
-}
-
-// Block route change when there are unsaved changes.
-async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
-	if (molGridStore.hasChanges) {
-		await modalStore.alert('If you leave, all changes will be lost.', {
-			title: 'Unsaved changes',
-			primaryBtn: 'Stay',
-			secondaryBtn: 'Discard changes',
-			onCancel: () => next(),
-			onSubmit: () => next(false),
-		})
-	} else {
-		next()
-		if (to.path != from.path && !props.retainCache) molGridStore.clear()
 	}
 }
 
@@ -381,12 +344,19 @@ const keyHandlers: KeyHandlers = {
 // Icons
 #mol-grid .mol .icn-btn {
 	position: absolute;
-	top: 3px;
-	right: 3px;
+	top: 0;
+	right: 0;
 	z-index: 1;
+	// background: pink;
 }
-#mol-grid .mol .icn-btn-taste {
-	top: 43px;
+#mol-grid .mol .icn-bookmark {
+	top: 0;
+}
+#mol-grid .mol .icn-smell {
+	top: 40px;
+}
+#mol-grid .mol .icn-taste {
+	top: 80px;
 }
 #mol-grid .mol .icn-btn::after {
 	content: '';
@@ -398,8 +368,9 @@ const keyHandlers: KeyHandlers = {
 	right: -5px;
 	bottom: -5px;
 	background: white;
+	// background: red;
 	border-radius: 20px;
-	filter: blur(12px);
+	filter: blur(10px);
 	transition: filter 0.2s;
 }
 #mol-grid .mol.sel .icn-btn::after {
@@ -449,15 +420,18 @@ const keyHandlers: KeyHandlers = {
 #mol-grid .mol .prop .key {
 	font-size: $font-size-small;
 	line-height: $line-height-small;
-
+}
+#mol-grid .mol .prop .value {
+	font-weight: 500;
+	// line-break: anywhere; // <-- Instead of truncating values we may want to break them over multiple lines? TBD
+}
+#mol-grid .mol .prop .key,
+#mol-grid .mol .prop .value {
 	// Truncate
 	word-wrap: normal;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-}
-#mol-grid .mol .prop .value {
-	font-weight: 500;
 }
 #mol-grid .mol .prop .value.empty {
 	color: $black-30;
@@ -489,11 +463,11 @@ const keyHandlers: KeyHandlers = {
 
 	// Icons
 	#mol-grid.sel-mode .mol .icn-btn,
-	#mol-grid .mol:not(:hover) .icn-btn {
+	#mol-grid .mol:not(:hover) .icn-btn:not(.icn-bookmark.toggle-on) {
 		display: none;
 	}
 	#mol-grid .mol .icn-btn:hover::after {
-		filter: blur(8px);
+		filter: blur(6px);
 	}
 	#mol-grid .mol .icn-btn:hover:deep() svg {
 		pointer-events: none; // To avoid this as e.target

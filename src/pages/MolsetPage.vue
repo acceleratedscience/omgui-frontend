@@ -45,6 +45,7 @@ onMounted(() => {
 	apiFetch(moleculesApi.getMolset(+props.cacheId, query), {
 		onSuccess: (data) => {
 			molGridStore.setMolset(data)
+			molGridStore.setContext(null)
 		},
 		onError: (err) => {
 			console.log('Error in getMolset()', err)

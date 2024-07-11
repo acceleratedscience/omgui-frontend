@@ -12,6 +12,9 @@
 	<!-- Command line overlay -->
 	<CommandLine v-if="commandLineStore.active" />
 
+	<!-- Assistant overlay -->
+	<AIAssistant v-else-if="assistantStore.active" />
+
 	<!-- Modal overlay -->
 	<TheModal />
 
@@ -58,9 +61,11 @@ import { computed, onBeforeMount, onMounted, ref } from 'vue'
 import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
 import { useCommandLineStore } from '@/stores/CommandLineStore'
+import { useAssistantStore } from '@/stores/AssistantStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
 const commandLineStore = useCommandLineStore()
+const assistantStore = useAssistantStore()
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
@@ -71,6 +76,7 @@ import { fileSystemApi } from '@/api/ApiService'
 import TheModal from '@/components/TheModal.vue'
 import TheNav from '@/components/TheNav.vue'
 import CommandLine from '@/pages/CommandLine.vue'
+import AIAssistant from '@/pages/AIAssistant.vue'
 
 // Utils
 import { debounce } from '@/utils/helpers'

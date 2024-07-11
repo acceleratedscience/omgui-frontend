@@ -1,16 +1,22 @@
 <template>
-	<h3 v-if="!molViewerStore.molFromMolset">My Molecules</h3>
 	<BaseFetching v-if="loading" />
-	<template v-else-if="status == 204">
-		<p>You haven't saved any molecules yet.</p>
-		<p>To add molecules to your working set, run <span class="code">add molecule &lt;identifier&gt;</span> in your terminal.</p>
-	</template>
 	<template v-else>
-		<p v-if="!molViewerStore.molFromMolset">
-			This is your working set of molecules, it is cleared at the end of your session.<br />
-			If you want to preserve this molecule set, you can save it to your workspace.
-		</p>
-		<MolsetViewer />
+		<template v-if="!molViewerStore.molFromMolset">
+			<h3><BaseSvgServe icon="icn-bookmark-full" />My Molecules</h3>
+			<p v-if="loadingError" class="error-msg">Something went wrong</p>
+			<template v-else>
+				<template v-if="empty">
+					<p>You haven't saved any molecules yet.</p>
+					<p>To add molecules to your working set, click the bookmark icon on a molecule, or run in your terminal:</p>
+					<span class="code" style="margin-top: 8px; display: inline-block">add molecule &lt;identifier&gt;</span><br />
+				</template>
+				<div v-else id="about-msg">
+					This is your working set of molecules, it is cleared at the end of your session.<br />
+					If you want to preserve this molecule set, you can save it to your workspace under actions.
+				</div>
+			</template>
+		</template>
+		<MolsetViewer v-if="!empty && !loadingError" />
 	</template>
 </template>
 
@@ -22,21 +28,21 @@ import { ref, onMounted } from 'vue'
 import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Stores
-import { useMainStore } from '@/stores/MainStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
-const mainStore = useMainStore()
 const molGridStore = useMolGridStore()
 const molViewerStore = useMolViewerStore()
 
 // Components
 import MolsetViewer from '@/viewers/MolsetViewer.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
+import BaseSvgServe from '@/components/BaseSvgServe.vue'
 
 // Definitions
-const loading = ref<boolean>(false)
+const loading = ref<boolean>(true)
 const loadingError = ref<string>('')
 const status = ref<number | null>(null)
+const empty = ref<boolean>(false)
 
 /**
  * Hooks
@@ -44,19 +50,33 @@ const status = ref<number | null>(null)
 
 onMounted(() => {
 	const query = molGridStore._setUrlQuery()
-	apiFetch(moleculesApi.getMyMols(query), {
+	apiFetch(moleculesApi.getMolset_mymols(query), {
 		onSuccess: (data) => {
-			molGridStore.setMolset(data)
-			// molsetData.value = data
+			if (data == 'empty') {
+				empty.value = true
+			} else {
+				molGridStore.setMolset(data)
+				molGridStore.setContext('my-mols')
+			}
 		},
 		onError: (err) => {
-			console.log('Error in getMolset()', err)
+			console.log('Error in getMyMols()', err)
 		},
 		loading: loading,
 		status: status,
-		// loadingError: loadingError,
+		loadingError: loadingError,
 	})
 })
 </script>
 
-<style lang="css" scoped></style>
+<style lang="css" scoped>
+h3 svg {
+	margin-right: 8px;
+	/* background: pink; */
+	position: relative;
+	top: 2px;
+}
+#about-msg {
+	margin-bottom: 16px;
+}
+</style>

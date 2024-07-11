@@ -1,6 +1,6 @@
 <template>
 	<BreadCrumbs :pathArray="fileStore.breadCrumbPathArray">
-		<IconButton icon="icn-close" btnStyle="soft" mini @click="fileStore.exitViewer" />
+		<BaseIconButton icon="icn-close" btnStyle="soft" mini @click="fileStore.exitViewer" />
 	</BreadCrumbs>
 	<pre v-if="jsonData" id="json-data"><div v-for="line, i in jsonDataLines" :key="i">{{ line }}</div></pre>
 	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
@@ -16,7 +16,7 @@ const fileStore = useFileStore()
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
-import IconButton from '@/components/IconButton.vue'
+import BaseIconButton from '@/components/BaseIconButton.vue'
 
 // Props
 const props = defineProps<{

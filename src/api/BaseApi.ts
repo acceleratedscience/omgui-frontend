@@ -39,7 +39,7 @@ class BaseApi implements BaseApiType {
 	apiClient: any
 	altPort: number
 
-	constructor(apiName: string) {
+	constructor(apiName: string | null = null) {
 		// Create axios instance for API.
 		this.apiClient = axios.create({
 			baseURL: API_URL(),
@@ -50,8 +50,9 @@ class BaseApi implements BaseApiType {
 			},
 		})
 
-		// console.log('Registered API module:', apiName)
-		apiName
+		if (apiName) {
+			console.log('Registered API module:', apiName)
+		}
 
 		this.setupInterceptors()
 		this.altPort = DEFAULT_PORT

@@ -34,42 +34,61 @@
 		<div class="breaker-2"></div>
 
 		<!-- Main actions -->
-		<cv-dropdown id="dd-actions" v-model="mainActionsSelect" :disabled="!molGridStore.hasSel" @change="dispatchMainAction">
+		<cv-dropdown id="dd-actions" v-model="mainActionsSelect" @change="dispatchMainAction">
 			<cv-dropdown-item value="default" hidden>Actions</cv-dropdown-item>
-			<cv-dropdown-item v-for="(action, i) in mainActions" :key="i" :value="action">
+			<cv-dropdown-item
+				v-for="(action, i) in mainActions"
+				:key="i"
+				:value="action"
+				:disabled="!molGridStore.hasSel && action.includes('selected')"
+			>
 				{{ action }}
 			</cv-dropdown-item>
 		</cv-dropdown>
 
 		<!-- Save -->
-		<ButtonSave :onSave="molGridStore.saveChanges" :disabled="!molGridStore.hasChanges" />
+		<TheButtonSaveMolset :disabled="disableSave" />
 	</div>
 </template>
 
 <script setup lang="ts">
 // Vue
 import { ref, computed, watch, nextTick } from 'vue'
-import type { ComputedRef, WritableComputedRef } from 'vue'
+
+// Router
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'
+import { useFileStore } from '@/stores/FileStore'
+import { useModalStore } from '@/stores/ModalStore'
 const molGridStore = useMolGridStore()
+const fileStore = useFileStore()
+const modalStore = useModalStore()
 
 // Components
 import BasePagination from '@/components/BasePagination.vue'
 import MolSearch from '@/components/MolSearch.vue'
 import SortDropdown from '@/components/SortDropdown.vue'
-import ButtonSave from '@/components/ButtonSave.vue'
+import TheButtonSaveMolset from '@/components/TheButtonSaveMolset.vue'
+
+// Modals
+import { useModalSaveFile } from '@/modals/modal-save-file'
+const modalSaveFile = useModalSaveFile()
 
 // Utils
 import useStickyObserver from '@/utils/sticky-observer'
+
+// Type declarations
+import type { ComputedRef, WritableComputedRef } from 'vue'
 
 // Definitions
 // const $actions = ref<HTMLElement | null>(null)
 const selectActionsSelect = ref<string>('default')
 const selectActions = ['select all', 'deselect all', 'select matching', 'invert selection']
 const mainActionsSelect = ref<string>('default')
-const mainActions = ['remove selected', 'keep selected', 'copy to clipboard', 'save SMILES', 'save CSV'] // prettier-ignore
+const mainActions = ['remove selected', 'keep selected', 'copy selected', 'save as']
 
 /**
  * Computed
@@ -100,6 +119,15 @@ const vmodelPagination: WritableComputedRef<number> = computed({
 	set: molGridStore.setPage,
 })
 
+// Save button disabled state.
+const disableSave: ComputedRef<boolean> = computed(() => {
+	if (['result-mols', 'my-mols', 'json'].includes(molGridStore.context || '')) {
+		return !molGridStore.hasChanges
+	} else {
+		return false
+	}
+})
+
 /**
  * Logic
  */
@@ -123,11 +151,11 @@ async function dispatchSelect(selectAction: string) {
 	if (!molGridStore.mols || !selectAction) return
 	if (selectAction == 'default') return
 	if (selectAction == 'select all') {
-		molGridStore.setSel([...Array(molGridStore.total).keys()])
+		molGridStore.setSel(molGridStore.allIndices)
 	} else if (selectAction == 'deselect all') {
 		molGridStore.setSel([])
 	} else if (selectAction == 'select matching') {
-		molGridStore.setSel(molGridStore.matching)
+		molGridStore.setSel(molGridStore.matchingIndices)
 	} else if (selectAction == 'invert selection') {
 		const allIndices = [...Array(molGridStore.total).keys()]
 		const invertedSelection = allIndices.filter((i) => !molGridStore.sel.includes(i))
@@ -138,17 +166,16 @@ async function dispatchSelect(selectAction: string) {
 	await nextTick()
 	selectActionsSelect.value = 'default'
 }
+
 async function dispatchMainAction(action: string) {
 	if (action == 'remove selected') {
 		molGridStore.removeMols(molGridStore.sel)
 	} else if (action == 'keep selected') {
 		molGridStore.keepMols(molGridStore.sel)
 	} else if (action == 'copy to clipboard') {
-		// console.log('copy to clipboard')
-	} else if (action == 'save SMILES') {
-		// console.log('save SMILES')
-	} else if (action == 'save CSV') {
-		// console.log('save CSV')
+		console.log('copy to clipboard')
+	} else if (action == 'save as') {
+		modalSaveFile('molset-options')
 	}
 
 	// Reset for next use.

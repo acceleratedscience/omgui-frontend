@@ -44,7 +44,7 @@
 				/>
 			</div> -->
 		<div class="container-2d" v-html="molViewerStore.svg"></div>
-		<MolRender3D :sdf="molViewerStore.sdf" :molName="molViewerStore.mol.identifiers?.name ?? ''" />
+		<MolRender3D :mdl="molViewerStore.mdl" :molName="molViewerStore.mol.identifiers?.name ?? ''" />
 	</div>
 
 	<!-- Page content -->
@@ -52,16 +52,16 @@
 		<!-- Left main column -->
 		<div class="col-left">
 			<BreadCrumbsNot v-if="context == 'identifier'" :backto="{ name: 'mol' }">
-				<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
+				<BaseIconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
 			</BreadCrumbsNot>
 			<BreadCrumbs v-else :pathArray="pathArray">
-				<IconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
+				<BaseIconButton icon="icn-file-json" iconHover="icn-file-json-hover" btnStyle="soft" mini @click="router.push('?use=json')" />
 			</BreadCrumbs>
 
 			<!-- Title -->
 			<div id="title-wrap">
 				<div class="v-align">
-					<SvgServe
+					<BaseSvgServe
 						class="icn-file-mol"
 						:class="{ loading: loading }"
 						:icon="context == 'molset' ? 'icn-file-molset' : 'icn-file-mol'"
@@ -72,21 +72,22 @@
 					{{ capitalize(molName) }}
 				</h2>
 				<div class="filler"></div>
-				<IconButton icon="icn-star-large-outline" iconHover="icn-star" colorHover="rgba(0,0,0,.3)" colorToggle="#d3bf0b" :toggle="true" />
+				<BaseBookmark v-if="molViewerStore.mol" :mol="molViewerStore.mol" />
+				<OverflowMenuMol :disabled="Boolean(loading)" />
 				<BasePagination v-if="context == 'molset'" v-model="modelPagination" :total="molGridStore.total" />
-				<IconButton
+				<BaseIconButton
 					v-if="context == 'molset'"
 					icon="icn-close"
 					icnSize="small"
 					btnStyle="carbon"
 					@click="molViewerStore.setMolFromMolsetIndex(null)"
 				/>
-				<IconButton
+				<BaseIconButton
 					v-else
 					icon="icn-close"
 					icnSize="small"
 					btnStyle="default"
-					@click="context == 'file' ? fileStore.exitViewer : context == 'identifier' ? router.push({ name: 'mol' }) : null"
+					@click="context == 'file' ? fileStore.exitViewer() : context == 'identifier' ? router.push({ name: 'mol' }) : null"
 					:style="{ 'margin-right': '-8px' }"
 				/>
 			</div>
@@ -128,9 +129,11 @@
 						<span v-else class="blank">-</span>
 						<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 					</div>
-					<div v-if="molViewerStore.enriched || mol?.identifiers?.formula">
-						<b v-copy-on-click :data-copy="`Formula: ${mol?.identifiers?.formula}`">Formula: </b>
-						<span v-if="mol?.identifiers?.formula" id="data-isomeric-smiles" v-copy-on-click>{{ mol?.identifiers?.formula }}</span>
+					<div v-if="molViewerStore.enriched || mol?.identifiers?.molecular_formula">
+						<b v-copy-on-click :data-copy="`Formula: ${mol?.identifiers?.molecular_formula}`">Formula: </b>
+						<span v-if="mol?.identifiers?.molecular_formula" id="data-isomeric-smiles" v-copy-on-click>{{
+							mol?.identifiers?.molecular_formula
+						}}</span>
 						<span v-else class="blank">-</span>
 						<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 					</div>
@@ -146,15 +149,14 @@
 						<span v-else class="blank">-</span>
 						<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 					</div>
-					<br />
-					<cv-button
-						v-if="!loading && !loadingError && !molViewerStore.enriched && !mol.identifiers?.cid"
-						size="small"
-						kind="secondary"
-						@click="molViewerStore.enrichMolecule"
-					>
-						Enrich
-					</cv-button>
+
+					<template v-if="!loading && !loadingError">
+						<!-- Enrich button -->
+						<TheButtonEnrichMol />
+
+						<!-- Save button -->
+						<TheButtonSaveMol />
+					</template>
 				</div>
 
 				<hr />
@@ -240,8 +242,8 @@
 
 <script setup lang="ts">
 // Vue
-import { onBeforeUnmount, computed, watch } from 'vue'
-import type { ComputedRef, WritableComputedRef } from 'vue'
+import { onBeforeUnmount, computed } from 'vue'
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
 
 // Router
 import { useRouter } from 'vue-router'
@@ -252,25 +254,33 @@ import { useMainStore } from '@/stores/MainStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
 import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
+import { useModalStore } from '@/stores/ModalStore'
 const mainStore = useMainStore()
 const molViewerStore = useMolViewerStore()
 const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
+const modalStore = useModalStore()
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import BreadCrumbsNot from '@/components/BreadCrumbsNot.vue'
-import IconButton from '@/components/IconButton.vue'
-import SvgServe from '@/components/SvgServe.vue'
+import BaseIconButton from '@/components/BaseIconButton.vue'
+import BaseBookmark from '@/components/BaseBookmark.vue'
+import BaseSvgServe from '@/components/BaseSvgServe.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
 import BasePagination from '@/components/BasePagination.vue'
 import MolRender3D from '@/components/MolRender3D.vue'
+import OverflowMenuMol from '@/components/OverflowMenuMol.vue'
+import TheButtonSaveMol from '@/components/TheButtonSaveMol.vue'
+import TheButtonEnrichMol from '@/components/TheButtonEnrichMol.vue'
 
 // Utils
 import { capitalize } from '@/utils/helpers'
 
 // Type declarations
 import type { Mol, TempMol } from '@/types'
+import type { ComputedRef, WritableComputedRef } from 'vue'
+import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
 // Props
 const props = withDefaults(
@@ -306,7 +316,8 @@ const pathArray: ComputedRef<string[]> = computed(() => {
 
 // Title
 const molName: ComputedRef<string> = computed(() => {
-	return mol.value?.identifiers?.name ? mol.value.identifiers.name : props.loading ? 'Loading' : 'Unnamed Molecule'
+	if (props.loading) return 'Loading'
+	return molViewerStore.name
 })
 
 // Pagination model
@@ -363,13 +374,12 @@ const stylePropWrap: ComputedRef<{ height?: string }> = computed(() => {
 
 // When viewing molecule as JSON, and then returning to the molviewer,
 // we need to reload the data.
-if (molViewerStore.isEmpty && fileStore.data) {
+if (molViewerStore.isEmpty && fileStore.data && fileStore.moduleName == 'MolViewer') {
 	const data: Mol = fileStore.data
 	molViewerStore.setMolData(data)
 }
 
 // When opening a molecule from a molset, the fetchMolVizData is called from within MolsetViewer.vue.
-console.log('INIT')
 if (props.context == 'file' || props.context == 'identifier') {
 	if (molViewerStore.inchi) {
 		// When opening a molecule file.
@@ -387,6 +397,14 @@ if (props.context == 'file' || props.context == 'identifier') {
 // Clear store on exit.
 onBeforeUnmount(molViewerStore.clear)
 
+// Block any exit attempt when there are unsaved changes.
+window.onbeforeunload = function () {
+	if (molGridStore.hasChanges) return true
+	molGridStore.clear()
+}
+onBeforeRouteLeave(onBeforeExit)
+onBeforeRouteUpdate(onBeforeExit)
+
 /**
  * Methods
  */
@@ -394,6 +412,36 @@ onBeforeUnmount(molViewerStore.clear)
 // Toggle synonym truncation.
 function toggleExpand(e: Event) {
 	;(e.currentTarget as Element).classList.toggle('expand')
+}
+
+// Block route change when there are unsaved changes.
+async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
+	// console.log('onBeforeExit MOL', molViewerStore.hasChanges)
+	if (molViewerStore.molFromMolset) {
+		// When we're looking at a molecule from a molset, we don't
+		// do anything because MolSetViewer has its own onBeforeExit.
+		// When you enrich or edit a molecule, saving it will update
+		// the molset (either json or my-mols) which is all controlled
+		// from TheButtonSaveMol.vue.
+		next()
+	} else if (molViewerStore.hasChanges) {
+		await modalStore.alert('If you leave, all changes to this molecule will be lost.', {
+			title: 'Unsaved molecule changes',
+			primaryBtn: 'Stay',
+			secondaryBtn: 'Discard',
+			onCancel: () => {
+				// We check for fullPath to include page changes.
+				if (to.fullPath != from.fullPath) molViewerStore.clear()
+				next()
+			},
+			onSubmit: () => next(false),
+		})
+	} else {
+		// We check for path to exclude page changes.
+		// Otherwise there's an ungly flicker when changing pages.
+		if (to.path != from.path) molViewerStore.clear()
+		next()
+	}
 }
 </script>
 
@@ -485,6 +533,13 @@ function toggleExpand(e: Event) {
 #title-wrap h1.loading::after {
 	content: '';
 	animation: ellipsis 800ms infinite;
+}
+
+// Enrich & Save buttons
+.btn-save,
+.btn-enrich {
+	margin-top: 16px;
+	margin-right: 8px;
 }
 
 // Filler

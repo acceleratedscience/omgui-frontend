@@ -67,7 +67,9 @@ export type FileType =
 	| 'mol'
 	| 'molset'
 	| 'json'
+	| 'mdl'
 	| 'data'
+	| 'smi'
 	| 'text'
 	| 'html'
 	| 'img'
@@ -110,7 +112,7 @@ export type Mol = {
 		isomeric_smiles: string
 		smiles: string // We don't use this field but when opening SDF files it may be used
 		cid: string
-		formula: string
+		molecular_formula: string
 		[key: string]: string // To shut up ts errors.
 	}
 	synonyms: string[]
@@ -144,7 +146,8 @@ export type MolsetApi = {
 	searchStr: string
 	searchMode: SearchMode
 	sort: string
-	matching: number[]
+	allIndices: number[]
+	matchingIndices: number[]
 	page: number
 	pageSize: number
 	pageTotal: number
@@ -153,3 +156,10 @@ export type SearchMode = 'text' | 'smarts'
 
 // The URL query object as part of the route.
 export type UrlQuery = Record<string, string | (string | null)[]>
+
+// Option menu with actions
+export type ActionOption = {
+	val: string
+	disp: string
+	action: () => void
+}

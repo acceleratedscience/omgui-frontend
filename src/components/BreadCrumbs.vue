@@ -15,7 +15,7 @@
 		<a v-if="needsTruncation && truncate" href="#" class="toggle-show" @click.prevent="toggleTruncate">show</a>
 		<div class="bc-right">
 			<slot></slot>
-			<IconButton
+			<BaseIconButton
 				v-if="fileType"
 				icon="icn-doc"
 				iconHover="icn-doc-full"
@@ -44,7 +44,7 @@ const modalStore = useModalStore()
 import { fileSystemApi } from '@/api/ApiService'
 
 // Components
-import IconButton from '@/components/IconButton.vue'
+import BaseIconButton from '@/components/BaseIconButton.vue'
 
 // Props
 const props = defineProps<{

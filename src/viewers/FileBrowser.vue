@@ -1,9 +1,9 @@
 <template>
 	<div id="col-scroll-x" ref="colScroll">
-		<div id="col-wrap">
+		<div id="col-wrap" :class="{ modal: isModal }">
 			<!-- Filler column left -->
-			<div class="column filler-left" :class="{ headless: mainStore.headless }">
-				<div class="col-header"></div>
+			<div class="column filler-left" :class="{ headless: tight }">
+				<div v-if="!isModal" class="col-header"></div>
 				<div class="col-body"></div>
 			</div>
 
@@ -11,7 +11,7 @@
 			<template v-for="(column, level) in levels" :key="level">
 				<div class="column" ref="columns">
 					<!-- Column header -->
-					<div class="col-header" :class="{ root: level == 0 }" :title="column.dirname" @click="(e) => resetCol(e, level)">
+					<div v-if="!isModal" class="col-header" :class="{ root: level == 0 }" :title="column.dirname" @click="(e) => resetCol(e, level)">
 						<button class="btn-workspace" v-if="level == 0" @click="modalStore.display('ModalWorkspaces')">
 							{{ column.dirname }}
 						</button>
@@ -31,7 +31,7 @@
 							@click="() => fetchNextLevel(dir_hidden.path, dir_hidden.filename, level + 1, true)"
 						>
 							<div>{{ dir_hidden.filename }}</div>
-							<SvgServe icon="icn-caret-right" :key="dir_hidden.filename" />
+							<BaseSvgServe icon="icn-caret-right" :key="dir_hidden.filename" />
 						</div>
 
 						<!-- Directories -->
@@ -44,7 +44,7 @@
 							@click="() => fetchNextLevel(dir.path, dir.filename, level + 1, true)"
 						>
 							<div>{{ dir.filename }}</div>
-							<SvgServe icon="icn-caret-right" :key="dir.filename" />
+							<BaseSvgServe icon="icn-caret-right" :key="dir.filename" />
 						</div>
 
 						<!-- Hidden files -->
@@ -59,7 +59,7 @@
 							@click="() => previewFile(file_hidden, level + 1, true)"
 							@dblclick="openFile(file_hidden)"
 						>
-							<SvgServe :icon="'icn-file-' + file_hidden._meta.fileType" :key="String(file_hidden._meta.fileType)" />
+							<BaseSvgServe :icon="'icn-file-' + file_hidden._meta.fileType" :key="String(file_hidden._meta.fileType)" />
 							<div>{{ file_hidden.filename }}</div>
 						</div>
 
@@ -74,8 +74,9 @@
 							:title="file.filename"
 							@click="() => previewFile(file, level + 1, true)"
 							@dblclick="openFile(file)"
+							:x="'icn-file-' + file._meta.fileType"
 						>
-							<SvgServe :icon="'icn-file-' + file._meta.fileType" :key="String(file._meta.fileType)" />
+							<BaseSvgServe :icon="'icn-file-' + file._meta.fileType" :key="String(file._meta.fileType)" />
 							<div>{{ file.filename }}</div>
 						</div>
 
@@ -87,7 +88,7 @@
 			</template>
 
 			<!-- File preview column -->
-			<div v-if="filePreview" class="column file-preview">
+			<div v-if="filePreview && !isModal" class="column file-preview">
 				<!-- Column header -->
 				<div class="col-header" :title="filePreview.filename">
 					{{ filePreview.filename }}
@@ -109,7 +110,7 @@
 
 			<!-- Filler column left -->
 			<div class="column filler-right">
-				<div class="col-header"></div>
+				<div v-if="!isModal" class="col-header"></div>
 				<div class="col-body"></div>
 			</div>
 		</div>
@@ -118,7 +119,7 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 // Stores
@@ -131,7 +132,7 @@ const modalStore = useModalStore()
 import { fileSystemApi } from '@/api/ApiService'
 
 // Components
-import SvgServe from '@/components/SvgServe.vue'
+import BaseSvgServe from '@/components/BaseSvgServe.vue'
 
 // Utils
 import { prettySize, timeAgo } from '@/utils/helpers'
@@ -148,6 +149,25 @@ const filePreview = ref<File | null>(null)
 const colScroll = ref<HTMLDivElement | null>(null)
 const columns = ref<HTMLDivElement[] | null>(null)
 
+// Props
+const props = defineProps<{
+	// When the filebrowser is loaded inside the save-file modal.
+	isModal?: boolean
+	// This lets us v-model a path in the save-file modal.
+	modelValue?: string
+}>()
+
+// Emits
+const emit = defineEmits(['update:modelValue'])
+
+/*
+ * Computed
+ */
+
+const tight = computed<boolean>(() => {
+	return props.isModal ?? mainStore.headless
+})
+
 /**
  * Hooks
  */
@@ -162,14 +182,14 @@ onMounted(async () => {
 	parseRoute()
 
 	// Update UI when going back/forward in the browser history.
-	window.addEventListener('popstate', parseRoute)
+	if (!props.isModal) window.addEventListener('popstate', parseRoute)
 })
 
 onBeforeUnmount(() => {
 	mounted.value = false
 
 	// Remove event listener.
-	window.removeEventListener('popstate', parseRoute)
+	if (!props.isModal) window.removeEventListener('popstate', parseRoute)
 })
 
 // When the workspace is switched using the
@@ -188,16 +208,12 @@ watch(
 // Parse the route and load the appropriate files.
 async function parseRoute() {
 	// console.log('fb parseRoute')
-	// When going back or forward in the history while
-	// leaving the fileBrowser module, the popstate
-	// triggers parseRoute before the listener is removed.
-	// Hence we need to catch this.
 
 	// Fetch root level
 	await fetchNextLevel()
 
 	// Fetch consecutive levels & mark selection state.
-	const path = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
+	const path = props.isModal && props.modelValue != undefined ? props.modelValue : route.path.replace(/(^\/headless)?\/~(\/)?/, '')
 	const pathArr = path.split('/').filter((item) => !!item)
 	for (const [i, dirName] of pathArr.entries()) {
 		const dirPath = pathArr.slice(0, i + 1).join('/')
@@ -214,7 +230,7 @@ async function parseRoute() {
 			previewFile(file, levels.value.length)
 		} else {
 			// Remove the hash from the route
-			router.push({ path: route.path, query: route.query })
+			if (!props.isModal) router.push({ path: route.path, query: route.query })
 		}
 	}
 }
@@ -225,8 +241,8 @@ async function previewFile(file: File, level: number, fromClick: boolean = false
 	// if (!fromClick) {
 	const re = new RegExp('/?' + file.filename + '$')
 	const previewPath = file.path.replace(re, '')
-	const headless = mainStore.headless ? '/headless' : ''
-	router.push(headless + '/~/' + previewPath + '#' + file.filename)
+	const headlessPath = tight.value ? '/headless' : ''
+	if (!props.isModal) router.push(headlessPath + '/~/' + previewPath + '#' + file.filename)
 	// }
 
 	// Update selection state.
@@ -253,7 +269,7 @@ function hidePreviewFile() {
 }
 
 function openFile(file: File) {
-	router.push('/~/' + file.path)
+	if (!props.isModal) router.push('/~/' + file.path)
 }
 
 // Load the next level of files and add column.
@@ -268,7 +284,11 @@ async function fetchNextLevel(path: string = '', filename: string = '', level: n
 
 	// Update the URL.
 	if (fromClick) {
-		router.push('/~/' + path)
+		if (props.isModal) {
+			emit('update:modelValue', path)
+		} else {
+			router.push('/~/' + path)
+		}
 	}
 
 	// Update selection state.
@@ -377,7 +397,7 @@ async function fetchWorkspaceFiles(path = '') {
 }
 
 // Column split (tab in between column titles)
-#col-wrap .col-split {
+#col-wrap:not(.modal) .col-split {
 	height: 32px;
 	line-height: 32px;
 	position: relative;
@@ -389,7 +409,7 @@ async function fetchWorkspaceFiles(path = '') {
 	border-bottom: solid 1px #eee;
 	box-sizing: border-box;
 }
-#col-wrap .col-split::after {
+#col-wrap:not(.modal) .col-split::after {
 	content: '/';
 	width: 10px;
 	position: absolute;
@@ -524,6 +544,12 @@ async function fetchWorkspaceFiles(path = '') {
 }
 #col-wrap .dir.sel svg {
 	color: #fff;
+}
+
+// Disable file selecting in modal mode.
+#col-wrap.modal .file {
+	pointer-events: none;
+	cursor: default;
 }
 
 // Hidden files

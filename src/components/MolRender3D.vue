@@ -5,8 +5,8 @@
 			<!-- <div>{{ mol.identifiers.inchi }}</div> -->
 			<!-- <div>{{ mol.identifiers.canonical_smiles }}</div> -->
 		</div>
-		<IconButton v-if="fullscreen" icon="icn-close" btnStyle="soft" icnSize="large" @click="toggleFullScreen(false)" />
-		<IconButton
+		<BaseIconButton v-if="fullscreen" icon="icn-close" btnStyle="soft" icnSize="large" @click="toggleFullScreen(false)" />
+		<BaseIconButton
 			v-else
 			icon="icn-full-screen-large"
 			iconHover="icn-full-screen-large-hover"
@@ -26,10 +26,10 @@ import Miew from '@/TEMP/miew/dist/miew.module'
 import '@/TEMP/miew/dist/miew.min.css'
 
 // Vue
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 // Components
-import IconButton from '@/components/IconButton.vue'
+import BaseIconButton from '@/components/BaseIconButton.vue'
 
 // Utils
 import { capitalize } from '@/utils/helpers'
@@ -38,7 +38,7 @@ import { capitalize } from '@/utils/helpers'
 import type { Mol, TempMol } from '@/types'
 
 // Props
-const props = defineProps<{ sdf: string | null; molName: string | null }>()
+const props = defineProps<{ mdl: string | null; molName: string | null }>()
 
 // Definitions
 const $container3d = ref<Element | null>(null)
@@ -51,15 +51,22 @@ let miewViewer: any = null
 
 // When you look at molecule-by-identifier as JSON (?use=json), then return to the molecule,
 // the watcher won't trigger because ?use=JSON is handled in MolViewer.vue (see #json-only)
-// and molviewerStore.sdf remains unchanged.
+// and molViewerStore.mdl remains unchanged.
 // When looking at molecule via filebrowser, the ?use=json is handler by ViewerDispatch.vue,
-// which resets molViewerStore.sdf, triggering the watcher.
+// which resets molViewerStore.mdl, triggering the watcher.
 onMounted(() => {
-	if (props.sdf) init3DViewer()
+	if (props.mdl) init3DViewer()
 })
 
 // As soon as the SDF data is loaded into the store, render the 3D molecule.
-watch(() => props.sdf, init3DViewer)
+watch(() => props.mdl, init3DViewer)
+
+onBeforeUnmount(() => {
+	if (miewViewer) {
+		miewViewer.term()
+		miewViewer = null
+	}
+})
 
 /**
  * Methods
@@ -71,7 +78,7 @@ function init3DViewer() {
 	if (!$container3d.value) return
 
 	// Triggered whenever we clear the molViewerStore.
-	if (props.sdf == null) {
+	if (props.mdl == null) {
 		miewViewer.term()
 		miewViewer = null
 		$container3d.value.innerHTML = ''
@@ -115,7 +122,7 @@ function render3d_miew(forceReInit = false) {
 			miewViewer.run()
 		}
 	}
-	miewViewer.load(props.sdf, { sourceType: 'immediate', fileType: 'sdf' })
+	miewViewer.load(props.mdl, { sourceType: 'immediate', fileType: 'sdf' })
 }
 
 async function toggleFullScreen(state: boolean) {

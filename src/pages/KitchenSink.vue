@@ -30,6 +30,33 @@
 	<button @click="modalStore.display('_ModalTemplate')">template</button>&nbsp;
 	<button @click="modalStore.display('ModalViewer')">file type</button>&nbsp;
 	<button @click="modalStore.display('ModalWorkspaces')">workspaces</button>&nbsp;
+	<button @click="modalStore.display('ModalSaveFile', { path: 'my_dir/sub_dir/subsub_dir', filename: 'Foobar', ext: 'json', ext2: 'molset' })">
+		Save file
+	</button>
+	&nbsp;
+	<button @click="modalStore.display('ModalSaveFile', { path: 'my_dir/sub_dir/subsub_dir', filename: 'Foobar', dataType: 'molset' })">
+		Save molset as
+	</button>
+	&nbsp;
+	<button
+		@click="
+			modalStore.display(
+				'ModalSaveFile',
+				{ path: 'my_dir/sub_dir/subsub_dir', filename: 'Foobar', dataType: 'mol' },
+				{
+					onSubmit: () => {
+						console.log('submitted')
+					},
+					onCancel: () => {
+						console.log('cancelled')
+					},
+				},
+			)
+		"
+	>
+		Save mol as
+	</button>
+	&nbsp;
 
 	<br /><br /><br /><br />
 	<hr />
@@ -46,25 +73,28 @@
 	<h4>:: Icons</h4>
 
 	<span style="color: red">
-		<a href="#"><SvgServe icon="icn-file-mol" /></a>
-		<SvgServe icon="icn-file-mol" />
-		<SvgServe icon="icn-file-molset" />
-		<SvgServe icon="icn-file-data" />
-		<SvgServe icon="icn-file-text" />
-		<SvgServe icon="icn-link" />
-		<SvgServe icon="icn-reaction" />
-		<SvgServe icon="icn-star" />
-		<SvgServe icon="icn-file-run" />
-		<SvgServe icon="icn-file-json" />
-		<SvgServe icon="icn-file-pdf" />
-		<SvgServe icon="icn-file-svg" />
-		<SvgServe icon="icn-file-md" />
-		<SvgServe icon="icn-file-unk" />
-		<SvgServe icon="icn-caret-left" />
-		<SvgServe icon="icn-caret-right" />
-		<SvgServe icon="icn-caret-up" />
-		<SvgServe icon="icn-caret-down" />
-		<SvgServe icon="icn-file-mol" size="large" />
+		<a href="#"><BaseSvgServe icon="icn-file-mol" /></a>
+		<BaseSvgServe icon="icn-file-mol" />
+		<BaseSvgServe icon="icn-file-molset" />
+		<BaseSvgServe icon="icn-file-data" />
+		<BaseSvgServe icon="icn-file-text" />
+		<BaseSvgServe icon="icn-link" />
+		<BaseSvgServe icon="icn-reaction" />
+		<BaseSvgServe icon="icn-star" />
+		<BaseSvgServe icon="icn-file-run" />
+		<BaseSvgServe icon="icn-file-json" />
+		<BaseSvgServe icon="icn-file-pdf" />
+		<BaseSvgServe icon="icn-file-run" />
+		<BaseSvgServe icon="icn-file-sdf" />
+		<BaseSvgServe icon="icn-file-molset-csv" />
+		<BaseSvgServe icon="icn-file-svg" />
+		<BaseSvgServe icon="icn-file-md" />
+		<BaseSvgServe icon="icn-file-unk" />
+		<BaseSvgServe icon="icn-caret-left" />
+		<BaseSvgServe icon="icn-caret-right" />
+		<BaseSvgServe icon="icn-caret-up" />
+		<BaseSvgServe icon="icn-caret-down" />
+		<BaseSvgServe icon="icn-file-mol" size="large" />
 
 		<!-- Native icons -->
 		<CloseIcon />
@@ -77,39 +107,46 @@
 	<div class="icons-wrap">
 		<div style="background: #ffd">
 			Default
-			<IconButton icon="icn-star" />
+			<BaseIconButton icon="icn-star" />
 		</div>
 		<div>
 			Soft
-			<IconButton icon="icn-star" btnStyle="soft" />
+			<BaseIconButton icon="icn-star" btnStyle="soft" />
 		</div>
 		<div>
 			Carbon
-			<IconButton icon="icn-star" btnStyle="carbon" />
+			<BaseIconButton icon="icn-star" btnStyle="carbon" />
 		</div>
 		<div>
 			Custom colors
-			<IconButton icon="icn-star" color="green" colorHover="red" />
+			<BaseIconButton icon="icn-star" color="green" colorHover="red" />
 		</div>
 		<div>
 			Toggle
-			<IconButton icon="icn-star" :toggle="true" />
+			<BaseIconButton icon="icn-star" :toggle="true" />
 		</div>
 		<div>
 			Toggle with custom color
-			<IconButton icon="icn-star" :toggle="true" colorToggle="#d3bf0b" />
+			<BaseIconButton icon="icn-star" :toggle="true" colorToggle="#d3bf0b" />
 		</div>
 		<div>
 			Mini
-			<IconButton icon="icn-star" :mini="true" />
+			<BaseIconButton icon="icn-star" :mini="true" />
 		</div>
 	</div>
 	<br />
 	<div class="icons-in-field">
 		Examples
 		<div class="icons-wrap">
-			<IconButton icon="icn-full-screen-large" iconHover="icn-full-screen-large-hover" btnStyle="soft" icnSize="large" />
-			<IconButton icon="icn-star-large-outline" iconHover="icn-star" colorToggle="#d3bf0b" :toggle="true" icnSize="large" />
+			<BaseIconButton icon="icn-full-screen-large" iconHover="icn-full-screen-large-hover" btnStyle="soft" icnSize="large" />
+			<BaseIconButton
+				icon="icn-star-large-outline"
+				iconHover="icn-star"
+				iconSel="icn-star"
+				colorToggle="#d3bf0b"
+				:toggle="true"
+				icnSize="large"
+			/>
 		</div>
 	</div>
 	<span> </span>
@@ -148,8 +185,8 @@ import { useModalStore } from '@/stores/ModalStore'
 const modalStore = useModalStore()
 
 // Compnents
-import SvgServe from '@/components/SvgServe.vue'
-import IconButton from '@/components/IconButton.vue'
+import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIconButton from '@/components/BaseIconButton.vue'
 // @ts-ignore
 import CloseIcon from '@carbon/icons-vue/es/close/16'
 // @ts-ignore
