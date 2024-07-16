@@ -13,6 +13,7 @@ type State = {
 	_screenWidth: number | null
 	_contentWidth: number | null
 	_onClickAnywhere: (e: MouseEvent) => void
+	_blockRouting: boolean
 }
 
 export const useMainStore = defineStore('mainStore', {
@@ -22,6 +23,7 @@ export const useMainStore = defineStore('mainStore', {
 		_screenWidth: null, // The available width of the viewport
 		_contentWidth: null, // The width of the content area (screen - padding)
 		_onClickAnywhere: () => {}, // Executes when the user clicks anywhere on the page
+		_blockRouting: false, // Prevents the router from changing routes, including changes to the query
 	}),
 	getters: {
 		headless(): boolean {
@@ -38,6 +40,9 @@ export const useMainStore = defineStore('mainStore', {
 		},
 		onClickAnywhere(): (e: MouseEvent) => void {
 			return this._onClickAnywhere
+		},
+		blockRouting(): boolean {
+			return this._blockRouting
 		},
 	},
 	actions: {
@@ -88,6 +93,11 @@ export const useMainStore = defineStore('mainStore', {
 		// Set onBlur function
 		setOnClickAnywhere(fn: (e: MouseEvent) => void) {
 			this._onClickAnywhere = fn
+		},
+
+		// Set blockRouting
+		setBlockRouting(bool: boolean) {
+			this._blockRouting = bool
 		},
 	},
 })

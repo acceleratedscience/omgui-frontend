@@ -5,8 +5,6 @@
  -->
 
 <template>
-	<!-- <BreadCrumbs v-if="showBreadCrumbs" :pathArray="fileStore.breadCrumbPathArray" /> -->
-	<p v-if="fileStore.invalidExt" class="error-msg">We don't recognize this file's extension ({{ fileStore.ext }})</p>
 	<div v-if="loadError" class="error-msg">The requested module '{{ fileStore.moduleName }}' was not found.</div>
 	<BaseFetching v-else-if="loading && !fileStore.isDir" text="Fetching file" failText="Failed to fetch file" />
 	<component v-else-if="dynamicModule" :is="dynamicModule" /><!-- :data="fileStore.data" -->
@@ -99,10 +97,9 @@ watch(
 		// When you open a molecule from a molset, the route doesn't change,
 		// so we monitor the fileType. We need to check if the oldValue is not
 		// null to avoid triggering this on intial load.
-		if (newValue && oldValue) {
-			// console.log('A1', newValue, fileStore.moduleName)
-			loadModule(fileStore.moduleName)
-		}
+		// if (newValue && oldValue) { // This condition was preventing yet-to-be-supported filetypes like PDF from loading the correct viewer. Don't think we need this?
+		loadModule(fileStore.moduleName)
+		// }
 	},
 )
 
@@ -159,7 +156,6 @@ async function parseRoute() {
 
 // Load the dynamic module.
 function loadModule(moduleName: string | null) {
-	// console.log('loadModule', moduleName)
 	loadError.value = false
 	if (!moduleName) {
 		dynamicModule.value = null

@@ -29,12 +29,12 @@ const _map_FileType: MultiMap = {
 	img:    ['image',        'TextViewer'], // Viewer TBD
 	vid:    ['video',        'TextViewer'], // Viewer TBD
 	xml:    ['xml',          'TextViewer'], // Viewer TBD
-	pdf:    ['pdf',          'TextViewer'], // Viewer TBD
+	pdf:    ['pdf',          'PdfViewer'],
 	svg:    ['svg',          'TextViewer'], // Viewer TBD
 	run:    ['run',          'TextViewer'], // Viewer TBD
 	rxn:    ['reaction',     'TextViewer'], // Viewer TBD
 	md:     ['markdown',     'TextViewer'], // Viewer TBD
-	unk:    ['unknown',      'TextViewer'],
+	unk:    ['unknown',      'UnknownViewer'],
 }
 
 // Splitting up the above map into two separate maps.

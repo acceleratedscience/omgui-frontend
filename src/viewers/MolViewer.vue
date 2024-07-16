@@ -198,7 +198,7 @@
 								</div>
 							</div>
 							<BaseFetching v-else-if="loading" :error="!!loadingError" />
-							<template v-else>This molecule does not have any synonyms.</template>
+							<template v-else>No synonyms available</template>
 						</div>
 					</div>
 

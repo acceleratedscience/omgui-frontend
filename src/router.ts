@@ -108,6 +108,16 @@ const router = createRouter({
 // the headless version of the next route.
 router.beforeEach((to, from, next) => {
 	const mainStore = useMainStore()
+
+	// Block routing if requested.
+	// We use the mainStore state for this so we can also cover changes to the URL query.
+	// This is in particular needed for
+	// if (mainStore.blockRouting) {
+	// 	console.log('BLOCK')
+	// 	next(false)
+	// 	return
+	// }
+
 	const exitHeadless = from.path.replace(/^\/headless/, '') == to.path
 	if (!mainStore.headless && !exitHeadless && (from.meta.headless || to.meta.headless)) {
 		mainStore.setHeadless()

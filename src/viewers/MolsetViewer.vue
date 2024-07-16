@@ -1,5 +1,5 @@
 <template>
-	<MolViewer v-if="molViewerStore.molFromMolset" context="molset" />
+	<MolViewer v-if="!mainStore.blockRouting && molViewerStore.molFromMolset" context="molset" />
 	<template v-else>
 		<BreadCrumbs v-if="fileStore.active" :pathArray="fileStore.breadCrumbPathArray">
 			<template v-if="molGridStore.resultCount < molGridStore.total">
@@ -28,10 +28,12 @@ const router = useRouter()
 const route = useRoute()
 
 // Stores
+import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
 import { useModalStore } from '@/stores/ModalStore'
+const mainStore = useMainStore()
 const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
 const molViewerStore = useMolViewerStore()
@@ -44,7 +46,6 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import BreadCrumbsNot from '@/components/BreadCrumbsNot.vue'
 import TheMolGrid from '@/components/TheMolGrid.vue'
-import BaseIconButton from '@/components/BaseIconButton.vue'
 import MolViewer from '@/viewers/MolViewer.vue'
 
 // Utils
@@ -123,8 +124,8 @@ function _fetchMolDataFromMolset(cacheId: number | null = null, index: number) {
 // Block route change when there are unsaved changes.
 async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
 	// console.log('onBeforeExit MOLSET', molGridStore.hasChanges)
-	console.log('on before exit', molGridStore.hasChanges)
 	if (molGridStore.hasChanges) {
+		mainStore.setBlockRouting(true)
 		await modalStore.alert('If you leave, all molset changes will be lost.', {
 			title: 'Unsaved molset changes',
 			primaryBtn: 'Stay',
@@ -133,9 +134,13 @@ async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNorm
 				if (to.path != from.path && !props.retainCache) {
 					molGridStore.clear()
 				}
+				molGridStore.setHasChanges(false)
+				mainStore.setBlockRouting(false)
 				next()
 			},
-			onSubmit: () => next(false),
+			onSubmit: () => {
+				next(false)
+			},
 		})
 	} else {
 		if (to.path != from.path && !props.retainCache) {

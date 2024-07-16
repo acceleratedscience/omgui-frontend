@@ -1,8 +1,8 @@
 <template>
 	<!-- <router-link to="/~/sample.csv">sample</router-link> |
 	<router-link to="/~/foo.csv">foo</router-link> -->
-	<main id="module">This is the dataviewer component</main>
-	<pre v-if="fileStore.data" id="file-content">{{ fileStore.data }}</pre>
+	<main id="module">TO BE IMPLEMENTED: Data viewer</main>
+	<TextBox v-if="fileStore.data" :textData="fileStore.data" />
 	<div v-else-if="fileStore.errCode">{{ fileStore.errCode }}</div>
 </template>
 
@@ -10,6 +10,9 @@
 // Stores
 import { useFileStore } from '@/stores/FileStore'
 const fileStore = useFileStore()
+
+// Components
+import TextBox from '@/components/TextBox.vue'
 </script>
 
 <style lang="css" scoped>
@@ -17,8 +20,5 @@ const fileStore = useFileStore()
 	background: lightblue;
 	padding: 4px;
 	margin-bottom: 20px;
-}
-#file-content {
-	white-space: pre-wrap;
 }
 </style>
