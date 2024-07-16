@@ -11,7 +11,7 @@ import axios from 'axios'
 
 // API URL
 const DEFAULT_PORT: number = 8024
-const API_URL = (port: number = DEFAULT_PORT): string => `http://localhost:${port}/api/v1/`
+const API_URL = (port: number = DEFAULT_PORT): string => `http://0.0.0.0:${port}/api/v1/`
 
 // Type declarations
 type AxiosError = {

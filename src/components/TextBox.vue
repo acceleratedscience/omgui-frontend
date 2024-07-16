@@ -50,7 +50,7 @@ const textDataLines = computed<string[]>(() => {
 			} else {
 				let whitespaces = [...line.matchAll(/\s/g)]
 				let lastWhiteSpaceIndex = whitespaces.length > 0 ? whitespaces[whitespaces.length - 1].index : -1
-				if (lastWhiteSpaceIndex > 0) splitIndex = lastWhiteSpaceIndex
+				if (lastWhiteSpaceIndex && lastWhiteSpaceIndex > 0) splitIndex = lastWhiteSpaceIndex
 				line = line.slice(0, splitIndex)
 			}
 			splitLines[splitLines.length - 1].push(line)
