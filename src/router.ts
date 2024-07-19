@@ -48,6 +48,12 @@ const routes = [
 		component: () => import(/* webpackChunkName: 'ResultPage' */ '@/pages/ResultPage.vue'),
 	},
 	{
+		path: '/dataframe/:dfName',
+		name: 'dataframe',
+		props: true,
+		component: () => import(/* webpackChunkName: 'DataframePage' */ '@/pages/DataframePage.vue'),
+	},
+	{
 		path: '/dataviewer',
 		name: 'dataviewer',
 		component: () => import(/* webpackChunkName: 'DataViewer' */ '@/viewers/DataViewer.vue'),

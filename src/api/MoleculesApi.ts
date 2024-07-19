@@ -113,11 +113,6 @@ export default class MoleculesApi extends BaseApi {
 		return this.apiClient.post('/get-molset-mymols', { query })
 	}
 
-	// Get result molset currently stored in memory.
-	getMolset_result(query: LocationQuery = {}) {
-		return this.apiClient.post('/get-molset-result', { query })
-	}
-
 	// #endregion
 	///////////////////////////////////////////////////////////////
 	// #region - Manipulation
@@ -147,12 +142,6 @@ export default class MoleculesApi extends BaseApi {
 	// This overrides the working list molecules stored in the cmd_pointer with the ones from the working copy.
 	updateMolset_mymols(cacheId: number) {
 		return this.apiClient.post('/update-molset-mymols', { cacheId })
-	}
-
-	// Update result molset.
-	// This overrides the result dataframe stored in memory.
-	updateMolset_result(cacheId: number) {
-		return this.apiClient.post('/update-molset-result', { cacheId })
 	}
 
 	// #endregion

@@ -6,11 +6,19 @@
 // https://www.vuemastery.com/courses/real-world-vue3/api-calls-with-axios (service layer)
 // https://itnext.io/vue-tricks-smart-api-module-for-vuejs-b0cae563e67b (using classes so we can pass pinia and router in SSR context)
 
+// This is for this ts file to recognize the type for process.env.NODE_ENV
+// Note types were installed as a dev dependency @types/node
+/// <reference types="node" />
+
 // Modules
 import axios from 'axios'
 
 // API URL
-const DEFAULT_PORT: number = 8024
+// - - -
+// Every CLI or Jupyter Notebook runs on a different port.
+// We get the port from the window.location to make sure we connect to the right API.
+// For our development server to work, we need to have the API running separately on 8024 or up.
+const DEFAULT_PORT: number = process.env.NODE_ENV == 'development' ? 8024 : +window.location.port
 const API_URL = (port: number = DEFAULT_PORT): string => `http://0.0.0.0:${port}/api/v1/`
 
 // Type declarations

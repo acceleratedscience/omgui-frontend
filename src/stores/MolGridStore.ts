@@ -57,7 +57,7 @@ const fileStore = useFileStore()
 const modalStore = useModalStore()
 
 // API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi, resultApi } from '@/api/ApiService'
 
 // Utils
 import { query2UrlQuery } from '@/utils/helpers'
@@ -715,7 +715,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// Update the result dataframe stored in memory.
 		updateMolset_result(): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.updateMolset_result(this._cacheId!), {
+				apiFetch(resultApi.updateResult_molset(this._cacheId!), {
 					onSuccess: () => resolve(true),
 					onError: () => reject(true),
 				})

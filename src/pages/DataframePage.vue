@@ -1,19 +1,17 @@
 <template>
+	<pre>!{{ TEMP_DATA }}!</pre>
 	<BaseFetching v-if="loading" />
 	<template v-else-if="empty">
-		<h3>Result</h3>
+		<h3>
+			Dataframe <i>{{ dfName }}</i>
+		</h3>
 		<p>
-			This page displays any data result from the CLI.<br />
-			There is currently no result stored in memory.
+			There is no dataframe named <i>'{{ dfName }}'</i>.
 		</p>
-		<p>To give it a try, run in your terminal:</p>
-		<span class="code" style="margin-top: 8px; display: inline-block">set context gt4sd</span><br />
-		<span class="code" style="margin-top: 8px; display: inline-block">search for similar molecules to 'C1(C(=C)C([O-])C1C)=O'</span><br />
-		<span class="code" style="margin-top: 8px; display: inline-block">result open</span>
 	</template>
 	<pre v-else-if="TEMP_DATA">{{ TEMP_DATA }}</pre>
 	<template v-else-if="loadingError">
-		<div class="error-msg">Something went wrong loading this molecule set.</div>
+		<div class="error-msg">Something went wrong loading this dataframe.</div>
 		<div class="status-msg" v-if="loadingError">{{ status }}: {{ loadingError }}</div>
 	</template>
 	<MolsetViewer v-else />
@@ -28,7 +26,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 
 // API
-import { apiFetch, resultApi } from '@/api/ApiService'
+import { apiFetch, dataframeApi } from '@/api/ApiService'
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'
@@ -37,6 +35,11 @@ const molGridStore = useMolGridStore()
 // Components
 import MolsetViewer from '@/viewers/MolsetViewer.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
+
+// Props
+const props = defineProps<{
+	dfName: string
+}>()
 
 // Definitions
 const empty = ref<boolean>(false)
@@ -51,12 +54,13 @@ const TEMP_DATA = ref<string>('')
 
 onMounted(() => {
 	const query = route.query
-	apiFetch(resultApi.getResult(query), {
+	apiFetch(dataframeApi.getDataframe(props.dfName, query), {
 		onSuccess: (data) => {
 			if (data && data.type == 'empty') {
 				empty.value = true
 				return
 			} else if (data && data.type == 'molset') {
+				TEMP_DATA.value = data.data
 				molGridStore.setMolset(data.data)
 				molGridStore.setContext('result-mols')
 			} else if (data && data.type == 'data') {
@@ -64,6 +68,7 @@ onMounted(() => {
 				TEMP_DATA.value = data.data
 			} else {
 				console.log('Unknown data type:', data)
+				TEMP_DATA.value = data
 			}
 		},
 		loading: loading,

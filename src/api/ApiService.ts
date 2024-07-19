@@ -3,10 +3,14 @@ import type { Ref } from 'vue'
 import FileSystemApi from '@/api/FileSystemApi'
 import MoleculesApi from '@/api/MoleculesApi'
 import MainApi from '@/api/MainApi'
+import ResultApi from '@/api/ResultApi'
+import DataframeApi from '@/api/DataframeApi'
 
 export const fileSystemApi = new FileSystemApi()
 export const moleculesApi = new MoleculesApi()
 export const mainApi = new MainApi()
+export const resultApi = new ResultApi()
+export const dataframeApi = new DataframeApi()
 
 type FetchOptions = {
 	onSuccess?: ((response: any) => void) | null
