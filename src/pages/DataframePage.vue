@@ -1,5 +1,5 @@
 <template>
-	<pre>!{{ TEMP_DATA }}!</pre>
+	<!-- <pre>!{{ TEMP_DATA }}!</pre> -->
 	<BaseFetching v-if="loading" />
 	<template v-else-if="empty">
 		<h3>
@@ -60,9 +60,8 @@ onMounted(() => {
 				empty.value = true
 				return
 			} else if (data && data.type == 'molset') {
-				TEMP_DATA.value = data.data
 				molGridStore.setMolset(data.data)
-				molGridStore.setContext('result-mols')
+				molGridStore.setContext('dataframe')
 			} else if (data && data.type == 'data') {
 				// Todo: implement dataviewer
 				TEMP_DATA.value = data.data

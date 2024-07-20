@@ -57,7 +57,7 @@ const fileStore = useFileStore()
 const modalStore = useModalStore()
 
 // API
-import { apiFetch, moleculesApi, resultApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi, resultApi, dataframeApi } from '@/api/ApiService'
 
 // Utils
 import { query2UrlQuery } from '@/utils/helpers'
@@ -71,7 +71,7 @@ const PROP_DEFAULT = ['molecular_weight']
 
 // Type declarations
 import type { Mol, Molset, MolsetApi, SearchMode } from '@/types'
-type Context = 'json' | 'sdf-file' | 'csv-file' | 'smi-file' | 'result-mols' | 'my-mols' | null
+type Context = 'json' | 'sdf-file' | 'csv-file' | 'smi-file' | 'result-mols' | 'my-mols' | 'dataframe' | null
 type SaveAsJSONOptions = {
 	newFile?: boolean
 }
@@ -712,10 +712,20 @@ export const useMolGridStore = defineStore('molGridStore', {
 			})
 		},
 
-		// Update the result dataframe stored in memory.
+		// Update the results stored in memory.
 		updateMolset_result(): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(resultApi.updateResult_molset(this._cacheId!), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
+		// Update the dataframe stored in a Jupyter variable.
+		updateMolset_dataframe(dfName: string): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(dataframeApi.updateDataframe_molset(dfName, this._cacheId!), {
 					onSuccess: () => resolve(true),
 					onError: () => reject(true),
 				})

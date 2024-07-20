@@ -21,4 +21,10 @@ export default class ResultApi extends BaseApi {
 	updateResult_molset(cacheId: number) {
 		return this.apiClient.post('/update-result-molset', { cacheId })
 	}
+
+	// Update result data.
+	// This overrides the result dataframe stored in memory.
+	updateResult_data(cacheId: number) {
+		// Placeholder for when dataviewer is integrated.
+	}
 }
