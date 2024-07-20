@@ -28,7 +28,13 @@ export default class DataframeApi extends BaseApi {
 
 	// Update result molset.
 	// This overrides the result dataframe stored in memory.
-	updateDataframe(df_name: string, cacheId: number) {
-		return this.apiClient.post(`/update-dataframe/${df_name}`, { cacheId })
+	updateDataframe_molset(df_name: string, cacheId: number) {
+		return this.apiClient.post(`/update-dataframe-molset/${df_name}`, { cacheId })
+	}
+
+	// Update result data.
+	// This overrides the result dataframe stored in memory.
+	updateDataframe_data(df_name: string, cacheId: number) {
+		// Placeholder for when dataviewer is integrated.
 	}
 }

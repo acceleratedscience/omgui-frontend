@@ -23,8 +23,9 @@
 import { ref, computed, watch, onMounted } from 'vue'
 
 // Router
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
+const route = useRoute()
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'
@@ -133,6 +134,10 @@ function executeSave(): Promise<boolean> {
 		return molGridStore.updateMolset_mymols()
 	} else if (molGridStore.context == 'result-mols') {
 		return molGridStore.updateMolset_result()
+	} else if (molGridStore.context == 'dataframe') {
+		const dfName: string = route.params.dfName as string
+		console.log(22, dfName)
+		return molGridStore.updateMolset_dataframe(dfName)
 	}
 	return Promise.resolve(false)
 }
