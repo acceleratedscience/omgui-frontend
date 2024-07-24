@@ -25224,7 +25224,7 @@ ObjectControls.prototype.keydownup = function (event) {
   }
 };
 ObjectControls.prototype.getKeyBindObject = function () {
-  return window.top;
+  return window;
 };
 ObjectControls.prototype.dispose = function () {
   for (var i = 0; i < this._listeners.length; i++) {
@@ -27288,21 +27288,12 @@ var Miew = function (_EventDispatcher) {
           zIndex: 700
         });
         // When rendering Miew inside a CORS iframe, window.top will cause a security exception.
-        try {
-          window.top.addEventListener('keydown', (event) => {
-            self._onKeyDown(event);
-          });
-          window.top.addEventListener('keyup', (event) => {
-            self._onKeyUp(event);
-          });
-        } catch (error) {
-          window.addEventListener('keydown', (event) => {
-            self._onKeyDown(event);
-          });
-          window.addEventListener('keyup', (event) => {
-            self._onKeyUp(event);
-          });
-        }
+        window.addEventListener('keydown', (event) => {
+          self._onKeyDown(event);
+        });
+        window.addEventListener('keyup', (event) => {
+          self._onKeyUp(event);
+        });
         this._objectControls = new ObjectControls(this._gfx.root, this._gfx.pivot, this._gfx.camera, this._gfx.renderer.domElement, function () {
           return self._getAltObj();
         });

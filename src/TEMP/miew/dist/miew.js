@@ -25227,7 +25227,7 @@ Copyright (c) 2015-2022 EPAM Systems, Inc. */
     }
   };
   ObjectControls.prototype.getKeyBindObject = function () {
-    return window.top;
+    return window;
   };
   ObjectControls.prototype.dispose = function () {
     for (var i = 0; i < this._listeners.length; i++) {
@@ -27290,10 +27290,10 @@ Copyright (c) 2015-2022 EPAM Systems, Inc. */
             color: '#fff',
             zIndex: 700
           });
-          window.top.addEventListener('keydown', function (event) {
+          window.addEventListener('keydown', function (event) {
             self._onKeyDown(event);
           });
-          window.top.addEventListener('keyup', function (event) {
+          window.addEventListener('keyup', function (event) {
             self._onKeyUp(event);
           });
           this._objectControls = new ObjectControls(this._gfx.root, this._gfx.pivot, this._gfx.camera, this._gfx.renderer.domElement, function () {

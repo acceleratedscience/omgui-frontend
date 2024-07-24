@@ -5,12 +5,14 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
+		"build": "run-p type-check \"build-all {@}\" --",
+		"build-all": "npm run build:proxy && npm run build:no-proxy",
+		"build:proxy": "vite build --mode proxy",
+		"build:no-proxy": "vite build --mode no-proxy",
 		"postbuild": "node scripts/postbuild.js",
-		"build": "run-p type-check \"build-only {@}\" --",
 		"preview": "vite preview",
 		"test:unit": "vitest",
 		"test:e2e": "playwright test",
-		"build-only": "vite build",
 		"type-check": "vue-tsc --build --force",
 		"lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
 		"format": "prettier --write src/"
