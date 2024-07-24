@@ -18,8 +18,19 @@ import axios from 'axios'
 // Every CLI or Jupyter Notebook runs on a different port.
 // We get the port from the window.location to make sure we connect to the right API.
 // For our development server to work, we need to have the API running separately on 8024 or up.
-const DEFAULT_PORT: number = process.env.NODE_ENV == 'development' ? 8024 : +window.location.port
-const API_URL = (port: number = DEFAULT_PORT): string => `http://0.0.0.0:${port}/api/v1/`
+// const DEFAULT_PORT: number = 8024
+// // const API_URL = (port: number = DEFAULT_PORT): string => `http://127.0.0.1:8888/proxy/${port}/api/v1/`
+// const API_URL = (port: number = DEFAULT_PORT): string => `/proxy/${port}/api/v1/`
+
+// const DEFAULT_PORT: number = process.env.NODE_ENV == 'development' ? 8024 : +window.location.port
+// // const API_URL = (port: number = DEFAULT_PORT): string => `http://127.0.0.1:${port}/api/v1/`
+// const API_URL = (port: number = DEFAULT_PORT): string => `/api/v1/`
+
+const DEFAULT_PORT: number = 8024
+const pathName: string = window.location.pathname || ''
+const urlPortMatch: any = pathName.match(/\/proxy\/(\d{4})/)
+const urlPort = urlPortMatch.length > 1 ? urlPortMatch[1] : DEFAULT_PORT
+const API_URL = (port: number = urlPort): string => `/proxy/${port}/api/v1/`
 
 // Type declarations
 type AxiosError = {

@@ -1,0 +1,31 @@
+export default Instanced2CCylindersGeometry;
+declare class Instanced2CCylindersGeometry {
+    constructor(instanceCount: any, polyComplexity: any, useZSprites: any, openEnded: any);
+    _useZSprites: any;
+    _cylGeometry: any;
+    _collisionGeo: Simple2CCylindersGeometry;
+    setItem(itemIdx: any, botPos: any, topPos: any, itemRad: any): void;
+    setColor(itemIdx: any, colorVal1: any, colorVal2: any): void;
+    computeBoundingSphere(): void;
+    boundingSphere: any;
+    computeBoundingBox(): void;
+    boundingBox: any;
+    raycast(raycaster: any, intersects: any): void;
+    startUpdate(): boolean;
+    finishUpdate(): void;
+    finalize(): void;
+    setOpacity(chunkIndices: any, value: any): void;
+    getSubset(chunkIndices: any): any[];
+    getGeoParams(): any;
+    _init(instanceCount: any, cylinderGeo: any, useZSprites: any): void;
+    _matVector1: any;
+    _matVector2: any;
+    _matVector3: any;
+    _color1: any;
+    _color2: any;
+    _alpha: any;
+    _invmatVector1: any;
+    _invmatVector2: any;
+    _invmatVector3: any;
+}
+import Simple2CCylindersGeometry from "./Simple2CCylindersGeometry";
