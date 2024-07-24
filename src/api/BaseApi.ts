@@ -26,6 +26,7 @@ const API_URL = (port: number = DEFAULT_PORT): string => {
 		: proxyPort
 			? // When we're running the server on a proxy URL, we get the
 				// port from the URL's path and include it into our API calls.
+				// See vite.config.ts for more info about the proxy URL.
 				`/proxy/${proxyPort}/api/v1/`
 			: // For regular use, the API is just a relative path.
 				'/api/v1/'

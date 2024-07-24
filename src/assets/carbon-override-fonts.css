@@ -1,4 +1,13 @@
 /**
+	Note: the content of this file would have to be included in a <style>
+	tag in index.html in order to work with the Jupyter proxy server. But
+	because there is no plan in place to remove the font imports from the
+	carbon-components CSS, it makes more sense to simply rely on these fonts
+	and ignore this file, in order to prevent font loading errors in the
+	console when using the Jupyter proxy server.
+**/
+
+/**
  * The carbon-components CSS loads all fonts from a web server,
  * causing a 1.1MB download on page load. This is quite undesirable
  * and should be fixed. This file overrides the font imports and

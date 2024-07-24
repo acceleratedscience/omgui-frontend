@@ -1,7 +1,11 @@
 <!doctype html>
 <html lang="en">
 	<head>
-		<script>
+		<!----<script>
+			// This block of code is enabled during the build process
+			// for the proxy build only (gui-build-proxy).
+			// See vite.config.ts for more information.
+			// - - -
 			// This inserts a dynamic base tag that will allow
 			// the app to be served from a different proxy ports.
 			// <base href="/proxy/8027/" />
@@ -11,15 +15,15 @@
 				base.href = `/proxy/${port}/`
 				document.head.insertBefore(base, document.head.firstChild)
 			})()
-		</script>
+		</script>---->
 		<meta charset="UTF-8" />
 		<link rel="icon" href="favicon.ico" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<script src="rdkit/RDKit_minimal.js"></script>
+		<script src="/rdkit/RDKit_minimal.js"></script>
 		<title>OpenAD GUI</title>
 	</head>
 	<body>
 		<div id="app"></div>
-		<script type="module" src="src/main.ts"></script>
+		<script type="module" src="/src/main.ts"></script>
 	</body>
 </html>
