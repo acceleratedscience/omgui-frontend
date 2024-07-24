@@ -7,9 +7,6 @@ import { readFileSync, writeFileSync } from 'fs'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	// base: '/',
-	// base: process.env.NODE_ENV === 'production' ? '/proxy/8025/' : '/',
-	// base: process.env.NODE_ENV === 'production' ? `/proxy/${getPort()}/` : '/',
 	base: process.env.NODE_ENV === 'production' ? `/__PLACEHOLDER_BASEURL__/` : '/',
 	plugins: [
 		vue(),
@@ -50,7 +47,7 @@ export default defineConfig({
 					let jsFile = readFileSync(jsPath, 'utf-8')
 					jsFile = jsFile.replace(
 						/"\/__PLACEHOLDER_BASEURL__\/"/g,
-						'`${window.location.pathname.match(/\\/proxy\\/(\\d{4})/)?.[1] ?? 8024}`',
+						'`/proxy/${window.location.pathname.match(/\\/proxy\\/(\\d{4})/)?.[1] ?? 8024}/`',
 					)
 					writeFileSync(jsPath, jsFile)
 				}

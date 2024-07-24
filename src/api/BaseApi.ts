@@ -15,22 +15,21 @@ import axios from 'axios'
 
 // API URL
 // - - -
-// Every CLI or Jupyter Notebook runs on a different port.
-// We get the port from the window.location to make sure we connect to the right API.
-// For our development server to work, we need to have the API running separately on 8024 or up.
-// const DEFAULT_PORT: number = 8024
-// // const API_URL = (port: number = DEFAULT_PORT): string => `http://127.0.0.1:8888/proxy/${port}/api/v1/`
-// const API_URL = (port: number = DEFAULT_PORT): string => `/proxy/${port}/api/v1/`
-
-// const DEFAULT_PORT: number = process.env.NODE_ENV == 'development' ? 8024 : +window.location.port
-// // const API_URL = (port: number = DEFAULT_PORT): string => `http://127.0.0.1:${port}/api/v1/`
-// const API_URL = (port: number = DEFAULT_PORT): string => `/api/v1/`
-
+// Every CLI or Jupyter Notebook runs on a different port, starting at 8024 and up.
 const DEFAULT_PORT: number = 8024
-const pathName: string = window.location.pathname || ''
-const urlPortMatch: any = pathName.match(/\/proxy\/(\d{4})/)
-const urlPort = urlPortMatch.length > 1 ? urlPortMatch[1] : DEFAULT_PORT
-const API_URL = (port: number = urlPort): string => `/proxy/${port}/api/v1/`
+const proxyPort: number | null = Number((window.location.pathname ?? '').match(/$\/proxy\/(\d{4})/)?.[1]) ?? null
+const API_URL = (port: number = DEFAULT_PORT): string => {
+	return process.env.NODE_ENV == 'development'
+		? // When we're running the development server,
+			// we try connecting to the API on port 8024 or up.
+			`http://127.0.0.1:${port}/api/v1/`
+		: proxyPort
+			? // When we're running the server on a proxy URL, we get the
+				// port from the URL's path and include it into our API calls.
+				`/proxy/${proxyPort}/api/v1/`
+			: // For regular use, the API is just a relative path.
+				'/api/v1/'
+}
 
 // Type declarations
 type AxiosError = {
@@ -78,7 +77,7 @@ class BaseApi implements BaseApiType {
 
 		// API health check
 		if (!BaseApi.isInitialized) {
-			this.testApiPort()
+			if (process.env.NODE_ENV == 'development') this.findDevApiPort()
 			BaseApi.isInitialized = true
 		}
 	}
@@ -138,11 +137,13 @@ class BaseApi implements BaseApiType {
 	}
 
 	/**
-	 * Check if the API is available on the
-	 * default port, or try the next 10 ports.
+	 * When running the development server (port 5173), we need the
+	 * OpenAD server to run elsewhere in order for the API to work.
+	 * By default this will be on port 8024, though if we can't find
+	 * it there we'll try the next 10 ports.
 	 */
 
-	testApiPort() {
+	findDevApiPort() {
 		this.apiClient.get('/health').then((res: any) => {
 			if (res.status == 200) {
 				if (this.altPort > DEFAULT_PORT) {
@@ -166,7 +167,7 @@ class BaseApi implements BaseApiType {
 				if (this.altPort < DEFAULT_PORT + 10) {
 					this.altPort++
 					this.apiClient.defaults.baseURL = API_URL(this.altPort)
-					this.testApiPort()
+					this.findDevApiPort()
 				} else {
 					const listOfPorts = Array.from({ length: 10 }, (_, i) => DEFAULT_PORT + i + 1) // prettier-ignore
 					setTimeout(() => {
