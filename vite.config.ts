@@ -24,6 +24,14 @@ export default defineConfig(({ command, mode }) => {
 					],
 				},
 			}),
+			{
+				name: 'replace-placeholder-baseurl',
+				closeBundle() {
+					if (command === 'build' && mode === 'proxy') {
+						closeProxyBundle()
+					}
+				},
+			},
 		],
 		resolve: {
 			alias: {
@@ -54,7 +62,9 @@ export default defineConfig(({ command, mode }) => {
 						// Add any rollup options here
 					},
 				},
-				closeBundle: closeProxyBundle,
+				// This doesn't work, don't understand why.
+				// Instead need to do it via plugin.
+				// closeBundle: closeProxyBundle,
 			}
 		} else if (mode === 'no-proxy') {
 			// Command: npm run build:no-proxy
@@ -81,10 +91,9 @@ export default defineConfig(({ command, mode }) => {
 
 // To get the proxy build to work, we have to do some hacky post-processing.
 function closeProxyBundle() {
-	console.log('****closeProxyBundle')
 	// Make the main JS and CSS file paths relative so they
 	// can be redirected using a dynamically generated base URL.
-	const dir = resolve(__dirname, 'dist')
+	const dir = resolve(__dirname, 'gui-build-proxy')
 	const indexPath = resolve(dir, 'index.html')
 	let indexHtml = readFileSync(indexPath, 'utf-8')
 	indexHtml = indexHtml.replace(/\/__PLACEHOLDER_BASEURL__\//g, '')
