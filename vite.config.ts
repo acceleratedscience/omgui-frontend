@@ -179,7 +179,10 @@ function setDynamicBaseUrl() {
 
 		// Replace the placeholder baseUrl.
 		let jsFile = readFileSync(jsPath, 'utf-8')
-		jsFile = jsFile.replace(/"\/__PLACEHOLDER_BASEURL__\/"/g, '`/proxy/${window.location.pathname.match(/\\/proxy\\/(\\d{4})/)?.[1] ?? 8024}/`')
+		jsFile = jsFile.replace(
+			/"\/__PLACEHOLDER_BASEURL__\/"/g,
+			'`${window.location.pathname.match(/(.*)\\/proxy\\/\\d{4}/)?.[1] ?? ""}/proxy/${window.location.pathname.match(/\\/proxy\\/(\\d{4})/)?.[1] ?? 8024}/`',
+		)
 		writeFileSync(jsPath, jsFile)
 	}
 }

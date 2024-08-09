@@ -222,12 +222,32 @@
 						</div>
 					</div>
 
-					<!-- <hr /> -->
-
-					<!-- <div id="analysis">
-							<h3>Analysis</h3>
-							Coming soon...
-						</div> -->
+					<hr v-if="showAnalysis" />
+					<div v-if="showAnalysis" id="analysis">
+						<h3>Analysis</h3>
+						<div v-for="(item, i) in molViewerStore.mol.analysis" :key="i" class="item">
+							<details>
+								<summary>
+									<BaseSvgServe class="icn-closed" icon="icn-caret-right" />
+									<BaseSvgServe class="icn-open" icon="icn-caret-down" />
+									<b>{{ item.toolkit }}</b> / {{ item.function }}
+								</summary>
+								<!-- <b>Function:</b> {{ item.function }}<br /> -->
+								<!-- <b>Plugin:</b> {{ item.toolkit }}<br /> -->
+								<!-- <b>Input SMILES:</b> {{ item.smiles }}<br /> -->
+								<!-- <b>Parameters:</b> {{ item.parameters }}<br /> -->
+								<!-- <b>Results:</b><br /> -->
+								<div v-for="(result, j) in item.results" :key="j" class="result">
+									<div v-for="(val, key) in result" :key="key">
+										<b v-copy-on-click :data-copy="`${key}: ${val}`">{{ key }}:</b> <span v-copy-on-click>{{ val }}</span>
+										<br />
+									</div>
+								</div>
+								<!-- {{ item }} -->
+							</details>
+						</div>
+						<!-- <pre>{{ molViewerStore.mol.analysis }}</pre> -->
+					</div>
 				</template>
 			</template>
 		</div>
@@ -365,6 +385,11 @@ const stylePropWrap: ComputedRef<{ height?: string }> = computed(() => {
 	return height ? { height: `${height}px` } : {}
 })
 
+// Whether to display the analysis section
+const showAnalysis: ComputedRef<boolean> = computed(() => {
+	return !!('analysis' in molViewerStore.mol && molViewerStore.mol['analysis'].length)
+})
+
 /**
  * Logic
  */
@@ -453,6 +478,7 @@ async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNorm
 #content-wrap {
 	display: flex;
 	gap: 0 40px;
+	margin-bottom: 64px;
 }
 #content-wrap .col-left {
 	flex: 1 1;
@@ -665,7 +691,68 @@ async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNorm
 	opacity: 0.3;
 }
 
-/*
+/**
+ * Analysis
+ */
+
+// Item
+#analysis .item {
+	border-top: solid 1px $black-10;
+	// white-space: pre;
+	// border: solid 1px red;
+}
+#analysis .item:last-child {
+	border-bottom: solid 1px $black-10;
+}
+
+// Summary
+#analysis .item summary {
+	min-height: 40px;
+	list-style: none;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	user-select: none;
+}
+#analysis .item details {
+	margin: 8px 0;
+}
+#analysis .item details[open] summary {
+	margin: 0 -24px;
+}
+#analysis .item details:not([open]) summary .icn-open,
+#analysis .item details[open] summary .icn-closed {
+	display: none;
+}
+#analysis .item details:not([open]) summary:hover,
+#analysis .item details[open] {
+	background: $black-03;
+}
+
+// Details
+#analysis .item details[open] {
+	padding: 24px;
+	padding-top: 0;
+}
+
+#analysis .item .result {
+	padding: 8px;
+	border: solid 1px $black-10;
+	// background: white;
+}
+#analysis .item .result:not(:last-child) {
+	border-bottom: 0;
+}
+#analysis .item .result > div {
+	// Truncate
+	word-wrap: normal;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+/**
  * Right Column
  */
 

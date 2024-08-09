@@ -17,7 +17,9 @@ import axios from 'axios'
 // - - -
 // Every CLI or Jupyter Notebook runs on a different port, starting at 8024 and up.
 const DEFAULT_PORT: number = 8024
-const proxyPort: number | null = Number((window.location.pathname ?? '').match(/^\/proxy\/(\d{4})/)?.[1]) ?? null
+const regEx = new RegExp(/^(.*)\/proxy\/(\d{4})/)
+const proxyPrefix: string = (window.location.pathname ?? '').match(regEx)?.[1] ?? ''
+const proxyPort: number | null = Number((window.location.pathname ?? '').match(regEx)?.[2]) ?? null
 const API_URL = (port: number = DEFAULT_PORT): string => {
 	return process.env.NODE_ENV == 'development'
 		? // When we're running the development server,
@@ -27,7 +29,7 @@ const API_URL = (port: number = DEFAULT_PORT): string => {
 			? // When we're running the server on a proxy URL, we get the
 				// port from the URL's path and include it into our API calls.
 				// See vite.config.ts for more info about the proxy URL.
-				`/proxy/${proxyPort}/api/v1/`
+				`${proxyPrefix}/proxy/${proxyPort}/api/v1/`
 			: // For regular use, the API is just a relative path.
 				'/api/v1/'
 }

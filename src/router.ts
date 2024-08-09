@@ -97,9 +97,11 @@ const routes = [
 ]
 
 // Duplicate each route with a '/headless' prefix and a 'headless' meta field
+const proxyRegex = /^(.*)\/proxy\/(\d{4})/
 const headlessRoutes = routes.map((route) => ({
 	...route,
 	path: `/headless${route.path}`,
+	// path: route.path.match(proxyRegex) ? route.path.replace(proxyRegex, '$1/proxy/$2/headless') : `/headless${route.path}`,
 	name: `headless-${route.name}`,
 	meta: { headless: true },
 }))
