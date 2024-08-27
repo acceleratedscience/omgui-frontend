@@ -223,7 +223,7 @@
 					</div>
 
 					<hr v-if="showAnalysis" />
-					<div v-if="showAnalysis" id="analysis">
+					<div v-if="showAnalysis && 'analysis' in molViewerStore.mol" id="analysis">
 						<h3>Analysis</h3>
 						<div v-for="(item, i) in molViewerStore.mol.analysis" :key="i" class="item">
 							<details>
