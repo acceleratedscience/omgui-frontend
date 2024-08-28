@@ -1,8 +1,10 @@
 # OpenAD GUI
 
-> Open Accelerated Discovery Graphical User Interface
+_Open Accelerated Discovery Graphical User Interface_
 
 This is a sub-repository to the main [OpenAD repo].
+
+---
 
 ### Initialisation
 
