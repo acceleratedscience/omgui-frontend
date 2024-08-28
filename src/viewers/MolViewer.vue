@@ -43,7 +43,7 @@
 					svg-mode
 				/>
 			</div> -->
-		<div class="container-2d" v-html="molViewerStore.svg"></div>
+		<div v-if="!molViewerStore.isMacromol" class="container-2d" v-html="molViewerStore.svg"></div>
 		<MolRender3D :mdl="molViewerStore.mdl" :molName="molViewerStore.mol.identifiers?.name ?? ''" />
 	</div>
 
@@ -96,6 +96,8 @@
 				<!-- Identification -->
 				<div id="identification">
 					<!-- @{{ molViewerStore.enriched }}! -->
+
+					<!-- Small molecule identifiers -->
 					<div v-if="molViewerStore.enriched || mol?.identifiers?.inchi">
 						<b v-copy-on-click :data-copy="`InChI: ${mol?.identifiers?.inchi}`">InChI: </b>
 						<span v-if="mol?.identifiers?.inchi" id="data-inchi" v-copy-on-click>{{ mol?.identifiers?.inchi }}</span>
@@ -150,9 +152,16 @@
 						<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 					</div>
 
+					<!-- Macromolecule identifiers -->
+					<div v-if="mol?.identifiers?.fasta">
+						<b v-copy-on-click :data-copy="`FASTA: ${mol?.identifiers?.fasta}`">FASTA: </b>
+						<span v-if="mol?.identifiers?.fasta" id="data-fasta" v-copy-on-click>{{ mol?.identifiers?.fasta }}</span>
+						<span v-else class="blank">-</span>
+					</div>
+
 					<template v-if="!loading && !loadingError">
 						<!-- Enrich button -->
-						<TheButtonEnrichMol />
+						<TheButtonEnrichMol v-if="!molViewerStore.isMacromol" />
 
 						<!-- Save button -->
 						<TheButtonSaveMol />
@@ -509,7 +518,8 @@ async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNorm
 	margin-bottom: 20px;
 }
 #mol-render > div:not(.fullscreen) {
-	width: 50%;
+	// width: 50%;
+	flex: 1;
 	height: 100%;
 	position: relative;
 	max-height: 100%;

@@ -30,7 +30,7 @@ type SaveAsOptions = {
 function getInitialState(): State {
 	return {
 		_mol: { identifiers: {} },
-		_mdl: null, // 3D data
+		_mdl: null, // 3D data, what's contained in .mol and .sdf files
 		_svg: null, // 2D data
 
 		// When viewing a molecule from a molset,
@@ -53,6 +53,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 		isEmpty(): boolean {
 			return !Object.keys(this._mol.identifiers).length
+		},
+		// Differentiate between small molecules (smiles, inchi) and macromolecules (fasta)
+		isMacromol(): boolean {
+			return Boolean(!this._mol.identifiers.inchi && !this._mol.identifiers.smiles)
 		},
 		name(): string {
 			return this._mol.identifiers?.name || 'Unnamed Molecule'
