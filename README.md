@@ -6,6 +6,8 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
 ---
 
+<br>
+
 ### Getting started
 
 -   Initialisation
@@ -19,6 +21,8 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 -   Creatig the production build
 
         npm run build
+
+<br>
 
 ### How things work
 
@@ -44,6 +48,8 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
         }
 
 -   The file object is then consumed by `loadItem()` in the FileStore.
+
+<br>
 
 ### Developer Guides
 
