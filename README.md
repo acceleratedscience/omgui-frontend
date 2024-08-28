@@ -51,14 +51,16 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
 -   Depending on the file type, the `data` attribute will contain a string (for text-based files) or an object (for structured data files).
 -   Different file types (as defined by the file extension) will open in different file viewers.
-    -   <ins>Molecule viewer:</ins> For displaying `.mol.json` files, which contain an OpenAD-native molecule object. Industry-standard molecules file formats like `.pdb` and `.mdl` are transformed on-the-fly and will also open in the molecule viewer.
+    -   <ins>Molecule viewer:</ins> For displaying `.mol.json` files, which contain an OpenAD-native molecule object. Industry-standard molecules file formats like `.pdb` and `.mol` are transformed on-the-fly and will also open in the molecule viewer.
     -   <ins>Molecule set viewer:</ins> For displaying `molset.json` files, which contain a list of OpenAD-native molecule objects. Industry-standard molecule set files like `.sdf` or `.smi` are transformed on-the-fly and will also open in the molecule set viewer.
     -   <ins>Data viewer:</ins> For `.csv` files and Jupyter dataframes.
     -   <ins>Text viewer:</ins> For text-based files like `.txt`, `.md` and `.yml`
     -   <ins>JSON viewer:</ins> For `.json` files
--   The file object is then consumed by `loadItem()` in the FileStore.
+    -   All other files (eg. `.pdf`) will be opened by the native application of your operating system (eg. Preview on macOS).
+        To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
+-   The file object and its data is then consumed by `loadItem()` in the FileStore.
 
-Currently there's a molecule viewer, a molecule set viewer, a data viewer (to be integrated) and a text viewer. All other files (eg. a PDF) will be opened by the native application of your operating system (eg. Preview on macOS). To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
+Currently there's a molecule viewer, a molecule set viewer, a data viewer (to be integrated) and a text viewer.
 
 <br>
 
