@@ -18,7 +18,6 @@ type MultiMap = {
 const _map_FileType: MultiMap = {
 	dir:    ['directory',    'FileBrowser'],
 	mdl:    ['molfile',      'MolViewer'],
-	pdb:	['pdb',          'MolViewer'],
 	mol:    ['molecule',     'MolViewer'],
 	molset: ['molecule set', 'MolsetViewer'],
 	sdf:	['sdf',          'MolsetViewer'],
