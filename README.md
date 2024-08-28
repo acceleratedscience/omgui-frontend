@@ -49,11 +49,16 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 }
 ```
 
--   Depending on the file type, the data will be a string (for text-based files) or an object (for structured data files).
--   Different file types will require different file viewers. Currently there's a molecule viewer, a molecule set viewer, a data viewer (to be integrated) and a text viewer. All other files (eg. a PDF) will be opened by the native application of your operating system (eg. Preview on macOS). To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
-    -   <ins>Molecule files</ins> like, **PDB**, **MDL** are transformed on-the-fly into an OpenAD molecule object, which reflects our native `.mol.json` format.
-    -   <ins>Molecule set files</ins> like **SDF** or **SMI** are transformed on-the-fly into a list of OpenAD molecule objects, which reflects our native `molset.json` format.
+-   Depending on the file type, the `data` attribute will contain a string (for text-based files) or an object (for structured data files).
+-   Different file types (as defined by the file extension) will open in different file viewers.
+    -   <ins>Molecule viewer:</ins> For molecule files like **pdb** and **mdl**, which are transformed on-the-fly into an OpenAD molecule object, reflecting our native `.mol.json` format.
+    -   <ins>Molecule set viewer:</ins> For molecule set files like **sdf** or **smi**, which are transformed on-the-fly into a list of OpenAD molecule objects, reflecting our native `molset.json` format.
+    -   <ins>Data viewer:</ins> For **csv** files and Jupyter dataframes.
+    -   <ins>Text viewer:</ins> For text-based files like **text**, **markdown**, **yaml**
+    -   <ins>JSON viewer:</ins> For **json** files
 -   The file object is then consumed by `loadItem()` in the FileStore.
+
+Currently there's a molecule viewer, a molecule set viewer, a data viewer (to be integrated) and a text viewer. All other files (eg. a PDF) will be opened by the native application of your operating system (eg. Preview on macOS). To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
 
 <br>
 
