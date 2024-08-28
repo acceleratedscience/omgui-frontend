@@ -24,26 +24,26 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
 #### File Browser
 
--         [OpenAD repo] - File content is read as a string by `get_file()` in `openad/gui/api/file_system_api.py` and attached to a file data object.
--         The file data object will look something like this:
+-   [OpenAD repo] - File content is read as a string by `get_file()` in `openad/gui/api/file_system_api.py` and attached to a file data object.
+-   The file data object will look something like this:
 
-                  {
-                          "_meta": {
-                                  "errCode": null,
-                                  "ext": "txt",
-                                  "ext2": null,
-                                  "fileType": "text",
-                                  "size": 120,
-                                  "timeCreated": 1724857839569.6558,
-                                  "timeEdited": 1724856402224.3848
-                          },
-                          "data": "hello, world",
-                          "filename": "example.txt",
-                          "path": "foobar/example.txt",
-                          "pathAbsolute": "/Users/johndoe/.openad/workspaces/DEFAULT/foobar/example.txt"
-                  }
+        {
+                "_meta": {
+                        "errCode": null,
+                        "ext": "txt",
+                        "ext2": null,
+                        "fileType": "text",
+                        "size": 120,
+                        "timeCreated": 1724857839569.6558,
+                        "timeEdited": 1724856402224.3848
+                },
+                "data": "hello, world",
+                "filename": "example.txt",
+                "path": "foobar/example.txt",
+                "pathAbsolute": "/Users/johndoe/.openad/workspaces/DEFAULT/foobar/example.txt"
+        }
 
--         The file object is then consumed by `loadItem()` in the FileStore.
+-   The file object is then consumed by `loadItem()` in the FileStore.
 
 ### Developer Guides
 
