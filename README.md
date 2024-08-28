@@ -47,9 +47,11 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
                 "pathAbsolute": "/Users/johndoe/.openad/workspaces/DEFAULT/foobar/example.txt"
         }
 
--   Different file types will require different file viewers. Currently there's a molecule viewer, a molecule set viewer, a data viewer (to be integrated) and a text viewer. All other files (eg. a PDF) will be opened by the native application of your operating system (eg. Preview on macOS). To see how file extensions are mappes to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
+-   Depending on the file type, the data will be a string (for text-based files) or an object (for structured data files).
+-   Different file types will require different file viewers. Currently there's a molecule viewer, a molecule set viewer, a data viewer (to be integrated) and a text viewer. All other files (eg. a PDF) will be opened by the native application of your operating system (eg. Preview on macOS). To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
+    -   <u>Molecule files</u> like, **PDB**, **MDL** are transformed on-the-fly into an OpenAD molecule object, which reflects our native `.mol.json` format.
+    -   <u>Molecule set files</u> like **SDF** or **SMI** are transformed on-the-fly into a list of OpenAD molecule objects, which reflects our native `molset.json` format.
 -   The file object is then consumed by `loadItem()` in the FileStore.
--   Molecule files, whether it be SDF, PDB, MDL or our native .mol.json format, are transformed into a consistent structure which can be consumed by the molecule viewer. This
 
 <br>
 
