@@ -31,24 +31,22 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 -   [OpenAD repo] - File content is read as a string by `get_file()` in `openad/gui/api/file_system_api.py` and attached to a file data object.
 -   The file data object will look something like this:
 
-            ```json
-
-    {
-    "\_meta": {
-    "errCode": null,
-    "ext": "txt",
-    "ext2": null,
-    "fileType": "text",
-    "size": 120,
-    "timeCreated": 1724857839569.6558,
-    "timeEdited": 1724856402224.3848
-    },
-    "data": "hello, world",
-    "filename": "example.txt",
-    "path": "foobar/example.txt",
-    "pathAbsolute": "/Users/johndoe/.openad/workspaces/DEFAULT/foobar/example.txt"
-    }
-
+```json
+{
+	"_meta": {
+		"errCode": null,
+		"ext": "txt",
+		"ext2": null,
+		"fileType": "text",
+		"size": 120,
+		"timeCreated": 1724857839569.6558,
+		"timeEdited": 1724856402224.3848
+	},
+	"data": "hello, world",
+	"filename": "example.txt",
+	"path": "foobar/example.txt",
+	"pathAbsolute": "/Users/johndoe/.openad/workspaces/DEFAULT/foobar/example.txt"
+}
 ```
 
 -   Depending on the file type, the data will be a string (for text-based files) or an object (for structured data files).
@@ -67,4 +65,3 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 -   Add the display name and correct viewer to `_map_FileType` in `src/utils/maps.ts`
 
 [OpenAD repo]: https://github.com/acceleratedscience/open-ad-toolkit
-```
