@@ -51,8 +51,8 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
 -   Depending on the file type, the `data` attribute will contain a string (for text-based files) or an object (for structured data files).
 -   Different file types (as defined by the file extension) will open in different file viewers.
-    -   <ins>Molecule viewer:</ins> For molecule files like **pdb** and **mdl**, which are transformed on-the-fly into an OpenAD molecule object, reflecting our native `.mol.json` format.
-    -   <ins>Molecule set viewer:</ins> For molecule set files like **sdf** or **smi**, which are transformed on-the-fly into a list of OpenAD molecule objects, reflecting our native `molset.json` format.
+    -   <ins>Molecule viewer:</ins> For displaying `.mol.json` files, which contain an OpenAD-native molecule object. Industry-standard molecules file formats like **pdb** and **mdl** are transformed on-the-fly and will also open in the molecule viewer.
+    -   <ins>Molecule set viewer:</ins> For displaying `molset.json` files, which contain a list of OpenAD-native molecule objects. Industry-standard molecule set files like **sdf** or **smi** are transformed on-the-fly and will also open in the molecule set viewer.
     -   <ins>Data viewer:</ins> For **csv** files and Jupyter dataframes.
     -   <ins>Text viewer:</ins> For text-based files like **text**, **markdown**, **yaml**
     -   <ins>JSON viewer:</ins> For **json** files
