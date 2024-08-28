@@ -2,21 +2,23 @@
 
 _Open Accelerated Discovery Graphical User Interface_
 
-This is a sub-repository to the main [OpenAD repo].
+This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is built in [Vue.js with Vite](readme/vue-vite.md).
 
 ---
 
-### Initialisation
+### Gettibg started
 
-    npm install
+-   Initialisation
 
-### Launching the development server
+        npm install
 
-    npm run dev
+-   Launching the development server
 
-### Creatig the production build
+        npm run dev
 
-    npm run build
+-   Creatig the production build
+
+        npm run build
 
 ### Developer Guides
 
