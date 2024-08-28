@@ -125,7 +125,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 	},
 	actions: {
 		setMolData(mol: Mol) {
-			// console.log('setMolData', mol)
+			console.log('setMolData', mol)
 			this._mol = mol
 			this._loading = false
 		},
