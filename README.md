@@ -16,21 +16,21 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
 #### Running the development version
 
-    First we need to launch the OpenAD application.
+First we need to launch the OpenAD application.
 
-        cd <openad_path>
-        openad
+    cd <openad_path>
+    openad
 
-    With OpenAD running, we need to activate the GUI Flask server, so our development server can connect to the API. This will open a browser window, which you can close.
+With OpenAD running, we need to activate the GUI Flask server, so our development server can connect to the API. This will open a browser window, which you can close.
 
-        launch gui
+    launch gui
 
-    Now we're ready to launch the development server in its own terminal.
+Now we're ready to launch the development server in its own terminal.
 
-        cd <openad-gui_path>
-        npm run dev
+    cd <openad-gui_path>
+    npm run dev
 
-    > **Note:** While the development server will reflect any changes on the fly, you'll still need to restart the OpenAD application for any changes to the backend to take effect.
+> **Note:** While the development server will reflect any changes on the fly, you'll still need to restart the OpenAD application for any changes to the backend to take effect.
 
 #### Creating the production build
 
