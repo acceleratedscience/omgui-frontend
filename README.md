@@ -10,11 +10,11 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
 ### Getting started
 
--   First time initialisation
+#### First time initialisation
 
         npm install
 
--   Running the development version
+#### Running the development version
 
     First we need to launch the OpenAD application.
 
@@ -32,7 +32,7 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
     > **Note:** While the development server will reflect any changes on the fly, you'll still need to restart the OpenAD application for any changes to the backend to take effect.
 
--   Creatihg the production build
+#### Creating the production build
 
         npm run build
 
