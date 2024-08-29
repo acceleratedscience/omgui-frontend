@@ -26,7 +26,7 @@ import Miew from '@/TEMP/miew/dist/miew.module'
 import '@/TEMP/miew/dist/miew.min.css'
 
 // Vue
-import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue'
 
 // Components
 import BaseIconButton from '@/components/BaseIconButton.vue'
@@ -34,16 +34,23 @@ import BaseIconButton from '@/components/BaseIconButton.vue'
 // Utils
 import { capitalize } from '@/utils/helpers'
 
-// Type declarations
-import type { Mol, TempMol } from '@/types'
-
 // Props
-const props = defineProps<{ mdl: string | null; molName: string | null }>()
+const props = defineProps<{
+	mdl?: string | null
+	pdb?: string | null
+	molName: string | null
+}>()
 
 // Definitions
 const $container3d = ref<Element | null>(null)
 const fullscreen = ref<boolean>(false)
 let miewViewer: any = null
+
+/**
+ * Computed
+ */
+
+const hasData = computed(() => Boolean(props.mdl || props.pdb))
 
 /**
  * Hooks
@@ -55,11 +62,11 @@ let miewViewer: any = null
 // When looking at molecule via filebrowser, the ?use=json is handler by ViewerDispatch.vue,
 // which resets molViewerStore.mdl, triggering the watcher.
 onMounted(() => {
-	if (props.mdl) init3DViewer()
+	if (hasData.value) init3DViewer()
 })
 
-// As soon as the SDF data is loaded into the store, render the 3D molecule.
-watch(() => props.mdl, init3DViewer)
+// As soon as the SDF/PDB data is loaded into the store, render the 3D molecule.
+watch(() => hasData.value, init3DViewer)
 
 onBeforeUnmount(() => {
 	if (miewViewer) {
@@ -74,11 +81,11 @@ onBeforeUnmount(() => {
 
 // Render 3D molecule.
 function init3DViewer() {
-	// console.log('init3DViewer')
+	console.log('init3DViewer')
 	if (!$container3d.value) return
 
 	// Triggered whenever we clear the molViewerStore.
-	if (props.mdl == null) {
+	if (!hasData.value) {
 		miewViewer.term()
 		miewViewer = null
 		$container3d.value.innerHTML = ''
@@ -122,7 +129,12 @@ function render3d_miew(forceReInit = false) {
 			miewViewer.run()
 		}
 	}
-	miewViewer.load(props.mdl, { sourceType: 'immediate', fileType: 'sdf' })
+
+	if (props.mdl) {
+		miewViewer.load(props.mdl, { sourceType: 'immediate', fileType: 'sdf' })
+	} else if (props.pdb) {
+		miewViewer.load(props.pdb, { sourceType: 'immediate', fileType: 'pdb' })
+	}
 }
 
 async function toggleFullScreen(state: boolean) {

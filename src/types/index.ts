@@ -154,6 +154,43 @@ export type MolsetApi = {
 }
 export type SearchMode = 'text' | 'smarts'
 
+// Protein
+export type Protein = {
+	mmol_type?: 'protein'
+	pdb?: string
+	header: {
+		// Identification
+		idcode: string
+		name: string
+
+		// Publication
+		head: string
+		author: string
+		release_date: string
+		deposition_date: string
+		keywords: string
+		journal: string
+		journal_reference: string
+
+		// Context
+		resolution: number
+		source: {}
+		structure_method: string
+		structure_reference: [string]
+		has_missing_residues: boolean
+		missing_residues: [string]
+		biomoltrans: [any]
+		compound: {
+			[key: string]: string
+		}
+
+		// Catch-all
+		[key: string]: any
+	}
+}
+
+export type Mmol = Protein | null
+
 // The URL query object as part of the route.
 export type UrlQuery = Record<string, string | (string | null)[]>
 

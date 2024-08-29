@@ -10,15 +10,29 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
 ### Getting started
 
--   Initialisation
+-   First time initialisation
 
         npm install
 
--   Launching the development server
+-   Running the development version
 
+    First we need to launch the OpenAD application.
+
+        cd <openad_path>
+        openad
+
+    With OpenAD running, we need to activate the GUI Flask server, so our development server can connect to the API. This will open a browser window, which you can close.
+
+        launch gui
+
+    Now we're ready to launch the development server in its own terminal.
+
+        cd <openad-gui_path>
         npm run dev
 
--   Creatig the production build
+    > **Note:** While the development server will reflect any changes on the fly, you'll still need to restart the OpenAD application for any changes to the backend to take effect.
+
+-   Creatihg the production build
 
         npm run build
 
@@ -50,17 +64,15 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 ```
 
 -   Depending on the file type, the `data` attribute will contain a string (for text-based files) or an object (for structured data files).
--   Different file types (as defined by the file extension) will open in different file viewers.
-    -   <ins>Molecule viewer:</ins> For displaying `.mol.json` files, which contain an OpenAD-native molecule object. Industry-standard molecules file formats like `.pdb` and `.mol` are transformed on-the-fly and will also open in the molecule viewer.
-    -   <ins>Molecule set viewer:</ins> For displaying `molset.json` files, which contain a list of OpenAD-native molecule objects. Industry-standard molecule set files like `.sdf` or `.smi` are transformed on-the-fly and will also open in the molecule set viewer.
+-   Different file types (as defined by the file extension) will open in different file viewers. To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
+    -   <ins>Molecule viewer:</ins> For displaying `.mol.json` files, which contain an OpenAD-native molecule object. Industry-standard molecules file formats like `.pdb` and `.mol` are translated on-the-fly and will also open in the molecule viewer.
+    -   <ins>Molecule set viewer:</ins> For displaying `molset.json` files, which contain a list of OpenAD-native molecule objects. Industry-standard molecule set files like `.sdf` or `.smi` are translated on-the-fly and will also open in the molecule set viewer.
     -   <ins>Data viewer:</ins> For `.csv` files and Jupyter dataframes.
     -   <ins>Text viewer:</ins> For text-based files like `.txt`, `.md` and `.yml`
     -   <ins>JSON viewer:</ins> For `.json` files
     -   All other files (eg. `.pdf`) will be opened by the native application of your operating system (eg. Preview on macOS).
-        To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
+-   On-the-fly translation of file formats happens under `fs_attach_file_data()` in `openad/workers/file_system.py` in the [OpenAD repo].
 -   The file object and its data is then consumed by `loadItem()` in the FileStore.
-
-Currently there's a molecule viewer, a molecule set viewer, a data viewer (to be integrated) and a text viewer.
 
 <br>
 
