@@ -14,6 +14,8 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
         npm install
 
+<br>
+
 #### Running the development version
 
 First we need to launch the OpenAD application.
@@ -31,6 +33,8 @@ Now we're ready to launch the development server in its own terminal.
     npm run dev
 
 > **Note:** While the development server will reflect any changes on the fly, you'll still need to restart the OpenAD application for any changes to the backend to take effect.
+
+<br>
 
 #### Creating the production build
 
