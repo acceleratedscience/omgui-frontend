@@ -12,7 +12,7 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
 #### First time initialisation
 
-        npm install
+    npm install
 
 <br>
 
@@ -38,7 +38,7 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 
 #### Creating the production build
 
-        npm run build
+    npm run build
 
 <br>
 
