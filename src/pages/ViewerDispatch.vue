@@ -144,7 +144,7 @@ async function parseRoute() {
 				}
 			} else if (fileStore.fileType == 'mol') {
 				const data: Mol = file.data
-				molViewerStore.setMolData(data)
+				molViewerStore.setMolData(data, 'smallMol')
 			}
 
 			// We can force the usage of a different module with ?use=OtherModule.

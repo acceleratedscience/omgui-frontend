@@ -111,7 +111,7 @@ function _fetchMolDataFromMolset(cacheId: number | null = null, index: number) {
 	if (!cacheId) return
 	apiFetch(moleculesApi.getMolDataFromMolset(cacheId, index), {
 		onSuccess: (data) => {
-			molViewerStore.setMolData(data)
+			molViewerStore.setMolData(data, 'smallMol')
 			const identifier = molViewerStore.inchi || molViewerStore.smiles
 			if (identifier) molViewerStore.fetchMolVizData(identifier)
 		},

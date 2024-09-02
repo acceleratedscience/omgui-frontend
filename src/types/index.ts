@@ -132,6 +132,7 @@ export type Mol = {
 // before the full molecule is loaded, without ts complaining.
 export type TempMol = {
 	identifiers: Record<string, string>
+	enriched?: boolean
 }
 
 // A set of molecules.
@@ -156,40 +157,43 @@ export type SearchMode = 'text' | 'smarts'
 
 // Protein
 export type Protein = {
-	mmol_type?: 'protein'
-	pdb?: string
-	header: {
-		// Identification
-		idcode: string
-		name: string
+	// Identification
+	idcode: string
+	name: string
 
-		// Publication
-		head: string
-		author: string
-		release_date: string
-		deposition_date: string
-		keywords: string
-		journal: string
-		journal_reference: string
+	// Publication
+	head: string
+	author: string
+	release_date: string
+	deposition_date: string
+	keywords: string
+	journal: string
+	journal_reference: string
 
-		// Context
-		resolution: number
-		source: {}
-		structure_method: string
-		structure_reference: [string]
-		has_missing_residues: boolean
-		missing_residues: [string]
-		biomoltrans: [any]
-		compound: {
-			[key: string]: string
-		}
-
-		// Catch-all
-		[key: string]: any
+	// Context
+	resolution: number
+	source: {}
+	structure_method: string
+	structure_reference: [string]
+	has_missing_residues: boolean
+	missing_residues: [string]
+	biomoltrans: [any]
+	compound: {
+		[key: string]: string
 	}
+
+	// Catch-all
+	[key: string]: any
 }
 
-export type Mmol = Protein | null
+// Api protein payload
+export type ProteinApi = {
+	molType: 'protein'
+	pdb: string
+	header: Protein
+}
+
+// export type Macromol = Protein | null
 
 // The URL query object as part of the route.
 export type UrlQuery = Record<string, string | (string | null)[]>

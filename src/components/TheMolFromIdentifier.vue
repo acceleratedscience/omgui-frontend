@@ -104,7 +104,7 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 			const needsVizData = !molViewerStore.inchi
 
 			// Update HTML
-			molViewerStore.setMolData(data)
+			molViewerStore.setMolData(data, 'smallMol')
 			success = true
 
 			if (needsVizData) {

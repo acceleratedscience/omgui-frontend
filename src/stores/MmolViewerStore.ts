@@ -14,10 +14,10 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 import { slugify } from '@/utils/helpers'
 
 // Type declarations
-import type { Mmol } from '@/types'
+import type { Macromol } from '@/types'
 type State = {
 	_mmolType: string | null
-	_mmol: Mmol
+	_mmol: Macromol
 	_pdb: string | null
 	_mmolFromMmolsetIndex: number | null
 	_loading: boolean
@@ -48,12 +48,16 @@ function getInitialState(): State {
 export const useMmolViewerStore = defineStore('mmolViewerStore', {
 	state: () => getInitialState(),
 	getters: {
-		mmol(): Mmol {
+		mmol(): Macromol {
 			return this._mmol
 		},
 
 		id(): string {
 			return this._mmol?.header?.idcode || 'Unknown Protein'
+		},
+
+		mmolType(): string | null {
+			return this._mmolType
 		},
 
 		// hasChanges(): boolean {
@@ -95,7 +99,7 @@ export const useMmolViewerStore = defineStore('mmolViewerStore', {
 		// },
 	},
 	actions: {
-		setMmolData(mmol: Mmol) {
+		setMmolData(mmol: Macromol) {
 			console.log('setMmolData', mmol)
 			if (mmol?.mmol_type == 'protein') {
 				this._mmolType = 'protein'
