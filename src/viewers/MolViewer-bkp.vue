@@ -307,7 +307,7 @@ import TheButtonEnrichMol from '@/components/TheButtonEnrichMol.vue'
 import { capitalize } from '@/utils/helpers'
 
 // Type declarations
-import type { Mol, TempMol } from '@/types'
+import type { Smol, TempSmol } from '@/types'
 import type { ComputedRef, WritableComputedRef } from 'vue'
 import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
@@ -334,7 +334,7 @@ const synonymColMinWidth: number = 150
  */
 
 // Molecule data
-const mol: ComputedRef<Mol | TempMol> = computed(() => molViewerStore.mol)
+const mol: ComputedRef<Smol | TempSmol> = computed(() => molViewerStore.mol)
 
 // Path array for breadcrumbs
 const pathArray: ComputedRef<string[]> = computed(() => {
@@ -409,7 +409,7 @@ const showAnalysis: ComputedRef<boolean> = computed(() => {
 // When viewing molecule as JSON, and then returning to the molviewer,
 // we need to reload the data.
 if (molViewerStore.isEmpty && fileStore.data && fileStore.moduleName == 'MolViewer') {
-	const data: Mol = fileStore.data
+	const data: Smol = fileStore.data
 	molViewerStore.setMolData(data)
 }
 

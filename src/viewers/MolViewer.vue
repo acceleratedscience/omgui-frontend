@@ -23,8 +23,12 @@
 	</div> -->
 
 	<!-- Visualization -->
+	<!-- @{{ molViewerStore.protein.foo }}@ -->
+	<!-- <button @click="foo(molViewerStore.proteinfoo)">AAA</button> -->
+	<br /><br />
 	<div id="mol-render" :class="{ headless: mainStore.headless }">
-		<MolViewerVizMol />
+		<MolViewerVizMol v-if="molType == 'smol'" />
+		<MolViewerVizProtein v-else-if="molType == 'protein'" />
 	</div>
 
 	<!-- Page content -->
@@ -40,9 +44,12 @@
 
 			<!-- Title -->
 			<MolViewerTitleMol :context="context" :loading="loading" />
+			<!-- <MolViewerTitleMol v-if="molType == 'smol'" :context="context" :loading="loading" /> -->
+			<!-- <MolViewerTitleProtein v-if="molType == 'protein'" :context="context" :loading="loading" /> -->
 
 			<!-- Molecule data -->
-			<MolViewerDataMol v-if="mol" :loading="loading" :loadingError="loadingError" />
+			<MolViewerDataSmol v-if="molType == 'smol'" :loading="loading" :loadingError="loadingError" />
+			<MolViewerDataProtein v-else-if="molType == 'protein'" />
 		</div>
 
 		<!-- Right column (to be enabled later) - See #enableright below -->
@@ -65,13 +72,11 @@ const router = useRouter()
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
-import { useMmolViewerStore } from '@/stores/MmolViewerStore'
 import { useFileStore } from '@/stores/FileStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
 import { useModalStore } from '@/stores/ModalStore'
 const mainStore = useMainStore()
 const molViewerStore = useMolViewerStore()
-const mmolViewerStore = useMmolViewerStore()
 const fileStore = useFileStore()
 const molGridStore = useMolGridStore()
 const modalStore = useModalStore()
@@ -81,11 +86,14 @@ import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import BreadCrumbsNot from '@/components/BreadCrumbsNot.vue'
 import BaseIconButton from '@/components/BaseIconButton.vue'
 import MolViewerVizMol from '@/components/MolViewerVizMol.vue'
+import MolViewerVizProtein from '@/components/MolViewerVizProtein.vue'
 import MolViewerTitleMol from '@/components/MolViewerTitleMol.vue'
-import MolViewerDataMol from '@/components/MolViewerDataMol.vue'
+import MolViewerTitleProtein from '@/components/MolViewerTitleProtein.vue'
+import MolViewerDataSmol from '@/components/MolViewerDataSmol.vue'
+import MolViewerDataProtein from '@/components/MolViewerDataProtein.vue'
 
 // Type declarations
-import type { Mol, TempMol } from '@/types'
+import type { MolType, Smol } from '@/types'
 import type { ComputedRef } from 'vue'
 import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
@@ -105,19 +113,9 @@ const props = withDefaults(
  * Computed
  */
 
-// Molecule type
-const molType: ComputedRef<String | null> = computed(() => {
-	if (molViewerStore.mol) {
-		return 'smallMol'
-	} else if (mmolViewerStore.mmolType) {
-		return 'smallMol'
-	} else {
-		return null
-	}
+const molType: ComputedRef<MolType> = computed(() => {
+	return molViewerStore.molType
 })
-
-// Molecule data
-const mol: ComputedRef<Mol | TempMol> = computed(() => molViewerStore.mol)
 
 // Path array for breadcrumbs
 const pathArray: ComputedRef<string[]> = computed(() => {
@@ -136,8 +134,8 @@ const pathArray: ComputedRef<string[]> = computed(() => {
 // When viewing molecule as JSON, and then returning to the molviewer,
 // we need to reload the data.
 if (molViewerStore.isEmpty && fileStore.data && fileStore.moduleName == 'MolViewer') {
-	const data: Mol = fileStore.data
-	molViewerStore.setMolData(data, 'smallMol')
+	const data: Smol = fileStore.data
+	molViewerStore.setMolData(data, 'smol')
 }
 
 // When opening a molecule from a molset, the fetchMolVizData is called from within MolsetViewer.vue.

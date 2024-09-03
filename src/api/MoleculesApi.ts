@@ -2,7 +2,7 @@ import BaseApi from './BaseApi'
 
 // Type declarations
 import type { LocationQuery } from 'vue-router'
-import type { Mol, TempMol } from '@/types'
+import type { Smol, TempSmol } from '@/types'
 
 // Molecule API
 export default class MoleculesApi extends BaseApi {
@@ -37,22 +37,22 @@ export default class MoleculesApi extends BaseApi {
 	// #region - Manipulation
 
 	// Save molecule to my-mols.
-	addMolToMyMols(mol: Mol | TempMol) {
+	addMolToMyMols(mol: Smol | TempSmol) {
 		return this.apiClient.post('/add-mol-to-mymols', { mol })
 	}
 
 	// Remove molecule from my-mols
-	removeMolFromMyMols(mol: Mol | TempMol) {
+	removeMolFromMyMols(mol: Smol | TempSmol) {
 		return this.apiClient.post('/remove-mol-from-mymols', { mol })
 	}
 
 	// Check if a molecule is in my-mols
-	checkMolInMyMols(mol: Mol | TempMol) {
+	checkMolInMyMols(mol: Smol | TempSmol) {
 		return this.apiClient.post('/check-mol-in-mymols', { mol })
 	}
 
 	// Check if a molecule is in my-mols
-	enrichMol(mol: Mol | TempMol) {
+	enrichMol(mol: Smol | TempSmol) {
 		return this.apiClient.post('/enrich-mol', { mol })
 	}
 
@@ -61,32 +61,32 @@ export default class MoleculesApi extends BaseApi {
 	// #region - Saving
 
 	// Save new .mol.json file to the workspace.
-	saveMolAsJSON(path: string, mol: Mol, newFile: boolean = true) {
+	saveMolAsJSON(path: string, mol: Smol, newFile: boolean = true) {
 		return this.apiClient.post('/save-mol-as-json', { path, mol, newFile })
 	}
 
 	// Save new .sdf file to the workspace.
-	saveMolAsSDF(path: string, mol: Mol, newFile: boolean = true) {
+	saveMolAsSDF(path: string, mol: Smol, newFile: boolean = true) {
 		return this.apiClient.post('/save-mol-as-sdf', { path, mol, newFile })
 	}
 
 	// Save new .mol file to the workspace.
-	saveMolAsCSV(path: string, mol: Mol, newFile: boolean = true) {
+	saveMolAsCSV(path: string, mol: Smol, newFile: boolean = true) {
 		return this.apiClient.post('/save-mol-as-csv', { path, mol, newFile })
 	}
 
 	// Save new .mol file to the workspace.
-	saveMolAsMDL(path: string, mol: Mol, newFile: boolean = true) {
+	saveMolAsMDL(path: string, mol: Smol, newFile: boolean = true) {
 		return this.apiClient.post('/save-mol-as-mdl', { path, mol, newFile })
 	}
 
 	// Save new .mol file to the workspace.
-	saveMolAsSMILES(path: string, mol: Mol, newFile: boolean = true) {
+	saveMolAsSMILES(path: string, mol: Smol, newFile: boolean = true) {
 		return this.apiClient.post('/save-mol-as-smiles', { path, mol, newFile })
 	}
 
 	// Update molset with the molecule data.
-	replaceMolInMolset(path: string, mol: Mol, context: 'json' | 'my-mols', cacheId: number) {
+	replaceMolInMolset(path: string, mol: Smol, context: 'json' | 'my-mols', cacheId: number) {
 		return this.apiClient.post('/replace-mol-in-molset', { path, mol, context, cacheId })
 	}
 

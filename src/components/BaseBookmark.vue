@@ -22,11 +22,11 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 import BaseIconButtonToggle from '@/components/BaseIconButtonToggle.vue'
 
 // Type declarations
-import type { Mol, TempMol, Macromol } from '@/types'
+import type { Smol, TempSmol, Macromol } from '@/types'
 
 // Props
 const props = defineProps<{
-	mol: Mol | TempMol | Macromol | null
+	mol: Smol | TempSmol | Macromol | null
 }>()
 
 // Definitions
@@ -78,7 +78,7 @@ async function removeFromMymols() {
 // Update status
 function updateStatus() {
 	// Prevent fetching status on page load when props.mol is
-	// still of type TempMol (before mlecule is loaded).
+	// still of type TempSmol (before mlecule is loaded).
 	if (!props.mol || !('properties' in props.mol)) return
 
 	if (props.mol) {

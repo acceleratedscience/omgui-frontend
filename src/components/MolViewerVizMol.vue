@@ -18,8 +18,8 @@
             svg-mode
         />
     </div> -->
-	<div v-if="!molViewerStore.isMacromol" class="container-2d" v-html="molViewerStore.svg"></div>
-	<MolRender3D :mdl="molViewerStore.mdl" :molName="molViewerStore.mol.identifiers?.name ?? ''" />
+	<div class="container-2d" v-html="molViewerStore.svg"></div>
+	<MolRender3D :mdl="molViewerStore.mdl" :molName="molViewerStore.name" />
 </template>
 
 <script setup lang="ts">

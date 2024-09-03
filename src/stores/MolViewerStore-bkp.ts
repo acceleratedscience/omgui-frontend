@@ -14,9 +14,9 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 import { slugify } from '@/utils/helpers'
 
 // Type declarations
-import type { Mol, TempMol } from '@/types'
+import type { Smol, TempSmol } from '@/types'
 type State = {
-	_mol: Mol | TempMol
+	_mol: Smol | TempSmol
 	_mdl: string | null
 	_svg: string | null
 	_molFromMolsetIndex: number | null
@@ -48,7 +48,7 @@ function getInitialState(): State {
 export const useMolViewerStore = defineStore('molViewerStore', {
 	state: () => getInitialState(),
 	getters: {
-		mol(): Mol | TempMol {
+		mol(): Smol | TempSmol {
 			return this._mol
 		},
 		isEmpty(): boolean {
@@ -78,7 +78,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			)
 		},
 		enriched(): boolean {
-			return (this._mol as Mol)?.enriched
+			return (this._mol as Smol)?.enriched
 		},
 
 		hasChanges(): boolean {
@@ -124,7 +124,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 	},
 	actions: {
-		setMolData(mol: Mol) {
+		setMolData(mol: Smol) {
 			console.log('setMolData', mol)
 			this._mol = mol
 			this._loading = false
@@ -182,7 +182,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		setEnriched(enriched: boolean) {
-			;(this._mol as Mol).enriched = enriched
+			;(this._mol as Smol).enriched = enriched
 		},
 
 		setHasChanges(hasChanges: boolean) {
@@ -196,7 +196,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		// Save molecule as a new JSON (.mol.json) file.
 		saveMolAsJSON(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsJSON(destinationPath, this.mol as Mol, newFile), {
+				apiFetch(moleculesApi.saveMolAsJSON(destinationPath, this.mol as Smol, newFile), {
 					onSuccess: () => resolve(true),
 					onError: () => reject(true),
 				})
@@ -206,7 +206,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		// Save molecule as a new SDF (.sdf) file.
 		saveMolAsSDF(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsSDF(destinationPath, this.mol as Mol, newFile), {
+				apiFetch(moleculesApi.saveMolAsSDF(destinationPath, this.mol as Smol, newFile), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -216,7 +216,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		// Save molecule as a new CSV (.csv) file.
 		saveMolAsCSV(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsCSV(destinationPath, this.mol as Mol, newFile), {
+				apiFetch(moleculesApi.saveMolAsCSV(destinationPath, this.mol as Smol, newFile), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -227,7 +227,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		// This removed all parameters from the molecule.
 		saveMolAsMDL(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsMDL(destinationPath, this.mol as Mol, newFile), {
+				apiFetch(moleculesApi.saveMolAsMDL(destinationPath, this.mol as Smol, newFile), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -238,7 +238,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		// This removed all parameters from the molecule.
 		saveMolAsSMILES(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsSMILES(destinationPath, this.mol as Mol, newFile), {
+				apiFetch(moleculesApi.saveMolAsSMILES(destinationPath, this.mol as Smol, newFile), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})

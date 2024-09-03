@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
 
 // Render 3D molecule.
 function init3DViewer() {
-	console.log('init3DViewer')
+	// console.log('init3DViewer')
 	if (!$container3d.value) return
 
 	// Triggered whenever we clear the molViewerStore.

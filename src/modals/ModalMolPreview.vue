@@ -55,7 +55,7 @@ import { fileSystemApi } from '@/api/ApiService'
 import { capitalize } from '@/utils/helpers'
 
 // Type declarations
-import type { Mol } from '@/types'
+import type { Smol } from '@/types'
 
 // Definitions
 const emit = defineEmits(['mounted'])
@@ -66,7 +66,7 @@ const selectedWorkspace = ref<string>(' ') // Space to avoid default text to dis
  * Computed
  */
 
-const mol = computed<Mol>(() => modalStore.data as Mol)
+const mol = computed<Smol>(() => modalStore.data as Smol)
 
 /**
  * Hooks

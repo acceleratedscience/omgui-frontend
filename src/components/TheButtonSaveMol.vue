@@ -28,7 +28,7 @@ const modalSaveFile = useModalSaveFile()
 
 // Type declarations
 import type { ComputedRef } from 'vue'
-import type { Mol } from '@/types'
+import type { Smol } from '@/types'
 
 // Definitions
 const saving = ref<boolean>(false)
@@ -83,10 +83,10 @@ async function onSaveClick() {
 		// Molecule inside of a molset.
 		if (molGridStore.context == 'json') {
 			// .molset.json file --> Update the JSON file.
-			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.mol as Mol, molGridStore.context)
+			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.mol as Smol, molGridStore.context)
 		} else if (molGridStore.context == 'my-mols') {
 			// My mols --> Update your working molecule set.
-			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.mol as Mol, molGridStore.context)
+			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.mol as Smol, molGridStore.context)
 		} else {
 			// Result mols / Non-JSON molset files (SDF, maybe others later) --> Display save-as modal.
 			molGridStore.setHasChanges(false) // See note on top

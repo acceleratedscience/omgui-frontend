@@ -66,6 +66,7 @@ export type FileType =
 	| 'dir'
 	| 'mol'
 	| 'molset'
+	| 'pdb'
 	| 'json'
 	| 'mdl'
 	| 'data'
@@ -101,8 +102,10 @@ export type FileType =
 // 	dispTimeEdited?: string
 // }
 
+export type MolType = 'smol' | 'protein' | null
+
 // A molecule object, as returned by the API.
-export type Mol = {
+export type Smol = {
 	index?: number // For the position in the molset
 	identifiers: {
 		name: string
@@ -130,13 +133,13 @@ export type Mol = {
 
 // This lets us set some properties on a molecule
 // before the full molecule is loaded, without ts complaining.
-export type TempMol = {
+export type TempSmol = {
 	identifiers: Record<string, string>
 	enriched?: boolean
 }
 
 // A set of molecules.
-export type Molset = Mol[]
+export type Molset = Smol[]
 
 // The API response for molset page.
 export type MolsetApi = {

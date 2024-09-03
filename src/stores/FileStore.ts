@@ -142,7 +142,7 @@ export const useFileStore = defineStore('fileStore', {
 		// Load file or directory.
 		loadItem(file: File) {
 			if (!file) return
-			console.log('file data:', file.data)
+			// console.log('file data:', file.data)
 			this.__meta.size = file._meta.size || null
 			this.__meta.timeCreated = file._meta.timeCreated || null
 			this.__meta.timeEdited = file._meta.timeEdited || null

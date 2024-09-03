@@ -70,7 +70,7 @@ const IDFR_DEFAULTS = ['name', 'isomeric_smiles', 'molecular_formula']
 const PROP_DEFAULT = ['molecular_weight']
 
 // Type declarations
-import type { Mol, Molset, MolsetApi, SearchMode } from '@/types'
+import type { Smol, Molset, MolsetApi, SearchMode } from '@/types'
 type Context = 'json' | 'sdf-file' | 'csv-file' | 'smi-file' | 'result-mols' | 'my-mols' | 'dataframe' | null
 type SaveAsJSONOptions = {
 	newFile?: boolean
@@ -549,7 +549,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Replace a molecule in a .molset.json file or in my-mols.
 		// This is used when saving changes to a molecule inside a molset.
-		replaceMolInMolset(destinationPath: string, mol: Mol, context: 'json' | 'my-mols'): Promise<boolean> {
+		replaceMolInMolset(destinationPath: string, mol: Smol, context: 'json' | 'my-mols'): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(moleculesApi.replaceMolInMolset(destinationPath, mol, context, this._cacheId!), {
 					onSuccess: () => {
@@ -659,7 +659,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// with a list of invalid molecules. This list is then used to display a modal,
 		// allowing the user to try again while discarding the invalid molecules.
 		_maybeShowInvalidMolsModal(
-			err: { data: { invalidMols?: Mol[] } },
+			err: { data: { invalidMols?: Smol[] } },
 			{ callback, destinationPath, options }: { callback: Function; destinationPath: string; options: SaveAsSDFOptions },
 		) {
 			// Ignore string error messages.
@@ -669,7 +669,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 			if (data.invalidMols) {
 				console.log(`The following ${data.invalidMols.length} molecules are invalid:`) // Leave this
 				const list = data.invalidMols
-					.map((mol: Mol) => {
+					.map((mol: Smol) => {
 						if (mol) {
 							const name = mol['identifiers']['name'] ? mol['identifiers']['name'] + '<br>' : ''
 							const smiles =

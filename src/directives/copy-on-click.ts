@@ -25,7 +25,7 @@ function _onClick(e: MouseEvent) {
 	// 	console.log('Validator result:', validator())
 	// }
 	if ((!validator && validator != undefined) || (validator instanceof Function && !validator())) return
-	const el: HTMLElement | null = e.target as HTMLElement
+	const el: HTMLElement | null = e.currentTarget as HTMLElement
 	if (!el) return
 	const text = el.getAttribute('data-copy') || el.innerText
 	navigator.clipboard.writeText(text)

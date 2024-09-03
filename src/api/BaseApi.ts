@@ -72,7 +72,7 @@ class BaseApi implements BaseApiType {
 		})
 
 		if (apiName) {
-			console.log('Registered API module:', apiName)
+			// console.log('Registered API module:', apiName)
 		}
 
 		this.setupInterceptors()

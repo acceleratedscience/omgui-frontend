@@ -14,15 +14,15 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 import { slugify } from '@/utils/helpers'
 
 // Type declarations
-import type { Mol, TempMol, Protein, ProteinApi } from '@/types'
+import type { MolType, Smol, TempSmol, Protein, ProteinApi } from '@/types'
 type State = {
-	_molType: 'smallMol' | 'protein' | null
-	smallMol: {
-		_mol: Mol | TempMol
+	_molType: MolType
+	smol: {
+		_mol: Smol | TempSmol
 		_mdl: string | null
 		_svg: string | null
 	}
-	protein: {
+	_protein: {
 		_mol: Protein | null
 		_pdb: string | null
 	}
@@ -36,17 +36,19 @@ type SaveAsOptions = {
 
 function getInitialState(): State {
 	return {
+		// The type will define where we save/read molecule data from to/from.
+		// I.e. smol, protein, etc.
 		_molType: null,
 
 		// Small molecule data
-		smallMol: {
+		smol: {
 			_mol: { identifiers: {} },
 			_mdl: null, // mol/sdf file content, used for 3D visualization
 			_svg: null, // 2D data
 		},
 
 		// Protein data
-		protein: {
+		_protein: {
 			_mol: null,
 			_pdb: null, // pdb file content, used for 3D visualization
 		},
@@ -70,23 +72,23 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 * General getters
 		 */
 
-		molType(): 'smallMol' | 'protein' | null {
+		molType(): MolType {
 			return this._molType
 		},
-		mol(): Mol | TempMol | Protein | null {
-			if (this._molType == 'smallMol') {
-				return this.smallMol._mol
+		mol(): Smol | TempSmol | Protein | null {
+			if (this._molType == 'smol') {
+				return this.smol._mol
 			} else if (this._molType == 'protein') {
-				return this.protein._mol
+				return this._protein._mol
 			} else {
 				return null
 			}
 		},
 		name(): string {
-			if (this._molType == 'smallMol') {
-				return this.smallMol._mol.identifiers?.name || 'Unnamed Molecule'
+			if (this._molType == 'smol') {
+				return this.smol._mol.identifiers?.name || 'Unnamed Molecule'
 			} else if (this._molType == 'protein') {
-				return this.protein._mol?.idcode || 'Unknown Protein'
+				return this._protein._mol?.idcode || 'Unknown Protein'
 			} else {
 				return ''
 			}
@@ -103,7 +105,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			return this._molFromMolsetIndex
 		},
 		isEmpty(): boolean {
-			return !!this._molType
+			return !this._molType
 		},
 		hasChanges(): boolean {
 			return this._hasChanges
@@ -117,18 +119,18 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 */
 
 		inchi(): string | null {
-			if (this._molType == 'smallMol') {
-				return this.smallMol._mol?.identifiers?.inchi || null
+			if (this._molType == 'smol') {
+				return this.smol._mol?.identifiers?.inchi || null
 			} else {
 				return null
 			}
 		},
 		smiles(): string | null {
-			if (this._molType == 'smallMol') {
+			if (this._molType == 'smol') {
 				return (
-					this.smallMol._mol?.identifiers?.isomeric_smiles ||
-					this.smallMol._mol?.identifiers?.canonical_smiles ||
-					this.smallMol._mol?.identifiers?.smiles
+					this.smol._mol?.identifiers?.isomeric_smiles ||
+					this.smol._mol?.identifiers?.canonical_smiles ||
+					this.smol._mol?.identifiers?.smiles
 				)
 			} else {
 				return null
@@ -136,13 +138,13 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 		// Cycle through the available identifiers to find the best available one.
 		identifier(): string | null {
-			if (this._molType == 'smallMol') {
+			if (this._molType == 'smol') {
 				return (
 					this.inchi ||
 					this.smiles ||
-					this.smallMol._mol?.identifiers?.inchikey ||
-					this.smallMol._mol?.identifiers?.name ||
-					this.smallMol._mol?.identifiers?.cid ||
+					this.smol._mol?.identifiers?.inchikey ||
+					this.smol._mol?.identifiers?.name ||
+					this.smol._mol?.identifiers?.cid ||
 					null
 				)
 			} else {
@@ -150,34 +152,34 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			}
 		},
 		mdl(): string | null {
-			if (this._molType == 'smallMol') {
-				return this.smallMol._mdl
+			if (this._molType == 'smol') {
+				return this.smol._mdl
 			} else {
 				return null
 			}
 		},
 		svg(): string | null {
-			if (this._molType == 'smallMol') {
-				return this.smallMol._svg
+			if (this._molType == 'smol') {
+				return this.smol._svg
 			} else {
 				return null
 			}
 		},
 		enriched(): boolean {
-			if (this._molType == 'smallMol') {
-				return !!this.smallMol._mol?.enriched
+			if (this._molType == 'smol') {
+				return !!this.smol._mol?.enriched
 			} else {
 				return false
 			}
 		},
 		// A combination string of "key: value" pairs used as tooltip.
 		propertiesString(): Record<string, string> | null {
-			if (this._molType == 'smallMol') {
-				if (!this.smallMol._mol || !('properties' in this.smallMol._mol)) return {}
+			if (this._molType == 'smol') {
+				if (!this.smol._mol || !('properties' in this.smol._mol)) return {}
 
 				const props: Record<string, string> = {}
-				for (const prop in this.smallMol._mol.properties) {
-					let val: string | number = this.smallMol._mol.properties[prop]
+				for (const prop in this.smol._mol.properties) {
+					let val: string | number = this.smol._mol.properties[prop]
 					if (val || val === 0) val = val.toString()
 					if (val) {
 						props[prop] = `${prop}: ${val}`
@@ -188,29 +190,38 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 				return null
 			}
 		},
+
+		/**
+		 * Macromolecule getters
+		 */
+
+		proteinData(): Protein | null {
+			return this._protein._mol
+		},
+		proteinPdb(): string | null {
+			return this._protein._pdb
+		},
 	},
 	actions: {
-		setMolData(mol: Mol | ProteinApi, molType: 'smallMol' | 'protein') {
-			if (molType == 'smallMol') {
-				console.log('setMolData smallMol', mol)
-				this._molType = 'smallMol'
-				this.smallMol._mol = mol as Mol
-				console.log(345)
+		setMolData(mol: Smol | ProteinApi, molType: 'smol' | 'protein') {
+			// console.log('--setMolData', molType, mol)
+			if (molType == 'smol') {
+				this._molType = 'smol'
+				this.smol._mol = mol as Smol
 			} else if (molType == 'protein') {
-				console.log('setMolData protein', mol)
-				this._molType == 'protein'
-				this.protein._mol = (mol as ProteinApi).header
-				this.protein._pdb = (mol as ProteinApi).pdb
+				this._molType = 'protein'
+				this._protein._mol = (mol as ProteinApi).header
+				this._protein._pdb = (mol as ProteinApi).pdb
 			}
 			this._loading = false
 		},
 		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
-			if (this._molType == 'smallMol') {
-				this.smallMol._mol.identifiers[identifier] = value
+			if (this._molType == 'smol') {
+				this.smol._mol.identifiers[identifier] = value
 			}
 		},
 		async fetchMolVizData(inchi_or_smiles: string) {
-			if (this._molType == 'smallMol') {
+			if (this._molType == 'smol') {
 				// console.log('* fetchMolVizData')
 				apiFetch(moleculesApi.getMolVizData(inchi_or_smiles), {
 					onSuccess: (data) => {
@@ -226,9 +237,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			}
 		},
 		setMolVizData(svg: string, mdl: string) {
-			if (this._molType == 'smallMol') {
-				if (svg) this.smallMol._svg = svg
-				if (mdl) this.smallMol._mdl = mdl
+			if (this._molType == 'smol') {
+				if (svg) this.smol._svg = svg
+				if (mdl) this.smol._mdl = mdl
 			}
 		},
 		setMolFromMolsetIndex(index: number | null, dontPushRoute = false) {
@@ -242,11 +253,11 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			}
 		},
 		async enrichMol() {
-			if (this._molType == 'smallMol') {
+			if (this._molType == 'smol') {
 				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.enrichMol(this.mol as Mol), {
+					apiFetch(moleculesApi.enrichMol(this.mol as Smol), {
 						onSuccess: (data) => {
-							this.smallMol._mol = data
+							this.smol._mol = data
 							this.setHasChanges(true)
 							this.setEnriched(true)
 							resolve(true)
@@ -257,8 +268,8 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			}
 		},
 		setEnriched(enriched: boolean) {
-			if (this._molType == 'smallMol') {
-				this.smallMol._mol.enriched = enriched
+			if (this._molType == 'smol') {
+				this.smol._mol.enriched = enriched
 			}
 		},
 		setHasChanges(hasChanges: boolean) {
@@ -271,9 +282,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		// Save molecule as a new JSON (.mol.json) file.
 		saveMolAsJSON(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smallMol') {
+			if (this._molType == 'smol') {
 				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsJSON(destinationPath, this.mol as Mol, newFile), {
+					apiFetch(moleculesApi.saveMolAsJSON(destinationPath, this.mol as Smol, newFile), {
 						onSuccess: () => resolve(true),
 						onError: () => reject(true),
 					})
@@ -285,9 +296,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		// Save molecule as a new CSV (.csv) file.
 		saveMolAsCSV(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smallMol') {
+			if (this._molType == 'smol') {
 				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsCSV(destinationPath, this.mol as Mol, newFile), {
+					apiFetch(moleculesApi.saveMolAsCSV(destinationPath, this.mol as Smol, newFile), {
 						onSuccess: () => resolve(true),
 						onError: (response) => reject(response),
 					})
@@ -303,9 +314,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		// Save molecule as a new SDF (.sdf) file.
 		saveMolAsSDF(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smallMol') {
+			if (this._molType == 'smol') {
 				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsSDF(destinationPath, this.mol as Mol, newFile), {
+					apiFetch(moleculesApi.saveMolAsSDF(destinationPath, this.mol as Smol, newFile), {
 						onSuccess: () => resolve(true),
 						onError: (response) => reject(response),
 					})
@@ -318,9 +329,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		// Save molecule as a new MDL (.mol) file.
 		// This removed all parameters from the molecule.
 		saveMolAsMDL(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smallMol') {
+			if (this._molType == 'smol') {
 				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsMDL(destinationPath, this.mol as Mol, newFile), {
+					apiFetch(moleculesApi.saveMolAsMDL(destinationPath, this.mol as Smol, newFile), {
 						onSuccess: () => resolve(true),
 						onError: (response) => reject(response),
 					})
@@ -333,9 +344,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		// Save molecule as a new SMILES (.smi) file.
 		// This removed all parameters from the molecule.
 		saveMolAsSMILES(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smallMol') {
+			if (this._molType == 'smol') {
 				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsSMILES(destinationPath, this.mol as Mol, newFile), {
+					apiFetch(moleculesApi.saveMolAsSMILES(destinationPath, this.mol as Smol, newFile), {
 						onSuccess: () => resolve(true),
 						onError: (response) => reject(response),
 					})

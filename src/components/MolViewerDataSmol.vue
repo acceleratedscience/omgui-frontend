@@ -116,7 +116,7 @@
 				<div
 					v-for="(val, key) in mol?.properties"
 					:key="key"
-					:title="molViewerStore.propertiesString[key]"
+					:title="molViewerStore.propertiesString ? molViewerStore.propertiesString[key] : ''"
 					:class="{ empty: !val && val !== 0 }"
 					:style="{ width: propColWidth }"
 				>
@@ -161,7 +161,7 @@
 import { computed } from 'vue'
 
 // Type declarations
-import type { Mol, TempMol } from '@/types'
+import type { Smol, TempSmol } from '@/types'
 import type { ComputedRef } from 'vue'
 
 // Stores
@@ -194,7 +194,7 @@ const synonymColMinWidth: number = 150
  */
 
 // Molecule data
-const mol: ComputedRef<Mol | TempMol> = computed(() => molViewerStore.mol)
+const mol: ComputedRef<Smol | TempSmol> = computed(() => molViewerStore.mol)
 
 // Whether to display the analysis section
 const showAnalysis: ComputedRef<boolean> = computed(() => {

@@ -68,7 +68,7 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 ```
 
 -   Depending on the file type, the `data` attribute will contain a string (for text-based files) or an object (for structured data files).
--   Different file types (as defined by the file extension) will open in different file viewers. To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
+-   Different file types (as defined by the file extension) will open in different file viewers. In `ViewerDispatch.vue` the correct viewer is loaded by `loadModule()` and then the file data is transferred into the appropriate viewer store by `parseRoute()`. To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
     -   <ins>Molecule viewer:</ins> For displaying `.mol.json` files, which contain an OpenAD-native molecule object. Industry-standard molecules file formats like `.pdb` and `.mol` are translated on-the-fly and will also open in the molecule viewer.
     -   <ins>Molecule set viewer:</ins> For displaying `molset.json` files, which contain a list of OpenAD-native molecule objects. Industry-standard molecule set files like `.sdf` or `.smi` are translated on-the-fly and will also open in the molecule set viewer.
     -   <ins>Data viewer:</ins> For `.csv` files and Jupyter dataframes.
