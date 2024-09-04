@@ -2,14 +2,23 @@
  * General
  */
 
-body {
-	// background: $soft-bg;
-}
 #app {
-	// height: min-content;
 	height: 100%; // Required for file-browser to stretch to the bottom.
-	// border: solid 1px red;
 }
+
+// Small text
+small,
+.small {
+	font-size: $font-size-small;
+	line-height: $line-height-small;
+}
+
+.soft,
+.soft a,
+.soft a.lookup {
+	color: #aaa;
+}
+
 .error-msg {
 	color: $error;
 }
@@ -38,7 +47,8 @@ body {
 a:hover {
 	text-decoration: underline;
 }
-a.lookup {
+a.lookup,
+a.lookup > div {
 	color: $black;
 	text-decoration: underline;
 	text-decoration-color: $black-20;
@@ -80,9 +90,6 @@ p {
 }
 i {
 	font-style: italic;
-}
-.soft {
-	color: #aaa;
 }
 hr {
 	height: 1px;

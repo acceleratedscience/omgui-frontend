@@ -63,7 +63,7 @@
 							<template v-if="ref.pub">
 								/ <a :href="scholarSearch(ref.pub)" target="_blank" class="title lookup">{{ ref.pub }}</a>
 							</template>
-							<div class="meta">
+							<div class="small soft">
 								<!-- Authors -->
 								<template v-for="(author, i) in ref.authors" :key="i">
 									<a :href="scholarSearch(author)" target="_blank" class="lookup">
@@ -74,6 +74,7 @@
 
 								<!-- Other metadata -->
 								<template v-if="ref.metaStr">{{ ref.metaStr }}</template>
+								<template v-if="ref.input"><br />-- {{ ref.input }}</template>
 							</div>
 						</li>
 					</ul>

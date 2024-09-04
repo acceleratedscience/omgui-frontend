@@ -20,10 +20,10 @@
 
 <script setup lang="ts">
 // Libraries
-// import Miew from 'miew' // Waiting for fix, self-hosting until then - see https://github.com/epam/miew/issues/524
+import Miew from 'miew' // Waiting for fix, self-hosting until then - see https://github.com/epam/miew/issues/524
 // @ts-ignore
-import Miew from '@/TEMP/miew/dist/miew.module'
-import '@/TEMP/miew/dist/miew.min.css'
+// import Miew from '@/TEMP/miew/dist/miew.module'
+// import '@/TEMP/miew/dist/miew.min.css'
 
 // Vue
 import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue'
@@ -99,7 +99,7 @@ function init3DViewer() {
 // Render 3D mol using the Miew library - https://lifescience.opensource.epam.com/miew/index.html
 // Miew is not well documented, but it's the best 3D viewer we've found so far.
 // Uses WebGL and has a few nice features like displaying atom info on click, and setting the rotation center on doubleclick.
-function render3d_miew(forceReInit = false) {
+function render3d_miew(forceReInit = false, zoom = false) {
 	if (forceReInit) {
 		miewViewer.term()
 		miewViewer = null
@@ -113,7 +113,7 @@ function render3d_miew(forceReInit = false) {
 				fps: false,
 				camDistance: 3, // Default 2.5 tends to crop some of the molecule, depending on the shape. Eg. with penguinone.
 				resolution: 'high',
-				zooming: false,
+				zooming: zoom,
 				bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg.
 				// bg: { color: 0xffffff, transparent: true }, // Transparent background creates ugly edges
 				// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
@@ -140,7 +140,7 @@ function render3d_miew(forceReInit = false) {
 async function toggleFullScreen(state: boolean) {
 	fullscreen.value = state
 	await nextTick()
-	render3d_miew(true)
+	render3d_miew(true, state)
 }
 </script>
 
