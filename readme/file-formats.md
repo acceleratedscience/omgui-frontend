@@ -10,7 +10,7 @@ On top of supporting common molecular file formats like `mol`, `sdf` and `smi` f
 
 ### 1. Small molecules: `mol.json`
 
-The small molecule data format is how the molecule viewer stores and interacts with small molecule data. When you open a `mol`, `sdf` or `smi` file, its content is converted into this format on the fly.
+The small molecule data format is how the molecule viewer stores and interacts with small molecule data. When you open a `mol`, `sdf` or `smi` file, its content is converted into this format on-the-fly.
 
 In addition to molecule-related data, this format also allows us to store user-generated data like notes and labels.
 
@@ -82,6 +82,7 @@ An analysis example:
 }
 ```
 
+<br>
 
 ### 2. Macromolecules: `mmol.json`
 
@@ -93,6 +94,9 @@ Hence the main purpose of this format is to be able to store user-generated data
 {
     // Currently only protein molecules are supported,
     // but in the future this could be dna, rna, ligand, etc.
+    // This field will define what kind of data is expected
+    // in the data field, and will subsequently also define
+    // what is being displayed in the molecule viewer.
     "molType": "protein",
 
     // Available data for this macromolecule
@@ -115,4 +119,19 @@ Hence the main purpose of this format is to be able to store user-generated data
         "labels:": [],
     }
 }
+```
+
+<br>
+
+### 3. Molecule set: `molset.json`
+
+A molecule set is nothing more than an array of small molecules or macromolecules. Both `sdf` and `smi` files are converted to this format on-the-fly.
+
+```cjson
+[
+    { /* mol.json or mmol.json molecule */ },
+    { /* mol.json or mmol.json molecule */ },
+    { /* mol.json or mmol.json molecule */ },
+    ...
+]
 ```
