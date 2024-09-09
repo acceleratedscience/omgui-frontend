@@ -12,7 +12,7 @@ The small molecule data format is how the molecule viewer stores and interacts w
 
 No visualization data is stored directly into this format, as it can easily be calculated on the fly.
 
-```json
+```jsonc
 {
     "name": "Foobar",
     "synonyms": ["foo", "bar"],
@@ -23,7 +23,7 @@ No visualization data is stored directly into this format, as it can easily be c
         // molecular_weight: 'pubchem'
     },
     "analysis": [],
-    "enriched": false,
+    "enriched": false,  
     "meta": {
         "notes": "",
         "labels:": [],
