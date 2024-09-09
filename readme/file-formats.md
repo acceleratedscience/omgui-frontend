@@ -17,7 +17,7 @@ The small molecule data format is how the molecule viewer stores and interacts w
 
 In addition to molecule-related data, this format also allows us to store user-generated data like notes and labels.
 
-No visualization data is stored directly into this format, as it can easily be calculated on the fly based on the InChI or SMILES string.
+No visualization data is stored directly into this format, as it can easily be calculated on-the-fly based on the *InChI* or *SMILES* string.
 
 ```jsonc
 {
@@ -89,9 +89,9 @@ An analysis example:
 
 ### 2. Macromolecules: `mmol.json`
 
-The macromolecule format is a more simplistic wrapper around a `cif` file. Unlike small molecules, macromolecules require that the 3D visualisation data is stored the file, as it cannot be calculated on the fly.
+The macromolecule format is a more simplistic wrapper around a `cif` file. Unlike small molecules, macromolecules require that the 3D visualisation data is stored in the file, as it cannot be calculated on the fly.
 
-Hence the main purpose of this format is to be able to store user-generated data like notes and labels, as well as to provide a single format to store different types of macromolecules.
+Hence the main purpose of this format is to be able to store user-generated data like notes and labels, as well as to provide a single format to represent different types of macromolecules.
 
 ```jsonc
 {
@@ -130,7 +130,7 @@ Hence the main purpose of this format is to be able to store user-generated data
 
 A molecule set is nothing more than an array of small molecules or macromolecules. Both `sdf` and `smi` files are converted to this format on-the-fly.
 
-```cjson
+```jsonc
 [
     { /* mol.json or mmol.json molecule */ },
     { /* mol.json or mmol.json molecule */ },
