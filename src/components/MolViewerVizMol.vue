@@ -19,7 +19,7 @@
         />
     </div> -->
 	<div class="container-2d" v-html="molViewerStore.svg"></div>
-	<MolRender3D :mdl="molViewerStore.mdl" :molName="molViewerStore.name" />
+	<MolRender3D :data3D="molViewerStore.mdl" data3DFormat="sdf" :molName="molViewerStore.name" />
 </template>
 
 <script setup lang="ts">

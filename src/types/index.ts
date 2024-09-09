@@ -1,3 +1,149 @@
+/**
+ * Molecules shared
+ */
+
+type MmolType = 'protein'
+export type MolType = 'smol' | MmolType | null
+
+/**
+ * Small molecules
+ */
+
+// A molecule object, as returned by the API.
+export type Smol = {
+	index?: number // For the position in the molset
+	identifiers: {
+		name: string
+		inchi: string
+		inchikey: string
+		canonical_smiles: string // The "regular" SMILES
+		isomeric_smiles: string
+		smiles: string // We don't use this field but when opening SDF files it may be used
+		cid: string
+		molecular_formula: string
+		[key: string]: string // To shut up ts errors.
+	}
+	synonyms: string[]
+	properties: {
+		[key: string]: string | number
+	}
+	property_sources: {
+		[key: string]: {
+			[key: string]: string
+		}
+	}
+	analysis: any[]
+	enriched: boolean
+}
+
+// This lets us set some properties on a molecule
+// before the full molecule is loaded, without ts complaining.
+export type TempSmol = {
+	identifiers: Record<string, string>
+	enriched?: boolean
+}
+
+/**
+ * Macromolecules
+ */
+
+// Macromolecule
+// - - -
+// Unlike small molecules, with macromolecules like proteins
+// we can't fetch 3D data on the fly so we store the 3D data
+// in the molecule dictionary.
+export type Mmol = {
+	_molType?: MmolType | null // Optional because in the MolViewerStore we store the molType one level higher
+	data: Protein | null
+	data3DFormat: Format3D
+	data3D: string | null
+	meta: MolMeta | null
+}
+
+export type MolMeta = {
+	notes: string
+	labels: string[]
+}
+
+// Miew supported 3D data formats:
+// https://github.com/search?q=repo%3Aepam%2Fmiew+this._options.fileType+%3D+&type=code
+export type Format3D = 'sdf' | 'pdb' | 'cif' | 'xyz' | 'cml' | 'gro' | 'ccp4' | 'mol2' | 'dsn6' | 'mmtf' | null
+
+// Protein
+export type Protein = {
+	// Identification
+	idcode: string
+	name: string
+
+	// Publication
+	head: string
+	author: string
+	release_date: string
+	deposition_date: string
+	keywords: string
+	journal: string
+	journal_reference: string
+
+	// Context
+	resolution: number
+	source: {}
+	structure_method: string
+	structure_reference: [string]
+	has_missing_residues: boolean
+	missing_residues: [string]
+	biomoltrans: [any]
+	compound: {
+		[key: string]: string
+	}
+
+	// Catch-all
+	[key: string]: any
+}
+
+// Api protein payload
+// Todo: merge with Mmol
+export type MmolApi = {
+	mol_type: 'protein' | string
+	name: string
+	data: Protein
+	data_3d: string
+	data_3d_format: string
+	meta: {
+		notes: string
+		labels: string[]
+	}
+}
+
+// Superset of all macromoelcule types
+export type Mmol_temp = Protein | null
+
+/**
+ * Molecule sets
+ */
+
+// A set of molecules.
+export type Molset = Smol[]
+
+// The API response for molset page.
+export type MolsetApi = {
+	cacheId: number
+	mols: Molset // Paginated subset of the molset
+	total: number
+	resultCount: number
+	searchStr: string
+	searchMode: SearchMode
+	sort: string
+	allIndices: number[]
+	matchingIndices: number[]
+	page: number
+	pageSize: number
+	pageTotal: number
+}
+
+/**
+ * File System
+ */
+
 // The contents of one column in the file browser.
 export type Level = {
 	_meta: {
@@ -102,101 +248,11 @@ export type FileType =
 // 	dispTimeEdited?: string
 // }
 
-export type MolType = 'smol' | 'protein' | null
+/**
+ * Other
+ */
 
-// A molecule object, as returned by the API.
-export type Smol = {
-	index?: number // For the position in the molset
-	identifiers: {
-		name: string
-		inchi: string
-		inchikey: string
-		canonical_smiles: string // The "regular" SMILES
-		isomeric_smiles: string
-		smiles: string // We don't use this field but when opening SDF files it may be used
-		cid: string
-		molecular_formula: string
-		[key: string]: string // To shut up ts errors.
-	}
-	synonyms: string[]
-	properties: {
-		[key: string]: string | number
-	}
-	property_sources: {
-		[key: string]: {
-			[key: string]: string
-		}
-	}
-	analysis: any[]
-	enriched: boolean
-}
-
-// This lets us set some properties on a molecule
-// before the full molecule is loaded, without ts complaining.
-export type TempSmol = {
-	identifiers: Record<string, string>
-	enriched?: boolean
-}
-
-// A set of molecules.
-export type Molset = Smol[]
-
-// The API response for molset page.
-export type MolsetApi = {
-	cacheId: number
-	mols: Molset // Paginated subset of the molset
-	total: number
-	resultCount: number
-	searchStr: string
-	searchMode: SearchMode
-	sort: string
-	allIndices: number[]
-	matchingIndices: number[]
-	page: number
-	pageSize: number
-	pageTotal: number
-}
 export type SearchMode = 'text' | 'smarts'
-
-// Protein
-export type Protein = {
-	// Identification
-	idcode: string
-	name: string
-
-	// Publication
-	head: string
-	author: string
-	release_date: string
-	deposition_date: string
-	keywords: string
-	journal: string
-	journal_reference: string
-
-	// Context
-	resolution: number
-	source: {}
-	structure_method: string
-	structure_reference: [string]
-	has_missing_residues: boolean
-	missing_residues: [string]
-	biomoltrans: [any]
-	compound: {
-		[key: string]: string
-	}
-
-	// Catch-all
-	[key: string]: any
-}
-
-// Api protein payload
-export type ProteinApi = {
-	molType: 'protein'
-	pdb: string
-	header: Protein
-}
-
-// export type Macromol = Protein | null
 
 // The URL query object as part of the route.
 export type UrlQuery = Record<string, string | (string | null)[]>

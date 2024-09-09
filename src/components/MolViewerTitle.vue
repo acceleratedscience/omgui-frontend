@@ -93,7 +93,6 @@ const modelPagination: WritableComputedRef<number> = computed({
 <style lang="scss" scoped>
 #title-wrap {
 	display: flex;
-	margin-bottom: 16px;
 }
 
 // Molecule Icon

@@ -2,12 +2,12 @@
 	<table v-copy-on-click="allowCopy" :data-copy="allowCopy ? copyData : null">
 		<thead v-if="header">
 			<tr>
-				<th v-for="(cell, i) in table.header" :key="i">{{ cell }}</th>
+				<th v-for="(cell, i) in table.header" :key="i"><span v-html="cell || `<span class='soft'>-</span>`"></span></th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr v-for="(row, i) in table.body" :key="i">
-				<td v-for="(cell, j) in row" :key="j">{{ cell }}</td>
+				<td v-for="(cell, j) in row" :key="j"><span v-html="cell || `<span class='soft'>-</span>`"></span></td>
 			</tr>
 		</tbody>
 	</table>
@@ -58,7 +58,6 @@ const copyData: ComputedRef<string> = computed(() => {
 	let i = 0
 	for (const row in data.value) {
 		if (i > 0 || props.header) {
-			console.log(data.value[row])
 			output += data.value[row].join(',') + '\n'
 		}
 		i++

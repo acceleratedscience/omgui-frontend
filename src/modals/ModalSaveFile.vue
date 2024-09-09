@@ -17,15 +17,29 @@
 						>.{{ ext }}
 					</div>
 
-					<!-- Save-as options for mol -->
-					<cv-dropdown v-if="modalOptions.dataType == 'mol'" v-model="vModelOutputTypeMol" class="dd-output-options">
-						<cv-dropdown-item v-for="(option, i) in outputTypeOptionsMol" :key="i" :value="option.val">{{
+					<!-- Save-as options for small molecule -->
+					<cv-dropdown v-if="modalOptions.dataType == 'smol'" v-model="vModelOutputExt" class="dd-output-options">
+						<cv-dropdown-item v-for="(option, i) in outputTypeOptionsSmol" :key="i" :value="option.val">{{
+							option.disp
+						}}</cv-dropdown-item>
+					</cv-dropdown>
+
+					<!-- Save-as options for CIF -->
+					<cv-dropdown v-else-if="modalOptions.dataType == 'cif'" v-model="vModelOutputExt" class="dd-output-options">
+						<cv-dropdown-item v-for="(option, i) in outputTypeOptionsCIF" :key="i" :value="option.val">{{
+							option.disp
+						}}</cv-dropdown-item>
+					</cv-dropdown>
+
+					<!-- Save-as options for PDB -->
+					<cv-dropdown v-else-if="modalOptions.dataType == 'pdb'" v-model="vModelOutputExt" class="dd-output-options">
+						<cv-dropdown-item v-for="(option, i) in outputTypeOptionsPDB" :key="i" :value="option.val">{{
 							option.disp
 						}}</cv-dropdown-item>
 					</cv-dropdown>
 
 					<!-- Save-as options for molset -->
-					<cv-dropdown v-if="modalOptions.dataType == 'molset'" v-model="vModelOutputTypeMolset" class="dd-output-options">
+					<cv-dropdown v-else-if="modalOptions.dataType == 'molset'" v-model="vModelOutputExt" class="dd-output-options">
 						<cv-dropdown-item v-for="(option, i) in outputTypeOptionsMolset" :key="i" :value="option.val">{{
 							option.disp
 						}}</cv-dropdown-item>
@@ -65,31 +79,41 @@ type ModalOptions = {
 	// When datatype is set, the dropdown with output options is shown.
 	// Different output options are available per dataType.
 	// When dataType is set, ext & ext2 are ignored.
-	dataType?: 'mol' | 'molset' | null
+	dataType?: 'smol' | 'cif' | 'pdb' | 'molset' | null
 }
-type OutputTypesMol = 'mol.json' | 'mol' | 'csv' | 'smi'
-type OutputTypesMolset = 'molset.json' | 'sdf' | 'csv' | 'smi'
+type OutputExtSmol = 'mol.json' | 'mol' | 'csv' | 'smi'
+type OutputExtMmol = 'mmol.json' | 'cif' | 'pdb'
+type OutputExtMolset = 'molset.json' | 'sdf' | 'csv' | 'smi'
+type OutputExt = OutputExtSmol | OutputExtMmol | OutputExtMolset | null
 
 // Emits
 const emit = defineEmits(['mounted']) // <--
 
 // Definitions
 const isSubmitted = ref(false) // Workaround for Carbon dialog to make ESC or X trigger the onCancel event
-const outputTypeOptionsMolset = [
-	{ val: 'molset.json', disp: 'JSON' },
-	{ val: 'sdf', disp: 'SDF' },
-	{ val: 'csv', disp: 'CSV' },
-	{ val: 'smi', disp: 'SMILES' },
-]
-const outputTypeOptionsMol = [
+const outputTypeOptionsSmol = [
 	{ val: 'mol.json', disp: 'JSON' },
 	{ val: 'sdf', disp: 'SDF' },
 	{ val: 'csv', disp: 'CSV' },
 	{ val: 'mol', disp: 'MOL' },
 	{ val: 'smi', disp: 'SMILES' },
 ]
-const vModelOutputTypeMol: Ref<OutputTypesMol> = ref('mol.json')
-const vModelOutputTypeMolset: Ref<OutputTypesMolset> = ref('molset.json')
+const outputTypeOptionsCIF = [
+	{ val: 'mmol.json', disp: 'JSON' },
+	{ val: 'cif', disp: 'CIF' },
+]
+const outputTypeOptionsPDB = [
+	{ val: 'mmol.json', disp: 'JSON' },
+	{ val: 'pdb', disp: 'PDB' },
+	{ val: 'cif', disp: 'CIF' },
+]
+const outputTypeOptionsMolset = [
+	{ val: 'molset.json', disp: 'JSON' },
+	{ val: 'sdf', disp: 'SDF' },
+	{ val: 'csv', disp: 'CSV' },
+	{ val: 'smi', disp: 'SMILES' },
+]
+const vModelOutputExt: Ref<OutputExt> = ref(null)
 const $ipFilename = ref<HTMLInputElement | null>(null)
 const filenameRequired: Ref<string | null> = ref(null)
 
@@ -118,12 +142,10 @@ const vModelPath: WritableComputedRef<string> = computed({
 
 // File extension
 const ext: ComputedRef<string> = computed(() => {
-	if (modalOptions.value.dataType == 'mol') {
-		return vModelOutputTypeMol.value
-	} else if (modalOptions.value.dataType == 'molset') {
-		return vModelOutputTypeMolset.value
-	} else if (modalOptions.value.ext) {
+	if (modalOptions.value.ext) {
 		return (modalOptions.value.ext2 ? modalOptions.value.ext2 + '.' : '') + modalOptions.value.ext || ''
+	} else if (modalOptions.value.dataType) {
+		return vModelOutputExt.value || ''
 	} else {
 		console.error('ModalSaveFile.vue: either ext or dataType must be set in the dialog options.')
 		return ''
@@ -138,10 +160,12 @@ onMounted(() => {
 	emit('mounted') // <--
 
 	// Set the initial value for the output dropdown.
-	if (modalOptions.value.dataType == 'mol') {
-		vModelOutputTypeMol.value = 'mol.json'
+	if (modalOptions.value.dataType == 'smol') {
+		vModelOutputExt.value = 'mol.json'
+	} else if (['cif', 'pdb'].includes(modalOptions.value.dataType as string)) {
+		vModelOutputExt.value = 'mmol.json'
 	} else if (modalOptions.value.dataType == 'molset') {
-		vModelOutputTypeMolset.value = 'molset.json'
+		vModelOutputExt.value = 'molset.json'
 	}
 
 	// Select filename content.

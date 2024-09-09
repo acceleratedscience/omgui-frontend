@@ -1,5 +1,5 @@
 <template>
-	<MolRender3D :pdb="molViewerStore.proteinPdb" :molName="molViewerStore.name" />
+	<MolRender3D :data3D="molViewerStore.proteinData3D" :data3DFormat="molViewerStore.proteinData3DFormat" :molName="molViewerStore.name" />
 </template>
 
 <script setup lang="ts">

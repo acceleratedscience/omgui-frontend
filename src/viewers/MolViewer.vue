@@ -23,9 +23,9 @@
 	</div> -->
 
 	<!-- Visualization -->
-	<!-- @{{ molViewerStore.protein.foo }}@ -->
+	<!-- @{{ molType }}@ -->
 	<!-- <button @click="foo(molViewerStore.proteinfoo)">AAA</button> -->
-	<br /><br />
+	<!-- <br /><br /> -->
 	<div id="mol-render" :class="{ headless: mainStore.headless }">
 		<MolViewerVizMol v-if="molType == 'smol'" />
 		<MolViewerVizProtein v-else-if="molType == 'protein'" />
@@ -43,9 +43,7 @@
 			</BreadCrumbs>
 
 			<!-- Title -->
-			<MolViewerTitleMol :context="context" :loading="loading" />
-			<!-- <MolViewerTitleMol v-if="molType == 'smol'" :context="context" :loading="loading" /> -->
-			<!-- <MolViewerTitleProtein v-if="molType == 'protein'" :context="context" :loading="loading" /> -->
+			<MolViewerTitle :context="context" :loading="loading" />
 
 			<!-- Molecule data -->
 			<MolViewerDataSmol v-if="molType == 'smol'" :loading="loading" :loadingError="loadingError" />
@@ -87,8 +85,8 @@ import BreadCrumbsNot from '@/components/BreadCrumbsNot.vue'
 import BaseIconButton from '@/components/BaseIconButton.vue'
 import MolViewerVizMol from '@/components/MolViewerVizMol.vue'
 import MolViewerVizProtein from '@/components/MolViewerVizProtein.vue'
-import MolViewerTitleMol from '@/components/MolViewerTitleMol.vue'
-import MolViewerTitleProtein from '@/components/MolViewerTitleProtein.vue'
+import MolViewerTitle from '@/components/MolViewerTitle.vue'
+import MmolDetails from '@/components/MmolDetails.vue'
 import MolViewerDataSmol from '@/components/MolViewerDataSmol.vue'
 import MolViewerDataProtein from '@/components/MolViewerDataProtein.vue'
 

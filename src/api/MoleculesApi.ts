@@ -2,7 +2,7 @@ import BaseApi from './BaseApi'
 
 // Type declarations
 import type { LocationQuery } from 'vue-router'
-import type { Smol, TempSmol } from '@/types'
+import type { Smol, TempSmol, Mmol_temp, Mmol } from '@/types'
 
 // Molecule API
 export default class MoleculesApi extends BaseApi {
@@ -11,7 +11,7 @@ export default class MoleculesApi extends BaseApi {
 	}
 
 	/**
-	 * Molecules
+	 * Small molecules
 	 */
 
 	///////////////////////////////////////////////////////////////
@@ -88,6 +88,31 @@ export default class MoleculesApi extends BaseApi {
 	// Update molset with the molecule data.
 	replaceMolInMolset(path: string, mol: Smol, context: 'json' | 'my-mols', cacheId: number) {
 		return this.apiClient.post('/replace-mol-in-molset', { path, mol, context, cacheId })
+	}
+
+	// #endregion
+
+	/**
+	 * Macromolecules
+	 */
+
+	///////////////////////////////////////////////////////////////
+	// #region - Saving
+
+	// Save new .mol.json file to the workspace.
+	saveMmolAsMmolJson(path: string, mol: Mmol, newFile: boolean = true) {
+		return this.apiClient.post('/save-mmol-as-mmol-json', { path, mol, newFile })
+	}
+
+	// Save new .sdf file to the workspace.
+	saveMmolAsPDB(path: string, mol: Mmol, newFile: boolean = true) {
+		return this.apiClient.post('/save-mmol-as-pdb', { path, mol, newFile })
+	}
+
+	// Save new .sdf file to the workspace.
+	saveMmolAsCIF(path: string, mol: Mmol, newFile: boolean = true) {
+		console.log(mol)
+		return this.apiClient.post('/save-mmol-as-cif', { path, mol, newFile })
 	}
 
 	// #endregion

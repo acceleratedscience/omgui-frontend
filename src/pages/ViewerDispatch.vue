@@ -42,7 +42,7 @@ import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
 
 // Type declarations
-import type { File, Molset, MolsetApi, Smol, ProteinApi, UrlQuery } from '@/types'
+import type { File, Molset, MolsetApi, Smol, Mmol, UrlQuery } from '@/types'
 import type { LocationQuery } from 'vue-router'
 type RouteType = 'dir' | 'file' | 'error' | null
 
@@ -143,13 +143,9 @@ async function parseRoute() {
 					molGridStore.setContext('smi-file')
 				}
 			} else if (fileStore.fileType == 'mol') {
-				// console.log(555)
-				const data: Smol = file.data
-				molViewerStore.setMolData(data, 'smol')
-			} else if (fileStore.fileType == 'pdb') {
-				// console.log(666)
-				const data: ProteinApi = file.data
-				molViewerStore.setMolData(data, 'protein')
+				molViewerStore.setMolData(file.data as Smol, 'smol')
+			} else if (fileStore.fileType && ['mmol', 'pdb', 'cif'].includes(fileStore.fileType)) {
+				molViewerStore.setMolData(file.data as Mmol, 'protein')
 			}
 
 			// We can force the usage of a different module with ?use=OtherModule.

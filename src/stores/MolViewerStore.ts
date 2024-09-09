@@ -14,18 +14,17 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 import { slugify } from '@/utils/helpers'
 
 // Type declarations
-import type { MolType, Smol, TempSmol, Protein, ProteinApi } from '@/types'
+import type { MolType, Smol, TempSmol, Protein, Mmol, Format3D, MolMeta } from '@/types'
+
 type State = {
 	_molType: MolType
-	smol: {
-		_mol: Smol | TempSmol
-		_mdl: string | null
-		_svg: string | null
+	_smol: {
+		data: Smol | TempSmol
+		data3D: string | null // mdl format, basically a singular sdf
+		data2D: string | null // svg
+		meta: MolMeta | null
 	}
-	_protein: {
-		_mol: Protein | null
-		_pdb: string | null
-	}
+	_mmol: Mmol
 	_molFromMolsetIndex: number | null
 	_loading: boolean
 	_hasChanges: boolean
@@ -36,21 +35,24 @@ type SaveAsOptions = {
 
 function getInitialState(): State {
 	return {
-		// The type will define where we save/read molecule data from to/from.
+		// Defines where we read/save molecule data from/to
 		// I.e. smol, protein, etc.
 		_molType: null,
 
 		// Small molecule data
-		smol: {
-			_mol: { identifiers: {} },
-			_mdl: null, // mol/sdf file content, used for 3D visualization
-			_svg: null, // 2D data
+		_smol: {
+			data: { identifiers: {} },
+			data3D: null,
+			data2D: null,
+			meta: null,
 		},
 
 		// Protein data
-		_protein: {
-			_mol: null,
-			_pdb: null, // pdb file content, used for 3D visualization
+		_mmol: {
+			data: null,
+			data3DFormat: null,
+			data3D: null,
+			meta: null,
 		},
 
 		// When viewing a molecule from a molset,
@@ -75,20 +77,30 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		molType(): MolType {
 			return this._molType
 		},
+		isSmol(): boolean {
+			return this._molType == 'smol'
+		},
+		isMmol(): boolean {
+			return !!(this._molType && this._molType != 'smol')
+		},
+		isProtein(): boolean {
+			return this._molType == 'protein'
+		},
+
 		mol(): Smol | TempSmol | Protein | null {
-			if (this._molType == 'smol') {
-				return this.smol._mol
-			} else if (this._molType == 'protein') {
-				return this._protein._mol
+			if (this.isSmol) {
+				return this._smol.data
+			} else if (this.isMmol) {
+				return this._mmol.data
 			} else {
 				return null
 			}
 		},
 		name(): string {
-			if (this._molType == 'smol') {
-				return this.smol._mol.identifiers?.name || 'Unnamed Molecule'
-			} else if (this._molType == 'protein') {
-				return this._protein._mol?.idcode || 'Unknown Protein'
+			if (this.isSmol) {
+				return this._smol.data.identifiers?.name || 'Unnamed Molecule'
+			} else if (this.isProtein) {
+				return this._mmol.data?.idcode || 'Unknown Protein'
 			} else {
 				return ''
 			}
@@ -119,128 +131,100 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 */
 
 		inchi(): string | null {
-			if (this._molType == 'smol') {
-				return this.smol._mol?.identifiers?.inchi || null
-			} else {
-				return null
-			}
+			if (!this.isSmol) return null
+			return this._smol.data?.identifiers?.inchi || null
 		},
 		smiles(): string | null {
-			if (this._molType == 'smol') {
-				return (
-					this.smol._mol?.identifiers?.isomeric_smiles ||
-					this.smol._mol?.identifiers?.canonical_smiles ||
-					this.smol._mol?.identifiers?.smiles
-				)
-			} else {
-				return null
-			}
+			if (!this.isSmol) return null
+			return (
+				this._smol.data?.identifiers?.isomeric_smiles ||
+				this._smol.data?.identifiers?.canonical_smiles ||
+				this._smol.data?.identifiers?.smiles
+			)
 		},
 		// Cycle through the available identifiers to find the best available one.
 		identifier(): string | null {
-			if (this._molType == 'smol') {
-				return (
-					this.inchi ||
-					this.smiles ||
-					this.smol._mol?.identifiers?.inchikey ||
-					this.smol._mol?.identifiers?.name ||
-					this.smol._mol?.identifiers?.cid ||
-					null
-				)
-			} else {
-				return null
-			}
+			if (!this.isSmol) return null
+			return (
+				this.inchi ||
+				this.smiles ||
+				this._smol.data?.identifiers?.inchikey ||
+				this._smol.data?.identifiers?.name ||
+				this._smol.data?.identifiers?.cid ||
+				null
+			)
 		},
 		mdl(): string | null {
-			if (this._molType == 'smol') {
-				return this.smol._mdl
-			} else {
-				return null
-			}
+			if (!this.isSmol) return null
+			return this._smol.data3D
 		},
 		svg(): string | null {
-			if (this._molType == 'smol') {
-				return this.smol._svg
-			} else {
-				return null
-			}
+			if (!this.isSmol) return null
+			return this._smol.data2D
 		},
 		enriched(): boolean {
-			if (this._molType == 'smol') {
-				return !!this.smol._mol?.enriched
-			} else {
-				return false
-			}
+			if (!this.isSmol) return false
+			return !!this._smol.data?.enriched
 		},
 		// A combination string of "key: value" pairs used as tooltip.
 		propertiesString(): Record<string, string> | null {
-			if (this._molType == 'smol') {
-				if (!this.smol._mol || !('properties' in this.smol._mol)) return {}
+			if (!this.isSmol) return null
+			if (!this._smol.data || !('properties' in this._smol.data)) return null
 
-				const props: Record<string, string> = {}
-				for (const prop in this.smol._mol.properties) {
-					let val: string | number = this.smol._mol.properties[prop]
-					if (val || val === 0) val = val.toString()
-					if (val) {
-						props[prop] = `${prop}: ${val}`
-					}
+			const props: Record<string, string> = {}
+			for (const prop in this._smol.data.properties) {
+				let val: string | number = this._smol.data.properties[prop]
+				if (val || val === 0) val = val.toString()
+				if (val) {
+					props[prop] = `${prop}: ${val}`
 				}
-				return props
-			} else {
-				return null
 			}
+			return props
 		},
 
 		/**
 		 * Macromolecule getters
 		 */
-
-		proteinData(): Protein | null {
-			return this._protein._mol
+		mmol(): Mmol {
+			return this._mmol
 		},
-		proteinPdb(): string | null {
-			return this._protein._pdb
+		protein(): Mmol | null {
+			if (!this.isProtein) return null
+			return this._mmol
+		},
+		proteinData(): Protein | null {
+			if (!this.isProtein) return null
+			return this._mmol.data
+		},
+		proteinData3D(): string | null {
+			if (!this.isProtein) return null
+			return this._mmol.data3D
+		},
+		proteinData3DFormat(): Format3D {
+			if (!this.isProtein) return null
+			return this._mmol.data3DFormat
 		},
 	},
 	actions: {
-		setMolData(mol: Smol | ProteinApi, molType: 'smol' | 'protein') {
-			// console.log('--setMolData', molType, mol)
+		/**
+		 * General actions
+		 */
+
+		setMolData(mol: Smol | Mmol, molType: 'smol' | 'protein') {
+			console.log('--setMolData', molType, mol)
 			if (molType == 'smol') {
+				mol = mol as Smol
 				this._molType = 'smol'
-				this.smol._mol = mol as Smol
+				this._smol.data = mol
 			} else if (molType == 'protein') {
+				mol = mol as Mmol
 				this._molType = 'protein'
-				this._protein._mol = (mol as ProteinApi).header
-				this._protein._pdb = (mol as ProteinApi).pdb
+				this._mmol.data = mol.data
+				this._mmol.data3DFormat = mol.data3DFormat as Format3D
+				this._mmol.data3D = mol.data3D
+				this._mmol.meta = mol.meta
 			}
 			this._loading = false
-		},
-		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
-			if (this._molType == 'smol') {
-				this.smol._mol.identifiers[identifier] = value
-			}
-		},
-		async fetchMolVizData(inchi_or_smiles: string) {
-			if (this._molType == 'smol') {
-				// console.log('* fetchMolVizData')
-				apiFetch(moleculesApi.getMolVizData(inchi_or_smiles), {
-					onSuccess: (data) => {
-						if (data.svg) {
-							// console.log('fetchMolVizData')
-							this.setMolVizData(data.svg, data.mdl)
-						}
-					},
-					onError: (err) => {
-						console.log('Error in getMolVizData()', err)
-					},
-				})
-			}
-		},
-		setMolVizData(svg: string, mdl: string) {
-			if (this._molType == 'smol') {
-				if (svg) this.smol._svg = svg
-				if (mdl) this.smol._mdl = mdl
-			}
 		},
 		setMolFromMolsetIndex(index: number | null, dontPushRoute = false) {
 			// console.log('setMolFromMolsetIndex:', index, dontPushRoute)
@@ -252,109 +236,153 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 				router.push(path)
 			}
 		},
+
+		/**
+		 * Small molecule actions
+		 */
+
+		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
+			if (!this.isSmol) return
+			this._smol.data.identifiers[identifier] = value
+		},
+		async fetchMolVizData(inchi_or_smiles: string) {
+			if (!this.isSmol) return
+			// console.log('* fetchMolVizData')
+			apiFetch(moleculesApi.getMolVizData(inchi_or_smiles), {
+				onSuccess: (data) => {
+					if (data.svg) {
+						// console.log('fetchMolVizData')
+						this.setMolVizData(data.svg, data.mdl)
+					}
+				},
+				onError: (err) => {
+					console.log('Error in getMolVizData()', err)
+				},
+			})
+		},
+		setMolVizData(svg: string, mdl: string) {
+			if (!this.isSmol) return
+			if (svg) this._smol.data2D = svg
+			if (mdl) this._smol.data3D = mdl
+		},
 		async enrichMol() {
-			if (this._molType == 'smol') {
-				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.enrichMol(this.mol as Smol), {
-						onSuccess: (data) => {
-							this.smol._mol = data
-							this.setHasChanges(true)
-							this.setEnriched(true)
-							resolve(true)
-						},
-						onError: (response) => reject(response),
-					})
+			if (!this.isSmol) return
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.enrichMol(this.mol as Smol), {
+					onSuccess: (data) => {
+						this._smol.data = data
+						this.setHasChanges(true)
+						this.setEnriched(true)
+						resolve(true)
+					},
+					onError: (response) => reject(response),
 				})
-			}
+			})
 		},
 		setEnriched(enriched: boolean) {
-			if (this._molType == 'smol') {
-				this.smol._mol.enriched = enriched
-			}
+			if (!this.isSmol) return
+			this._smol.data.enriched = enriched
 		},
 		setHasChanges(hasChanges: boolean) {
 			this._hasChanges = hasChanges
 		},
 
 		/**
-		 * Save-as functions - general
-		 */
-
-		// Save molecule as a new JSON (.mol.json) file.
-		saveMolAsJSON(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smol') {
-				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsJSON(destinationPath, this.mol as Smol, newFile), {
-						onSuccess: () => resolve(true),
-						onError: () => reject(true),
-					})
-				})
-			} else {
-				return Promise.resolve(false)
-			}
-		},
-
-		// Save molecule as a new CSV (.csv) file.
-		saveMolAsCSV(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smol') {
-				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsCSV(destinationPath, this.mol as Smol, newFile), {
-						onSuccess: () => resolve(true),
-						onError: (response) => reject(response),
-					})
-				})
-			} else {
-				return Promise.resolve(false)
-			}
-		},
-
-		/**
 		 * Save-as functions - small molecules
 		 */
 
-		// Save molecule as a new SDF (.sdf) file.
+		// Save molecule as JSON (.mol.json) file.
+		saveMolAsJSON(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+			if (!this.isSmol) return Promise.resolve(false)
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolAsJSON(destinationPath, this.mol as Smol, newFile), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
+		// Save molecule as CSV (.csv) file.
+		saveMolAsCSV(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+			if (!this.isSmol) return Promise.resolve(false)
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolAsCSV(destinationPath, this.mol as Smol, newFile), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
+				})
+			})
+		},
+
+		// Save molecule as SDF (.sdf) file.
 		saveMolAsSDF(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smol') {
-				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsSDF(destinationPath, this.mol as Smol, newFile), {
-						onSuccess: () => resolve(true),
-						onError: (response) => reject(response),
-					})
+			if (!this.isSmol) return Promise.resolve(false)
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolAsSDF(destinationPath, this.mol as Smol, newFile), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
 				})
-			} else {
-				return Promise.resolve(false)
-			}
+			})
 		},
 
-		// Save molecule as a new MDL (.mol) file.
-		// This removed all parameters from the molecule.
+		// Save molecule as MDL (.mol) file.
 		saveMolAsMDL(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smol') {
-				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsMDL(destinationPath, this.mol as Smol, newFile), {
-						onSuccess: () => resolve(true),
-						onError: (response) => reject(response),
-					})
+			if (!this.isSmol) return Promise.resolve(false)
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolAsMDL(destinationPath, this.mol as Smol, newFile), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
 				})
-			} else {
-				return Promise.resolve(false)
-			}
+			})
 		},
 
-		// Save molecule as a new SMILES (.smi) file.
-		// This removed all parameters from the molecule.
+		// Save molecule as SMILES (.smi) file.
+		// This removes all parameters from the molecule.
 		saveMolAsSMILES(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (this._molType == 'smol') {
-				return new Promise<boolean>((resolve, reject) => {
-					apiFetch(moleculesApi.saveMolAsSMILES(destinationPath, this.mol as Smol, newFile), {
-						onSuccess: () => resolve(true),
-						onError: (response) => reject(response),
-					})
+			if (!this.isSmol) return Promise.resolve(false)
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolAsSMILES(destinationPath, this.mol as Smol, newFile), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
 				})
-			} else {
-				return Promise.resolve(false)
-			}
+			})
 		},
+
+		/**
+		 * Save-as functions - proteins
+		 */
+
+		saveMmolAsMmolJson(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+			console.log('# saveMmolAsMmolJson', this._molType)
+			if (!this.isProtein) return Promise.resolve(false)
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMmolAsMmolJson(destinationPath, this.mmol as Mmol, newFile), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
+				})
+			})
+		},
+
+		saveMmolAsPDB(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+			if (!this.isProtein) return Promise.resolve(false)
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMmolAsPDB(destinationPath, this.mmol as Mmol, newFile), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
+				})
+			})
+		},
+
+		saveMmolAsCIF(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+			if (!this.isProtein) return Promise.resolve(false)
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMmolAsCIF(destinationPath, this.mmol as Mmol, newFile), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
+				})
+			})
+		},
+
+		// saveMolAsFASTA
 
 		clear() {
 			Object.assign(this, getInitialState())

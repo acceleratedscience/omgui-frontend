@@ -267,6 +267,9 @@ function toggleExpand(e: Event) {
 }
 
 // Identification
+#identification {
+	margin-top: 16px;
+}
 #identification div {
 	margin-bottom: 4px;
 }

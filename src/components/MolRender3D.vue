@@ -34,10 +34,13 @@ import BaseIconButton from '@/components/BaseIconButton.vue'
 // Utils
 import { capitalize } from '@/utils/helpers'
 
+// Type declarations
+import type { Format3D } from '@/types'
+
 // Props
 const props = defineProps<{
-	mdl?: string | null
-	pdb?: string | null
+	data3D: string | null
+	data3DFormat: Format3D
 	molName: string | null
 }>()
 
@@ -50,7 +53,7 @@ let miewViewer: any = null
  * Computed
  */
 
-const hasData = computed(() => Boolean(props.mdl || props.pdb))
+const hasData = computed(() => !!props.data3D)
 
 /**
  * Hooks
@@ -65,7 +68,7 @@ onMounted(() => {
 	if (hasData.value) init3DViewer()
 })
 
-// As soon as the SDF/PDB data is loaded into the store, render the 3D molecule.
+// As soon as the 3D data is loaded into the store, render the 3D molecule.
 watch(() => hasData.value, init3DViewer)
 
 onBeforeUnmount(() => {
@@ -130,10 +133,12 @@ function render3d_miew(forceReInit = false, zoom = false) {
 		}
 	}
 
-	if (props.mdl) {
-		miewViewer.load(props.mdl, { sourceType: 'immediate', fileType: 'sdf' })
-	} else if (props.pdb) {
-		miewViewer.load(props.pdb, { sourceType: 'immediate', fileType: 'pdb' })
+	if (props.data3DFormat == 'sdf') {
+		miewViewer.load(props.data3D, { sourceType: 'immediate', fileType: 'sdf' })
+	} else if (props.data3DFormat == 'pdb') {
+		miewViewer.load(props.data3D, { sourceType: 'immediate', fileType: 'pdb' })
+	} else if (props.data3DFormat == 'cif') {
+		miewViewer.load(props.data3D, { sourceType: 'immediate', fileType: 'cif' })
 	}
 }
 

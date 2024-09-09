@@ -60,7 +60,7 @@ export function useModalSaveFile() {
 				},
 			)
 		} else if (modalType == 'molset-options') {
-			// Molset --> provide export options
+			// Molset --> Provide export options
 			return modalStore.display(
 				'ModalSaveFile',
 				{
@@ -87,15 +87,15 @@ export function useModalSaveFile() {
 					},
 				},
 			)
-		} else if (modalType == 'mol-options') {
-			// Mol --> provide export options
+		} else if (modalType == 'smol-options') {
+			// Smol --> Provide export options
 			const fileStoreFilename = fileStore.moduleName == 'MolViewer' ? fileStore.filenameNaked : null
 			return modalStore.display(
 				'ModalSaveFile',
 				{
 					path: fileStore.pathDir || '',
 					filename: fileStoreFilename || params.defaultName || 'untitled',
-					dataType: 'mol',
+					dataType: 'smol',
 				},
 				{
 					onSubmit: async ({ destinationPath, ext }: { destinationPath: string; ext: string }) => {
@@ -110,6 +110,58 @@ export function useModalSaveFile() {
 							success = await molViewerStore.saveMolAsMDL(destinationPath, { newFile: true })
 						} else if (ext == 'smi') {
 							success = await molViewerStore.saveMolAsSMILES(destinationPath, { newFile: true })
+						}
+						if (success) {
+							const filebrowserPath = path2FileBrowserPath(destinationPath)
+							router.push('/~/' + filebrowserPath)
+						}
+					},
+				},
+			)
+		} else if (modalType == 'cif-options') {
+			// Protein --> Provide export options
+			const fileStoreFilename = fileStore.moduleName == 'MolViewer' ? fileStore.filenameNaked : null
+			return modalStore.display(
+				'ModalSaveFile',
+				{
+					path: fileStore.pathDir || '',
+					filename: fileStoreFilename || params.defaultName || 'untitled',
+					dataType: 'cif',
+				},
+				{
+					onSubmit: async ({ destinationPath, ext }: { destinationPath: string; ext: string }) => {
+						let success: boolean = false
+						if (ext == 'mmol.json') {
+							success = await molViewerStore.saveMmolAsMmolJson(destinationPath, { newFile: true })
+						} else if (ext == 'cif') {
+							success = await molViewerStore.saveMmolAsCIF(destinationPath, { newFile: true })
+						} else if (ext == 'pdb') {
+							success = await molViewerStore.saveMmolAsPDB(destinationPath, { newFile: true })
+						}
+						if (success) {
+							const filebrowserPath = path2FileBrowserPath(destinationPath)
+							router.push('/~/' + filebrowserPath)
+						}
+					},
+				},
+			)
+		} else if (modalType == 'pdb-options') {
+			// Protein --> Provide export options
+			const fileStoreFilename = fileStore.moduleName == 'MolViewer' ? fileStore.filenameNaked : null
+			return modalStore.display(
+				'ModalSaveFile',
+				{
+					path: fileStore.pathDir || '',
+					filename: fileStoreFilename || params.defaultName || 'untitled',
+					dataType: 'pdb',
+				},
+				{
+					onSubmit: async ({ destinationPath, ext }: { destinationPath: string; ext: string }) => {
+						let success: boolean = false
+						if (ext == 'mmol.json') {
+							success = await molViewerStore.saveMmolAsMmolJson(destinationPath, { newFile: true })
+						} else if (ext == 'pdb') {
+							success = await molViewerStore.saveMmolAsPDB(destinationPath, { newFile: true })
 						}
 						if (success) {
 							const filebrowserPath = path2FileBrowserPath(destinationPath)
