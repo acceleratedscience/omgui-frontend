@@ -6,6 +6,9 @@ On top of supporting common molecular file formats like `mol`, `sdf` and `smi` f
 - **`mmol.json`** - Macromolecule data (at this time only proteins are supported)
 - **`molset.json`** - A set of small molecules or macromolecules
 
+> [!CAUTION]
+> Our molecule file formats are in beta. We are working on a more advanced and established data structure, which will eventually replace the data strcutured listed below. Please keep this in mind when integrating OpenAD into your workflow.
+
 <br>
 
 ### 1. Small molecules: `mol.json`
@@ -88,7 +91,7 @@ An analysis example:
 
 The macromolecule format is a more simplistic wrapper around a `cif` file. Unlike small molecules, macromolecules require that the 3D visualisation data is stored the file, as it cannot be calculated on the fly.
 
-Hence the main purpose of this format is to be able to store user-generated data like notes and labels.
+Hence the main purpose of this format is to be able to store user-generated data like notes and labels, as well as to provide a single format to store different types of macromolecules.
 
 ```jsonc
 {
