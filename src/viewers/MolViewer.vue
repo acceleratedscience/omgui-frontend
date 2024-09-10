@@ -46,7 +46,7 @@
 			<MolViewerTitle :context="context" :loading="loading" />
 
 			<!-- Molecule data -->
-			<MolViewerDataSmol v-if="molType == 'smol'" :loading="loading" :loadingError="loadingError" />
+			<MolViewerDataSmol v-if="molType == 'smol'" :loading="loading" :loadingError="loadingError" @retryLoad="$emit('retryLoad')" />
 			<MolViewerDataProtein v-else-if="molType == 'protein'" />
 		</div>
 

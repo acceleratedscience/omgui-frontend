@@ -22,7 +22,7 @@ import TextBox from '@/components/TextBox.vue'
 // Props
 const props = defineProps<{
 	filePath?: string
-	data?: Record<string, any>
+	data?: Record<string, any> | null
 }>()
 
 /**

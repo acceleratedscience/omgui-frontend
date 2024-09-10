@@ -42,7 +42,7 @@ No visualization data is stored directly into this format, as it can easily be c
     // See the analysis example below.
     "analysis": [],
     
-    // This flag indicates if the molecule data was
+    // Flag to indicate if the molecule data was
     // enriched with data from PubChem.
     "enriched": false,
     
@@ -64,8 +64,8 @@ An analysis example:
     "parameters": {
         "max_steps": 3
     },
-    "results": {
-        "0": {
+    "results": [
+        {
             "confidence": 0.999,
             "reactions": [
                 "C1CCOC1 + CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21 + [Pd] --->> CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)O)CC2CCCC21",
@@ -73,7 +73,7 @@ An analysis example:
                 "CC(=O)C(=O)Cl + O=C(OCc1ccccc1)C1CC2CCCC2N1 + c1ccncc1 --->> CC(=O)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21"
             ]
         },
-        "1": {
+        {
             "confidence": 0.999,
             "reactions": [
                 "C1CCOC1 + CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21 + [Pd] --->> CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)O)CC2CCCC21",
@@ -81,7 +81,7 @@ An analysis example:
                 "CC(=O)C(=O)Cl + O=C(OCc1ccccc1)C1CC2CCCC2N1 --->> CC(=O)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21"
             ]
         },
-    },
+    ],
 }
 ```
 

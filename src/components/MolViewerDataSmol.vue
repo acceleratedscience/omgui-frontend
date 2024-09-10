@@ -63,7 +63,7 @@
 
 		<template v-if="!loading && !loadingError">
 			<!-- Enrich button -->
-			<TheButtonEnrichMol v-if="!molViewerStore.isMacromol" />
+			<TheButtonEnrichMol v-if="!molViewerStore.isMmol" />
 
 			<!-- Save button -->
 			<TheButtonSaveMol />
@@ -128,7 +128,7 @@
 		</div>
 
 		<hr v-if="showAnalysis" />
-		<div v-if="showAnalysis && 'analysis' in molViewerStore.mol" id="analysis">
+		<div v-if="showAnalysis && molViewerStore.mol && 'analysis' in molViewerStore.mol" id="analysis">
 			<h3>Analysis</h3>
 			<div v-for="(item, i) in molViewerStore.mol.analysis" :key="i" class="item">
 				<details>
@@ -194,11 +194,11 @@ const synonymColMinWidth: number = 150
  */
 
 // Molecule data
-const mol: ComputedRef<Smol | TempSmol> = computed(() => molViewerStore.mol)
+const mol: ComputedRef<Smol | TempSmol> = computed(() => molViewerStore.mol as Smol | TempSmol)
 
 // Whether to display the analysis section
 const showAnalysis: ComputedRef<boolean> = computed(() => {
-	return !!('analysis' in molViewerStore.mol && molViewerStore.mol['analysis'].length)
+	return !!(molViewerStore.mol && 'analysis' in molViewerStore.mol && molViewerStore.mol['analysis'].length)
 })
 
 // Synonyms section
