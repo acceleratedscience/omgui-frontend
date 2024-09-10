@@ -97,6 +97,15 @@ export default class MoleculesApi extends BaseApi {
 	 */
 
 	///////////////////////////////////////////////////////////////
+	// #region - Fetching
+
+	// Fetch macromolecule by its identifier (FASTA or PDB ID).
+	getMmolData(identifier: string) {
+		return this.apiClient.post(`/get-mmol-data`, { identifier })
+	}
+
+	//#endregion
+	///////////////////////////////////////////////////////////////
 	// #region - Saving
 
 	// Save new .mol.json file to the workspace.

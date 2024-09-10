@@ -35,6 +35,7 @@ const props = defineProps<{
 const loading = ref<boolean>(false)
 // const loadingError = ref<boolean>(false)
 const loadingError = ref<string>('')
+const molType = ref<'smol' | 'mmol'>(route.matched[0].name as 'smol' | 'mmol')
 
 // Utils
 import initRDKit from '@/utils/rdkit/initRDKit'
@@ -88,32 +89,51 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 	loading.value = true
 	loadingError.value = ''
 
-	apiFetch(moleculesApi.getMolData(identifier), {
-		onSuccess: (data) => {
-			// // #fetching-error
-			// // To test error handling.
-			// loadingError.value = 'Some status message'
-			// loading.value = false
-			// console.log('ERROOOO')
-			// return
+	if (molType.value == 'smol') {
+		apiFetch(moleculesApi.getMolData(identifier), {
+			onSuccess: (data) => {
+				// // #fetching-error
+				// // To test error handling.
+				// loadingError.value = 'Some status message'
+				// loading.value = false
+				// console.log('ERROOOO')
+				// return
 
-			// If the molviewer is loaded directly with a smiles or inchi as
-			// the identifier, we pre-loaded the visualisation data with a
-			// separate API call. But for any other identifier, we need to
-			// wait until we get the inchi back.
-			const needsVizData = !molViewerStore.inchi
+				// If the molviewer is loaded directly with a smiles or inchi as
+				// the identifier, we pre-loaded the visualisation data with a
+				// separate API call. But for any other identifier, we need to
+				// wait until we get the inchi back.
+				const needsVizData = !molViewerStore.inchi
 
-			// Update HTML
-			molViewerStore.setMolData(data, 'smol')
-			success = true
+				// Update HTML
+				molViewerStore.setMolData(data, 'smol')
+				success = true
 
-			if (needsVizData) {
-				molViewerStore.fetchMolVizData(molViewerStore.inchi!)
-			}
-		},
-		loading: loading,
-		loadingError: loadingError,
-	})
+				if (needsVizData) {
+					molViewerStore.fetchMolVizData(molViewerStore.inchi!)
+				}
+			},
+			loading: loading,
+			loadingError: loadingError,
+		})
+	} else if (molType.value == 'mmol') {
+		apiFetch(moleculesApi.getMmolData(identifier), {
+			onSuccess: (data) => {
+				// // #fetching-error
+				// // To test error handling.
+				// loadingError.value = 'Some status message'
+				// loading.value = false
+				// console.log('ERROOOO')
+				// return
+
+				// Update HTML
+				molViewerStore.setMolData(data, 'protein')
+				success = true
+			},
+			loading: loading,
+			loadingError: loadingError,
+		})
+	}
 
 	return success
 }

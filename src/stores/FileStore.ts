@@ -167,7 +167,6 @@ export const useFileStore = defineStore('fileStore', {
 			} else {
 				const path = ['/~'].concat(this._path.split('/'))
 				path.pop()
-				console.log('>', path.join('/'))
 				router.push({ path: path.join('/') })
 			}
 		},
