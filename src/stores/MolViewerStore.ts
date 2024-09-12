@@ -11,7 +11,7 @@ import router from '@/router'
 import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Utils
-import { slugify } from '@/utils/helpers'
+import { slugify, isObject } from '@/utils/helpers'
 
 // Type declarations
 import type { MolType, Smol, TempSmol, Protein, Mmol, Format3D, MolMeta } from '@/types'
@@ -100,7 +100,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (this.isSmol) {
 				return this._smol.data.identifiers?.name || 'Unnamed Molecule'
 			} else if (this.isProtein) {
-				return this._mmol.data?.idcode || 'Unknown Protein'
+				return this._mmol.data?.entry?.id || 'Unknown Protein'
 			} else {
 				return ''
 			}
@@ -196,6 +196,57 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (!this.isProtein) return null
 			return this._mmol.data
 		},
+		proteinDataHuman(): Record<string, string | number | null> | null {
+			if (!this.isProtein) return null
+			const data = this._mmol.data
+			const humanData: Record<string, any> = {}
+			for (const key in data) {
+				const humanKey = _massageKey(key)
+
+				if (Array.isArray(data[key]) && isObject(data[key][0])) {
+					// Humanize arrays of objects
+					if (['pdbx_struct_oper_list'].includes(key)) {
+						// Fields with list of matrix data
+						console.log(999, data[key])
+						const humanArray = data[key].map((data) => _formMatrix(data))
+						humanData[humanKey] = humanArray
+					} else {
+						// regular arrays of objects
+						const humanArray = data[key].map((ogVal) => {
+							const val: Record<string, any> = {}
+							for (const key2 in ogVal) {
+								const humanTableKey = _massageTableKey(key2)
+								val[humanTableKey] = _massageValue(ogVal[key2])
+							}
+							return val
+						})
+						humanData[humanKey] = humanArray
+					}
+				} else if (isObject(data[key])) {
+					// Humanize objects
+					let humanObj: Record<string, any> | string[][] | null = {}
+
+					if (['entry'].includes(key)) {
+						// Fields we ignore
+						humanObj = null
+					} else if (['atom_sites', 'database_PDB_matrix'].includes(key)) {
+						// Fields with matrix data
+						humanObj = _formMatrix(data[key])
+					} else {
+						// General objects
+						for (const key2 in data[key]) {
+							const humanTableKey = _massageTableKey(key2)
+							humanObj[humanTableKey] = _massageValue(data[key][key2])
+						}
+					}
+					if (humanObj) humanData[humanKey] = humanObj
+				} else if (data[key] && typeof data[key] === 'string') {
+					// Humanize strings
+					humanData[humanKey] = _massageValue(data[key])
+				}
+			}
+			return humanData
+		},
 		proteinData3D(): string | null {
 			if (!this.isProtein) return null
 			return this._mmol.data3D
@@ -220,6 +271,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 				mol = mol as Mmol
 				this._molType = 'protein'
 				this._mmol.data = mol.data
+				this._mmol.header = mol.header // temp
 				this._mmol.data3DFormat = mol.data3DFormat as Format3D
 				this._mmol.data3D = mol.data3D
 				this._mmol.meta = mol.meta
@@ -382,10 +434,86 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			})
 		},
 
-		// saveMolAsFASTA
-
 		clear() {
 			Object.assign(this, getInitialState())
 		},
 	},
 })
+
+/**
+ * String translators for CIF data,
+ * making fields more human-readable.
+ */
+function _massageKey(str: string): string {
+	str = str.replace(/^pdbx_/i, '')
+	str = str.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") // prettier-ignore
+	str = str.replace('SG Project', 'Structural Genomics Project')
+	str = str.replace('Chem Comp', 'Chemical Composition')
+	str = str.replace('Struct Asym', 'Structural Asymmetric Unit')
+	str = str.replace(/\bexptl\b/gi, 'Experimental')
+	str = str.replace(/\bnmr\b/gi, 'NMR')
+	str = str.replace(/\bstruct\b/gi, 'Structure')
+	str = str.replace(/\bgen\b/gi, 'Generation')
+	str = str.replace(/\bref\b/gi, 'Reference')
+	str = str.replace(/\bseq\b/gi, 'Sequence')
+	str = str.replace(/\bdiffrn\b/gi, 'Diffraction')
+	str = str.trim()
+
+	return str
+}
+
+function _massageTableKey(str: string): string {
+	str = str.replace(/^pdbx_/i, '')
+	str = str.split('_').join(' ')
+	str = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+	str = str.replace(/\bdb\b/gi, 'DB')
+	str = str.replace(/\bid\b/gi, 'ID')
+	str = str.replace(/\bdoi\b/gi, 'DOI')
+	str = str.trim()
+	// str = '--' + str
+	return str
+}
+
+function _massageValue(str: string | null): string | null {
+	if (!str) return null
+	if ((str.startsWith("'") && str.endsWith("'")) || (str.startsWith(';') && str.endsWith(';'))) {
+		str = str.slice(1, -1)
+	}
+	if (str === str.toUpperCase()) {
+		str = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+	}
+	if (str == 'entry id') console.log('-1', `-${str}-`, str.replace(/\bid\b/gi, 'ID'))
+	str = str == '?' ? null : str
+	str = str ? str.trim() : null
+	return str
+}
+
+function _formMatrix(obj: Record<string, string>): { matrix: string[][]; vector: string[]; fields: { [key: string]: string } } {
+	// return obj
+	const matrix: string[][] = []
+	const vector: string[] = []
+	const fields: { [key: string]: string } = {}
+	for (const key in obj) {
+		// Parse matrix row and columnn from fract_transf_matrix[1][2]
+		const keyArr = key.split('[')
+		if (keyArr.length == 3) {
+			const row = +keyArr[1].replace(']', '') - 1
+			const col = +keyArr[2].replace(']', '') - 1
+			matrix[row] = matrix[row] || []
+			matrix[row][col] = obj[key]
+			// console.log('>', row, col, obj[key])
+		} else if (keyArr.length == 2) {
+			// Parse translation vector and store it in the last row
+			vector.push(obj[key])
+		} else {
+			fields[key] = obj[key]
+		}
+	}
+	// console.log('matrix:', matrix)
+	// console.log('vector:', vector)
+	return {
+		matrix,
+		vector,
+		fields,
+	}
+}

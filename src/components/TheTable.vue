@@ -1,13 +1,25 @@
 <template>
-	<table v-copy-on-click="allowCopy" :data-copy="allowCopy ? copyData : null">
+	<table v-copy-on-click="allowCopy" :data-copy="allowCopy ? copyData : null" :class="{ 'key-val': dataStructure == 'B' }">
 		<thead v-if="header">
 			<tr>
-				<th v-for="(cell, i) in table.header" :key="i"><span v-html="cell || `<span class='soft'>-</span>`"></span></th>
+				<th v-for="(cell, i) in table.header" :key="i">
+					<span :class="{ soft: !cell }">{{ cell || '-' }}</span>
+				</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr v-for="(row, i) in table.body" :key="i">
-				<td v-for="(cell, j) in row" :key="j"><span v-html="cell || `<span class='soft'>-</span>`"></span></td>
+				<td v-for="(cell, j) in row" :key="j">
+					<a v-if="cell && typeof cell == 'string' && cell.match(/^http(s)?:\/\//)" :href="cell" target="_blank">{{ cell }}</a>
+					<span
+						v-else
+						v-copy-on-click="dataStructure == 'B'"
+						:data-copy="j == 0 ? `${cell}: ${row[1]}` : j == 1 ? cell : null"
+						:class="{ soft: !cell }"
+					>
+						{{ cell || '-' }}
+					</span>
+				</td>
 			</tr>
 		</tbody>
 	</table>
@@ -15,16 +27,14 @@
 
 <script setup lang="ts">
 // Vue
-import { onMounted, watch, computed } from 'vue'
-
-// Stores
-import { useModalStore } from '@/stores/ModalStore'
-const modalStore = useModalStore()
+import { computed } from 'vue'
 
 // Type declarations
+import type { ComputedRef } from 'vue'
+type DataStructure = 'A' | 'B' | null
 type Table = {
-	header: string[] | number[]
-	body: Array<{ [key: string]: string | number }>
+	header: (string | number)[]
+	body: (string | number)[][]
 }
 
 // Props
@@ -40,17 +50,29 @@ const props = withDefaults(
 	},
 )
 
-// Type declarations
-import type { ComputedRef } from 'vue'
-type DataStructure = 'A' | 'B' | null
-
 /*
  * Computed
  */
 
+// Objects structure
+const dataStructure: ComputedRef<DataStructure> = computed(() => {
+	if (typeof props.data == 'object' && props.data !== null) {
+		let i = 0
+		let isArrayObject = true
+		for (const key in props.data) {
+			if (+key !== i) {
+				isArrayObject = false
+				break
+			}
+			i++
+		}
+		return isArrayObject ? 'A' : 'B'
+	}
+	return null
+})
+
 const data: ComputedRef<any> = computed(() => {
-	const struct = detectDataStructure(props.data)
-	return restructureData(props.data, struct)
+	return restructureData(props.data, dataStructure.value)
 })
 
 const copyData: ComputedRef<string> = computed(() => {
@@ -66,7 +88,7 @@ const copyData: ComputedRef<string> = computed(() => {
 })
 
 const table: ComputedRef<Table> = computed(() => {
-	const output = {
+	const output: Table = {
 		header: [],
 		body: [],
 	}
@@ -93,27 +115,17 @@ const table: ComputedRef<Table> = computed(() => {
  * Methods
  */
 
-// Parse input data and return its structure category (A, B, C, etc.)
-function detectDataStructure(data: any): DataStructure {
-	if (typeof data == 'object' && data !== null) {
-		let i = 0
-		for (const key in Object.keys(data)) {
-			// console.log('%', +key, i)
-			if (+key !== i) return null
-			i++
-		}
-		return 'A'
-	}
-	return null
-}
-
 // Restructure a data object into an array of arrays.
 //
-// Input data structure A:
+// Input data structure A (array object):
 // Input: { 0: { key1: 'foo', key2: 'bar' }, 1: { key1: 'goo', key2: 'car' } }
 // Output: [ ['key1', 'key2'], ['foo', 'bar'], ['goo', 'car'] ]
 //
-// Input data structure B:
+// Input data structure B (object):
+// Input: { foo: 1, bar: 2  }
+// Output: [ ['foo', 1], ['bar', 2] ]
+//
+// Input data structure C:
 // TBD (wil be extended as needed)
 function restructureData(data: any, struct: DataStructure): any[] {
 	// console.log(struct, data)
@@ -126,7 +138,7 @@ function restructureData(data: any, struct: DataStructure): any[] {
 		return []
 	}
 
-	const table = []
+	const table: any[] = []
 
 	if (struct == 'A') {
 		let i = 0
@@ -141,6 +153,13 @@ function restructureData(data: any, struct: DataStructure): any[] {
 			i++
 		}
 	} else if (struct == 'B') {
+		let i = 0
+		for (const key in data) {
+			if (i === 0) table[0] = []
+			table[i + 1] = [key, data[key]]
+			i++
+		}
+	} else if (struct == 'C') {
 		// Future other data structured go here.
 	}
 
@@ -154,11 +173,18 @@ table {
 }
 table th,
 table td {
-	border: 1px solid #ddd;
+	border: 1px solid $black-10;
 	padding: 4px;
 	text-align: left;
+	min-width: 40px;
 }
 table th {
+	font-weight: bold;
+	background: $black-03;
+}
+
+// Key-value table has left column bold/gray
+table.key-val td:first-child {
 	font-weight: bold;
 	background: $black-03;
 }

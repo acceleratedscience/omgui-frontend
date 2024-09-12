@@ -47,7 +47,7 @@
 
 			<!-- Molecule data -->
 			<MolViewerDataSmol v-if="molType == 'smol'" :loading="loading" :loadingError="loadingError" @retryLoad="$emit('retryLoad')" />
-			<MolViewerDataProtein v-else-if="molType == 'protein'" />
+			<MolViewerDataCIF v-else-if="molType == 'protein'" />
 		</div>
 
 		<!-- Right column (to be enabled later) - See #enableright below -->
@@ -89,6 +89,7 @@ import MolViewerTitle from '@/components/MolViewerTitle.vue'
 import MmolDetails from '@/components/MmolDetails.vue'
 import MolViewerDataSmol from '@/components/MolViewerDataSmol.vue'
 import MolViewerDataProtein from '@/components/MolViewerDataProtein.vue'
+import MolViewerDataCIF from '@/components/MolViewerDataCIF.vue'
 
 // Type declarations
 import type { MolType, Smol } from '@/types'

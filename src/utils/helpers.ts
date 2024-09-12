@@ -271,3 +271,8 @@ export function path2FileBrowserPath(path: string) {
 export function slugify(str: string) {
 	return str.toLowerCase().replace(/\s+/g, '-')
 }
+
+// Check if a value is an object.
+export function isObject(value: any) {
+	return value && typeof value === 'object' && !Array.isArray(value)
+}

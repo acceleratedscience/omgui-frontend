@@ -13,12 +13,14 @@ small,
 	line-height: $line-height-small;
 }
 
+// Soft text
 .soft,
 .soft a,
 .soft a.lookup {
 	color: #aaa;
 }
 
+// Status messages
 .error-msg {
 	color: $error;
 }
@@ -106,6 +108,10 @@ ul {
 ul li {
 	margin-bottom: 8px;
 }
+ul.compact li,
+ol.compact li {
+	margin-bottom: 2px;
+}
 .bx--dropdown ul {
 	margin-inline-start: 0;
 }
@@ -114,8 +120,9 @@ ul li {
 }
 
 /**
- * Styles
+ * Shortcuts
  */
+
 .capitalize::first-letter {
 	text-transform: capitalize; // Note: only works on divs
 }
@@ -123,6 +130,10 @@ ul li {
 	display: flex;
 	align-items: center;
 }
+
+/**
+ * Styles
+ */
 
 // Code
 span.code {

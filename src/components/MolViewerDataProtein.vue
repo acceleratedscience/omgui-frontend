@@ -50,6 +50,7 @@
 			<div v-copy-on-click class="val">{{ proteinData?.keywords || '-' }}</div>
 		</div>
 	</div>
+
 	<hr />
 
 	<!-- Context -->

@@ -1,7 +1,12 @@
 import type { Directive } from 'vue'
 
-// Validator function that can block the functianlity.
-let validator: (() => boolean) | boolean = true
+// Add _validator to tghe global HTMLElement interface,
+// so we can use it in the directive.
+declare global {
+	interface HTMLElement {
+		_validator?: (() => boolean) | boolean
+	}
+}
 
 // Allow elements to be copied to the clipboard when clicked.
 // <div v-copy-on-click>ABC</div>
@@ -10,7 +15,9 @@ let validator: (() => boolean) | boolean = true
 const copyOnClick: Directive = {
 	beforeMount(el, binding) {
 		// console.log('Validator: ', binding.value)
-		validator = binding.value
+		// Validator function that can block the functianlity.
+		el._validator = binding.value
+
 		if (binding.value === false) return
 		if (!el.classList.contains('click-copy')) el.classList.add('click-copy')
 		el.addEventListener('click', _onClick)
@@ -22,10 +29,10 @@ const copyOnClick: Directive = {
 
 function _onClick(e: MouseEvent) {
 	// if (validator instanceof Function) {
-	// 	console.log('Validator result:', validator())
+	// 	console.log('Validator result:', el.validator())
 	// }
-	if ((!validator && validator != undefined) || (validator instanceof Function && !validator())) return
 	const el: HTMLElement | null = e.currentTarget as HTMLElement
+	if ((!el._validator && el._validator != undefined) || (el._validator instanceof Function && !el._validator())) return
 	if (!el) return
 	const text = el.getAttribute('data-copy') || el.innerText
 	navigator.clipboard.writeText(text)
