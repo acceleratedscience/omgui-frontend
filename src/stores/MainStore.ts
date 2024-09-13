@@ -14,6 +14,7 @@ type State = {
 	_contentWidth: number | null
 	_onClickAnywhere: (e: MouseEvent) => void
 	_blockRouting: boolean
+	_scrollY: number
 }
 
 export const useMainStore = defineStore('mainStore', {
@@ -24,6 +25,7 @@ export const useMainStore = defineStore('mainStore', {
 		_contentWidth: null, // The width of the content area (screen - padding)
 		_onClickAnywhere: () => {}, // Executes when the user clicks anywhere on the page
 		_blockRouting: false, // Prevents the router from changing routes, including changes to the query
+		_scrollY: 0, // The current scroll position
 	}),
 	getters: {
 		headless(): boolean {
@@ -43,6 +45,9 @@ export const useMainStore = defineStore('mainStore', {
 		},
 		blockRouting(): boolean {
 			return this._blockRouting
+		},
+		scrollY(): number {
+			return this._scrollY
 		},
 	},
 	actions: {
@@ -98,6 +103,11 @@ export const useMainStore = defineStore('mainStore', {
 		// Set blockRouting
 		setBlockRouting(bool: boolean) {
 			this._blockRouting = bool
+		},
+
+		// Set scroll position
+		setScrollY(scrollY: number) {
+			this._scrollY = scrollY
 		},
 	},
 })

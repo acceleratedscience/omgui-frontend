@@ -2,9 +2,17 @@
 	<!-- prettier-ignore -->
 	<div class="capitalize" v-html="proteinDataHuman?.Structure?.Title || `<div class='soft'>No description available</div>`"></div>
 
-	<hr />
+	<br />
 
-	<!-- <pre>{{ proteinDataHuman }}</pre> -->
+	<!-- Index dropdown -->
+	<cv-dropdown id="dd-sections" v-model="sectionsSel" @change="onSectionChange">
+		<cv-dropdown-item value="-" hidden>Jump to section</cv-dropdown-item>
+		<cv-dropdown-item v-for="(item, i) in sections" :key="i" :value="item.key">
+			{{ item.humanKey }}
+		</cv-dropdown-item>
+	</cv-dropdown>
+
+	<hr />
 
 	<div class="data-block">
 		<h3>Overview</h3>
@@ -126,36 +134,42 @@
 	<hr v-if="validationReportUrl" />
 
 	<!-- Data dump -->
-	<div class="data-block temp">
+	<div class="data-block">
 		<h3>Data</h3>
 		<div v-for="(val, key) in proteinDataHuman" :key="key" class="data-item" :class="{ break: true }">
-			<h4>{{ key }}</h4>
+			<h4>
+				<a :href="'#' + molViewerStore.proteinDataKeyMap[key]" :name="molViewerStore.proteinDataKeyMap[key]" class="anchor">{{ key }}</a>
+			</h4>
 
 			<!-- Matrix data -->
 			<div v-if="val.matrix && val.vector">
 				<div class="matrix-wrap">
+					<div v-for="(v, k) in val.fields" :key="k">
+						• <b>{{ k }}:</b> {{ v }}
+					</div>
+					<br v-if="Object.keys(val.fields).length" />
 					<div class="small soft">Matrix</div>
 					<TheTable :data="val.matrix" :allowCopy="true" :header="false" />
 
-					<div class="small soft">Vector</div>
+					<div class="small soft vector">Vector</div>
 					<TheTable :data="[val.vector]" :allowCopy="true" :header="false" />
 				</div>
 			</div>
 
 			<!-- Array with matrix data -->
-			<div v-if="Array.isArray(val) && val[0].matrix && val[0].vector">
+			<div v-else-if="Array.isArray(val) && val[0].matrix && val[0].vector">
 				<div v-for="(matrixObj, i) in val" :key="i" class="matrix-wrap-wrap">
 					<div class="matrix-wrap">
 						<h5 v-if="matrixObj.fields?.id">Matrix {{ matrixObj.fields.id }}</h5>
-						<div v-for="(val, key) in matrixObj.fields" :key="key">
-							<b>{{ key }}:</b> {{ val }}
+						<div v-for="(v, k) in matrixObj.fields" :key="k">
+							<b>{{ k }}:</b> {{ v }}
 						</div>
 						<br v-if="Object.keys(matrixObj.fields).length" />
 
 						<div class="small soft">Matrix</div>
 						<TheTable :data="matrixObj.matrix" :allowCopy="true" :header="false" />
 
-						<div class="small soft">Vector</div>
+						<div class="small soft vector">Vector</div>
 						<TheTable :data="[matrixObj.vector]" :allowCopy="true" :header="false" />
 					</div>
 				</div>
@@ -176,22 +190,24 @@
 
 <script setup lang="ts">
 // Vue
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 // Type declarations
-import type { Protein } from '@/types'
 import type { ComputedRef } from 'vue'
-type StructuredRef = {
-	title: string | null
-	authors: string[] | null
-	//
-	v: string | null
-	issn: string | null
-	pub: string | null
-	//
-	metaStr: string | null
-	input: string
-}
+
+// trash
+// import type { Protein } from '@/types'
+// type StructuredRef = {
+// 	title: string | null
+// 	authors: string[] | null
+// 	//
+// 	v: string | null
+// 	issn: string | null
+// 	pub: string | null
+// 	//
+// 	metaStr: string | null
+// 	input: string
+// }
 
 // Stores
 import { useMolViewerStore } from '@/stores/MolViewerStore'
@@ -203,12 +219,29 @@ const fileStore = useFileStore()
 import TheTable from '@/components/TheTable.vue'
 import MmolDetails from '@/components/MmolDetails.vue'
 
+// Definitions
+const sectionsSel = ref<string | null>('-')
+
 /*
  * Computed
  */
 
-// Molecule data
-// const protein: ComputedRef<Smol | TempSmol> = computed(() => molViewerStore.mol)
+// Data sections
+const sections: ComputedRef<{ key: string; humanKey: string }[]> = computed(() => {
+	if (!molViewerStore.proteinData || !molViewerStore.proteinDataHuman) return []
+
+	const keys = Object.keys(molViewerStore.proteinData)
+	const humanKeys = Object.keys(molViewerStore.proteinDataHuman)
+	const output = []
+	for (let i = 0; i < keys.length; i++) {
+		const section = {
+			key: keys[i],
+			humanKey: humanKeys[i],
+		}
+		output.push(section)
+	}
+	return output
+})
 
 const isMmolJsonFile: ComputedRef<boolean> = computed(() => {
 	return fileStore.ext == 'json' && fileStore.ext2 == 'mmol'
@@ -216,7 +249,7 @@ const isMmolJsonFile: ComputedRef<boolean> = computed(() => {
 
 const proteinData: ComputedRef<{ [key: string]: any } | null> = computed(() => molViewerStore.proteinData)
 const proteinDataHuman: ComputedRef<{ [key: string]: any } | null> = computed(() => molViewerStore.proteinDataHuman)
-const proteinData_temp: ComputedRef<Protein | null> = computed(() => molViewerStore.mmol.header)
+// const proteinData_temp: ComputedRef<Protein | null> = computed(() => molViewerStore.mmol.header)
 
 // PDB ID
 const pdbId: ComputedRef<string | null> = computed(() => {
@@ -299,99 +332,116 @@ const keywords: ComputedRef<string[] | null> = computed(() => {
 
 // Validation report URL
 const validationReportUrl: ComputedRef<string | null> = computed(() => {
-	const entryId = proteinDataHuman.value?.Entry?.ID || null
-	if (!entryId) return null
-	const cat = entryId.slice(1, 3)
-	return `https://files.rcsb.org/pub/pdb/validation_reports/${cat}/${entryId}/${entryId}_multipercentile_validation.png`
+	if (!pdbId.value) return null
+	const id = pdbId.value.toLowerCase()
+	const cat = id.slice(1, 3)
+	return `https://files.rcsb.org/pub/pdb/validation_reports/${cat}/${id}/${id}_multipercentile_validation.png`
 })
 
-// Parse the structured reference strings into structured data.
-const structureReference: ComputedRef<StructuredRef[] | null> = computed(() => {
-	const references = proteinData_temp.value?.structure_reference
-	if (!proteinData_temp.value?.structure_reference || !proteinData_temp.value?.structure_reference.length) return null
+// trash
+// // Parse the structured reference strings into structured data.
+// const structureReference: ComputedRef<StructuredRef[] | null> = computed(() => {
+// 	const references = proteinData_temp.value?.structure_reference
+// 	if (!proteinData_temp.value?.structure_reference || !proteinData_temp.value?.structure_reference.length) return null
 
-	const output = []
-	if (references) {
-		for (let i = 0; i < references.length; i++) {
-			const _firstSpaceIdx = references[i].indexOf(' ')
-			const _authorsStr = _firstSpaceIdx > -1 ? references[i].slice(0, _firstSpaceIdx) : null
-			const _vIdx = references[i].indexOf(' v. ')
-			const _end = _vIdx > -1 ? references[i].slice(_vIdx + 1).trim() : null
-			const _issnIdx = _end?.indexOf(' issn ') || -1
+// 	const output = []
+// 	if (references) {
+// 		for (let i = 0; i < references.length; i++) {
+// 			const _firstSpaceIdx = references[i].indexOf(' ')
+// 			const _authorsStr = _firstSpaceIdx > -1 ? references[i].slice(0, _firstSpaceIdx) : null
+// 			const _vIdx = references[i].indexOf(' v. ')
+// 			const _end = _vIdx > -1 ? references[i].slice(_vIdx + 1).trim() : null
+// 			const _issnIdx = _end?.indexOf(' issn ') || -1
 
-			const title: string | null = _firstSpaceIdx > -1 && _vIdx > -1 ? references[i].slice(_firstSpaceIdx, _vIdx).trim() : null
-			const authors: string[] | null = _authorsStr ? _authorsStr.split(',') : null
-			const issn: string | null = _issnIdx > -1 ? _end?.slice(_issnIdx) || null : null
-			let v: string | null = null
-			let pub: string | null = null
+// 			const title: string | null = _firstSpaceIdx > -1 && _vIdx > -1 ? references[i].slice(_firstSpaceIdx, _vIdx).trim() : null
+// 			const authors: string[] | null = _authorsStr ? _authorsStr.split(',') : null
+// 			const issn: string | null = _issnIdx > -1 ? _end?.slice(_issnIdx) || null : null
+// 			let v: string | null = null
+// 			let pub: string | null = null
 
-			if (issn) {
-				v = _end?.slice(0, _issnIdx) || null
-			} else {
-				const _endTrimmed = _end?.replace(/^v. /, '') || null
-				const _firstLetterIdx = _endTrimmed ? _endTrimmed.search(/[a-zA-Z]/) : -1
-				v = _end && _firstLetterIdx > -1 ? _end.slice(0, _firstLetterIdx + 3) : null
-				pub = _endTrimmed && _firstLetterIdx > -1 ? _endTrimmed.slice(_firstLetterIdx) : null
-			}
+// 			if (issn) {
+// 				v = _end?.slice(0, _issnIdx) || null
+// 			} else {
+// 				const _endTrimmed = _end?.replace(/^v. /, '') || null
+// 				const _firstLetterIdx = _endTrimmed ? _endTrimmed.search(/[a-zA-Z]/) : -1
+// 				v = _end && _firstLetterIdx > -1 ? _end.slice(0, _firstLetterIdx + 3) : null
+// 				pub = _endTrimmed && _firstLetterIdx > -1 ? _endTrimmed.slice(_firstLetterIdx) : null
+// 			}
 
-			// Meta string combining v, issn and pub
-			let metaStr = [v, issn].filter((x) => x).join(' / ')
-			metaStr = metaStr ? ' / ' + metaStr : ''
+// 			// Meta string combining v, issn and pub
+// 			let metaStr = [v, issn].filter((x) => x).join(' / ')
+// 			metaStr = metaStr ? ' / ' + metaStr : ''
 
-			// Output format
-			output.push({
-				title,
-				authors,
-				//
-				v,
-				issn,
-				pub,
-				//
-				metaStr,
-				input: references[i],
-			})
-		}
-		return output
-	} else {
-		return null
-	}
-})
+// 			// Output format
+// 			output.push({
+// 				title,
+// 				authors,
+// 				//
+// 				v,
+// 				issn,
+// 				pub,
+// 				//
+// 				metaStr,
+// 				input: references[i],
+// 			})
+// 		}
+// 		return output
+// 	} else {
+// 		return null
+// 	}
+// })
 
-const biomoltrans: ComputedRef<any> = computed(() => {
-	const input = proteinData_temp.value?.biomoltrans
-	const allTables = []
-	// console.log(999, input)
-	if (input) {
-		for (const key in input) {
-			const table: { chains: string; matrix: string[] } = {
-				chains: '',
-				matrix: [],
-			}
-			let i = 0
-			const data = input[key]
-			for (const key in data) {
-				key // To shut up ts linter
-				if (i == 0) {
-					table.chains = data[i].join(', ')
-				} else if (typeof data[i] == 'string') {
-					const rowArray = data[i].trim().split(/\s+/)
-					table.matrix.push(rowArray)
-				}
-				i++
-			}
-			allTables.push(table)
-		}
-	}
-	return allTables
-})
+// const biomoltrans: ComputedRef<any> = computed(() => {
+// 	const input = proteinData_temp.value?.biomoltrans
+// 	const allTables = []
+// 	// console.log(999, input)
+// 	if (input) {
+// 		for (const key in input) {
+// 			const table: { chains: string; matrix: string[] } = {
+// 				chains: '',
+// 				matrix: [],
+// 			}
+// 			let i = 0
+// 			const data = input[key]
+// 			for (const key in data) {
+// 				key // To shut up ts linter
+// 				if (i == 0) {
+// 					table.chains = data[i].join(', ')
+// 				} else if (typeof data[i] == 'string') {
+// 					const rowArray = data[i].trim().split(/\s+/)
+// 					table.matrix.push(rowArray)
+// 				}
+// 				i++
+// 			}
+// 			allTables.push(table)
+// 		}
+// 	}
+// 	return allTables
+// })
 
 /*
  * Hooks
  */
 
+onMounted(() => {
+	const hash = window.location.hash
+	window.location.hash = ''
+	setTimeout(() => {
+		window.location.hash = hash
+	}, 1)
+})
+
 /*
  * Methods
  */
+
+function onSectionChange(section: string) {
+	window.location.hash = '#' + section
+	setTimeout(() => {
+		history.replaceState(null, '', ' ')
+		sectionsSel.value = '-'
+	}, 0)
+}
 
 async function copyTextFileToClipboard() {
 	const url = 'https://www.rcsb.org/fasta/entry/8K1G/display'
@@ -415,6 +465,10 @@ function scholarSearch(str: string | null): string {
 </script>
 
 <style lang="scss" scoped>
+#dd-sections {
+	max-width: 250px;
+}
+
 #validation-report {
 	width: 100%;
 	max-width: 600px;
@@ -473,13 +527,13 @@ function scholarSearch(str: string | null): string {
 .data-block .matrix-wrap {
 	display: inline-block;
 }
-.data-block .matrix-wrap table {
+.data-block .matrix-wrap:deep() table {
 	width: 100%;
 }
 .data-block .matrix-wrap .small {
 	margin-bottom: 4px;
 }
-.data-block .matrix-wrap .small:last-of-type {
+.data-block .matrix-wrap .small.vector {
 	margin-top: 8px;
 }
 
@@ -488,7 +542,13 @@ a > div.capitalize {
 	display: inline-block;
 }
 
-// .data-block:not(.temp) {
-// 	display: none;
-// }
+/**
+ * Responsive
+ */
+
+@media (max-width: $bp-small) {
+	#dd-sections {
+		max-width: none;
+	}
+}
 </style>

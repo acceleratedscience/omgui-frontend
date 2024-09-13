@@ -54,6 +54,10 @@ export type TempSmol = {
 // in the molecule dictionary.
 export type Mmol = {
 	_molType?: MmolType | null // Optional because in the MolViewerStore we store the molType one level higher
+	_keyMap: {
+		// Used to map humanized data keys to original keys
+		[key: string]: string
+	}
 	data: Protein | null
 	data3DFormat: Format3D
 	data3D: string | null
@@ -71,32 +75,9 @@ export type Format3D = 'sdf' | 'pdb' | 'cif' | 'xyz' | 'cml' | 'gro' | 'ccp4' | 
 
 // Protein
 export type Protein = {
-	// Identification
-	idcode: string
-	name: string
-
-	// Publication
-	head: string
-	author: string
-	release_date: string
-	deposition_date: string
-	keywords: string
-	journal: string
-	journal_reference: string
-
-	// Context
-	resolution: number
-	source: {}
-	structure_method: string
-	structure_reference: [string]
-	has_missing_residues: boolean
-	missing_residues: [string]
-	biomoltrans: [any]
-	compound: {
+	__map__?: {
 		[key: string]: string
 	}
-
-	// Catch-all
 	[key: string]: any
 }
 
@@ -113,9 +94,6 @@ export type MmolApi = {
 		labels: string[]
 	}
 }
-
-// Superset of all macromoelcule types
-export type Mmol_temp = Protein | null
 
 /**
  * Molecule sets

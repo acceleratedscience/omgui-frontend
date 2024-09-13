@@ -51,6 +51,8 @@
 			</RouterView> -->
 		</div>
 	</div>
+
+	<ScrollToTop />
 </template>
 
 <script setup lang="ts">
@@ -77,6 +79,7 @@ import TheModal from '@/components/TheModal.vue'
 import TheNav from '@/components/TheNav.vue'
 import CommandLine from '@/pages/CommandLine.vue'
 import AIAssistant from '@/pages/AIAssistant.vue'
+import ScrollToTop from '@/components/ScrollToTop.vue'
 
 // Utils
 import { debounce } from '@/utils/helpers'
@@ -225,17 +228,15 @@ header {
  * Responsive
  */
 
+// Note: keep this in sync with responsive behavior in TheTable.vue
 @media (max-width: $bp-xlarge) {
 	#main-wrap {
 		max-width: none;
-		// padding-top: 80px;
 	}
 }
-
 @media (max-width: $bp-medium) {
 	#main-wrap {
 		padding: 40px;
-		// padding-top: 80px;
 	}
 }
 @media (max-width: $bp-small) {

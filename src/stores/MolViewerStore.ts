@@ -49,6 +49,7 @@ function getInitialState(): State {
 
 		// Protein data
 		_mmol: {
+			_keyMap: {},
 			data: null,
 			data3DFormat: null,
 			data3D: null,
@@ -196,23 +197,23 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (!this.isProtein) return null
 			return this._mmol.data
 		},
-		proteinDataHuman(): Record<string, string | number | null> | null {
+		proteinDataHuman(): Protein | null {
 			if (!this.isProtein) return null
 			const data = this._mmol.data
 			const humanData: Record<string, any> = {}
+
 			for (const key in data) {
 				const humanKey = _massageKey(key)
 
 				if (Array.isArray(data[key]) && isObject(data[key][0])) {
 					// Humanize arrays of objects
+					let humanArray
 					if (['pdbx_struct_oper_list'].includes(key)) {
 						// Fields with list of matrix data
-						console.log(999, data[key])
-						const humanArray = data[key].map((data) => _formMatrix(data))
-						humanData[humanKey] = humanArray
+						humanArray = data[key].map((data) => _formMatrix(data))
 					} else {
 						// regular arrays of objects
-						const humanArray = data[key].map((ogVal) => {
+						humanArray = data[key].map((ogVal) => {
 							const val: Record<string, any> = {}
 							for (const key2 in ogVal) {
 								const humanTableKey = _massageTableKey(key2)
@@ -220,8 +221,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 							}
 							return val
 						})
-						humanData[humanKey] = humanArray
 					}
+					humanData[humanKey] = humanArray
+					this._mmol._keyMap[humanKey] = key
 				} else if (isObject(data[key])) {
 					// Humanize objects
 					let humanObj: Record<string, any> | string[][] | null = {}
@@ -229,7 +231,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 					if (['entry'].includes(key)) {
 						// Fields we ignore
 						humanObj = null
-					} else if (['atom_sites', 'database_PDB_matrix'].includes(key)) {
+					} else if (['atom_sites', 'database_PDB_matrix', 'pdbx_struct_oper_list'].includes(key)) {
 						// Fields with matrix data
 						humanObj = _formMatrix(data[key])
 					} else {
@@ -239,13 +241,21 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 							humanObj[humanTableKey] = _massageValue(data[key][key2])
 						}
 					}
-					if (humanObj) humanData[humanKey] = humanObj
+					if (humanObj) {
+						humanData[humanKey] = humanObj
+						this._mmol._keyMap[humanKey] = key
+					}
 				} else if (data[key] && typeof data[key] === 'string') {
 					// Humanize strings
 					humanData[humanKey] = _massageValue(data[key])
+					this._mmol._keyMap[humanKey] = key
 				}
 			}
 			return humanData
+		},
+		proteinDataKeyMap(): Record<string, string> {
+			if (!this._mmol._keyMap) return {}
+			return this._mmol._keyMap || {}
 		},
 		proteinData3D(): string | null {
 			if (!this.isProtein) return null

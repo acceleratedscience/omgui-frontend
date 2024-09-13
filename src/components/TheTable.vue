@@ -1,33 +1,36 @@
 <template>
-	<table v-copy-on-click="allowCopy" :data-copy="allowCopy ? copyData : null" :class="{ 'key-val': dataStructure == 'B' }">
-		<thead v-if="header">
-			<tr>
-				<th v-for="(cell, i) in table.header" :key="i">
-					<span :class="{ soft: !cell }">{{ cell || '-' }}</span>
-				</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr v-for="(row, i) in table.body" :key="i">
-				<td v-for="(cell, j) in row" :key="j">
-					<a v-if="cell && typeof cell == 'string' && cell.match(/^http(s)?:\/\//)" :href="cell" target="_blank">{{ cell }}</a>
-					<span
-						v-else
-						v-copy-on-click="dataStructure == 'B'"
-						:data-copy="j == 0 ? `${cell}: ${row[1]}` : j == 1 ? cell : null"
-						:class="{ soft: !cell }"
-					>
-						{{ cell || '-' }}
-					</span>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+	<div ref="overflowWrap" class="table-overflow-wrap" :class="{ inline: inline }">
+		<table v-copy-on-click="allowCopy" :data-copy="allowCopy ? copyData : null" :class="{ 'key-val': dataStructure == 'B' }">
+			<thead v-if="header">
+				<tr>
+					<th v-for="(cell, i) in table.header" :key="i">
+						<span :class="{ soft: !cell }">{{ cell || '-' }}</span>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-for="(row, i) in table.body" :key="i">
+					<!-- Title tooltip only shows approximately when text requires truncation -->
+					<td v-for="(cell, j) in row" :key="j" :title="dataStructure == 'B' && String(cell).length > 20 ? String(cell) : ''">
+						<a v-if="cell && typeof cell == 'string' && cell.match(/^http(s)?:\/\//)" :href="cell" target="_blank">{{ cell }}</a>
+						<span
+							v-else
+							v-copy-on-click="dataStructure == 'B'"
+							:data-copy="j == 0 ? `${cell}: ${row[1]}` : j == 1 ? cell : null"
+							:class="{ soft: !cell }"
+						>
+							{{ cell || '-' }}
+						</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 </template>
 
 <script setup lang="ts">
 // Vue
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 
 // Type declarations
 import type { ComputedRef } from 'vue'
@@ -37,14 +40,21 @@ type Table = {
 	body: (string | number)[][]
 }
 
+// Definitions
+const overflowWrap = ref<HTMLElement | null>(null)
+
 // Props
 const props = withDefaults(
 	defineProps<{
 		data: any
+		// Lets the table stick to minimum required width
+		// and disables the overflow scroll behavior.
+		inline?: boolean
 		header?: boolean
 		allowCopy?: boolean
 	}>(),
 	{
+		inline: false,
 		header: true,
 		allowCopy: false,
 	},
@@ -108,10 +118,6 @@ const table: ComputedRef<Table> = computed(() => {
 })
 
 /*
- * Hooks
- */
-
-/*
  * Methods
  */
 
@@ -165,11 +171,34 @@ function restructureData(data: any, struct: DataStructure): any[] {
 
 	return table
 }
+
+// // Unused: Style table when it requires scrolling.
+// import { onMounted, onBeforeUnmount } from 'vue'
+// onMounted(() => {
+// 	checkOverflow()
+// 	window.addEventListener('resize', checkOverflow)
+// })
+// onBeforeUnmount(() => {
+// 	window.removeEventListener('resize', checkOverflow)
+// })
+// function checkOverflow() {
+// 	if (!overflowWrap.value) return
+// 	if (overflowWrap.value.scrollWidth > overflowWrap.value.clientWidth) {
+// 		overflowWrap.value.classList.add('has-overflow')
+// 	} else {
+// 		overflowWrap.value.classList.remove('has-overflow')
+// 	}
+// }
 </script>
 
 <style lang="scss" scoped>
+.table-overflow-wrap {
+	overflow-x: auto;
+	position: relative;
+}
 table {
 	border-collapse: collapse;
+	width: 100%;
 }
 table th,
 table td {
@@ -187,5 +216,50 @@ table th {
 table.key-val td:first-child {
 	font-weight: bold;
 	background: $black-03;
+	width: 1px;
+	max-width: 200px;
+
+	// Truncate
+	word-wrap: normal;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+table.key-val td:not(:first-child) {
+	width: auto;
+}
+
+/**
+ * Responsive
+ * - - -
+ * When the table is taking up the full screen width, the overflow wrapper
+ * will take on the width of the entire screen instead of the content area.
+ * This way the table will scroll more elegantly off screen, but to achieve
+ * this, the values below need to stay in sync with the margin of the main-wrap.
+ */
+
+@media (max-width: $bp-xlarge) {
+	.table-overflow-wrap:not(.inline) {
+		margin-left: -80px;
+		padding-left: 80px;
+		margin-right: -80px;
+		padding-right: 80px;
+	}
+}
+@media (max-width: $bp-medium) {
+	.table-overflow-wrap:not(.inline) {
+		margin-left: -40px;
+		padding-left: 40px;
+		margin-right: -40px;
+		padding-right: 40px;
+	}
+}
+@media (max-width: $bp-small) {
+	.table-overflow-wrap:not(.inline) {
+		margin-left: -20px;
+		padding-left: 20px;
+		margin-right: -20px;
+		padding-right: 20px;
+	}
 }
 </style>

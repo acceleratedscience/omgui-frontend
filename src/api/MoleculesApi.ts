@@ -2,7 +2,7 @@ import BaseApi from './BaseApi'
 
 // Type declarations
 import type { LocationQuery } from 'vue-router'
-import type { Smol, TempSmol, Mmol_temp, Mmol } from '@/types'
+import type { Smol, TempSmol, Mmol } from '@/types'
 
 // Molecule API
 export default class MoleculesApi extends BaseApi {

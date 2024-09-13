@@ -1,4 +1,5 @@
 <template>
+	QQ
 	<!-- prettier-ignore -->
 	<div class="capitalize" v-html="proteinData?.name || `<div class='soft'>No description available</div>`"></div>
 
@@ -200,9 +201,6 @@ import MmolDetails from '@/components/MmolDetails.vue'
 /*
  * Computed
  */
-
-// Molecule data
-// const protein: ComputedRef<Smol | TempSmol> = computed(() => molViewerStore.mol)
 
 const isMmolJsonFile: ComputedRef<boolean> = computed(() => {
 	return fileStore.ext == 'json' && fileStore.ext2 == 'mmol'
