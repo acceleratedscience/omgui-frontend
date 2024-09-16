@@ -4,6 +4,8 @@
 
 	<br />
 
+	<!-- <pre>{{ sections }}</pre> -->
+
 	<!-- Index dropdown -->
 	<cv-dropdown id="dd-sections" v-model="sectionsSel" @change="onSectionChange">
 		<cv-dropdown-item value="-" hidden>Jump to section</cv-dropdown-item>
@@ -136,55 +138,71 @@
 	<!-- Data dump -->
 	<div class="data-block">
 		<h3>Data</h3>
-		<div v-for="(val, key) in proteinDataHuman" :key="key" class="data-item" :class="{ break: true }">
-			<h4>
-				<a :href="'#' + molViewerStore.proteinDataKeyMap[key]" :name="molViewerStore.proteinDataKeyMap[key]" class="anchor">{{ key }}</a>
-			</h4>
+		<template v-for="(val, key) in proteinDataHuman" :key="key">
+			<div v-if="Object.keys(val).length" class="data-item" :class="{ break: true }">
+				<h4>
+					<a :href="'#' + molViewerStore.proteinDataKeyMap[key]" :name="molViewerStore.proteinDataKeyMap[key]" class="anchor">{{ key }}</a>
+				</h4>
 
-			<!-- Matrix data -->
-			<div v-if="val.matrix && val.vector">
-				<div class="matrix-wrap">
+				<!-- Matrix data -->
+				<!-- Example: /mmol/2G64#database_PDB_matrix -->
+				<!-- Example with multiple matrices -->
+				<div v-if="val.matrices && val.vectors">
 					<div v-for="(v, k) in val.fields" :key="k">
 						• <b>{{ k }}:</b> {{ v }}
 					</div>
-					<br v-if="Object.keys(val.fields).length" />
-					<div class="small soft">Matrix</div>
-					<TheTable :data="val.matrix" :allowCopy="true" :header="false" />
+					<div v-for="(matrix, mtxName) in val.matrices" :key="mtxName">
+						<div class="matrix-wrap">
+							<br v-if="Object.keys(val.fields).length" />
+							<div class="small soft">
+								Matrix<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
+							</div>
+							<TheTable :data="matrix" :allowCopy="true" :header="false" />
 
-					<div class="small soft vector">Vector</div>
-					<TheTable :data="[val.vector]" :allowCopy="true" :header="false" />
-				</div>
-			</div>
-
-			<!-- Array with matrix data -->
-			<div v-else-if="Array.isArray(val) && val[0].matrix && val[0].vector">
-				<div v-for="(matrixObj, i) in val" :key="i" class="matrix-wrap-wrap">
-					<div class="matrix-wrap">
-						<h5 v-if="matrixObj.fields?.id">Matrix {{ matrixObj.fields.id }}</h5>
-						<div v-for="(v, k) in matrixObj.fields" :key="k">
-							<b>{{ k }}:</b> {{ v }}
+							<div class="small soft vector">
+								Vector<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
+							</div>
+							<TheTable :data="[val.vectors[mtxName]]" :allowCopy="true" :header="false" />
 						</div>
-						<br v-if="Object.keys(matrixObj.fields).length" />
-
-						<div class="small soft">Matrix</div>
-						<TheTable :data="matrixObj.matrix" :allowCopy="true" :header="false" />
-
-						<div class="small soft vector">Vector</div>
-						<TheTable :data="[matrixObj.vector]" :allowCopy="true" :header="false" />
 					</div>
 				</div>
-			</div>
 
-			<!-- Table data -->
-			<div v-else-if="Array.isArray(val)">
-				<TheTable :data="val" :allowCopy="true" />
-			</div>
+				<!-- Array with matrix data -->
+				<!-- Example: /mmol/2g64#pdbx_struct_oper_list -->
+				<div v-else-if="Array.isArray(val) && val[0].matrices && val[0].vectors">
+					<!-- <pre>{{ val }}</pre> -->
+					<div v-for="(matrixObj, i) in val" :key="i" class="matrix-wrap-wrap">
+						<div v-for="(matrix, mtxName) in matrixObj.matrices" :key="mtxName" class="matrix-wrap">
+							<h5 v-if="matrixObj.fields?.id">Matrix {{ matrixObj.fields.id }}</h5>
+							<div v-for="(v, k) in matrixObj.fields" :key="k">
+								<b>{{ k }}:</b> {{ v }}
+							</div>
+							<br v-if="Object.keys(matrixObj.fields).length" />
 
-			<!-- Value list -->
-			<div v-else>
-				<TheTable :data="val" :allowCopy="false" />
+							<div class="small soft">
+								Matrix<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
+							</div>
+							<TheTable :data="matrix" :allowCopy="true" :header="false" />
+
+							<div class="small soft vector">
+								Vector<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
+							</div>
+							<TheTable :data="[matrixObj.vectors[mtxName]]" :allowCopy="true" :header="false" />
+						</div>
+					</div>
+				</div>
+
+				<!-- Table data -->
+				<div v-else-if="Array.isArray(val)">
+					<TheTable :data="val" :allowCopy="true" />
+				</div>
+
+				<!-- Value list -->
+				<div v-else>
+					<TheTable :data="val" :allowCopy="false" />
+				</div>
 			</div>
-		</div>
+		</template>
 	</div>
 </template>
 
@@ -229,7 +247,6 @@ const sectionsSel = ref<string | null>('-')
 // Data sections
 const sections: ComputedRef<{ key: string; humanKey: string }[]> = computed(() => {
 	if (!molViewerStore.proteinData || !molViewerStore.proteinDataHuman) return []
-
 	const keys = Object.keys(molViewerStore.proteinData)
 	const humanKeys = Object.keys(molViewerStore.proteinDataHuman)
 	const output = []
@@ -288,9 +305,11 @@ const depositionDate: ComputedRef<string | null> = computed(() => {
 
 // Release date
 const releaseDate: ComputedRef<string | null> = computed(() => {
-	let revisionList = proteinData.value?.pdbx_audit_revision_history || null
+	const revisions = proteinData.value?.pdbx_audit_revision_history || null
+	const revisionList = Array.isArray(revisions) ? revisions : [revisions]
 	let dateString = revisionList ? revisionList[0]['revision_date'] : null
 
+	// Humanize date string
 	if (dateString) {
 		const date = new Date(dateString)
 		return date.toLocaleDateString('en-US', {
@@ -305,7 +324,9 @@ const releaseDate: ComputedRef<string | null> = computed(() => {
 
 // Authors
 const authors: ComputedRef<string[]> = computed(() => {
-	let authorList = proteinData.value?.audit_author ? proteinDataHuman.value!['Audit Author'] : null
+	const authors = proteinData.value?.audit_author ? proteinDataHuman.value!['Audit Author'] : null
+	let authorList = Array.isArray(authors) ? authors : [authors]
+
 	// Reformat names from Rowling, j.k. to J.K. Rowling
 	authorList = authorList
 		? authorList.map((auth: { [key: string]: string }) => {

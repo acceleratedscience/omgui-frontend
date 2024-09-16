@@ -15,6 +15,8 @@ import { slugify, isObject } from '@/utils/helpers'
 
 // Type declarations
 import type { MolType, Smol, TempSmol, Protein, Mmol, Format3D, MolMeta } from '@/types'
+type Matrix = string[][]
+type Vector = string[]
 
 type State = {
 	_molType: MolType
@@ -197,7 +199,18 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (!this.isProtein) return null
 			return this._mmol.data
 		},
+		// Data in a human-readable format, with keys
+		// sorted according to their human-readable names.
 		proteinDataHuman(): Protein | null {
+			if (!this.isProtein) return null
+			if (!this._proteinDataHuman) return null
+			const sortedData: Protein | null = {}
+			Object.keys(this._proteinDataHuman)
+				.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+				.forEach((key) => (sortedData[key] = this._proteinDataHuman![key]))
+			return sortedData
+		},
+		_proteinDataHuman(): Protein | null {
 			if (!this.isProtein) return null
 			const data = this._mmol.data
 			const humanData: Record<string, any> = {}
@@ -215,9 +228,9 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 						// regular arrays of objects
 						humanArray = data[key].map((ogVal) => {
 							const val: Record<string, any> = {}
-							for (const key2 in ogVal) {
-								const humanTableKey = _massageTableKey(key2)
-								val[humanTableKey] = _massageValue(ogVal[key2])
+							for (const k in ogVal) {
+								const humanTableKey = _massageTableKey(k)
+								val[humanTableKey] = _massageValue(ogVal[k])
 							}
 							return val
 						})
@@ -230,7 +243,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 					if (['entry'].includes(key)) {
 						// Fields we ignore
-						humanObj = null
+						humanObj = {}
 					} else if (['atom_sites', 'database_PDB_matrix', 'pdbx_struct_oper_list'].includes(key)) {
 						// Fields with matrix data
 						humanObj = _formMatrix(data[key])
@@ -241,21 +254,29 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 							humanObj[humanTableKey] = _massageValue(data[key][key2])
 						}
 					}
-					if (humanObj) {
-						humanData[humanKey] = humanObj
-						this._mmol._keyMap[humanKey] = key
-					}
+					humanData[humanKey] = humanObj
+					this._mmol._keyMap[humanKey] = key
 				} else if (data[key] && typeof data[key] === 'string') {
 					// Humanize strings
 					humanData[humanKey] = _massageValue(data[key])
 					this._mmol._keyMap[humanKey] = key
 				}
 			}
+
+			// // Make a new object that has the keys alphabetically sorted
+			// // This is needed because human keys can have very different sorting
+			// const sortedHumanData: Record<string, any> = {}
+			// Object.keys(humanData).map(key => key)
+			// 	.sort()
+			// 	.forEach((key) => {
+			// 		sortedHumanData[key] = humanData[key]
+			// 	})
+
 			return humanData
 		},
 		proteinDataKeyMap(): Record<string, string> {
 			if (!this._mmol._keyMap) return {}
-			return this._mmol._keyMap || {}
+			return this._mmol._keyMap
 		},
 		proteinData3D(): string | null {
 			if (!this.isProtein) return null
@@ -493,37 +514,61 @@ function _massageValue(str: string | null): string | null {
 		str = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 	}
 	if (str == 'entry id') console.log('-1', `-${str}-`, str.replace(/\bid\b/gi, 'ID'))
-	str = str == '?' ? null : str
+	str = _fixEmpty(str)
 	str = str ? str.trim() : null
 	return str
 }
 
-function _formMatrix(obj: Record<string, string>): { matrix: string[][]; vector: string[]; fields: { [key: string]: string } } {
-	// return obj
-	const matrix: string[][] = []
-	const vector: string[] = []
+// Replaxe question mark values with null or
+function _fixEmpty(str: string, alt: string | null = null): string | null {
+	return str == '?' || !str ? (alt ? alt : null) : str
+}
+
+// Parse matrix data into a more readable format.
+// - - -
+// In most cases, when a certain category will have multiple matrices,
+// each matrix will have its own matrix object with its own name, and
+// under each object, the matrices key will only hold one matrix.
+// Example: /mmol/2G64#pdbx_struct_oper_list
+// However sometimes, a category will list different types of matrices
+// under the same name, and in that case, there will be more than one
+// matrix under the matrices key.
+// Example: /mmol/8k1g#atom_sites
+function _formMatrix(obj: Record<string, string>): {
+	matrices: { [key: string]: Matrix }
+	vectors: { [key: string]: Vector }
+	fields: { [key: string]: string }
+} {
+	const matrices: { [key: string]: Matrix } = {}
+	const vectors: { [key: string]: Vector } = {}
 	const fields: { [key: string]: string } = {}
 	for (const key in obj) {
-		// Parse matrix row and columnn from fract_transf_matrix[1][2]
 		const keyArr = key.split('[')
 		if (keyArr.length == 3) {
+			// Parse matrix row and columnn from fract_transf_matrix[1][2]
+			let matrixName = keyArr[0].replace(/(_)?matrix$/i, '').toLowerCase()
+			matrixName = matrixName || '_'
+			matrices[matrixName] = matrices[matrixName] || []
+			const matrix: Matrix = matrices[matrixName]
 			const row = +keyArr[1].replace(']', '') - 1
 			const col = +keyArr[2].replace(']', '') - 1
 			matrix[row] = matrix[row] || []
-			matrix[row][col] = obj[key]
-			// console.log('>', row, col, obj[key])
+			matrix[row][col] = _fixEmpty(obj[key], '-') || '-'
 		} else if (keyArr.length == 2) {
-			// Parse translation vector and store it in the last row
-			vector.push(obj[key])
+			// Parse translation vector
+			let vectorName = keyArr[0].replace(/(_)?vector$/i, '').toLowerCase()
+			vectorName = vectorName || '_'
+			vectors[vectorName] = vectors[vectorName] || []
+			const vector: Vector = vectors[vectorName]
+			vector.push(_fixEmpty(obj[key], '-') || '-')
 		} else {
-			fields[key] = obj[key]
+			fields[key] = _fixEmpty(obj[key], '-') || '-'
 		}
 	}
-	// console.log('matrix:', matrix)
-	// console.log('vector:', vector)
+
 	return {
-		matrix,
-		vector,
+		matrices,
+		vectors,
 		fields,
 	}
 }
