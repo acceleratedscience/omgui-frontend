@@ -100,7 +100,7 @@ async function save(saveType: SaveType) {
 		if (isNonJSONFile.value) {
 			// Double-option save button for non-JSON files.
 			if (saveType == 'as-molset') {
-				submitted = await modalSaveFile('molset-json') // --> Saves as new molset.json file
+				submitted = await modalSaveFile('molset', false) // --> Saves as new molset.json file
 			} else if (saveType == 'update-original') {
 				submitted = await updateOriginal() // --> Saves to non-json source file (SDF/CSV/...)
 			}

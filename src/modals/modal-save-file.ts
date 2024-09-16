@@ -1,12 +1,12 @@
 /**
- * This file contains different presets for the save-as
+ * This file contains different presets for the ModalSaveFile.vue
  * modal that can be reused across the application.
  *
  * Usage:
  * import { useModalSaveFile } from '@/modals'
  * const modalSaveFile = useModalSaveFile()
  *
- * modalSaveFile('molset-json')
+ * modalSaveFile('molset-json', true, { defaultName: 'foobar' })
  */
 
 // Router
@@ -37,69 +37,19 @@ export function useModalSaveFile() {
 	const molGridStore = useMolGridStore()
 	const molViewerStore = useMolViewerStore()
 
-	return function modalSaveFile(modalType: string, params: any = {}): Promise<boolean> {
-		if (modalType == 'molset-json') {
-			// Molset --> Save JSON file
-			return modalStore.display(
-				'ModalSaveFile',
-				{
-					path: fileStore.pathDir,
-					filename: fileStore.filenameNaked,
-					// ext: 'molset.json',
-					dataType: 'molset',
-				},
-				{ onSubmit: doSubmit },
-			)
-		} else if (modalType == 'molset-options') {
-			// Molset --> Provide export options
-			return modalStore.display(
-				'ModalSaveFile',
-				{
-					path: fileStore.pathDir,
-					filename: fileStore.filenameNaked,
-					dataType: 'molset',
-				},
-				{ onSubmit: doSubmit },
-			)
-		} else if (modalType == 'smol-options') {
-			// Smol --> Provide export options
-			const fileStoreFilename = fileStore.moduleName == 'MolViewer' ? fileStore.filenameNaked : null
-			return modalStore.display(
-				'ModalSaveFile',
-				{
-					path: fileStore.pathDir || '',
-					filename: fileStoreFilename || params.defaultName || 'untitled',
-					dataType: 'smol',
-				},
-				{ onSubmit: doSubmit },
-			)
-		} else if (modalType == 'cif-options') {
-			// Protein --> Provide export options
-			const fileStoreFilename = fileStore.moduleName == 'MolViewer' ? fileStore.filenameNaked : null
-			return modalStore.display(
-				'ModalSaveFile',
-				{
-					path: fileStore.pathDir || '',
-					filename: fileStoreFilename || params.defaultName || 'untitled',
-					dataType: 'cif',
-				},
-				{ onSubmit: doSubmit },
-			)
-		} else if (modalType == 'pdb-options') {
-			// Protein --> Provide export options
-			const fileStoreFilename = fileStore.moduleName == 'MolViewer' ? fileStore.filenameNaked : null
-			return modalStore.display(
-				'ModalSaveFile',
-				{
-					path: fileStore.pathDir || '',
-					filename: fileStoreFilename || params.defaultName || 'untitled',
-					dataType: 'pdb',
-				},
-				{ onSubmit: doSubmit },
-			)
-		}
-		// To shut up ts linter. This won't be reached.
-		return new Promise(() => {})
+	return function modalSaveFile(dataType: string, exportOptions: boolean = false, params: any = {}): Promise<boolean> {
+		const filename = (fileStore.moduleName == 'MolViewer' ? fileStore.filenameNaked : params.defaultName) || 'untitled'
+
+		return modalStore.display(
+			'ModalSaveFile',
+			{
+				path: fileStore.pathDir,
+				filename,
+				dataType,
+				exportOptions,
+			},
+			{ onSubmit: doSubmit },
+		)
 	}
 
 	//

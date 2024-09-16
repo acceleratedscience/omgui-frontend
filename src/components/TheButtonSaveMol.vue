@@ -90,13 +90,13 @@ async function onSaveClick() {
 		} else {
 			// Result mols / Non-JSON molset files (SDF, maybe others later) --> Display save-as modal.
 			molGridStore.setHasChanges(false) // See note on top
-			success = await modalSaveFile('smol-options', { defaultName: molViewerStore.nameSlug })
+			success = await modalSaveFile('smol', true, { defaultName: molViewerStore.nameSlug })
 			molGridStore.setHasChanges(!success)
 		}
 	} else if (!fileStore.active || isForeignFile.value) {
 		// Not a file (molecule viewer) or a foreign file --> Display save-as modal.
 		molViewerStore.setHasChanges(false) // See note on top
-		success = await modalSaveFile('smol-options', { defaultName: molViewerStore.nameSlug })
+		success = await modalSaveFile('smol', true, { defaultName: molViewerStore.nameSlug })
 		molViewerStore.setHasChanges(!success)
 	} else if (fileStore.fileType == 'mol') {
 		// .mol.json file --> Update the current JSON file.
