@@ -189,10 +189,9 @@ async function onSubmit() {
 		return
 	}
 
-	// The way how modal function data is passed via the modalStore state is a little convoluted,
-	// but this basically triggers the onSubmit function that's passed as an option to the modal.
-	// That's where destinationPath is consumed.
-	// For example:	TheButtonSaveMolset.vue -> saveAsModal -> onSubmit()
+	// Note: the onSubmit in the modalStore is set when the modal is displayed.
+	// See modal-save-file.js for example usage.
+	// Eg: modalStore.display('ModalSaveFile', {}, { onSubmit })
 	const path = vModelPath.value ? vModelPath.value + '/' : ''
 	const destinationPath: string = path + vmodelFilename.value + '.' + ext.value
 	const srcDataType = modalOptions.value.ext == 'molset.json' ? 'molset' : modalOptions.value.dataType

@@ -45,7 +45,8 @@ export function useModalSaveFile() {
 				{
 					path: fileStore.pathDir,
 					filename: fileStore.filenameNaked,
-					ext: 'molset.json',
+					// ext: 'molset.json',
+					dataType: 'molset',
 				},
 				{ onSubmit: doSubmit },
 			)
