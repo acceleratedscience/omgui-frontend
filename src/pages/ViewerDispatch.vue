@@ -145,7 +145,7 @@ async function parseRoute() {
 			} else if (fileStore.fileType == 'mol') {
 				molViewerStore.setMolData(file.data as Smol, 'smol')
 			} else if (fileStore.fileType && ['mmol', 'pdb', 'cif'].includes(fileStore.fileType)) {
-				molViewerStore.setMolData(file.data as Mmol, 'protein')
+				molViewerStore.setMolData(file.data as Mmol, 'mmol')
 			}
 
 			// We can force the usage of a different module with ?use=OtherModule.

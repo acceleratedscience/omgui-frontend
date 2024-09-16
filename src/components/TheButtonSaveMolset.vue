@@ -136,7 +136,6 @@ function executeSave(): Promise<boolean> {
 		return molGridStore.updateMolset_result()
 	} else if (molGridStore.context == 'dataframe') {
 		const dfName: string = route.params.dfName as string
-		console.log(22, dfName)
 		return molGridStore.updateMolset_dataframe(dfName)
 	}
 	return Promise.resolve(false)

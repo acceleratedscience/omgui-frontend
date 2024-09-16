@@ -61,28 +61,28 @@ export default class MoleculesApi extends BaseApi {
 	// #region - Saving
 
 	// Save new .mol.json file to the workspace.
-	saveMolAsJSON(path: string, mol: Smol, newFile: boolean = true) {
-		return this.apiClient.post('/save-mol-as-json', { path, mol, newFile })
+	saveMolAsJSON(path: string, mol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mol-as-json', { path, mol, newFile, force })
 	}
 
 	// Save new .sdf file to the workspace.
-	saveMolAsSDF(path: string, mol: Smol, newFile: boolean = true) {
-		return this.apiClient.post('/save-mol-as-sdf', { path, mol, newFile })
+	saveMolAsSDF(path: string, mol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mol-as-sdf', { path, mol, newFile, force })
 	}
 
 	// Save new .mol file to the workspace.
-	saveMolAsCSV(path: string, mol: Smol, newFile: boolean = true) {
-		return this.apiClient.post('/save-mol-as-csv', { path, mol, newFile })
+	saveMolAsCSV(path: string, mol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mol-as-csv', { path, mol, newFile, force })
 	}
 
 	// Save new .mol file to the workspace.
-	saveMolAsMDL(path: string, mol: Smol, newFile: boolean = true) {
-		return this.apiClient.post('/save-mol-as-mdl', { path, mol, newFile })
+	saveMolAsMDL(path: string, mol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mol-as-mdl', { path, mol, newFile, force })
 	}
 
 	// Save new .mol file to the workspace.
-	saveMolAsSMILES(path: string, mol: Smol, newFile: boolean = true) {
-		return this.apiClient.post('/save-mol-as-smiles', { path, mol, newFile })
+	saveMolAsSMILES(path: string, mol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mol-as-smiles', { path, mol, newFile, force })
 	}
 
 	// Update molset with the molecule data.
@@ -109,19 +109,18 @@ export default class MoleculesApi extends BaseApi {
 	// #region - Saving
 
 	// Save new .mol.json file to the workspace.
-	saveMmolAsMmolJson(path: string, mol: Mmol, newFile: boolean = true) {
-		return this.apiClient.post('/save-mmol-as-mmol-json', { path, mol, newFile })
+	saveMmolAsMmolJson(path: string, mol: Mmol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mmol-as-mmol-json', { path, mol, newFile, force })
 	}
 
 	// Save new .sdf file to the workspace.
-	saveMmolAsPDB(path: string, mol: Mmol, newFile: boolean = true) {
-		return this.apiClient.post('/save-mmol-as-pdb', { path, mol, newFile })
+	saveMmolAsPDB(path: string, mol: Mmol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mmol-as-pdb', { path, mol, newFile, force })
 	}
 
 	// Save new .sdf file to the workspace.
-	saveMmolAsCIF(path: string, mol: Mmol, newFile: boolean = true) {
-		console.log(mol)
-		return this.apiClient.post('/save-mmol-as-cif', { path, mol, newFile })
+	saveMmolAsCIF(path: string, mol: Mmol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mmol-as-cif', { path, mol, newFile, force })
 	}
 
 	// #endregion
@@ -184,26 +183,26 @@ export default class MoleculesApi extends BaseApi {
 
 	// Save new .molset.json file.
 	// This will copy the working copy to a new file in the workspace.
-	saveMolsetAsJSON(path: string, cacheId: number, newFile: boolean) {
-		return this.apiClient.post('/save-molset-as-json', { path, cacheId, newFile })
+	saveMolsetAsJSON(path: string, cacheId: number, newFile: boolean, force = false) {
+		return this.apiClient.post('/save-molset-as-json', { path, cacheId, newFile, force })
 	}
 
 	// Save molset as .sdf file.
 	// This will turn the working copy data into an SDF file and store it in the workspace.
-	saveMolsetAsSDF(path: string, cacheId: number, removeInvalidMols: boolean = false, newFile: boolean) {
-		return this.apiClient.post('/save-molset-as-sdf', { path, cacheId, removeInvalidMols, newFile })
+	saveMolsetAsSDF(path: string, cacheId: number, removeInvalidMols: boolean = false, newFile: boolean, force = false) {
+		return this.apiClient.post('/save-molset-as-sdf', { path, cacheId, removeInvalidMols, newFile, force })
 	}
 
 	// Save molset as .csv file.
 	// This will turn the working copy data into an CSV file and store it in the workspace.
-	saveMolsetAsCSV(path: string, cacheId: number, newFile: boolean) {
-		return this.apiClient.post('/save-molset-as-csv', { path, cacheId, newFile })
+	saveMolsetAsCSV(path: string, cacheId: number, newFile: boolean, force = false) {
+		return this.apiClient.post('/save-molset-as-csv', { path, cacheId, newFile, force })
 	}
 
 	// Save molset as .smi file.
 	// This will turn the working copy data into a SMI file and store it in the workspace.
-	saveMolsetAsSmiles(path: string, cacheId: number, newFile: boolean) {
-		return this.apiClient.post('/save-molset-as-smiles', { path, cacheId, newFile })
+	saveMolsetAsSmiles(path: string, cacheId: number, newFile: boolean, force = false) {
+		return this.apiClient.post('/save-molset-as-smiles', { path, cacheId, newFile, force })
 	}
 
 	// #endregion

@@ -1,5 +1,7 @@
 /**
  * This store is responsible for controling the modal.
+ * - - -
+ * For examples on how to use the modal, see KitchenSink.vue
  */
 
 import { defineStore } from 'pinia'

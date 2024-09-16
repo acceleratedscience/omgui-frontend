@@ -2,8 +2,9 @@
  * Molecules shared
  */
 
-type MmolType = 'protein'
+type MmolType = 'mmol'
 export type MolType = 'smol' | MmolType | null
+export type MolFileDataType = 'smol' | 'cif' | 'pdb' | 'molset'
 
 /**
  * Small molecules
@@ -58,12 +59,18 @@ export type Mmol = {
 		// Used to map humanized data keys to original keys
 		[key: string]: string
 	}
-	data: Protein | null
+	data: MmolData | null
 	data3DFormat: Format3D
 	data3D: string | null
 	meta: MolMeta | null
 }
 
+// Macromolecule data
+export type MmolData = {
+	[key: string]: any
+}
+
+// Meta data for any molecule
 export type MolMeta = {
 	notes: string
 	labels: string[]
@@ -72,28 +79,6 @@ export type MolMeta = {
 // Miew supported 3D data formats:
 // https://github.com/search?q=repo%3Aepam%2Fmiew+this._options.fileType+%3D+&type=code
 export type Format3D = 'sdf' | 'pdb' | 'cif' | 'xyz' | 'cml' | 'gro' | 'ccp4' | 'mol2' | 'dsn6' | 'mmtf' | null
-
-// Protein
-export type Protein = {
-	__map__?: {
-		[key: string]: string
-	}
-	[key: string]: any
-}
-
-// Api protein payload
-// Todo: merge with Mmol
-export type MmolApi = {
-	mol_type: 'protein' | string
-	name: string
-	data: Protein
-	data_3d: string
-	data_3d_format: string
-	meta: {
-		notes: string
-		labels: string[]
-	}
-}
 
 /**
  * Molecule sets

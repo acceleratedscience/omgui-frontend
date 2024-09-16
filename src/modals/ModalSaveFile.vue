@@ -68,6 +68,7 @@ import FileBrowser from '@/viewers/FileBrowser.vue'
 
 // Type declarations
 import type { Ref, ComputedRef, WritableComputedRef } from 'vue'
+import type { MolFileDataType } from '@/types'
 type ModalOptions = {
 	path?: string
 	filename?: string
@@ -79,7 +80,7 @@ type ModalOptions = {
 	// When datatype is set, the dropdown with output options is shown.
 	// Different output options are available per dataType.
 	// When dataType is set, ext & ext2 are ignored.
-	dataType?: 'smol' | 'cif' | 'pdb' | 'molset' | null
+	dataType?: MolFileDataType
 }
 type OutputExtSmol = 'mol.json' | 'mol' | 'csv' | 'smi'
 type OutputExtMmol = 'mmol.json' | 'cif' | 'pdb'
@@ -194,7 +195,8 @@ async function onSubmit() {
 	// For example:	TheButtonSaveMolset.vue -> saveAsModal -> onSubmit()
 	const path = vModelPath.value ? vModelPath.value + '/' : ''
 	const destinationPath: string = path + vmodelFilename.value + '.' + ext.value
-	if (modalStore.onSubmit) modalStore.onSubmit({ destinationPath, ext: ext.value })
+	const srcDataType = modalOptions.value.ext == 'molset.json' ? 'molset' : modalOptions.value.dataType
+	if (modalStore.onSubmit) modalStore.onSubmit({ destinationPath, ext: ext.value, srcDataType })
 	isSubmitted.value = true
 }
 

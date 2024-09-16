@@ -63,7 +63,7 @@
 
 		<template v-if="!loading && !loadingError">
 			<!-- Enrich button -->
-			<TheButtonEnrichMol v-if="!molViewerStore.isMmol" />
+			<TheButtonEnrichMol v-if="molViewerStore.isSmol" />
 
 			<!-- Save button -->
 			<TheButtonSaveMol />

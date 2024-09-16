@@ -103,8 +103,8 @@ const routes = [
 		component: () => import(/* webpackChunkName: 'BaseSvgServe' */ '@/components/BaseSvgServe.vue'),
 	},
 	{
-		path: '/kitchen-sink',
-		name: 'kitchen-sink',
+		path: '/kitchensink',
+		name: 'kitchensink',
 		component: () => import(/* webpackChunkName: 'KitchenSink' */ '@/pages/KitchenSink.vue'),
 	},
 	{

@@ -289,7 +289,6 @@ const doiLink: ComputedRef<string | null> = computed(() => {
 // Deposition data
 const depositionDate: ComputedRef<string | null> = computed(() => {
 	let dateString = proteinData.value?.pdbx_database_status?.recvd_initial_deposition_date || null
-	console.log(88, proteinData.value)
 
 	if (dateString) {
 		const date = new Date(dateString)
@@ -306,6 +305,7 @@ const depositionDate: ComputedRef<string | null> = computed(() => {
 // Release date
 const releaseDate: ComputedRef<string | null> = computed(() => {
 	const revisions = proteinData.value?.pdbx_audit_revision_history || null
+	if (!revisions) return null
 	const revisionList = Array.isArray(revisions) ? revisions : [revisions]
 	let dateString = revisionList ? revisionList[0]['revision_date'] : null
 
@@ -325,6 +325,7 @@ const releaseDate: ComputedRef<string | null> = computed(() => {
 // Authors
 const authors: ComputedRef<string[]> = computed(() => {
 	const authors = proteinData.value?.audit_author ? proteinDataHuman.value!['Audit Author'] : null
+	if (!authors) return []
 	let authorList = Array.isArray(authors) ? authors : [authors]
 
 	// Reformat names from Rowling, j.k. to J.K. Rowling
@@ -359,87 +360,6 @@ const validationReportUrl: ComputedRef<string | null> = computed(() => {
 	return `https://files.rcsb.org/pub/pdb/validation_reports/${cat}/${id}/${id}_multipercentile_validation.png`
 })
 
-// trash
-// // Parse the structured reference strings into structured data.
-// const structureReference: ComputedRef<StructuredRef[] | null> = computed(() => {
-// 	const references = proteinData_temp.value?.structure_reference
-// 	if (!proteinData_temp.value?.structure_reference || !proteinData_temp.value?.structure_reference.length) return null
-
-// 	const output = []
-// 	if (references) {
-// 		for (let i = 0; i < references.length; i++) {
-// 			const _firstSpaceIdx = references[i].indexOf(' ')
-// 			const _authorsStr = _firstSpaceIdx > -1 ? references[i].slice(0, _firstSpaceIdx) : null
-// 			const _vIdx = references[i].indexOf(' v. ')
-// 			const _end = _vIdx > -1 ? references[i].slice(_vIdx + 1).trim() : null
-// 			const _issnIdx = _end?.indexOf(' issn ') || -1
-
-// 			const title: string | null = _firstSpaceIdx > -1 && _vIdx > -1 ? references[i].slice(_firstSpaceIdx, _vIdx).trim() : null
-// 			const authors: string[] | null = _authorsStr ? _authorsStr.split(',') : null
-// 			const issn: string | null = _issnIdx > -1 ? _end?.slice(_issnIdx) || null : null
-// 			let v: string | null = null
-// 			let pub: string | null = null
-
-// 			if (issn) {
-// 				v = _end?.slice(0, _issnIdx) || null
-// 			} else {
-// 				const _endTrimmed = _end?.replace(/^v. /, '') || null
-// 				const _firstLetterIdx = _endTrimmed ? _endTrimmed.search(/[a-zA-Z]/) : -1
-// 				v = _end && _firstLetterIdx > -1 ? _end.slice(0, _firstLetterIdx + 3) : null
-// 				pub = _endTrimmed && _firstLetterIdx > -1 ? _endTrimmed.slice(_firstLetterIdx) : null
-// 			}
-
-// 			// Meta string combining v, issn and pub
-// 			let metaStr = [v, issn].filter((x) => x).join(' / ')
-// 			metaStr = metaStr ? ' / ' + metaStr : ''
-
-// 			// Output format
-// 			output.push({
-// 				title,
-// 				authors,
-// 				//
-// 				v,
-// 				issn,
-// 				pub,
-// 				//
-// 				metaStr,
-// 				input: references[i],
-// 			})
-// 		}
-// 		return output
-// 	} else {
-// 		return null
-// 	}
-// })
-
-// const biomoltrans: ComputedRef<any> = computed(() => {
-// 	const input = proteinData_temp.value?.biomoltrans
-// 	const allTables = []
-// 	// console.log(999, input)
-// 	if (input) {
-// 		for (const key in input) {
-// 			const table: { chains: string; matrix: string[] } = {
-// 				chains: '',
-// 				matrix: [],
-// 			}
-// 			let i = 0
-// 			const data = input[key]
-// 			for (const key in data) {
-// 				key // To shut up ts linter
-// 				if (i == 0) {
-// 					table.chains = data[i].join(', ')
-// 				} else if (typeof data[i] == 'string') {
-// 					const rowArray = data[i].trim().split(/\s+/)
-// 					table.matrix.push(rowArray)
-// 				}
-// 				i++
-// 			}
-// 			allTables.push(table)
-// 		}
-// 	}
-// 	return allTables
-// })
-
 /*
  * Hooks
  */
@@ -462,22 +382,6 @@ function onSectionChange(section: string) {
 		history.replaceState(null, '', ' ')
 		sectionsSel.value = '-'
 	}, 0)
-}
-
-async function copyTextFileToClipboard() {
-	const url = 'https://www.rcsb.org/fasta/entry/8K1G/display'
-	try {
-		const response = await fetch(url)
-		if (!response.ok) {
-			throw new Error('Network response was not ok')
-		}
-		const text = await response.text()
-		await navigator.clipboard.writeText(text)
-		alert('Text file content copied to clipboard!')
-	} catch (error) {
-		console.error('There was a problem with the fetch operation:', error)
-		alert('Failed to copy text file content to clipboard.')
-	}
 }
 
 function scholarSearch(str: string | null): string {

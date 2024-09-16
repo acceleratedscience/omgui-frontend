@@ -14,7 +14,7 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 import { slugify, isObject } from '@/utils/helpers'
 
 // Type declarations
-import type { MolType, Smol, TempSmol, Protein, Mmol, Format3D, MolMeta } from '@/types'
+import type { MolType, Smol, TempSmol, MmolData, Mmol, Format3D, MolMeta } from '@/types'
 type Matrix = string[][]
 type Vector = string[]
 
@@ -33,6 +33,9 @@ type State = {
 }
 type SaveAsOptions = {
 	newFile?: boolean
+	// This will overwrite any existing file. It is only set
+	// to to true after resubmitting via the confirmation modal.
+	force?: boolean
 }
 
 function getInitialState(): State {
@@ -87,10 +90,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			return !!(this._molType && this._molType != 'smol')
 		},
 		isProtein(): boolean {
-			return this._molType == 'protein'
+			return this._molType == 'mmol'
 		},
 
-		mol(): Smol | TempSmol | Protein | null {
+		mol(): Smol | TempSmol | MmolData | null {
 			if (this.isSmol) {
 				return this._smol.data
 			} else if (this.isMmol) {
@@ -195,22 +198,22 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (!this.isProtein) return null
 			return this._mmol
 		},
-		proteinData(): Protein | null {
+		proteinData(): MmolData | null {
 			if (!this.isProtein) return null
 			return this._mmol.data
 		},
 		// Data in a human-readable format, with keys
 		// sorted according to their human-readable names.
-		proteinDataHuman(): Protein | null {
+		proteinDataHuman(): MmolData | null {
 			if (!this.isProtein) return null
 			if (!this._proteinDataHuman) return null
-			const sortedData: Protein | null = {}
+			const sortedData: MmolData | null = {}
 			Object.keys(this._proteinDataHuman)
 				.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
 				.forEach((key) => (sortedData[key] = this._proteinDataHuman![key]))
 			return sortedData
 		},
-		_proteinDataHuman(): Protein | null {
+		_proteinDataHuman(): MmolData | null {
 			if (!this.isProtein) return null
 			const data = this._mmol.data
 			const humanData: Record<string, any> = {}
@@ -292,17 +295,16 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 * General actions
 		 */
 
-		setMolData(mol: Smol | Mmol, molType: 'smol' | 'protein') {
-			console.log('--setMolData', molType, mol)
+		setMolData(mol: Smol | Mmol, molType: 'smol' | 'mmol') {
+			// console.log('--setMolData', molType, mol)
 			if (molType == 'smol') {
 				mol = mol as Smol
 				this._molType = 'smol'
 				this._smol.data = mol
-			} else if (molType == 'protein') {
+			} else if (molType == 'mmol') {
 				mol = mol as Mmol
-				this._molType = 'protein'
+				this._molType = 'mmol'
 				this._mmol.data = mol.data
-				this._mmol.header = mol.header // temp
 				this._mmol.data3DFormat = mol.data3DFormat as Format3D
 				this._mmol.data3D = mol.data3D
 				this._mmol.meta = mol.meta
@@ -375,10 +377,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 */
 
 		// Save molecule as JSON (.mol.json) file.
-		saveMolAsJSON(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveMolAsJSON(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsJSON(destinationPath, this.mol as Smol, newFile), {
+				apiFetch(moleculesApi.saveMolAsJSON(destinationPath, this.mol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: () => reject(true),
 				})
@@ -386,10 +388,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		// Save molecule as CSV (.csv) file.
-		saveMolAsCSV(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveMolAsCSV(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsCSV(destinationPath, this.mol as Smol, newFile), {
+				apiFetch(moleculesApi.saveMolAsCSV(destinationPath, this.mol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -397,10 +399,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		// Save molecule as SDF (.sdf) file.
-		saveMolAsSDF(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveMolAsSDF(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsSDF(destinationPath, this.mol as Smol, newFile), {
+				apiFetch(moleculesApi.saveMolAsSDF(destinationPath, this.mol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -408,10 +410,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		// Save molecule as MDL (.mol) file.
-		saveMolAsMDL(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveMolAsMDL(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsMDL(destinationPath, this.mol as Smol, newFile), {
+				apiFetch(moleculesApi.saveMolAsMDL(destinationPath, this.mol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -420,10 +422,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		// Save molecule as SMILES (.smi) file.
 		// This removes all parameters from the molecule.
-		saveMolAsSMILES(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveMolAsSMILES(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsSMILES(destinationPath, this.mol as Smol, newFile), {
+				apiFetch(moleculesApi.saveMolAsSMILES(destinationPath, this.mol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -431,34 +433,34 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		/**
-		 * Save-as functions - proteins
+		 * Save-as functions - macromolecules
 		 */
 
-		saveMmolAsMmolJson(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveMmolAsMmolJson(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			console.log('# saveMmolAsMmolJson', this._molType)
 			if (!this.isProtein) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMmolAsMmolJson(destinationPath, this.mmol as Mmol, newFile), {
+				apiFetch(moleculesApi.saveMmolAsMmolJson(destinationPath, this.mmol as Mmol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
 			})
 		},
 
-		saveMmolAsPDB(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveMmolAsPDB(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isProtein) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMmolAsPDB(destinationPath, this.mmol as Mmol, newFile), {
+				apiFetch(moleculesApi.saveMmolAsPDB(destinationPath, this.mmol as Mmol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
 			})
 		},
 
-		saveMmolAsCIF(destinationPath: string, { newFile = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveMmolAsCIF(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isProtein) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMmolAsCIF(destinationPath, this.mmol as Mmol, newFile), {
+				apiFetch(moleculesApi.saveMmolAsCIF(destinationPath, this.mmol as Mmol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -507,6 +509,8 @@ function _massageTableKey(str: string): string {
 
 function _massageValue(str: string | null): string | null {
 	if (!str) return null
+	if (isObject(str) || Array.isArray(str)) console.log('***', str)
+	if (isObject(str) || Array.isArray(str)) return str // %%
 	if ((str.startsWith("'") && str.endsWith("'")) || (str.startsWith(';') && str.endsWith(';'))) {
 		str = str.slice(1, -1)
 	}

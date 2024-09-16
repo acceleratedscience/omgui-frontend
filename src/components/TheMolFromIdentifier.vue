@@ -127,7 +127,7 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 				// return
 
 				// Update HTML
-				molViewerStore.setMolData(data, 'protein')
+				molViewerStore.setMolData(data, 'mmol')
 				success = true
 			},
 			loading: loading,
