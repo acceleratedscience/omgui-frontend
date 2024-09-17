@@ -1,9 +1,12 @@
 <template>
+	<!-- Single matrix:               /mmol/2G64#database_PDB_matrix -->
+	<!-- Multiple matrices together:  /mmol/8k1g#atom_sites -->
+	<!-- Array of separated matrices: /mmol/2g64#pdbx_struct_oper_list -->
 	<div v-for="(matrixObj, i) in mxObjs" :key="i" class="matrix-wrap-wrap">
 		<div v-for="(matrix, mtxName) in matrixObj.matrices" :key="mtxName" class="matrix-wrap">
 			<h5 v-if="matrixObj.fields?.id">Matrix {{ matrixObj.fields.id }}</h5>
 			<div v-for="(v, k) in matrixObj.fields" :key="k">
-				<b>{{ k }}:</b> {{ v }}
+				• <b>{{ k }}:</b> {{ v }}
 			</div>
 			<br v-if="Object.keys(matrixObj.fields).length" />
 			<div class="small soft">
@@ -24,28 +27,42 @@
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 
-// Stores
-import { useModalStore } from '@/stores/ModalStore'
-const modalStore = useModalStore()
+// Components
+import TheTable from '@/components/TheTable.vue'
 
 // Props
 const props = defineProps<{
-	mxObjs: any
+	data: any
 }>()
 
 /*
  * Computed
  */
 
-const mxObjs: ComputedRef<any> = computed(() => {})
-
-/*
- * Hooks
- */
-
-/*
- * Methods
- */
+const mxObjs: ComputedRef<any> = computed(() => {
+	const data = props.data
+	if (Array.isArray(data)) {
+		return data
+	} else {
+		return [data]
+	}
+})
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.matrix-wrap-wrap {
+	margin-top: 40px;
+}
+.matrix-wrap {
+	display: inline-block;
+}
+.matrix-wrap:deep() table {
+	width: 100%;
+}
+.matrix-wrap .small {
+	margin-bottom: 4px;
+}
+.matrix-wrap .small.vector {
+	margin-top: 8px;
+}
+</style>

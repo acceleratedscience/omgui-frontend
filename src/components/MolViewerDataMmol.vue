@@ -145,50 +145,10 @@
 				</h4>
 
 				<!-- Matrix data -->
-				<!-- Example: /mmol/2G64#database_PDB_matrix -->
-				<!-- Example with multiple matrices -->
-				<div v-if="val.matrices && val.vectors">
-					<div v-for="(v, k) in val.fields" :key="k">
-						• <b>{{ k }}:</b> {{ v }}
-					</div>
-					<div v-for="(matrix, mtxName) in val.matrices" :key="mtxName">
-						<div class="matrix-wrap">
-							<br v-if="Object.keys(val.fields).length" />
-							<div class="small soft">
-								Matrix<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
-							</div>
-							<TheTable :data="matrix" :allowCopy="true" :header="false" />
-
-							<div class="small soft vector">
-								Vector<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
-							</div>
-							<TheTable :data="[val.vectors[mtxName]]" :allowCopy="true" :header="false" />
-						</div>
-					</div>
-				</div>
-
-				<!-- Array with matrix data -->
-				<!-- Example: /mmol/2g64#pdbx_struct_oper_list -->
-				<div v-else-if="Array.isArray(val) && val[0].matrices && val[0].vectors">
-					<div v-for="(matrixObj, i) in val" :key="i" class="matrix-wrap-wrap">
-						<div v-for="(matrix, mtxName) in matrixObj.matrices" :key="mtxName" class="matrix-wrap">
-							<h5 v-if="matrixObj.fields?.id">Matrix {{ matrixObj.fields.id }}</h5>
-							<div v-for="(v, k) in matrixObj.fields" :key="k">
-								<b>{{ k }}:</b> {{ v }}
-							</div>
-							<br v-if="Object.keys(matrixObj.fields).length" />
-							<div class="small soft">
-								Matrix<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
-							</div>
-							<TheTable :data="matrix" :allowCopy="true" :header="false" />
-
-							<div class="small soft vector">
-								Vector<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
-							</div>
-							<TheTable :data="[matrixObj.vectors[mtxName]]" :allowCopy="true" :header="false" />
-						</div>
-					</div>
-				</div>
+				<MolViewerDataMmolMatrices
+					v-if="(val.matrices && val.vectors) || (Array.isArray(val) && val[0].matrices && val[0].vectors)"
+					:data="val"
+				/>
 
 				<!-- Table data -->
 				<div v-else-if="Array.isArray(val)">
@@ -220,6 +180,7 @@ const fileStore = useFileStore()
 // Components
 import TheTable from '@/components/TheTable.vue'
 import MmolDetails from '@/components/MmolDetails.vue'
+import MolViewerDataMmolMatrices from '@/components/MolViewerDataMmolMatrices.vue'
 
 // Definitions
 const sectionsSel = ref<string | null>('-')
@@ -427,22 +388,10 @@ function scholarSearch(str: string | null): string {
 	margin-top: 32px;
 	margin-bottom: 8px;
 }
-.data-block .matrix-wrap-wrap:not(:first-child) {
-	margin-top: 40px;
-}
 
-// Matrix displays
-.data-block .matrix-wrap {
-	display: inline-block;
-}
-.data-block .matrix-wrap:deep() table {
-	width: 100%;
-}
-.data-block .matrix-wrap .small {
-	margin-bottom: 4px;
-}
-.data-block .matrix-wrap .small.vector {
-	margin-top: 8px;
+// Matrix
+h4 + :deep() .matrix-wrap-wrap {
+	margin-top: 0;
 }
 
 // Avoid links to fill page width
