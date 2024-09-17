@@ -57,9 +57,9 @@ function actionSaveAs() {
 	} else if ((fileStore.fileType as string) == 'pdb') {
 		return modalSaveFile('pdb', true, { defaultName: molViewerStore.nameSlug })
 	} else if ((fileStore.fileType as string) == 'mmol') {
-		if (molViewerStore.proteinData3DFormat == 'cif') {
+		if (molViewerStore.mmolData3DFormat == 'cif') {
 			return modalSaveFile('cif', true, { defaultName: molViewerStore.nameSlug })
-		} else if (molViewerStore.proteinData3DFormat == 'pdb') {
+		} else if (molViewerStore.mmolData3DFormat == 'pdb') {
 			return modalSaveFile('pdb', true, { defaultName: molViewerStore.nameSlug })
 		}
 	}

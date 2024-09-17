@@ -3,7 +3,7 @@
 On top of supporting common molecular file formats like `mol`, `sdf` and `smi` for small molecules as well as `cif` and `pdb` for macromolecules, we use our own data structures that are used internally by OpenAD.
 
 -   **`mol.json`** - Small molecule data
--   **`mmol.json`** - Macromolecule data (at this time only proteins are supported)
+-   **`mmol.json`** - Macromolecule data (at this time only PDB/CIF format supported)
 -   **`molset.json`** - A set of small molecules or macromolecules
 
 > [!CAUTION]

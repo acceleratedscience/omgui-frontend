@@ -41,7 +41,7 @@ type SaveAsOptions = {
 function getInitialState(): State {
 	return {
 		// Defines where we read/save molecule data from/to
-		// I.e. smol, protein, etc.
+		// I.e. smol, mmol & maybe other types later.
 		_molType: null,
 
 		// Small molecule data
@@ -52,7 +52,7 @@ function getInitialState(): State {
 			meta: null,
 		},
 
-		// Protein data
+		// Macromolecule data
 		_mmol: {
 			_keyMap: {},
 			data: null,
@@ -87,9 +87,6 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			return this._molType == 'smol'
 		},
 		isMmol(): boolean {
-			return !!(this._molType && this._molType != 'smol')
-		},
-		isProtein(): boolean {
 			return this._molType == 'mmol'
 		},
 
@@ -105,8 +102,8 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		name(): string {
 			if (this.isSmol) {
 				return this._smol.data.identifiers?.name || 'Unnamed Molecule'
-			} else if (this.isProtein) {
-				return this._mmol.data?.entry?.id || 'Unknown Protein'
+			} else if (this.isMmol) {
+				return this._mmol.data?.entry?.id || 'Unknown Macromolecule'
 			} else {
 				return ''
 			}
@@ -191,30 +188,27 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		/**
 		 * Macromolecule getters
 		 */
-		mmol(): Mmol {
+		mmol(): Mmol | null {
+			if (!this.isMmol) return null
 			return this._mmol
 		},
-		protein(): Mmol | null {
-			if (!this.isProtein) return null
-			return this._mmol
-		},
-		proteinData(): MmolData | null {
-			if (!this.isProtein) return null
+		mmolData(): MmolData | null {
+			if (!this.isMmol) return null
 			return this._mmol.data
 		},
 		// Data in a human-readable format, with keys
 		// sorted according to their human-readable names.
-		proteinDataHuman(): MmolData | null {
-			if (!this.isProtein) return null
-			if (!this._proteinDataHuman) return null
+		mmolDataHuman(): MmolData | null {
+			if (!this.isMmol) return null
+			if (!this._mmolDataHuman) return null
 			const sortedData: MmolData | null = {}
-			Object.keys(this._proteinDataHuman)
+			Object.keys(this._mmolDataHuman)
 				.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-				.forEach((key) => (sortedData[key] = this._proteinDataHuman![key]))
+				.forEach((key) => (sortedData[key] = this._mmolDataHuman![key]))
 			return sortedData
 		},
-		_proteinDataHuman(): MmolData | null {
-			if (!this.isProtein) return null
+		_mmolDataHuman(): MmolData | null {
+			if (!this.isMmol) return null
 			const data = this._mmol.data
 			const humanData: Record<string, any> = {}
 
@@ -277,16 +271,16 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 			return humanData
 		},
-		proteinDataKeyMap(): Record<string, string> {
+		mmolDataKeyMap(): Record<string, string> {
 			if (!this._mmol._keyMap) return {}
 			return this._mmol._keyMap
 		},
-		proteinData3D(): string | null {
-			if (!this.isProtein) return null
+		mmolData3D(): string | null {
+			if (!this.isMmol) return null
 			return this._mmol.data3D
 		},
-		proteinData3DFormat(): Format3D {
-			if (!this.isProtein) return null
+		mmolData3DFormat(): Format3D {
+			if (!this.isMmol) return null
 			return this._mmol.data3DFormat
 		},
 	},
@@ -438,7 +432,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		saveMmolAsMmolJson(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			console.log('# saveMmolAsMmolJson', this._molType)
-			if (!this.isProtein) return Promise.resolve(false)
+			if (!this.isMmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(moleculesApi.saveMmolAsMmolJson(destinationPath, this.mmol as Mmol, newFile, force), {
 					onSuccess: () => resolve(true),
@@ -448,7 +442,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		saveMmolAsPDB(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (!this.isProtein) return Promise.resolve(false)
+			if (!this.isMmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(moleculesApi.saveMmolAsPDB(destinationPath, this.mmol as Mmol, newFile, force), {
 					onSuccess: () => resolve(true),
@@ -458,7 +452,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		saveMmolAsCIF(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
-			if (!this.isProtein) return Promise.resolve(false)
+			if (!this.isMmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(moleculesApi.saveMmolAsCIF(destinationPath, this.mmol as Mmol, newFile, force), {
 					onSuccess: () => resolve(true),

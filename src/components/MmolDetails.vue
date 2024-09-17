@@ -2,7 +2,7 @@
 	<div v-if="molViewerStore.isMmol" id="mmol-details">
 		<div class="title">mmol.json</div>
 		<!-- <div><b>Macromolecule type:</b> {{ molViewerStore.molType }}</div> -->
-		<div><b>3D Data format:</b> {{ molViewerStore.proteinData3DFormat }}</div>
+		<div><b>3D Data format:</b> {{ molViewerStore.mmolData3DFormat }}</div>
 	</div>
 </template>
 

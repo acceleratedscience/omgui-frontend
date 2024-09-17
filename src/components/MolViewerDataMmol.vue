@@ -1,6 +1,6 @@
 <template>
 	<!-- prettier-ignore -->
-	<div class="capitalize" v-html="proteinDataHuman?.Structure?.Title || `<div class='soft'>No description available</div>`"></div>
+	<div class="capitalize" v-html="mmolDataHuman?.Structure?.Title || `<div class='soft'>No description available</div>`"></div>
 
 	<br />
 
@@ -98,31 +98,31 @@
 		<!-- Method -->
 		<div class="data-item">
 			<div class="key">Method</div>
-			<div class="value">{{ proteinDataHuman?.Experimental?.Method || '-' }}</div>
+			<div class="value">{{ mmolDataHuman?.Experimental?.Method || '-' }}</div>
 		</div>
 
 		<!-- Resolution -->
 		<div class="data-item">
 			<div class="key">Resolution</div>
-			<div class="value">{{ proteinData?.reflns_shell?.d_res_high || '-' }}</div>
+			<div class="value">{{ mmolData?.reflns_shell?.d_res_high || '-' }}</div>
 		</div>
 
 		<!-- R-Value Free -->
 		<div class="data-item">
 			<div class="key">R-Value Free</div>
-			<div class="value">{{ proteinData?.refine?.ls_R_factor_R_free || '-' }}</div>
+			<div class="value">{{ mmolData?.refine?.ls_R_factor_R_free || '-' }}</div>
 		</div>
 
 		<!-- R-Value Work -->
 		<div class="data-item">
 			<div class="key">R-Value Work</div>
-			<div class="value">{{ proteinData?.refine?.ls_R_factor_R_work || '-' }}</div>
+			<div class="value">{{ mmolData?.refine?.ls_R_factor_R_work || '-' }}</div>
 		</div>
 
 		<!-- R-Value Observed -->
 		<div class="data-item">
 			<div class="key">R-Value Observed</div>
-			<div class="value">{{ proteinData?.refine?.ls_R_factor_obs || '-' }}</div>
+			<div class="value">{{ mmolData?.refine?.ls_R_factor_obs || '-' }}</div>
 		</div>
 	</div>
 
@@ -138,10 +138,10 @@
 	<!-- Data dump -->
 	<div class="data-block">
 		<h3>Data</h3>
-		<template v-for="(val, key) in proteinDataHuman" :key="key">
+		<template v-for="(val, key) in mmolDataHuman" :key="key">
 			<div v-if="Object.keys(val).length" class="data-item" :class="{ break: true }">
 				<h4>
-					<a :href="'#' + molViewerStore.proteinDataKeyMap[key]" :name="molViewerStore.proteinDataKeyMap[key]" class="anchor">{{ key }}</a>
+					<a :href="'#' + molViewerStore.mmolDataKeyMap[key]" :name="molViewerStore.mmolDataKeyMap[key]" class="anchor">{{ key }}</a>
 				</h4>
 
 				<!-- Matrix data -->
@@ -170,7 +170,6 @@
 				<!-- Array with matrix data -->
 				<!-- Example: /mmol/2g64#pdbx_struct_oper_list -->
 				<div v-else-if="Array.isArray(val) && val[0].matrices && val[0].vectors">
-					<!-- <pre>{{ val }}</pre> -->
 					<div v-for="(matrixObj, i) in val" :key="i" class="matrix-wrap-wrap">
 						<div v-for="(matrix, mtxName) in matrixObj.matrices" :key="mtxName" class="matrix-wrap">
 							<h5 v-if="matrixObj.fields?.id">Matrix {{ matrixObj.fields.id }}</h5>
@@ -178,7 +177,6 @@
 								<b>{{ k }}:</b> {{ v }}
 							</div>
 							<br v-if="Object.keys(matrixObj.fields).length" />
-
 							<div class="small soft">
 								Matrix<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
 							</div>
@@ -213,20 +211,6 @@ import { ref, computed, onMounted } from 'vue'
 // Type declarations
 import type { ComputedRef } from 'vue'
 
-// trash
-// import type { Protein } from '@/types'
-// type StructuredRef = {
-// 	title: string | null
-// 	authors: string[] | null
-// 	//
-// 	v: string | null
-// 	issn: string | null
-// 	pub: string | null
-// 	//
-// 	metaStr: string | null
-// 	input: string
-// }
-
 // Stores
 import { useMolViewerStore } from '@/stores/MolViewerStore'
 import { useFileStore } from '@/stores/FileStore'
@@ -246,9 +230,9 @@ const sectionsSel = ref<string | null>('-')
 
 // Data sections
 const sections: ComputedRef<{ key: string; humanKey: string }[]> = computed(() => {
-	if (!molViewerStore.proteinData || !molViewerStore.proteinDataHuman) return []
-	const keys = Object.keys(molViewerStore.proteinData)
-	const humanKeys = Object.keys(molViewerStore.proteinDataHuman)
+	if (!molViewerStore.mmolData || !molViewerStore.mmolDataHuman) return []
+	const keys = Object.keys(molViewerStore.mmolData)
+	const humanKeys = Object.keys(molViewerStore.mmolDataHuman)
 	const output = []
 	for (let i = 0; i < keys.length; i++) {
 		const section = {
@@ -264,18 +248,17 @@ const isMmolJsonFile: ComputedRef<boolean> = computed(() => {
 	return fileStore.ext == 'json' && fileStore.ext2 == 'mmol'
 })
 
-const proteinData: ComputedRef<{ [key: string]: any } | null> = computed(() => molViewerStore.proteinData)
-const proteinDataHuman: ComputedRef<{ [key: string]: any } | null> = computed(() => molViewerStore.proteinDataHuman)
-// const proteinData_temp: ComputedRef<Protein | null> = computed(() => molViewerStore.mmol.header)
+const mmolData: ComputedRef<{ [key: string]: any } | null> = computed(() => molViewerStore.mmolData)
+const mmolDataHuman: ComputedRef<{ [key: string]: any } | null> = computed(() => molViewerStore.mmolDataHuman)
 
 // PDB ID
 const pdbId: ComputedRef<string | null> = computed(() => {
-	return proteinData.value?.entry?.id || null
+	return mmolData.value?.entry?.id || null
 })
 
 // DOI link
 const doiLink: ComputedRef<string | null> = computed(() => {
-	let db2 = proteinData.value?.database_2 ? proteinDataHuman.value!['Database 2'] : null
+	let db2 = mmolData.value?.database_2 ? mmolDataHuman.value!['Database 2'] : null
 	if (db2) {
 		for (let i = 0; i < db2.length; i++) {
 			if (db2[i]['Database ID'] == 'Pdb') {
@@ -288,7 +271,7 @@ const doiLink: ComputedRef<string | null> = computed(() => {
 
 // Deposition data
 const depositionDate: ComputedRef<string | null> = computed(() => {
-	let dateString = proteinData.value?.pdbx_database_status?.recvd_initial_deposition_date || null
+	let dateString = mmolData.value?.pdbx_database_status?.recvd_initial_deposition_date || null
 
 	if (dateString) {
 		const date = new Date(dateString)
@@ -304,7 +287,7 @@ const depositionDate: ComputedRef<string | null> = computed(() => {
 
 // Release date
 const releaseDate: ComputedRef<string | null> = computed(() => {
-	const revisions = proteinData.value?.pdbx_audit_revision_history || null
+	const revisions = mmolData.value?.pdbx_audit_revision_history || null
 	if (!revisions) return null
 	const revisionList = Array.isArray(revisions) ? revisions : [revisions]
 	let dateString = revisionList ? revisionList[0]['revision_date'] : null
@@ -324,7 +307,7 @@ const releaseDate: ComputedRef<string | null> = computed(() => {
 
 // Authors
 const authors: ComputedRef<string[]> = computed(() => {
-	const authors = proteinData.value?.audit_author ? proteinDataHuman.value!['Audit Author'] : null
+	const authors = mmolData.value?.audit_author ? mmolDataHuman.value!['Audit Author'] : null
 	if (!authors) return []
 	let authorList = Array.isArray(authors) ? authors : [authors]
 
@@ -344,7 +327,7 @@ const authors: ComputedRef<string[]> = computed(() => {
 
 // Keywords
 const keywords: ComputedRef<string[] | null> = computed(() => {
-	let kw = proteinData.value?.struct_keywords?.text ? proteinDataHuman.value!['Structure Keywords'].Text : null
+	let kw = mmolData.value?.struct_keywords?.text ? mmolDataHuman.value!['Structure Keywords'].Text : null
 	if (kw) {
 		kw = kw.split(',')
 		kw = kw.map((keyword: string) => keyword.trim())
