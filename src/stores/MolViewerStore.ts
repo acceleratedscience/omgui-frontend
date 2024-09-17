@@ -14,7 +14,7 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 import { slugify, isObject } from '@/utils/helpers'
 
 // Type declarations
-import type { MolType, Smol, TempSmol, MmolData, Mmol, Format3D, MolMeta } from '@/types'
+import type { MolType, MolFileDataType, Smol, TempSmol, MmolData, Mmol, Format3D, MolMeta } from '@/types'
 type Matrix = string[][]
 type Vector = string[]
 
@@ -82,6 +82,13 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		molType(): MolType {
 			return this._molType
+		},
+		// The dataType is used for decising on export options.
+		// MolViewerTitle.vue
+		dataType(): MolFileDataType {
+			if (this.isSmol) return 'smol'
+			if (this.isMmol) return this._mmol.data3DFormat as MolFileDataType
+			return 'molset'
 		},
 		isSmol(): boolean {
 			return this._molType == 'smol'
@@ -192,6 +199,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		/**
 		 * Macromolecule getters
 		 */
+
 		mmol(): Mmol | null {
 			if (!this.isMmol) return null
 			return this._mmol
@@ -436,7 +444,6 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 */
 
 		saveMmolAsMmolJson(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
-			console.log('# saveMmolAsMmolJson', this._molType)
 			if (!this.isMmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(moleculesApi.saveMmolAsMmolJson(destinationPath, this.mmol as Mmol, newFile, force), {

@@ -21,10 +21,11 @@ import { useModalSaveFile } from '@/modals/modal-save-file'
 const modalSaveFile = useModalSaveFile()
 
 // Type declarations
-import type { ActionOption } from '@/types'
+import type { MolFileDataType, ActionOption } from '@/types'
 
 // Props
-defineProps<{
+const props = defineProps<{
+	dataType: MolFileDataType
 	disabled: boolean
 }>()
 
@@ -36,7 +37,7 @@ const overflowOptions: ActionOption[] = [
 		action: actionSaveAs,
 	},
 ]
-if (fileStore.active && ['mmol', 'smol', 'cif', 'pdb'].includes(fileStore.fileType as string)) {
+if (fileStore.active && ['smol', 'mmol', 'cif', 'pdb'].includes(fileStore.fileType as string)) {
 	overflowOptions.push({
 		val: 'delete',
 		disp: 'Delete',
@@ -50,19 +51,18 @@ if (fileStore.active && ['mmol', 'smol', 'cif', 'pdb'].includes(fileStore.fileTy
 
 // Save as...
 function actionSaveAs() {
-	if (fileStore.fileType == 'smol') {
-		return modalSaveFile('smol', true, { defaultName: molViewerStore.nameSlug })
-	} else if (fileStore.fileType == 'cif') {
-		return modalSaveFile('cif', true, { defaultName: molViewerStore.nameSlug })
-	} else if (fileStore.fileType == 'pdb') {
-		return modalSaveFile('pdb', true, { defaultName: molViewerStore.nameSlug })
-	} else if (fileStore.fileType == 'mmol') {
-		if (molViewerStore.mmolData3DFormat == 'cif') {
-			return modalSaveFile('cif', true, { defaultName: molViewerStore.nameSlug })
-		} else if (molViewerStore.mmolData3DFormat == 'pdb') {
-			return modalSaveFile('pdb', true, { defaultName: molViewerStore.nameSlug })
-		}
-	}
+	console.log('dataType: ', props.dataType)
+
+	// smol.json
+	if (props.dataType == 'smol') return modalSaveFile('smol', true, { defaultName: molViewerStore.nameSlug })
+
+	// cif / mmol.json with cif data
+	if (props.dataType == 'cif') return modalSaveFile('cif', true, { defaultName: molViewerStore.nameSlug })
+
+	// pdb / mmol.json with pdb data
+	if (props.dataType == 'pdb') return modalSaveFile('pdb', true, { defaultName: molViewerStore.nameSlug })
+
+	console.error(`actionSaveAs() -> props.dataType "${props.dataType}" not recognized`)
 }
 
 // Delete

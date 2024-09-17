@@ -98,23 +98,23 @@ const emit = defineEmits(['mounted']) // <--
 // Definitions
 const isSubmitted = ref(false) // Workaround for Carbon dialog to make ESC or X trigger the onCancel event
 const outputTypeOptionsSmol = [
-	{ val: 'smol.json', disp: 'smol' },
+	{ val: 'smol.json', disp: 'smol.json' },
 	{ val: 'sdf', disp: 'SDF' },
 	{ val: 'csv', disp: 'CSV' },
 	{ val: 'mol', disp: 'MOL' },
 	{ val: 'smi', disp: 'SMILES' },
 ]
 const outputTypeOptionsCIF = [
-	{ val: 'mmol.json', disp: 'mmol' },
+	{ val: 'mmol.json', disp: 'mmol.json' },
 	{ val: 'cif', disp: 'CIF' },
 ]
 const outputTypeOptionsPDB = [
-	{ val: 'mmol.json', disp: 'mmol' },
+	{ val: 'mmol.json', disp: 'mmol.json' },
 	{ val: 'pdb', disp: 'PDB' },
 	{ val: 'cif', disp: 'CIF' },
 ]
 const outputTypeOptionsMolset = [
-	{ val: 'molset.json', disp: 'molset' },
+	{ val: 'molset.json', disp: 'molset.json' },
 	{ val: 'sdf', disp: 'SDF' },
 	{ val: 'csv', disp: 'CSV' },
 	{ val: 'smi', disp: 'SMILES' },

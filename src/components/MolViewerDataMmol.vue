@@ -20,8 +20,8 @@
 		<h3>Overview</h3>
 
 		<!-- PDB Entry -->
-		<div class="data-item">
-			<div v-copy-on-click :data-copy="`PDB Entry: https://www.rcsb.org/structure/${pdbId}`" class="key">PDB Entry</div>
+		<div class="key-val">
+			<div v-copy-on-click :data-copy="`PDB Entry: https://www.rcsb.org/structure/${pdbId}`">PDB Entry</div>
 			<a v-if="pdbId" :href="`https://www.rcsb.org/structure/${pdbId}`" target="_blank">
 				{{ pdbId }}
 			</a>
@@ -29,38 +29,38 @@
 		</div>
 
 		<!-- DOI -->
-		<div class="data-item">
-			<div v-copy-on-click :data-copy="`DOI Entry: https://doi.org/${doiLink}`" class="key">DOI</div>
-			<a v-if="doiLink" :href="`https://doi.org/${doiLink}`" target="_blank" class="val">{{ doiLink }}</a>
+		<div class="key-val">
+			<div v-copy-on-click :data-copy="`DOI Entry: https://doi.org/${doiLink}`">DOI</div>
+			<a v-if="doiLink" :href="`https://doi.org/${doiLink}`" target="_blank">{{ doiLink }}</a>
 			<div v-else>-</div>
 		</div>
 
 		<!-- FASTA -->
-		<div class="data-item">
-			<div class="key">FASTA</div>
+		<div class="key-val">
+			<div>FASTA</div>
 			<template v-if="pdbId">
-				<a :href="`https://www.rcsb.org/fasta/entry/${pdbId}/display`" target="_blank	" class="value">View</a>&nbsp;/&nbsp;
-				<a :href="`https://www.rcsb.org/fasta/entry/${pdbId}`" class="value">Download</a>
+				<a :href="`https://www.rcsb.org/fasta/entry/${pdbId}/display`" target="_blank">View</a>&nbsp;/&nbsp;
+				<a :href="`https://www.rcsb.org/fasta/entry/${pdbId}`">Download</a>
 			</template>
 			<div v-else>-</div>
 		</div>
 
 		<!-- Deposited -->
-		<div class="data-item">
-			<div v-copy-on-click :data-copy="`Deposited: ${depositionDate}`" class="key">Deposited</div>
-			<div class="val">{{ depositionDate || '-' }}</div>
+		<div class="key-val">
+			<div v-copy-on-click :data-copy="`Deposited: ${depositionDate}`">Deposited</div>
+			<div>{{ depositionDate || '-' }}</div>
 		</div>
 
 		<!-- Released -->
-		<div class="data-item">
-			<div v-copy-on-click :data-copy="`Released: ${releaseDate}`" class="key">Released</div>
-			<div class="val">{{ releaseDate || '-' }}</div>
+		<div class="key-val">
+			<div v-copy-on-click :data-copy="`Released: ${releaseDate}`">Released</div>
+			<div>{{ releaseDate || '-' }}</div>
 		</div>
 
 		<!-- Authors -->
-		<div class="data-item inline">
-			<div v-copy-on-click :data-copy="`Authors: ${authors?.join(', ') || '-'}`" class="key">Authors</div>
-			<div v-if="authors && authors.length" class="val">
+		<div class="key-val inline">
+			<div v-copy-on-click :data-copy="`Authors: ${authors?.join(', ') || '-'}`">Authors</div>
+			<div v-if="authors && authors.length">
 				<template v-for="(author, i) in authors" :key="i">
 					<a :href="scholarSearch(author)" target="_blank" class="lookup">
 						{{ author }}
@@ -72,9 +72,9 @@
 		</div>
 
 		<!-- Keywords -->
-		<div class="data-item inline">
-			<div v-copy-on-click :data-copy="`Keywords: ${keywords?.join(', ') || '-'}`" class="key">Keywords</div>
-			<div v-if="keywords && keywords.length" class="val">
+		<div class="key-val inline">
+			<div v-copy-on-click :data-copy="`Keywords: ${keywords?.join(', ') || '-'}`">Keywords</div>
+			<div v-if="keywords && keywords.length">
 				<template v-for="(kw, i) in keywords" :key="i">
 					<a :href="scholarSearch(kw)" target="_blank" class="lookup">
 						{{ kw }}
@@ -84,10 +84,13 @@
 			</div>
 			<div v-else>-</div>
 		</div>
-	</div>
 
-	<!-- mmol.json info -->
-	<MmolDetails v-if="isMmolJsonFile" />
+		<!-- 3D data format -->
+		<div v-if="isMmolJsonFile" class="key-val">
+			<div v-copy-on-click :data-copy="`PDB Entry: https://www.rcsb.org/structure/${pdbId}`">3D Data</div>
+			<div>{{ molViewerStore.mmolData3DFormat }}</div>
+		</div>
+	</div>
 
 	<hr />
 
@@ -96,33 +99,33 @@
 		<h3>Experimental Data Snapshot</h3>
 
 		<!-- Method -->
-		<div class="data-item">
-			<div class="key">Method</div>
-			<div class="value">{{ mmolDataHuman?.Experimental?.Method || '-' }}</div>
+		<div class="key-val">
+			<div>Method</div>
+			<div>{{ mmolDataHuman?.Experimental?.Method || '-' }}</div>
 		</div>
 
 		<!-- Resolution -->
-		<div class="data-item">
-			<div class="key">Resolution</div>
-			<div class="value">{{ mmolData?.reflns_shell?.d_res_high || '-' }}</div>
+		<div class="key-val">
+			<div>Resolution</div>
+			<div>{{ mmolData?.reflns_shell?.d_res_high || '-' }}</div>
 		</div>
 
 		<!-- R-Value Free -->
-		<div class="data-item">
-			<div class="key">R-Value Free</div>
-			<div class="value">{{ mmolData?.refine?.ls_R_factor_R_free || '-' }}</div>
+		<div class="key-val">
+			<div>R-Value Free</div>
+			<div>{{ mmolData?.refine?.ls_R_factor_R_free || '-' }}</div>
 		</div>
 
 		<!-- R-Value Work -->
-		<div class="data-item">
-			<div class="key">R-Value Work</div>
-			<div class="value">{{ mmolData?.refine?.ls_R_factor_R_work || '-' }}</div>
+		<div class="key-val">
+			<div>R-Value Work</div>
+			<div>{{ mmolData?.refine?.ls_R_factor_R_work || '-' }}</div>
 		</div>
 
 		<!-- R-Value Observed -->
-		<div class="data-item">
-			<div class="key">R-Value Observed</div>
-			<div class="value">{{ mmolData?.refine?.ls_R_factor_obs || '-' }}</div>
+		<div class="key-val">
+			<div>R-Value Observed</div>
+			<div>{{ mmolData?.refine?.ls_R_factor_obs || '-' }}</div>
 		</div>
 	</div>
 
@@ -139,7 +142,7 @@
 	<div class="data-block">
 		<h3>Data</h3>
 		<template v-for="(val, key) in mmolDataHuman" :key="key">
-			<div v-if="Object.keys(val).length" class="data-item" :class="{ break: true }">
+			<div v-if="Object.keys(val).length">
 				<h4>
 					<a :href="'#' + molViewerStore.mmolDataKeyMap[key]" :name="molViewerStore.mmolDataKeyMap[key]" class="anchor">{{ key }}</a>
 				</h4>
@@ -179,7 +182,6 @@ const fileStore = useFileStore()
 
 // Components
 import TheTable from '@/components/TheTable.vue'
-import MmolDetails from '@/components/MmolDetails.vue'
 import MolViewerDataMmolMatrices from '@/components/MolViewerDataMmolMatrices.vue'
 
 // Definitions
@@ -348,36 +350,22 @@ function scholarSearch(str: string | null): string {
 }
 
 // Data blocks key/value pairs
-.data-block .data-item {
+.data-block .key-val {
 	display: flex;
 	flex-direction: row;
 	margin-bottom: 4px;
 }
-.data-block .data-item.inline {
+.data-block .key-val.inline {
 	display: block;
 }
-.data-block .data-item.inline > div {
+.data-block .key-val.inline > div {
 	display: inline;
 }
-.data-block .data-item.break {
-	flex-direction: column;
-}
-.data-block .data-item .key {
+.data-block .key-val > div:first-child {
 	font-weight: bold;
 }
-.data-block .data-item .key::after {
+.data-block .key-val > div:first-child::after {
 	content: ':\00A0';
-}
-.data-block .data-item .value table {
-	margin: 4px 0;
-}
-.data-block .data-item .value ul {
-	margin: 4px 0;
-	padding-left: 20px;
-}
-.data-block .data-item.break .value {
-	margin: 4px 0;
-	// padding-left: 20px;
 }
 
 /**

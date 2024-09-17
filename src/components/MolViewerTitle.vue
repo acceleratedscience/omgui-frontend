@@ -8,7 +8,7 @@
 		</h2>
 		<div class="filler"></div>
 		<BaseBookmark v-if="molViewerStore.smol" :mol="molViewerStore.smol" />
-		<OverflowMenuMol :disabled="Boolean(loading)" />
+		<OverflowMenuMol :dataType="molViewerStore.dataType" :disabled="Boolean(loading)" />
 		<BasePagination v-if="context == 'molset'" v-model="modelPagination" :total="molGridStore.total" />
 		<BaseIconButton
 			v-if="context == 'molset'"
