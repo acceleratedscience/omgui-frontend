@@ -2,18 +2,6 @@
 	<!-- prettier-ignore -->
 	<div class="capitalize" v-html="mmolDataHuman?.Structure?.Title || `<div class='soft'>No description available</div>`"></div>
 
-	<br />
-
-	<!-- <pre>{{ sections }}</pre> -->
-
-	<!-- Index dropdown -->
-	<cv-dropdown id="dd-sections" v-model="sectionsSel" @change="onSectionChange">
-		<cv-dropdown-item value="-" hidden>Jump to section</cv-dropdown-item>
-		<cv-dropdown-item v-for="(item, i) in sections" :key="i" :value="item.key">
-			{{ item.humanKey }}
-		</cv-dropdown-item>
-	</cv-dropdown>
-
 	<hr />
 
 	<div class="data-block">
@@ -185,28 +173,9 @@ const fileStore = useFileStore()
 import TheTable from '@/components/TheTable.vue'
 import MolViewerDataMmolMatrices from '@/components/MolViewerDataMmolMatrices.vue'
 
-// Definitions
-const sectionsSel = ref<string | null>('-')
-
 /*
  * Computed
  */
-
-// Data sections
-const sections: ComputedRef<{ key: string; humanKey: string }[]> = computed(() => {
-	if (!molViewerStore.mmolData || !molViewerStore.mmolDataHuman) return []
-	const keys = Object.keys(molViewerStore.mmolData)
-	const humanKeys = Object.keys(molViewerStore.mmolDataHuman)
-	const output = []
-	for (let i = 0; i < keys.length; i++) {
-		const section = {
-			key: keys[i],
-			humanKey: humanKeys[i],
-		}
-		output.push(section)
-	}
-	return output
-})
 
 const isMmolJsonFile: ComputedRef<boolean> = computed(() => {
 	return fileStore.ext == 'json' && fileStore.ext2 == 'mmol'
@@ -332,24 +301,12 @@ function jumpToHash(hash: string) {
  * Methods
  */
 
-function onSectionChange(section: string) {
-	window.location.hash = '#' + section
-	setTimeout(() => {
-		history.replaceState(null, '', ' ')
-		sectionsSel.value = '-'
-	}, 0)
-}
-
 function scholarSearch(str: string | null): string {
 	return str ? 'https://scholar.google.com/scholar?q=' + str.replace(/\s/g, '+') : ''
 }
 </script>
 
 <style lang="scss" scoped>
-#dd-sections {
-	max-width: 250px;
-}
-
 #validation-report {
 	width: 100%;
 	max-width: 600px;
@@ -395,30 +352,4 @@ h4 + :deep() .matrix-wrap-wrap {
 a > div.capitalize {
 	display: inline-block;
 }
-
-/**
- * Responsive
- */
-
-@media (max-width: $bp-small) {
-	#dd-sections {
-		max-width: none;
-	}
-}
-
-// details summary {
-// 	list-style: none;
-// 	display: inline-block;
-// }
-// details summary::before {
-// 	content: '>\00A0';
-// }
-// details summary h4 {
-// 	display: inline-block;
-// }
-
-// details summary::marker {
-// 	color: red;
-// 	font-size: 1.5em;
-// }
 </style>
