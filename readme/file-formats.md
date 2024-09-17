@@ -2,7 +2,7 @@
 
 On top of supporting common molecular file formats like `mol`, `sdf` and `smi` for small molecules as well as `cif` and `pdb` for macromolecules, we use our own data structures that are used internally by OpenAD.
 
--   **`mol.json`** - Small molecule data
+-   **`smol.json`** - Small molecule data
 -   **`mmol.json`** - Macromolecule data (at this time only PDB/CIF format supported)
 -   **`molset.json`** - A set of small molecules or macromolecules
 
@@ -11,7 +11,7 @@ On top of supporting common molecular file formats like `mol`, `sdf` and `smi` f
 
 <br>
 
-### 1. Small molecules: `mol.json`
+### 1. Small molecules: `smol.json`
 
 The small molecule data format is how the molecule viewer stores and interacts with small molecule data. When you open a `mol`, `sdf` or `smi` file, its content is converted into this format on-the-fly.
 
@@ -133,9 +133,9 @@ A molecule set is nothing more than an array of small molecules or macromolecule
 
 ```jsonc
 [
-    { /* mol.json or mmol.json molecule */ },
-    { /* mol.json or mmol.json molecule */ },
-    { /* mol.json or mmol.json molecule */ },
+    { /* smol.json or mmol.json molecule */ },
+    { /* smol.json or mmol.json molecule */ },
+    { /* smol.json or mmol.json molecule */ },
     ...
 ]
 ```

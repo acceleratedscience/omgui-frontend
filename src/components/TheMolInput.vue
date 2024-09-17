@@ -59,6 +59,7 @@ const ipIdentifier = ref<string>('')
 const errorMsg = ref<string>('')
 const vModelSearchOption = ref<string>('smol')
 const searchOptions = [
+	// We may want to expose a general search option?
 	// {
 	// 	label: 'All molecules',
 	// 	val: 'mol',
@@ -127,7 +128,7 @@ function resetInput() {
 function displayMol() {
 	if (ipIdentifier.value) {
 		router.push({
-			name: vModelSearchOption.value as 'smol' | 'mol',
+			name: vModelSearchOption.value as 'smol' | 'mmol' | 'mol',
 			params: {
 				identifier: ipIdentifier.value.toString(),
 			},

@@ -173,9 +173,11 @@ export type FileErrCode = null | 'not_found' | 'no_permission' | 'is_dir' | 'dec
 // They are translated into the corresponsing name / module name in @/types/maps.ts › _map_FileType()
 export type FileType =
 	| 'dir'
-	| 'mol'
+	| 'smol'
 	| 'molset'
 	| 'pdb'
+	| 'mmol'
+	| 'cif'
 	| 'json'
 	| 'mdl'
 	| 'data'

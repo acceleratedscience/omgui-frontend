@@ -60,7 +60,7 @@ export default class MoleculesApi extends BaseApi {
 	///////////////////////////////////////////////////////////////
 	// #region - Saving
 
-	// Save new .mol.json file to the workspace.
+	// Save new .smol.json file to the workspace.
 	saveMolAsJSON(path: string, mol: Smol, newFile: boolean = true, force = false) {
 		return this.apiClient.post('/save-mol-as-json', { path, mol, newFile, force })
 	}
@@ -108,7 +108,7 @@ export default class MoleculesApi extends BaseApi {
 	///////////////////////////////////////////////////////////////
 	// #region - Saving
 
-	// Save new .mol.json file to the workspace.
+	// Save new .smol.json file to the workspace.
 	saveMmolAsMmolJson(path: string, mol: Mmol, newFile: boolean = true, force = false) {
 		return this.apiClient.post('/save-mmol-as-mmol-json', { path, mol, newFile, force })
 	}

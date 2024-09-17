@@ -72,7 +72,7 @@ export function useModalSaveFile() {
 					await molGridStore.saveMolsetAsSmiles(destinationPath, { newFile: true, force })
 				}
 			} else if (srcDataType == 'smol') {
-				if (ext == 'mol.json') {
+				if (ext == 'smol.json') {
 					await molViewerStore.saveMolAsJSON(destinationPath, { newFile: true, force })
 				} else if (ext == 'sdf') {
 					await molViewerStore.saveMolAsSDF(destinationPath, { newFile: true, force })

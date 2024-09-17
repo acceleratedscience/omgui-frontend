@@ -34,7 +34,7 @@ const jsonData = computed(() => {
 	if (props.data) return props.data
 	const fileStoreData = fileStore.data
 	if (fileStoreData?.cacheId && fileStoreData?.mols) {
-		// mol.json files come wrapped with meta information
+		// smol.json files come wrapped with meta information
 		// so we extract the file data without meta wrapper.
 		return fileStoreData.mols
 	} else {

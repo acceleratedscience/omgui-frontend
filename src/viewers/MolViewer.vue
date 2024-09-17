@@ -1,6 +1,6 @@
 <!-- 
 	The molviewer can be loaded in three different contexts:
-	- When opening a molecule file: /~/dopamine.mol.json -> ViewerDispatch.vue
+	- When opening a molecule file: /~/dopamine.smol.json -> ViewerDispatch.vue
 	- Looking up a molecule by identifier: /mol/dopamine -> MolPage.vue -> MolFromIdentifier.vue
 	- When opening a molecule from a molset: /mol/~/some_molset.molset.json?index=3 -> MolsetViewer.vue -> MolGrid.vue
 
@@ -14,8 +14,8 @@
 		The following links help with that.
 	 -->
 	<!-- <div style="display: flex; gap: 20px; margin-bottom: 50px">
-		<router-link to="/~/_for_testing/mol_a.mol.json">context: file A</router-link>
-		<router-link to="/~/_for_testing/mol_b.mol.json">context: file B</router-link>
+		<router-link to="/~/_for_testing/mol_a.smol.json">context: file A</router-link>
+		<router-link to="/~/_for_testing/mol_b.smol.json">context: file B</router-link>
 		<router-link to="/mol/penguinone">context: identifier A</router-link>
 		<router-link to="/mol/serotonin">context: identifier B</router-link>
 		<router-link to="/~/_for_testing/molset_a.molset.json?show=1">context: molset A</router-link>

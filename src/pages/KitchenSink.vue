@@ -42,7 +42,7 @@
 		@click="
 			modalStore.display(
 				'ModalSaveFile',
-				{ path: 'my_dir/sub_dir/subsub_dir', filename: 'Foobar', dataType: 'mol' },
+				{ path: 'my_dir/sub_dir/subsub_dir', filename: 'Foobar', dataType: 'smol' },
 				{
 					onSubmit: () => {
 						console.log('submitted')

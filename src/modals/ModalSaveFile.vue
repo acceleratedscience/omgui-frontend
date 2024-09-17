@@ -87,7 +87,7 @@ type ModalOptions = {
 	// Wether to show dropdown with export options or not.
 	exportOptions?: boolean
 }
-type OutputExtSmol = 'mol.json' | 'mol' | 'csv' | 'smi'
+type OutputExtSmol = 'smol.json' | 'mol' | 'csv' | 'smi'
 type OutputExtMmol = 'mmol.json' | 'cif' | 'pdb'
 type OutputExtMolset = 'molset.json' | 'sdf' | 'csv' | 'smi'
 type OutputExt = OutputExtSmol | OutputExtMmol | OutputExtMolset | null
@@ -158,11 +158,9 @@ const ext: ComputedRef<string> = computed(() => {
 onMounted(() => {
 	emit('mounted') // <--
 
-	console.log(444, modalOptions.value.dataType)
-
 	// Set the initial value for the output dropdown.
 	if (modalOptions.value.dataType == 'smol') {
-		vModelOutputExt.value = 'mol.json'
+		vModelOutputExt.value = 'smol.json'
 	} else if (['cif', 'pdb'].includes(modalOptions.value.dataType as string)) {
 		vModelOutputExt.value = 'mmol.json'
 	} else if (modalOptions.value.dataType == 'molset') {

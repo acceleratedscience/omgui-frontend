@@ -370,7 +370,7 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 * Save-as functions - small molecules
 		 */
 
-		// Save molecule as JSON (.mol.json) file.
+		// Save molecule as JSON (.smol.json) file.
 		saveMolAsJSON(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {

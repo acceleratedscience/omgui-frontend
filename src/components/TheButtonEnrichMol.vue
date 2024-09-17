@@ -34,7 +34,6 @@ const enriching = ref<boolean>(false)
 
 const showButton: ComputedRef<boolean> = computed(() => {
 	if (!molViewerStore.enriched) return true
-	// if (fileStore.fileType && !['mol', 'molset'].includes(fileStore.fileType || '')) return true
 	return false
 })
 

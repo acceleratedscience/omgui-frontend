@@ -39,7 +39,7 @@ const saving = ref<boolean>(false)
 
 // Molecule is a non-JSOn file.
 const isForeignFile: ComputedRef<boolean> = computed(() => {
-	return fileStore.active && !['mol', 'molset'].includes(fileStore.fileType || '')
+	return fileStore.active && !['smol', 'molset'].includes(fileStore.fileType || '')
 })
 
 // Control the button text, either 'Save' or 'Save as...'
@@ -47,8 +47,8 @@ const saveAs: ComputedRef<boolean> = computed(() => {
 	if (molGridStore.active) {
 		// molset.json / my-mols --> Update the source.
 		if (molGridStore.context == 'json' || molGridStore.context == 'my-mols') return false
-	} else if (fileStore.fileType == 'mol') {
-		// mol.json --> Update the source.
+	} else if (fileStore.fileType == 'smol') {
+		// smol.json --> Update the source.
 		return false
 	}
 	// Everything else --> Save as...
@@ -98,8 +98,8 @@ async function onSaveClick() {
 		molViewerStore.setHasChanges(false) // See note on top
 		success = await modalSaveFile('smol', true, { defaultName: molViewerStore.nameSlug })
 		molViewerStore.setHasChanges(!success)
-	} else if (fileStore.fileType == 'mol') {
-		// .mol.json file --> Update the current JSON file.
+	} else if (fileStore.fileType == 'smol') {
+		// .smol.json file --> Update the current JSON file.
 		success = await molViewerStore.saveMolAsJSON(fileStore.path, { newFile: false })
 	}
 

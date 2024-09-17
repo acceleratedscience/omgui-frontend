@@ -35,7 +35,7 @@ function getInitialState(): State {
 			timeEdited: null, // Timestamp in ms
 			fileType: null, // File type based on the extension, 'dir' for directories
 			ext: '',
-			ext2: '', // Secondary extension (e.g. foobar.mol.json --> mol)
+			ext2: '', // Secondary extension (e.g. foobar.smol.json --> mol)
 			errCode: null, // Error code from the API
 		},
 		_filename: '',
@@ -89,7 +89,7 @@ export const useFileStore = defineStore('fileStore', {
 			return this.__meta.ext
 		},
 
-		// The file's secondary extension (e.g. .mol.json).
+		// The file's secondary extension (e.g. .smol.json).
 		ext2(): string {
 			return this.__meta.ext2
 		},
@@ -107,13 +107,9 @@ export const useFileStore = defineStore('fileStore', {
 
 		// The final file type, which may be overridden
 		fileType(): FileType {
-			// const molViewerStore = useMolViewerStore()
 			return this.fileTypeOverride
 				? (router.currentRoute.value.query?.use?.toString() as FileType) || this.defaultFileType
 				: this.defaultFileType
-			// : molViewerStore.molFromMolset
-			// 	? 'mol'
-			// 	: this.defaultFileType
 		},
 
 		// The filename of the module we'll use to view the file.

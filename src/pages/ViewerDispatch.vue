@@ -142,7 +142,7 @@ async function parseRoute() {
 				} else if (fileStore.ext == 'smi') {
 					molGridStore.setContext('smi-file')
 				}
-			} else if (fileStore.fileType == 'mol') {
+			} else if (fileStore.fileType == 'smol') {
 				molViewerStore.setMolData(file.data as Smol, 'smol')
 			} else if (fileStore.fileType && ['mmol', 'pdb', 'cif'].includes(fileStore.fileType)) {
 				molViewerStore.setMolData(file.data as Mmol, 'mmol')

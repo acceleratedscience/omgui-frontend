@@ -36,7 +36,7 @@ const overflowOptions: ActionOption[] = [
 		action: actionSaveAs,
 	},
 ]
-if (fileStore.active && ['mmol', 'mol', 'cif', 'pdb'].includes(fileStore.fileType as string)) {
+if (fileStore.active && ['mmol', 'smol', 'cif', 'pdb'].includes(fileStore.fileType as string)) {
 	overflowOptions.push({
 		val: 'delete',
 		disp: 'Delete',
@@ -50,13 +50,13 @@ if (fileStore.active && ['mmol', 'mol', 'cif', 'pdb'].includes(fileStore.fileTyp
 
 // Save as...
 function actionSaveAs() {
-	if (fileStore.fileType == 'mol') {
+	if (fileStore.fileType == 'smol') {
 		return modalSaveFile('smol', true, { defaultName: molViewerStore.nameSlug })
-	} else if ((fileStore.fileType as string) == 'cif') {
+	} else if (fileStore.fileType == 'cif') {
 		return modalSaveFile('cif', true, { defaultName: molViewerStore.nameSlug })
-	} else if ((fileStore.fileType as string) == 'pdb') {
+	} else if (fileStore.fileType == 'pdb') {
 		return modalSaveFile('pdb', true, { defaultName: molViewerStore.nameSlug })
-	} else if ((fileStore.fileType as string) == 'mmol') {
+	} else if (fileStore.fileType == 'mmol') {
 		if (molViewerStore.mmolData3DFormat == 'cif') {
 			return modalSaveFile('cif', true, { defaultName: molViewerStore.nameSlug })
 		} else if (molViewerStore.mmolData3DFormat == 'pdb') {
