@@ -1,4 +1,6 @@
 <template>
+	<ApiOffline v-if="mainStore.apiOffline" />
+
 	<!-- Dev only: toggle headless -->
 	<template v-if="!isRawPath">
 		<input
@@ -75,6 +77,7 @@ import { fileSystemApi } from '@/api/ApiService'
 // webSocketClient()
 
 // Components
+import ApiOffline from '@/components/ApiOffline.vue'
 import TheModal from '@/components/TheModal.vue'
 import TheNav from '@/components/TheNav.vue'
 import CommandLine from '@/pages/CommandLine.vue'
@@ -201,7 +204,7 @@ header {
 	// overflow-x: hidden;
 
 	// Centered layout
-	padding: 80px;
+	padding: var(--page-margin);
 	padding-top: 40px;
 	max-width: 1360px;
 	background: #fff;
@@ -228,20 +231,18 @@ header {
  * Responsive
  */
 
-// Note: keep this in sync with responsive behavior in TheTable.vue
+// Max-width doesn't kick in right away,
+// so we avoid side margins that are too small.
 @media (max-width: $bp-xlarge) {
 	#main-wrap {
 		max-width: none;
 	}
 }
-@media (max-width: $bp-medium) {
-	#main-wrap {
-		padding: 40px;
-	}
-}
+
+// The default top-padding is not synced with --page-margin
 @media (max-width: $bp-small) {
 	#main-wrap {
-		padding: 20px;
+		padding-top: 20px;
 	}
 }
 

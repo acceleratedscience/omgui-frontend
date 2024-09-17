@@ -37,7 +37,7 @@
 
 		<!-- FASTA -->
 		<div class="data-item">
-			<div class="key">Fasta</div>
+			<div class="key">FASTA</div>
 			<template v-if="pdbId">
 				<a :href="`https://www.rcsb.org/fasta/entry/${pdbId}/display`" target="_blank	" class="value">View</a>&nbsp;/&nbsp;
 				<a :href="`https://www.rcsb.org/fasta/entry/${pdbId}`" class="value">Download</a>

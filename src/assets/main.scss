@@ -90,8 +90,16 @@ ul {
 	list-style: disc;
 	margin-inline-start: 20px;
 }
-ul li {
+ol {
+	list-style: decimal;
+	margin-inline-start: 20px;
+}
+ul li,
+ol li {
 	margin-bottom: 8px;
+}
+ol li {
+	padding-left: 3px;
 }
 ul.compact li,
 ol.compact li {
@@ -411,5 +419,23 @@ span.code {
 	table.click-copy:not(.copy-blink):hover td,
 	table.click-copy:not(.copy-blink):hover th {
 		border-color: $success-soft;
+	}
+}
+
+/**
+ * Responsive
+ */
+
+:root {
+	--page-margin: 80px;
+}
+@media (max-width: $bp-medium) {
+	:root {
+		--page-margin: 40px;
+	}
+}
+@media (max-width: $bp-small) {
+	:root {
+		--page-margin: 20px;
 	}
 }

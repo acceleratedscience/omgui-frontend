@@ -195,6 +195,17 @@ function restructureData(data: any, struct: DataStructure): any[] {
 .table-overflow-wrap {
 	overflow-x: auto;
 	position: relative;
+
+	// Responsive behavior
+	// - - -
+	// When the table is taking up the full screen width, the overflow wrapper
+	// will take on the width of the entire screen instead of the content area.
+	// This way the table will scroll more elegantly off screen, but to achieve
+	// this, the values below need to stay in sync with the margin of the main-wrap.
+	margin-left: calc(var(--page-margin) * -1);
+	padding-left: var(--page-margin);
+	margin-right: calc(var(--page-margin) * -1);
+	padding-right: var(--page-margin);
 }
 table {
 	border-collapse: collapse;
@@ -227,39 +238,5 @@ table.key-val td:first-child {
 }
 table.key-val td:not(:first-child) {
 	width: auto;
-}
-
-/**
- * Responsive
- * - - -
- * When the table is taking up the full screen width, the overflow wrapper
- * will take on the width of the entire screen instead of the content area.
- * This way the table will scroll more elegantly off screen, but to achieve
- * this, the values below need to stay in sync with the margin of the main-wrap.
- */
-
-@media (max-width: $bp-xlarge) {
-	.table-overflow-wrap:not(.inline) {
-		margin-left: -80px;
-		padding-left: 80px;
-		margin-right: -80px;
-		padding-right: 80px;
-	}
-}
-@media (max-width: $bp-medium) {
-	.table-overflow-wrap:not(.inline) {
-		margin-left: -40px;
-		padding-left: 40px;
-		margin-right: -40px;
-		padding-right: 40px;
-	}
-}
-@media (max-width: $bp-small) {
-	.table-overflow-wrap:not(.inline) {
-		margin-left: -20px;
-		padding-left: 20px;
-		margin-right: -20px;
-		padding-right: 20px;
-	}
 }
 </style>

@@ -13,6 +13,9 @@
 // Modules
 import axios from 'axios'
 
+// Stores
+import { useMainStore } from '@/stores/MainStore'
+
 // API URL
 // - - -
 // Every CLI or Jupyter Notebook runs on a different port, starting at 8024 and up.
@@ -185,6 +188,8 @@ class BaseApi implements BaseApiType {
 							'',
 						]
 						console.log(errorMsg.join('\n'), 'color:#d00;font-weight:bold;font-size:14px;text-transform:uppercase', '')
+						const mainStore = useMainStore()
+						mainStore.setApiOffline(true)
 					}, 0)
 				}
 			}

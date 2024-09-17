@@ -15,6 +15,7 @@ type State = {
 	_onClickAnywhere: (e: MouseEvent) => void
 	_blockRouting: boolean
 	_scrollY: number
+	_apiOffline: boolean
 }
 
 export const useMainStore = defineStore('mainStore', {
@@ -26,6 +27,7 @@ export const useMainStore = defineStore('mainStore', {
 		_onClickAnywhere: () => {}, // Executes when the user clicks anywhere on the page
 		_blockRouting: false, // Prevents the router from changing routes, including changes to the query
 		_scrollY: 0, // The current scroll position
+		_apiOffline: false, // Whether the API is offline
 	}),
 	getters: {
 		headless(): boolean {
@@ -48,6 +50,9 @@ export const useMainStore = defineStore('mainStore', {
 		},
 		scrollY(): number {
 			return this._scrollY
+		},
+		apiOffline(): boolean {
+			return this._apiOffline
 		},
 	},
 	actions: {
@@ -108,6 +113,11 @@ export const useMainStore = defineStore('mainStore', {
 		// Set scroll position
 		setScrollY(scrollY: number) {
 			this._scrollY = scrollY
+		},
+
+		// Set API offline error
+		setApiOffline(state: boolean) {
+			this._apiOffline = state
 		},
 	},
 })
