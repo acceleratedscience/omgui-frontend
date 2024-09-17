@@ -7,7 +7,7 @@
 			{{ capitalize(molName) }}
 		</h2>
 		<div class="filler"></div>
-		<BaseBookmark v-if="molViewerStore.isSmol && molViewerStore.mol" :mol="molViewerStore.mol" />
+		<BaseBookmark v-if="molViewerStore.smol" :mol="molViewerStore.smol" />
 		<OverflowMenuMol :disabled="Boolean(loading)" />
 		<BasePagination v-if="context == 'molset'" v-model="modelPagination" :total="molGridStore.total" />
 		<BaseIconButton

@@ -132,14 +132,14 @@ if (molViewerStore.isEmpty && fileStore.data && fileStore.moduleName == 'MolView
 	molViewerStore.setMolData(data, 'smol')
 }
 
-// When opening a molecule from a molset, the fetchMolVizData is called from within MolsetViewer.vue.
+// When opening a molecule from a molset, the fetchSmolVizData is called from within MolsetViewer.vue.
 if (props.context == 'file' || props.context == 'identifier') {
 	if (molViewerStore.inchi) {
 		// When opening a molecule file.
-		molViewerStore.fetchMolVizData(molViewerStore.inchi)
+		molViewerStore.fetchSmolVizData(molViewerStore.inchi)
 	} else if (molViewerStore.smiles) {
 		// When opening a molecule file.
-		molViewerStore.fetchMolVizData(molViewerStore.smiles)
+		molViewerStore.fetchSmolVizData(molViewerStore.smiles)
 	}
 }
 

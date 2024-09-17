@@ -18,18 +18,18 @@ export default class MoleculesApi extends BaseApi {
 	// #region - Fetching
 
 	// Fetch an RDKit-enriched molecule by its identifier.
-	getMolData(identifier: string) {
-		return this.apiClient.post(`/get-mol-data`, { identifier })
+	getSmolData(identifier: string) {
+		return this.apiClient.post(`/get-smol-data`, { identifier })
 	}
 
 	// Fetch data required for rendering a molecule - 2D: SVG, 3D: SDF
-	getMolVizData(inchi_or_smiles: string) {
-		return this.apiClient.post(`/get-mol-viz-data`, { inchi_or_smiles })
+	getSmolVizData(inchi_or_smiles: string) {
+		return this.apiClient.post(`/get-smol-viz-data`, { inchi_or_smiles })
 	}
 
 	// Fetch a non-enriched molecule from within a moleset file.
 	async getMolDataFromMolset(cacheId: number, index: number = 0) {
-		return this.apiClient.post('/get-mol-data-from-molset', { cacheId, index })
+		return this.apiClient.post('/get-mol-data-from-molset', { cacheId, index }) // Smol, may support mmol later
 	}
 
 	// #endregion
@@ -38,22 +38,22 @@ export default class MoleculesApi extends BaseApi {
 
 	// Save molecule to my-mols.
 	addMolToMyMols(mol: Smol | TempSmol) {
-		return this.apiClient.post('/add-mol-to-mymols', { mol })
+		return this.apiClient.post('/add-mol-to-mymols', { mol }) // Smol, may support mmol later
 	}
 
 	// Remove molecule from my-mols
 	removeMolFromMyMols(mol: Smol | TempSmol) {
-		return this.apiClient.post('/remove-mol-from-mymols', { mol })
+		return this.apiClient.post('/remove-mol-from-mymols', { mol }) // Smol, may support mmol later
 	}
 
 	// Check if a molecule is in my-mols
 	checkMolInMyMols(mol: Smol | TempSmol) {
-		return this.apiClient.post('/check-mol-in-mymols', { mol })
+		return this.apiClient.post('/check-mol-in-mymols', { mol }) // Smol, may support mmol later
 	}
 
 	// Check if a molecule is in my-mols
-	enrichMol(mol: Smol | TempSmol) {
-		return this.apiClient.post('/enrich-mol', { mol })
+	enrichSmol(smol: Smol | TempSmol) {
+		return this.apiClient.post('/enrich-smol', { smol })
 	}
 
 	// #endregion
@@ -61,33 +61,33 @@ export default class MoleculesApi extends BaseApi {
 	// #region - Saving
 
 	// Save new .smol.json file to the workspace.
-	saveMolAsJSON(path: string, mol: Smol, newFile: boolean = true, force = false) {
-		return this.apiClient.post('/save-mol-as-json', { path, mol, newFile, force })
+	saveSmolAsJSON(path: string, smol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-smol-as-json', { path, smol, newFile, force })
 	}
 
 	// Save new .sdf file to the workspace.
-	saveMolAsSDF(path: string, mol: Smol, newFile: boolean = true, force = false) {
-		return this.apiClient.post('/save-mol-as-sdf', { path, mol, newFile, force })
+	saveSmolAsSDF(path: string, smol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-smol-as-sdf', { path, smol, newFile, force })
 	}
 
 	// Save new .mol file to the workspace.
-	saveMolAsCSV(path: string, mol: Smol, newFile: boolean = true, force = false) {
-		return this.apiClient.post('/save-mol-as-csv', { path, mol, newFile, force })
+	saveSmolAsCSV(path: string, smol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-smol-as-csv', { path, smol, newFile, force })
 	}
 
 	// Save new .mol file to the workspace.
-	saveMolAsMDL(path: string, mol: Smol, newFile: boolean = true, force = false) {
-		return this.apiClient.post('/save-mol-as-mdl', { path, mol, newFile, force })
+	saveSmolAsMDL(path: string, smol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-smol-as-mdl', { path, smol, newFile, force })
 	}
 
 	// Save new .mol file to the workspace.
-	saveMolAsSMILES(path: string, mol: Smol, newFile: boolean = true, force = false) {
-		return this.apiClient.post('/save-mol-as-smiles', { path, mol, newFile, force })
+	saveSmolAsSMILES(path: string, smol: Smol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-smol-as-smiles', { path, smol, newFile, force })
 	}
 
 	// Update molset with the molecule data.
 	replaceMolInMolset(path: string, mol: Smol, context: 'json' | 'my-mols', cacheId: number) {
-		return this.apiClient.post('/replace-mol-in-molset', { path, mol, context, cacheId })
+		return this.apiClient.post('/replace-mol-in-molset', { path, mol, context, cacheId }) // Smol, may support mmol later
 	}
 
 	// #endregion
@@ -109,18 +109,18 @@ export default class MoleculesApi extends BaseApi {
 	// #region - Saving
 
 	// Save new .smol.json file to the workspace.
-	saveMmolAsMmolJson(path: string, mol: Mmol, newFile: boolean = true, force = false) {
-		return this.apiClient.post('/save-mmol-as-mmol-json', { path, mol, newFile, force })
+	saveMmolAsMmolJson(path: string, mmol: Mmol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mmol-as-mmol-json', { path, mmol, newFile, force })
 	}
 
 	// Save new .sdf file to the workspace.
-	saveMmolAsPDB(path: string, mol: Mmol, newFile: boolean = true, force = false) {
-		return this.apiClient.post('/save-mmol-as-pdb', { path, mol, newFile, force })
+	saveMmolAsPDB(path: string, mmol: Mmol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mmol-as-pdb', { path, mmol, newFile, force })
 	}
 
 	// Save new .sdf file to the workspace.
-	saveMmolAsCIF(path: string, mol: Mmol, newFile: boolean = true, force = false) {
-		return this.apiClient.post('/save-mmol-as-cif', { path, mol, newFile, force })
+	saveMmolAsCIF(path: string, mmol: Mmol, newFile: boolean = true, force = false) {
+		return this.apiClient.post('/save-mmol-as-cif', { path, mmol, newFile, force })
 	}
 
 	// #endregion

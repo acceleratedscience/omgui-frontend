@@ -22,11 +22,11 @@ import { apiFetch, moleculesApi } from '@/api/ApiService'
 import BaseIconButtonToggle from '@/components/BaseIconButtonToggle.vue'
 
 // Type declarations
-import type { Smol, TempSmol, Macromol } from '@/types'
+import type { Smol, TempSmol } from '@/types'
 
 // Props
 const props = defineProps<{
-	mol: Smol | TempSmol | Macromol | null
+	mol: Smol | TempSmol | null
 }>()
 
 // Definitions

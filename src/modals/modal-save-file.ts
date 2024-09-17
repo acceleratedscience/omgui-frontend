@@ -73,15 +73,15 @@ export function useModalSaveFile() {
 				}
 			} else if (srcDataType == 'smol') {
 				if (ext == 'smol.json') {
-					await molViewerStore.saveMolAsJSON(destinationPath, { newFile: true, force })
+					await molViewerStore.saveSmolAsJSON(destinationPath, { newFile: true, force })
 				} else if (ext == 'sdf') {
-					await molViewerStore.saveMolAsSDF(destinationPath, { newFile: true, force })
+					await molViewerStore.saveSmolAsSDF(destinationPath, { newFile: true, force })
 				} else if (ext == 'csv') {
-					await molViewerStore.saveMolAsCSV(destinationPath, { newFile: true, force })
+					await molViewerStore.saveSmolAsCSV(destinationPath, { newFile: true, force })
 				} else if (ext == 'mol') {
-					await molViewerStore.saveMolAsMDL(destinationPath, { newFile: true, force })
+					await molViewerStore.saveSmolAsMDL(destinationPath, { newFile: true, force })
 				} else if (ext == 'smi') {
-					await molViewerStore.saveMolAsSMILES(destinationPath, { newFile: true, force })
+					await molViewerStore.saveSmolAsSMILES(destinationPath, { newFile: true, force })
 				}
 			} else if (['cif', 'pdb'].includes(srcDataType)) {
 				if (ext == 'mmol.json') {

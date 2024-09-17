@@ -83,10 +83,10 @@ async function onSaveClick() {
 		// Molecule inside of a molset.
 		if (molGridStore.context == 'json') {
 			// .molset.json file --> Update the JSON file.
-			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.mol as Smol, molGridStore.context)
+			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.smol as Smol, molGridStore.context)
 		} else if (molGridStore.context == 'my-mols') {
 			// My mols --> Update your working molecule set.
-			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.mol as Smol, molGridStore.context)
+			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.smol as Smol, molGridStore.context)
 		} else {
 			// Result mols / Non-JSON molset files (SDF, maybe others later) --> Display save-as modal.
 			molGridStore.setHasChanges(false) // See note on top
@@ -100,7 +100,7 @@ async function onSaveClick() {
 		molViewerStore.setHasChanges(!success)
 	} else if (fileStore.fileType == 'smol') {
 		// .smol.json file --> Update the current JSON file.
-		success = await molViewerStore.saveMolAsJSON(fileStore.path, { newFile: false })
+		success = await molViewerStore.saveSmolAsJSON(fileStore.path, { newFile: false })
 	}
 
 	// Success

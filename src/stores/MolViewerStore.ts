@@ -90,15 +90,15 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			return this._molType == 'mmol'
 		},
 
-		mol(): Smol | TempSmol | MmolData | null {
-			if (this.isSmol) {
-				return this._smol.data
-			} else if (this.isMmol) {
-				return this._mmol.data
-			} else {
-				return null
-			}
-		},
+		// mol(): Smol | TempSmol | MmolData | null {
+		// 	if (this.isSmol) {
+		// 		return this._smol.data
+		// 	} else if (this.isMmol) {
+		// 		return this._mmol.data
+		// 	} else {
+		// 		return null
+		// 	}
+		// },
 		name(): string {
 			if (this.isSmol) {
 				return this._smol.data.identifiers?.name || 'Unnamed Molecule'
@@ -133,6 +133,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 * Small molecule getters
 		 */
 
+		smol(): Smol | TempSmol | null {
+			if (!this.isSmol) return null
+			return this._smol.data
+		},
 		inchi(): string | null {
 			if (!this.isSmol) return null
 			return this._smol.data?.identifiers?.inchi || null
@@ -320,22 +324,20 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 * Small molecule actions
 		 */
 
-		setMolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
+		setSmolIdentifier(identifier: 'inchi' | 'inchikey' | 'canonical_smiles', value: string) {
 			if (!this.isSmol) return
 			this._smol.data.identifiers[identifier] = value
 		},
-		async fetchMolVizData(inchi_or_smiles: string) {
+		async fetchSmolVizData(inchi_or_smiles: string) {
 			if (!this.isSmol) return
-			// console.log('* fetchMolVizData')
-			apiFetch(moleculesApi.getMolVizData(inchi_or_smiles), {
+			apiFetch(moleculesApi.getSmolVizData(inchi_or_smiles), {
 				onSuccess: (data) => {
 					if (data.svg) {
-						// console.log('fetchMolVizData')
 						this.setMolVizData(data.svg, data.mdl)
 					}
 				},
 				onError: (err) => {
-					console.log('Error in getMolVizData()', err)
+					console.log('Error in getSmolVizData()', err)
 				},
 			})
 		},
@@ -344,10 +346,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 			if (svg) this._smol.data2D = svg
 			if (mdl) this._smol.data3D = mdl
 		},
-		async enrichMol() {
+		async enrichSmol() {
 			if (!this.isSmol) return
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.enrichMol(this.mol as Smol), {
+				apiFetch(moleculesApi.enrichSmol(this.smol as Smol), {
 					onSuccess: (data) => {
 						this._smol.data = data
 						this.setHasChanges(true)
@@ -371,10 +373,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		 */
 
 		// Save molecule as JSON (.smol.json) file.
-		saveMolAsJSON(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveSmolAsJSON(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsJSON(destinationPath, this.mol as Smol, newFile, force), {
+				apiFetch(moleculesApi.saveSmolAsJSON(destinationPath, this.smol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: () => reject(true),
 				})
@@ -382,10 +384,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		// Save molecule as CSV (.csv) file.
-		saveMolAsCSV(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveSmolAsCSV(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsCSV(destinationPath, this.mol as Smol, newFile, force), {
+				apiFetch(moleculesApi.saveSmolAsCSV(destinationPath, this.smol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -393,10 +395,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		// Save molecule as SDF (.sdf) file.
-		saveMolAsSDF(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveSmolAsSDF(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsSDF(destinationPath, this.mol as Smol, newFile, force), {
+				apiFetch(moleculesApi.saveSmolAsSDF(destinationPath, this.smol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -404,10 +406,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		},
 
 		// Save molecule as MDL (.mol) file.
-		saveMolAsMDL(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveSmolAsMDL(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsMDL(destinationPath, this.mol as Smol, newFile, force), {
+				apiFetch(moleculesApi.saveSmolAsMDL(destinationPath, this.smol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})
@@ -416,10 +418,10 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 
 		// Save molecule as SMILES (.smi) file.
 		// This removes all parameters from the molecule.
-		saveMolAsSMILES(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
+		saveSmolAsSMILES(destinationPath: string, { newFile = false, force = false }: SaveAsOptions = {}): Promise<boolean> {
 			if (!this.isSmol) return Promise.resolve(false)
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolAsSMILES(destinationPath, this.mol as Smol, newFile, force), {
+				apiFetch(moleculesApi.saveSmolAsSMILES(destinationPath, this.smol as Smol, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: (response) => reject(response),
 				})

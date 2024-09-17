@@ -7,7 +7,7 @@
 		:class="{ enriching }"
 		:disabled="enriching"
 		title="Calculate molecular properties and load data from PubChem"
-		@click="enrichMol"
+		@click="enrichSmol"
 	></cv-button>
 	<!-- && !mol.identifiers?.cid -->
 </template>
@@ -41,9 +41,9 @@ const showButton: ComputedRef<boolean> = computed(() => {
  * Methods
  */
 
-async function enrichMol() {
+async function enrichSmol() {
 	enriching.value = true
-	const success = await molViewerStore.enrichMol()
+	const success = await molViewerStore.enrichSmol()
 	if (success) {
 		// If the molecule is from a molset, we mark the molset as changed.
 		// This will trigger the onBeforeExit modal.

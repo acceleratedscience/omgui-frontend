@@ -1,7 +1,7 @@
 <template>
 	<BaseFetching v-if="molViewerStore.loading" />
 	<template v-else-if="route.query.use == 'json'">
-		<JsonViewer :data="molViewerStore.mol" />
+		<JsonViewer :data="molViewerStore.smol" />
 	</template>
 	<MolViewer v-else context="identifier" :loading="loading" :loadingError="loadingError" @retryLoad="fetchMolDataByIdentifier(identifier)" />
 </template>
@@ -50,13 +50,13 @@ import type { JSMol } from '@/utils/rdkit/tsTypes'
 // While waiting for the API, prepopulate the UI where possible.
 if (props.identifier.startsWith('InChI=')) {
 	// InChI --> prepopulate inchi field only.
-	molViewerStore.setMolIdentifier('inchi', props.identifier)
-	molViewerStore.fetchMolVizData(props.identifier)
+	molViewerStore.setSmolIdentifier('inchi', props.identifier)
+	molViewerStore.fetchSmolVizData(props.identifier)
 } else {
 	// SMILES --> prepopulate other identifiers and generate the SVG.
-	// OTHER --> this won't do anything, we'll call molViewerStore.fetchMolVizData later.
+	// OTHER --> this won't do anything, we'll call molViewerStore.fetchSmolVizData later.
 	tryPrepopulateFromSmiles(props.identifier)
-	molViewerStore.fetchMolVizData(props.identifier)
+	molViewerStore.fetchSmolVizData(props.identifier)
 }
 
 fetchMolDataByIdentifier(props.identifier)
@@ -90,7 +90,7 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 	loadingError.value = ''
 
 	if (molType.value == 'smol') {
-		apiFetch(moleculesApi.getMolData(identifier), {
+		apiFetch(moleculesApi.getSmolData(identifier), {
 			onSuccess: (data) => {
 				// // #fetching-error
 				// // To test error handling.
@@ -110,7 +110,7 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 				success = true
 
 				if (needsVizData) {
-					molViewerStore.fetchMolVizData(molViewerStore.inchi!)
+					molViewerStore.fetchSmolVizData(molViewerStore.inchi!)
 				}
 			},
 			loading: loading,
@@ -151,9 +151,9 @@ async function tryPrepopulateFromSmiles(identifier: string) {
 
 	// Prepopulate
 	const inchi = rdkMol.get_inchi()
-	molViewerStore.setMolIdentifier('canonical_smiles', identifier) // This will trigger the SVG rendering
-	molViewerStore.setMolIdentifier('inchi', inchi)
-	molViewerStore.setMolIdentifier('inchikey', window.RDKit.get_inchikey_for_inchi(inchi))
+	molViewerStore.setSmolIdentifier('canonical_smiles', identifier) // This will trigger the SVG rendering
+	molViewerStore.setSmolIdentifier('inchi', inchi)
+	molViewerStore.setSmolIdentifier('inchikey', window.RDKit.get_inchikey_for_inchi(inchi))
 
 	// // Rendering the  3D Molecule from the frontend is
 	// // currently not possible with rdkit-js, but when it is,
