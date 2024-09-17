@@ -319,6 +319,12 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 				router.push(path)
 			}
 		},
+		setHasChanges(hasChanges: boolean) {
+			this._hasChanges = hasChanges
+		},
+		clear() {
+			Object.assign(this, getInitialState())
+		},
 
 		/**
 		 * Small molecule actions
@@ -363,9 +369,6 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 		setEnriched(enriched: boolean) {
 			if (!this.isSmol) return
 			this._smol.data.enriched = enriched
-		},
-		setHasChanges(hasChanges: boolean) {
-			this._hasChanges = hasChanges
 		},
 
 		/**
@@ -462,10 +465,6 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 				})
 			})
 		},
-
-		clear() {
-			Object.assign(this, getInitialState())
-		},
 	},
 })
 
@@ -519,7 +518,7 @@ function _massageValue(str: string | null): string | null {
 	return str
 }
 
-// Replaxe question mark values with null or
+// Replace question mark values with null or alt value.
 function _fixEmpty(str: string, alt: string | null = null): string | null {
 	return str == '?' || !str ? (alt ? alt : null) : str
 }
@@ -545,7 +544,7 @@ function _formMatrix(obj: Record<string, string>): {
 	for (const key in obj) {
 		const keyArr = key.split('[')
 		if (keyArr.length == 3) {
-			// Parse matrix row and columnn from fract_transf_matrix[1][2]
+			// Parse matrix row and columnn from eg. fract_transf_matrix[1][2]
 			let matrixName = keyArr[0].replace(/(_)?matrix$/i, '').toLowerCase()
 			matrixName = matrixName || '_'
 			matrices[matrixName] = matrices[matrixName] || []
@@ -555,7 +554,7 @@ function _formMatrix(obj: Record<string, string>): {
 			matrix[row] = matrix[row] || []
 			matrix[row][col] = _fixEmpty(obj[key], '-') || '-'
 		} else if (keyArr.length == 2) {
-			// Parse translation vector
+			// Parse translation vector from eg. fract_transf_vector[1][2]
 			let vectorName = keyArr[0].replace(/(_)?vector$/i, '').toLowerCase()
 			vectorName = vectorName || '_'
 			vectors[vectorName] = vectors[vectorName] || []
