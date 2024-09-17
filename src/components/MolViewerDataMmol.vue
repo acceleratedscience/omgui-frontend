@@ -140,29 +140,30 @@
 
 	<!-- Data dump -->
 	<div class="data-block">
-		<h3>Data</h3>
+		<h3>Meta Data</h3>
 		<template v-for="(val, key) in mmolDataHuman" :key="key">
-			<div v-if="Object.keys(val).length">
-				<h4>
-					<a :href="'#' + molViewerStore.mmolDataKeyMap[key]" :name="molViewerStore.mmolDataKeyMap[key]" class="anchor">{{ key }}</a>
-				</h4>
+			<details v-if="Object.keys(val).length">
+				<summary>
+					<h4>{{ key }}<a :href="'#' + molViewerStore.mmolDataKeyMap[key]" :name="molViewerStore.mmolDataKeyMap[key]">#</a></h4>
+				</summary>
+				<div>
+					<!-- Matrix data -->
+					<MolViewerDataMmolMatrices
+						v-if="(val.matrices && val.vectors) || (Array.isArray(val) && val[0].matrices && val[0].vectors)"
+						:data="val"
+					/>
 
-				<!-- Matrix data -->
-				<MolViewerDataMmolMatrices
-					v-if="(val.matrices && val.vectors) || (Array.isArray(val) && val[0].matrices && val[0].vectors)"
-					:data="val"
-				/>
+					<!-- Table data -->
+					<div v-else-if="Array.isArray(val)">
+						<TheTable :data="val" :allowCopy="true" />
+					</div>
 
-				<!-- Table data -->
-				<div v-else-if="Array.isArray(val)">
-					<TheTable :data="val" :allowCopy="true" />
+					<!-- Value list -->
+					<div v-else>
+						<TheTable :data="val" :allowCopy="false" />
+					</div>
 				</div>
-
-				<!-- Value list -->
-				<div v-else>
-					<TheTable :data="val" :allowCopy="false" />
-				</div>
-			</div>
+			</details>
 		</template>
 	</div>
 </template>
@@ -314,9 +315,18 @@ onMounted(() => {
 	const hash = window.location.hash
 	window.location.hash = ''
 	setTimeout(() => {
-		window.location.hash = hash
+		jumpToHash(hash)
 	}, 1)
 })
+
+function jumpToHash(hash: string) {
+	if (!hash) return
+	window.location.hash = hash
+	const link: HTMLAnchorElement | null = document.querySelector(`a[href="${hash}"]`)
+	const details = link?.closest('details')
+	if (details) details.setAttribute('open', 'true')
+	link?.blur()
+}
 
 /*
  * Methods
@@ -372,9 +382,8 @@ function scholarSearch(str: string | null): string {
  * Data dump section
  */
 
-.data-block h4 {
-	margin-top: 32px;
-	margin-bottom: 8px;
+.data-block details {
+	margin: 1rem 0;
 }
 
 // Matrix
@@ -396,4 +405,20 @@ a > div.capitalize {
 		max-width: none;
 	}
 }
+
+// details summary {
+// 	list-style: none;
+// 	display: inline-block;
+// }
+// details summary::before {
+// 	content: '>\00A0';
+// }
+// details summary h4 {
+// 	display: inline-block;
+// }
+
+// details summary::marker {
+// 	color: red;
+// 	font-size: 1.5em;
+// }
 </style>

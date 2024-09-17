@@ -133,8 +133,6 @@
 			<div v-for="(item, i) in molViewerStore.smol.analysis" :key="i" class="item">
 				<details>
 					<summary>
-						<BaseSvgServe class="icn-closed" icon="icn-caret-right" />
-						<BaseSvgServe class="icn-open" icon="icn-caret-down" />
 						<b>{{ item.toolkit }}</b> / {{ item.function }}
 					</summary>
 					<!-- <b>Function:</b> {{ item.function }}<br /> -->
@@ -399,13 +397,13 @@ function toggleExpand(e: Event) {
 
 // Summary
 #analysis .item summary {
+	// cursor: pointer;
+	// list-style: none;
+	// user-select: none;
 	min-height: 40px;
-	list-style: none;
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	cursor: pointer;
-	user-select: none;
 }
 #analysis .item details {
 	margin: 8px 0;
@@ -413,12 +411,7 @@ function toggleExpand(e: Event) {
 #analysis .item details[open] summary {
 	margin: 0 -24px;
 }
-#analysis .item details:not([open]) summary .icn-open,
-#analysis .item details[open] summary .icn-closed {
-	display: none;
-}
-#analysis .item details:not([open]) summary:hover,
-#analysis .item details[open] {
+#analysis .item details:not([open]) summary:hover {
 	background: $black-03;
 }
 

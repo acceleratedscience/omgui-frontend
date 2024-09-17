@@ -112,6 +112,60 @@ ol.compact li {
 	margin-bottom: 0;
 }
 
+// Detail / Summary structures
+details summary {
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
+	display: inline-block;
+	line-height: 0;
+	// border: solid 1px green;
+}
+// details summary .v-align {
+// 	display: flex;
+// 	align-items: center;
+// }
+details summary::before {
+	content: '';
+	display: inline-block;
+	background: url('data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M6 4L11 8L6 12V4Z"/></svg>')
+		center center no-repeat;
+	width: 16px;
+	height: 16px;
+	transition: transform 0.2s ease-in-out;
+	float: left;
+
+	// vertical-align: middle;
+}
+details[open] summary::before {
+	transform: rotate(90deg);
+}
+details summary h4 {
+	display: inline-block;
+	margin: 0;
+	height: 1rem;
+	line-height: 1rem;
+	position: relative;
+	// background: orange;
+}
+details summary h4 a {
+	display: inline-block;
+	text-align: center;
+	width: 1rem;
+	position: absolute;
+	left: -2rem;
+	// background: yellow;
+}
+details summary h4 a:hover {
+	text-decoration: none;
+}
+details:not([open]) summary h4 a {
+	opacity: 0;
+}
+details[open] summary h4 {
+	margin-bottom: 1rem;
+}
+
 /**
  * Shortcuts
  */
@@ -386,6 +440,7 @@ span.code {
 		left: -1rem;
 		width: 1rem;
 		color: $blue;
+		// pointer-events: none;
 	}
 	a.lookup:hover {
 		color: $blue;
