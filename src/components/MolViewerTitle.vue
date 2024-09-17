@@ -1,12 +1,7 @@
 <template>
 	<div id="title-wrap">
 		<div class="v-align">
-			<BaseSvgServe
-				class="icn-file-mol"
-				:class="{ loading: loading }"
-				:icon="context == 'molset' ? 'icn-file-molset' : 'icn-file-mol'"
-				size="large"
-			/>
+			<BaseSvgServe class="icn-mol" :class="{ loading: loading }" :icon="molIcon" size="large" />
 		</div>
 		<h2 id="data-name" data-val="{{ molName }}" :class="{ loading: loading }">
 			{{ capitalize(molName) }}
@@ -83,6 +78,11 @@ const molName: ComputedRef<string> = computed(() => {
 	return molViewerStore.name
 })
 
+// Molecule icon
+const molIcon: ComputedRef<string> = computed(() => {
+	return props.context == 'molset' ? 'icn-file-molset' : molViewerStore.isSmol ? 'icn-file-smol' : 'icn-file-mmol'
+})
+
 // Pagination model
 const modelPagination: WritableComputedRef<number> = computed({
 	get: () => molViewerStore.molFromMolsetIndex || 1,
@@ -100,10 +100,10 @@ const modelPagination: WritableComputedRef<number> = computed({
 	margin-bottom: 10px;
 	margin-right: 5px;
 }
-#title-wrap .icn-file-mol {
+#title-wrap .icn-mol {
 	margin-left: -4px;
 }
-#title-wrap .icn-file-mol.loading {
+#title-wrap .icn-mol.loading {
 	animation: rotate 3s infinite linear;
 }
 

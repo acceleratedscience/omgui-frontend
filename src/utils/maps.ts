@@ -21,7 +21,8 @@ const _map_FileType: MultiMap = {
 	mdl:    ['molfile',       'MolViewer'],
 	pdb:	['pdb',           'MolViewer'],
 	cif:	['cif',           'MolViewer'],
-	mol:    ['molecule',      'MolViewer'],
+	smol:   ['small molecule','MolViewer'],
+	mol:    ['small molecule','MolViewer'], // Backward compatibility for mol.json files
 	mmol:   ['macromolecule', 'MolViewer'],
 	
 	molset: ['molecule set',  'MolsetViewer'],

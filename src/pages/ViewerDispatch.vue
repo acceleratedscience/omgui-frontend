@@ -42,7 +42,7 @@ import BreadCrumbs from '@/components/BreadCrumbs.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
 
 // Type declarations
-import type { File, Molset, MolsetApi, Smol, Mmol, UrlQuery } from '@/types'
+import type { File, MolsetApi, Smol, Mmol } from '@/types'
 import type { LocationQuery } from 'vue-router'
 type RouteType = 'dir' | 'file' | 'error' | null
 

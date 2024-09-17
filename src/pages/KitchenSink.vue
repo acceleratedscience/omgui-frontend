@@ -73,8 +73,9 @@
 	<h4>:: Icons</h4>
 
 	<span style="color: red">
-		<a href="#"><BaseSvgServe icon="icn-file-mol" /></a>
-		<BaseSvgServe icon="icn-file-mol" />
+		<a href="#"><BaseSvgServe icon="icn-file-smol" /></a>
+		<BaseSvgServe icon="icn-file-smol" />
+		<BaseSvgServe icon="icn-file-mmol" />
 		<BaseSvgServe icon="icn-file-molset" />
 		<BaseSvgServe icon="icn-file-data" />
 		<BaseSvgServe icon="icn-file-text" />
@@ -94,7 +95,7 @@
 		<BaseSvgServe icon="icn-caret-right" />
 		<BaseSvgServe icon="icn-caret-up" />
 		<BaseSvgServe icon="icn-caret-down" />
-		<BaseSvgServe icon="icn-file-mol" size="large" />
+		<BaseSvgServe icon="icn-file-smol" size="large" />
 
 		<!-- Native icons -->
 		<CloseIcon />

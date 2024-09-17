@@ -54,7 +54,7 @@
 
 			<!-- Molecule viewer -->
 			<router-link :to="{ name: 'mol' }" class="mol-viewer">
-				<BaseIconButton icon="icn-file-mol" iconHover="icn-file-mol-full" iconSel="icn-file-mol-full" :sel="sel == 'mol'" />
+				<BaseIconButton icon="icn-file-smol" iconHover="icn-file-smol-full" iconSel="icn-file-smol-full" :sel="sel == 'mol'" />
 			</router-link>
 
 			<!-- File browser -->
