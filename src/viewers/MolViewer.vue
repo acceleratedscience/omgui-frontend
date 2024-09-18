@@ -234,7 +234,7 @@ async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNorm
 #mol-render.headless {
 	margin-bottom: 20px;
 }
-#mol-render:deep() > div:not(.fullscreen) {
+#mol-render:deep() > div:not(#container-3d-fs) {
 	flex: 1;
 	height: 100%;
 	position: relative;
