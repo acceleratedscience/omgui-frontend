@@ -10,8 +10,10 @@ const router = useRouter()
 // Stores
 import { useFileStore } from '@/stores/FileStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
+import { useModalStore } from '@/stores/ModalStore'
 const fileStore = useFileStore()
 const molViewerStore = useMolViewerStore()
+const modalStore = useModalStore()
 
 // Components
 import OverflowMenu from '@/components/OverflowMenu.vue'
@@ -67,8 +69,14 @@ function actionSaveAs() {
 
 // Delete
 async function actionDeleteFile() {
-	const success: boolean = await fileStore.deleteFile(fileStore.pathAbsolute)
-	if (success) router.push('/~/' + fileStore.pathDir)
+	modalStore.confirm('This cannot be undone.', {
+		title: 'Please confirm deletion',
+		primaryBtn: 'Delete',
+		onSubmit: async () => {
+			const success: boolean = await fileStore.deleteFile(fileStore.pathAbsolute)
+			if (success) router.push('/~/' + fileStore.pathDir)
+		},
+	})
 }
 </script>
 
