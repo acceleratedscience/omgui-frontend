@@ -1,6 +1,6 @@
 <template>
 	<div ref="overflowWrap" class="table-overflow-wrap" :class="{ inline: inline }">
-		<table v-copy-on-click="allowCopy" :data-copy="allowCopy ? copyData : null" :class="{ 'key-val': dataStructure == 'B' }">
+		<table v-click-to-copy="allowCopy" :data-copy="allowCopy ? copyData : null" :class="{ 'key-val': dataStructure == 'B' }">
 			<thead v-if="header">
 				<tr>
 					<th v-for="(cell, i) in table.header" :key="i">
@@ -15,7 +15,7 @@
 						<a v-if="cell && typeof cell == 'string' && cell.match(/^http(s)?:\/\//)" :href="cell" target="_blank">{{ cell }}</a>
 						<span
 							v-else
-							v-copy-on-click="dataStructure == 'B'"
+							v-click-to-copy="dataStructure == 'B'"
 							:data-copy="j == 0 ? `${cell}: ${row[1]}` : j == 1 ? cell : null"
 							:class="{ soft: !cell }"
 						>

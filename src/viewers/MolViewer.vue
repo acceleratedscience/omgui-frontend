@@ -91,6 +91,9 @@ import type { MolType, Smol } from '@/types'
 import type { ComputedRef } from 'vue'
 import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
+// Emits
+defineEmits(['retryLoad'])
+
 // Props
 const props = withDefaults(
 	defineProps<{

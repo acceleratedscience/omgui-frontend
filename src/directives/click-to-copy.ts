@@ -9,9 +9,9 @@ declare global {
 }
 
 // Allow elements to be copied to the clipboard when clicked.
-// <div v-copy-on-click>ABC</div>
-// <div v-copy-on-click="checkSomeState">ABC</div>
-// <div v-copy-on-click data-copy="XYZ">ABC</div>
+// <div v-click-to-copy>ABC</div>
+// <div v-click-to-copy="checkSomeState">ABC</div>
+// <div v-click-to-copy data-copy="XYZ">ABC</div>
 const copyOnClick: Directive = {
 	beforeMount(el, binding) {
 		// console.log('Validator: ', binding.value)

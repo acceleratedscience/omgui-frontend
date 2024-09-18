@@ -9,7 +9,7 @@
 
 		<!-- PDB Entry -->
 		<div class="key-val">
-			<div v-copy-on-click :data-copy="`PDB Entry: https://www.rcsb.org/structure/${pdbId}`">PDB Entry</div>
+			<div v-click-to-copy :data-copy="`PDB Entry: https://www.rcsb.org/structure/${pdbId}`">PDB Entry</div>
 			<a v-if="pdbId" :href="`https://www.rcsb.org/structure/${pdbId}`" target="_blank">
 				{{ pdbId }}
 			</a>
@@ -18,7 +18,7 @@
 
 		<!-- DOI -->
 		<div class="key-val">
-			<div v-copy-on-click :data-copy="`DOI Entry: https://doi.org/${doiLink}`">DOI</div>
+			<div v-click-to-copy :data-copy="`DOI Entry: https://doi.org/${doiLink}`">DOI</div>
 			<a v-if="doiLink" :href="`https://doi.org/${doiLink}`" target="_blank">{{ doiLink }}</a>
 			<div v-else>-</div>
 		</div>
@@ -35,19 +35,19 @@
 
 		<!-- Deposited -->
 		<div class="key-val">
-			<div v-copy-on-click :data-copy="`Deposited: ${depositionDate}`">Deposited</div>
+			<div v-click-to-copy :data-copy="`Deposited: ${depositionDate}`">Deposited</div>
 			<div>{{ depositionDate || '-' }}</div>
 		</div>
 
 		<!-- Released -->
 		<div class="key-val">
-			<div v-copy-on-click :data-copy="`Released: ${releaseDate}`">Released</div>
+			<div v-click-to-copy :data-copy="`Released: ${releaseDate}`">Released</div>
 			<div>{{ releaseDate || '-' }}</div>
 		</div>
 
 		<!-- Authors -->
 		<div class="key-val inline">
-			<div v-copy-on-click :data-copy="`Authors: ${authors?.join(', ') || '-'}`">Authors</div>
+			<div v-click-to-copy :data-copy="`Authors: ${authors?.join(', ') || '-'}`">Authors</div>
 			<div v-if="authors && authors.length">
 				<template v-for="(author, i) in authors" :key="i">
 					<a :href="scholarSearch(author)" target="_blank" class="lookup">
@@ -61,7 +61,7 @@
 
 		<!-- Keywords -->
 		<div class="key-val inline">
-			<div v-copy-on-click :data-copy="`Keywords: ${keywords?.join(', ') || '-'}`">Keywords</div>
+			<div v-click-to-copy :data-copy="`Keywords: ${keywords?.join(', ') || '-'}`">Keywords</div>
 			<div v-if="keywords && keywords.length">
 				<template v-for="(kw, i) in keywords" :key="i">
 					<a :href="scholarSearch(kw)" target="_blank" class="lookup">
@@ -75,7 +75,7 @@
 
 		<!-- 3D data format -->
 		<div v-if="isMmolJsonFile" class="key-val">
-			<div v-copy-on-click :data-copy="`PDB Entry: https://www.rcsb.org/structure/${pdbId}`">3D Data</div>
+			<div v-click-to-copy :data-copy="`PDB Entry: https://www.rcsb.org/structure/${pdbId}`">3D Data</div>
 			<div>{{ molViewerStore.mmolData3DFormat }}</div>
 		</div>
 	</div>

@@ -12,7 +12,7 @@ import CarbonComponentsVue from '@carbon/vue'
 import '@/assets/main.scss'
 
 // Directives
-import copyOnClick from '@/directives/copy-on-click'
+import clickToCopy from '@/directives/click-to-copy'
 
 // App
 import App from '@/App.vue'
@@ -24,6 +24,6 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(CarbonComponentsVue)
-app.directive('copy-on-click', copyOnClick)
+app.directive('click-to-copy', clickToCopy)
 
 app.mount('#app')

@@ -149,6 +149,9 @@ const filePreview = ref<File | null>(null)
 const colScroll = ref<HTMLDivElement | null>(null)
 const columns = ref<HTMLDivElement[] | null>(null)
 
+// Emits
+const emit = defineEmits(['update:modelValue'])
+
 // Props
 const props = defineProps<{
 	// When the filebrowser is loaded inside the save-file modal.
@@ -156,9 +159,6 @@ const props = defineProps<{
 	// This lets us v-model a path in the save-file modal.
 	modelValue?: string
 }>()
-
-// Emits
-const emit = defineEmits(['update:modelValue'])
 
 /*
  * Computed

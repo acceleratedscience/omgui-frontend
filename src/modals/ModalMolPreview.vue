@@ -4,12 +4,12 @@
 			<h2>{{ capitalize(mol.identifiers.name) || 'Unnamed Molecule' }}</h2>
 		</template>
 		<template v-slot:content>
-			<h3>Identifiers</h3>
+			<h3>Identifiers!</h3>
 			<div class="param-wrap">
 				<div v-for="(val, key) in mol?.identifiers" :key="key" :class="{ empty: !val }">
-					<div v-copy-on-click="!!val" :data-copy="`${key}: ${val}`" class="key">{{ key }}</div>
+					<div v-click-to-copy="!!val" :data-copy="`${key}: ${val}`" class="key">{{ key }}</div>
 					<div class="filler"></div>
-					<div v-copy-on-click="!!val" class="val">{{ val ? val : '-' }}</div>
+					<div v-click-to-copy="!!val" class="val">{{ val ? val : '-' }}</div>
 				</div>
 			</div>
 
@@ -17,15 +17,10 @@
 
 			<h3>Properties</h3>
 			<div class="param-wrap">
-				<div
-					v-for="(val, key) in mol?.properties"
-					:key="key"
-					:title="molViewerStore.propertiesString[key]"
-					:class="{ empty: !val && val !== 0 }"
-				>
-					<div v-copy-on-click="!!val || val === 0" :data-copy="`${key}: ${val}`" class="key">{{ key }}</div>
+				<div v-for="(val, key) in mol?.properties" :key="key" :class="{ empty: !val && val !== 0 }">
+					<div v-click-to-copy="!!val || val === 0" :data-copy="`${key}: ${val}`" class="key">{{ key }}</div>
 					<div class="filler"></div>
-					<div v-copy-on-click="!!val || val === 0" class="val">{{ val || val === 0 ? val : '-' }}</div>
+					<div v-click-to-copy="!!val || val === 0" class="val">{{ val || val === 0 ? val : '-' }}</div>
 				</div>
 			</div>
 		</template>
@@ -36,20 +31,13 @@
 
 <script setup lang="ts">
 // Vue
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 
 // Stores
-import { useMainStore } from '@/stores/MainStore'
 import { useModalStore } from '@/stores/ModalStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
-import { useMolGridStore } from '@/stores/MolGridStore'
-const mainStore = useMainStore()
 const modalStore = useModalStore()
 const molViewerStore = useMolViewerStore()
-const molGridStore = useMolGridStore()
-
-// API
-import { fileSystemApi } from '@/api/ApiService'
 
 // Utils
 import { capitalize } from '@/utils/helpers'
@@ -57,10 +45,8 @@ import { capitalize } from '@/utils/helpers'
 // Type declarations
 import type { Smol } from '@/types'
 
-// Definitions
+// Emits
 const emit = defineEmits(['mounted'])
-const allWorkspaces = ref<string[]>([' '])
-const selectedWorkspace = ref<string>(' ') // Space to avoid default text to display during load
 
 /**
  * Computed

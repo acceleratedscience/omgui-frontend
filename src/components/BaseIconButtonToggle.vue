@@ -45,6 +45,9 @@ type StyleParam = {
 	'--btn-color-on-hover'?: string
 }
 
+// Emits
+const emit = defineEmits(['toggle-on', 'toggle-off'])
+
 // Props
 const props = defineProps<{
 	// Icon
@@ -71,9 +74,6 @@ const defaultColors: { [key: string]: string } = {
 	semiSoft: 'rgba(0,0,0,.6)',
 	hard: '#393939',
 }
-
-// Emits
-const emit = defineEmits(['toggle-on', 'toggle-off'])
 
 /**
  * Computed

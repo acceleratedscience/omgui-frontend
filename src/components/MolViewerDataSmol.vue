@@ -5,44 +5,44 @@
 
 		<!-- Small molecule identifiers -->
 		<div v-if="molViewerStore.enriched || mol?.identifiers?.inchi">
-			<b v-copy-on-click :data-copy="`InChI: ${mol?.identifiers?.inchi}`">InChI: </b>
-			<span v-if="mol?.identifiers?.inchi" id="data-inchi" v-copy-on-click>{{ mol?.identifiers?.inchi }}</span>
+			<b v-click-to-copy :data-copy="`InChI: ${mol?.identifiers?.inchi}`">InChI: </b>
+			<span v-if="mol?.identifiers?.inchi" id="data-inchi" v-click-to-copy>{{ mol?.identifiers?.inchi }}</span>
 			<span v-else class="blank">-</span>
 			<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 		</div>
 		<div v-if="molViewerStore.enriched || mol?.identifiers?.inchikey">
-			<b v-copy-on-click :data-copy="`InChIKey: ${mol?.identifiers?.inchikey}`">InChIKey: </b>
-			<span v-if="mol?.identifiers?.inchikey" id="data-inchikey" v-copy-on-click>{{ mol?.identifiers?.inchikey }}</span>
+			<b v-click-to-copy :data-copy="`InChIKey: ${mol?.identifiers?.inchikey}`">InChIKey: </b>
+			<span v-if="mol?.identifiers?.inchikey" id="data-inchikey" v-click-to-copy>{{ mol?.identifiers?.inchikey }}</span>
 			<span v-else class="blank">-</span>
 			<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 		</div>
 		<div v-if="mol?.identifiers?.smiles && (!mol?.identifiers?.canonical_smiles || mol?.identifiers?.isomeric_smiles)">
-			<b v-copy-on-click :data-copy="`SMILES: ${mol?.identifiers?.smiles}`">SMILES: </b>
-			<span id="data-smiles" v-copy-on-click>{{ mol?.identifiers?.smiles }}</span>
+			<b v-click-to-copy :data-copy="`SMILES: ${mol?.identifiers?.smiles}`">SMILES: </b>
+			<span id="data-smiles" v-click-to-copy>{{ mol?.identifiers?.smiles }}</span>
 			<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 		</div>
 		<div v-if="molViewerStore.enriched || mol?.identifiers?.canonical_smiles">
-			<b v-copy-on-click :data-copy="`Canonical SMILES: ${mol?.identifiers?.canonical_smiles}`">Canonical SMILES: </b>
-			<span v-if="mol?.identifiers?.canonical_smiles" id="data-canonical-smiles" v-copy-on-click>{{ mol?.identifiers?.canonical_smiles }}</span>
+			<b v-click-to-copy :data-copy="`Canonical SMILES: ${mol?.identifiers?.canonical_smiles}`">Canonical SMILES: </b>
+			<span v-if="mol?.identifiers?.canonical_smiles" id="data-canonical-smiles" v-click-to-copy>{{ mol?.identifiers?.canonical_smiles }}</span>
 			<span v-else class="blank">-</span>
 			<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 		</div>
 		<div v-if="molViewerStore.enriched || mol?.identifiers?.isomeric_smiles">
-			<b v-copy-on-click :data-copy="`Isomeric SMILES: ${mol?.identifiers?.isomeric_smiles}`">Isomeric SMILES: </b>
-			<span v-if="mol?.identifiers?.isomeric_smiles" id="data-isomeric-smiles" v-copy-on-click>{{ mol?.identifiers?.isomeric_smiles }}</span>
+			<b v-click-to-copy :data-copy="`Isomeric SMILES: ${mol?.identifiers?.isomeric_smiles}`">Isomeric SMILES: </b>
+			<span v-if="mol?.identifiers?.isomeric_smiles" id="data-isomeric-smiles" v-click-to-copy>{{ mol?.identifiers?.isomeric_smiles }}</span>
 			<span v-else class="blank">-</span>
 			<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 		</div>
 		<div v-if="molViewerStore.enriched || mol?.identifiers?.molecular_formula">
-			<b v-copy-on-click :data-copy="`Formula: ${mol?.identifiers?.molecular_formula}`">Formula: </b>
-			<span v-if="mol?.identifiers?.molecular_formula" id="data-isomeric-smiles" v-copy-on-click>{{
+			<b v-click-to-copy :data-copy="`Formula: ${mol?.identifiers?.molecular_formula}`">Formula: </b>
+			<span v-if="mol?.identifiers?.molecular_formula" id="data-isomeric-smiles" v-click-to-copy>{{
 				mol?.identifiers?.molecular_formula
 			}}</span>
 			<span v-else class="blank">-</span>
 			<BaseFetching v-if="loading" text="" failText="x" :error="!!loadingError" />
 		</div>
 		<div v-if="molViewerStore.enriched || mol.identifiers?.cid">
-			<b v-copy-on-click :data-copy="`PubChem CID: ${mol.identifiers.cid}`">PubChem CID: </b>
+			<b v-click-to-copy :data-copy="`PubChem CID: ${mol.identifiers.cid}`">PubChem CID: </b>
 			<a
 				v-if="mol?.identifiers?.cid"
 				id="data-cid"
@@ -56,8 +56,8 @@
 
 		<!-- Macromolecule identifiers -->
 		<!-- <div v-if="mol?.identifiers?.fasta">
-			<b v-copy-on-click :data-copy="`FASTA: ${mol?.identifiers?.fasta}`">FASTA: </b>
-			<span v-if="mol?.identifiers?.fasta" id="data-fasta" v-copy-on-click>{{ mol?.identifiers?.fasta }}</span>
+			<b v-click-to-copy :data-copy="`FASTA: ${mol?.identifiers?.fasta}`">FASTA: </b>
+			<span v-if="mol?.identifiers?.fasta" id="data-fasta" v-click-to-copy>{{ mol?.identifiers?.fasta }}</span>
 			<span v-else class="blank">-</span>
 		</div> -->
 
@@ -97,7 +97,7 @@
 
 				<div v-if="synonymCount && 'synonyms' in mol" class="cloak">
 					<div class="synonyms-wrap" :style="{ height: synonymsHeight }">
-						<div v-for="(synonym, i) in mol?.synonyms" :key="i" :title="synonym" :style="{ width: synonymColWidth }" v-copy-on-click>
+						<div v-for="(synonym, i) in mol?.synonyms" :key="i" :title="synonym" :style="{ width: synonymColWidth }" v-click-to-copy>
 							{{ synonym }}
 						</div>
 					</div>
@@ -120,9 +120,9 @@
 					:class="{ empty: !val && val !== 0 }"
 					:style="{ width: propColWidth }"
 				>
-					<div v-copy-on-click :data-copy="`${key}: ${val}`" class="key">{{ key }}:</div>
+					<div v-click-to-copy :data-copy="`${key}: ${val}`" class="key">{{ key }}:</div>
 					<div class="filler"></div>
-					<div v-copy-on-click class="val">{{ val || val === 0 ? val : '-' }}</div>
+					<div v-click-to-copy class="val">{{ val || val === 0 ? val : '-' }}</div>
 				</div>
 			</div>
 		</div>
@@ -142,7 +142,7 @@
 					<!-- <b>Results:</b><br /> -->
 					<div v-for="(result, j) in item.results" :key="j" class="result">
 						<div v-for="(val, key) in result" :key="key">
-							<b v-copy-on-click :data-copy="`${key}: ${val}`">{{ key }}:</b> <span v-copy-on-click>{{ val }}</span>
+							<b v-click-to-copy :data-copy="`${key}: ${val}`">{{ key }}:</b> <span v-click-to-copy>{{ val }}</span>
 							<br />
 						</div>
 					</div>
@@ -170,18 +170,17 @@ const mainStore = useMainStore()
 
 // Components
 import BaseFetching from '@/components/BaseFetching.vue'
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
 import TheButtonSaveMol from '@/components/TheButtonSaveMol.vue'
 import TheButtonEnrichMol from '@/components/TheButtonEnrichMol.vue'
+
+// Emits
+const emit = defineEmits(['retryLoad'])
 
 // Props
 defineProps<{
 	loading?: boolean
 	loadingError?: string
 }>()
-
-// Emits
-const emit = defineEmits(['retryLoad'])
 
 // Definitions
 const paramColMinWidth: number = 250
