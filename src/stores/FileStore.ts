@@ -10,7 +10,6 @@ import router from '@/router'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
-import { useMolViewerStore } from './MolViewerStore'
 
 // Utils
 import { map_fileType2Module } from '@/utils/maps'
@@ -18,7 +17,9 @@ import { map_fileType2Module } from '@/utils/maps'
 // Type declarations
 import type { File, FileType } from '@/types'
 // The State type is just a copy of the File type but with underscored keys.
-type State = AddUnderscore<File>
+type State = AddUnderscore<File> & {
+	_forcedLoading: boolean
+}
 type AddUnderscore<T> = {
 	[P in keyof T as `_${string & P}`]: T[P]
 }
@@ -42,6 +43,11 @@ function getInitialState(): State {
 		_path: '', // File path relative to the workspace
 		_pathAbsolute: '', // Absolute file path
 		_data: '', // Content of file
+		//
+		// When you open a file in the file browser, this
+		// forces the loading screen to show, even though
+		// it's disabled when moving around the file browser.
+		_forcedLoading: false,
 	}
 }
 
@@ -133,6 +139,10 @@ export const useFileStore = defineStore('fileStore', {
 		active(): boolean {
 			return !!this._filename
 		},
+
+		forcedLoading(): boolean {
+			return this._forcedLoading
+		},
 	},
 	actions: {
 		// Load file or directory.
@@ -165,6 +175,11 @@ export const useFileStore = defineStore('fileStore', {
 				path.pop()
 				router.push({ path: path.join('/') })
 			}
+		},
+
+		// Activate loading screen
+		setForcedLoading(state: boolean) {
+			this._forcedLoading = state
 		},
 
 		// Delete a file.

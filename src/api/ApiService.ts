@@ -29,14 +29,15 @@ export async function apiFetch(
 	apiCall: Promise<any>,
 	{ onSuccess, onError, loading, loadingError, status, setLoading, setLoadingError, setStatus }: FetchOptions,
 ) {
-	// let success = false
-	if (loading) loading.value = true // For templates
-	if (loadingError) loadingError.value = null // For templates
-	if (status) status.value = null // For templates
+	// For templates
+	if (loading) loading.value = true
+	if (loadingError) loadingError.value = null
+	if (status) status.value = null
 
-	if (setLoading) setLoading(true) // For pinia
-	if (setLoadingError) setLoadingError(null) // For pinia
-	if (setStatus) setStatus(null) // For pinia
+	// For pinia
+	if (setLoading) setLoading(true)
+	if (setLoadingError) setLoadingError(null)
+	if (setStatus) setStatus(null)
 
 	try {
 		const response = await apiCall
@@ -65,6 +66,7 @@ export async function apiFetch(
 		if (status) status.value = 0
 		if (setStatus) setStatus(0)
 	} finally {
+		console.log(333, setLoading)
 		if (loading) loading.value = false
 		if (setLoading) setLoading(false)
 	}

@@ -6,7 +6,7 @@
 
 <template>
 	<div v-if="loadError" class="error-msg">The requested module '{{ fileStore.moduleName }}' was not found.</div>
-	<BaseFetching v-else-if="loading && !fileStore.isDir" text="Fetching file" failText="Failed to fetch file" />
+	<BaseFetchingFile v-else-if="fileStore.forcedLoading || (loading && !fileStore.isDir)" text="Fetching file" failText="Failed to fetch file" />
 	<component v-else-if="dynamicModule" :is="dynamicModule" /><!-- :data="fileStore.data" -->
 	<template v-else>
 		<!-- To do: show breadcrumbs when file is not found, requires some refactoring -->
@@ -39,7 +39,7 @@ import { apiFetch, fileSystemApi } from '@/api/ApiService'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
-import BaseFetching from '@/components/BaseFetching.vue'
+import BaseFetchingFile from '@/components/BaseFetchingFile.vue'
 
 // Type declarations
 import type { File, MolsetApi, Smol, Mmol } from '@/types'
@@ -93,13 +93,11 @@ watch(
 
 watch(
 	() => fileStore.fileType,
-	(newValue, oldValue) => {
+	() => {
 		// When you open a molecule from a molset, the route doesn't change,
 		// so we monitor the fileType. We need to check if the oldValue is not
 		// null to avoid triggering this on intial load.
-		// if (newValue && oldValue) { // This condition was preventing yet-to-be-supported filetypes like PDF from loading the correct viewer. Don't think we need this?
 		loadModule(fileStore.moduleName)
-		// }
 	},
 )
 
@@ -113,15 +111,20 @@ onBeforeUnmount(fileStore.clear)
 // Display a file or directory with the appropriate module.
 // This gets triggered on initial pageload / reload.
 async function parseRoute() {
-	// console.log('dispatch parseRoute')
 	const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
 	const urlQuery: LocationQuery = route.query
+
+	// fileStore.unsetFileType()
+	console.log('parseRoute', filePath, urlQuery, router)
+
 	apiFetch(fileSystemApi.getFile(filePath, urlQuery), {
 		loading: loading,
 		onError: (err) => {
+			fileStore.setForcedLoading(false)
 			console.log('Error in getFile()', err)
 		},
 		onSuccess: (file: File) => {
+			fileStore.setForcedLoading(false)
 			fileStore.loadItem(file)
 
 			if (fileStore.errCode) {

@@ -31,7 +31,12 @@
 	</template>
 
 	<!-- Load a headless module (wrapper + loader) -->
-	<div v-else-if="mainStore.headless" ref="$headlessWrap" id="headless-wrap" :class="{ 'file-browser': fileStore.isDir }">
+	<div
+		v-else-if="mainStore.headless"
+		ref="$headlessWrap"
+		id="headless-wrap"
+		:class="{ 'file-browser': fileStore.isDir && !fileStore.forcedLoading }"
+	>
 		<router-view />
 		<!-- <RouterView v-slot="{ Component }">
 			<KeepAlive>
@@ -42,7 +47,7 @@
 	</div>
 
 	<!-- Load the full application -->
-	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir }">
+	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir && !fileStore.forcedLoading }">
 		<TheNav />
 		<div id="body">
 			<router-view />

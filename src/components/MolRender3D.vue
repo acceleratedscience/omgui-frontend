@@ -125,11 +125,7 @@ function render3d_miew(doFullscreen = false) {
 
 	let mv
 
-	console.log('@', doFullscreen, miewViewerFs)
-
 	if ((doFullscreen && !miewViewerFs) || (!doFullscreen && !miewViewer)) {
-		console.log('CREATE')
-
 		// Select the correct container
 		const container = doFullscreen ? $container3dFs.value : $container3d.value
 

@@ -125,8 +125,10 @@ import { useRouter, useRoute } from 'vue-router'
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useModalStore } from '@/stores/ModalStore'
+import { useFileStore } from '@/stores/FileStore'
 const mainStore = useMainStore()
 const modalStore = useModalStore()
+const fileStore = useFileStore()
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
@@ -269,7 +271,35 @@ function hidePreviewFile() {
 }
 
 function openFile(file: File) {
-	if (!props.isModal) router.push('/~/' + file.path)
+	// You can't open files in the ModalSaveFile modal.
+	if (props.isModal) return
+
+	const fileSize = file._meta.size
+	const over3MB = fileSize && fileSize > 3000000
+	const over10MB = fileSize && fileSize > 10000000
+	const over20MB = fileSize && fileSize > 20000000
+
+	// Show warning when a file is over 3MB.
+	if (over3MB) {
+		const displaySize = over20MB ? '20 MB' : over10MB ? '10 MB' : '3 MB'
+		let message = over20MB
+			? 'It may take up to several minutes to load.'
+			: over10MB
+				? 'It may take a minute to load.'
+				: 'It may take a few seconds to load.'
+		message += ' Are you sure you want to continue?'
+
+		modalStore.confirm(message, {
+			title: `This file is over ${displaySize}`,
+			primaryBtn: 'Open',
+			onSubmit: () => {
+				fileStore.setForcedLoading(true)
+				router.push('/~/' + file.path)
+			},
+		})
+	} else {
+		router.push('/~/' + file.path)
+	}
 }
 
 // Load the next level of files and add column.
