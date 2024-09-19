@@ -171,6 +171,7 @@ function _getMmolData(identifier: string, onSuccess: () => void = () => {}, onEr
 
 			onSuccess()
 		},
+		onError: onError,
 		loading: loading,
 		loadingError: loadingError,
 	})
