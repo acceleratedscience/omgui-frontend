@@ -232,14 +232,14 @@ export const useMolViewerStore = defineStore('molViewerStore', {
 					let humanArray
 					if (['pdbx_struct_oper_list'].includes(key)) {
 						// Fields with list of matrix data
-						humanArray = data[key].map((data) => _formMatrix(data))
+						humanArray = data[key].map((data: { [key: string]: string }) => _formMatrix(data))
 					} else {
 						// regular arrays of objects
-						humanArray = data[key].map((ogVal) => {
+						humanArray = data[key].map((data: { [key: string]: string }) => {
 							const val: Record<string, any> = {}
-							for (const k in ogVal) {
+							for (const k in data) {
 								const humanTableKey = _massageTableKey(k)
-								val[humanTableKey] = _massageValue(ogVal[k])
+								val[humanTableKey] = _massageValue(data[k])
 							}
 							return val
 						})

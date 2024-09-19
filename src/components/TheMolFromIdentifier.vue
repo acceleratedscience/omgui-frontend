@@ -1,5 +1,6 @@
 <template>
-	<BaseFetching v-if="molViewerStore.loading" />
+	<BaseError v-if="loadingError" :loadingError backLink="/mol" />
+	<BaseFetchingFile v-else-if="loading || doubleLoading" />
 	<template v-else-if="route.query.use == 'json'">
 		<JsonViewer :data="molViewerStore.smol" />
 	</template>
@@ -22,9 +23,10 @@ const molViewerStore = useMolViewerStore()
 import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Components
+import BaseError from '@/components/BaseError.vue'
 import JsonViewer from '@/viewers/JsonViewer.vue'
 import MolViewer from '@/viewers/MolViewer.vue'
-import BaseFetching from '@/components/BaseFetching.vue'
+import BaseFetchingFile from '@/components/BaseFetchingFile.vue'
 
 // Props
 const props = defineProps<{
@@ -33,9 +35,10 @@ const props = defineProps<{
 
 // Definitions
 const loading = ref<boolean>(false)
+const doubleLoading = ref<boolean>(false) // Special loader for when we're fetching both smol and mmol data.
 // const loadingError = ref<boolean>(false)
 const loadingError = ref<string>('')
-const molType = ref<'smol' | 'mmol'>(route.matched[0].name as 'smol' | 'mmol')
+const molType = ref<'smol' | 'mmol' | 'mol'>(route.matched[0].name as 'smol' | 'mmol' | 'mol')
 
 // Utils
 import initRDKit from '@/utils/rdkit/initRDKit'
@@ -85,57 +88,92 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 	// console.log('fetchMolData', identifier)
 	if (!identifier) return
 
-	let success: boolean = false
 	loading.value = true
 	loadingError.value = ''
 
-	if (molType.value == 'smol') {
-		apiFetch(moleculesApi.getSmolData(identifier), {
-			onSuccess: (data) => {
-				// // #fetching-error
-				// // To test error handling.
-				// loadingError.value = 'Some status message'
-				// loading.value = false
-				// console.log('ERROOOO')
-				// return
-
-				// If the molviewer is loaded directly with a smiles or inchi as
-				// the identifier, we pre-loaded the visualisation data with a
-				// separate API call. But for any other identifier, we need to
-				// wait until we get the inchi back.
-				const needsVizData = !molViewerStore.inchi
-
-				// Update HTML
-				molViewerStore.setMolData(data, 'smol')
-				success = true
-
-				if (needsVizData) {
-					molViewerStore.fetchSmolVizData(molViewerStore.inchi!)
-				}
+	if (molType.value == 'mol') {
+		// When molType is 'mol', we don't know if the identifier
+		// is a smol or mmol, so we first do a smol search, then
+		// a mmol search if the smol search fails. The doubleLoading
+		// lets us maintain the loading status until both calls have
+		// completed.
+		doubleLoading.value = true
+		_getSmolData(
+			identifier,
+			() => {
+				// smol - onSuccess
+				doubleLoading.value = false
 			},
-			loading: loading,
-			loadingError: loadingError,
-		})
+			() => {
+				// smol - onError
+				_getMmolData(
+					identifier,
+					() => {
+						// mmol - onSuccess
+						doubleLoading.value = false
+					},
+					() => {
+						// mmol - onError
+						doubleLoading.value = false
+					},
+				)
+			},
+		)
+	} else if (['smol', 'mol'].includes(molType.value)) {
+		_getSmolData(identifier)
 	} else if (molType.value == 'mmol') {
-		apiFetch(moleculesApi.getMmolData(identifier), {
-			onSuccess: (data) => {
-				// // #fetching-error
-				// // To test error handling.
-				// loadingError.value = 'Some status message'
-				// loading.value = false
-				// console.log('ERROOOO')
-				// return
-
-				// Update HTML
-				molViewerStore.setMolData(data, 'mmol')
-				success = true
-			},
-			loading: loading,
-			loadingError: loadingError,
-		})
+		_getMmolData(identifier)
 	}
+}
 
-	return success
+function _getSmolData(identifier: string, onSuccess: () => void = () => {}, onError: () => void = () => {}) {
+	apiFetch(moleculesApi.getSmolData(identifier), {
+		onSuccess: (data) => {
+			// // #fetching-error
+			// // To test error handling.
+			// loadingError.value = 'Some status message'
+			// loading.value = false
+			// console.log('ERROOOO')
+			// return
+
+			// If the molviewer is loaded directly with a smiles or inchi as
+			// the identifier, we pre-loaded the visualisation data with a
+			// separate API call. But for any other identifier, we need to
+			// wait until we get the inchi back.
+			const needsVizData = !molViewerStore.inchi
+
+			// Update HTML
+			molViewerStore.setMolData(data, 'smol')
+
+			if (needsVizData) {
+				molViewerStore.fetchSmolVizData(molViewerStore.inchi!)
+			}
+			onSuccess()
+		},
+		onError: onError,
+		loading: loading,
+		loadingError: loadingError,
+	})
+}
+
+function _getMmolData(identifier: string, onSuccess: () => void = () => {}, onError: () => void = () => {}) {
+	apiFetch(moleculesApi.getMmolData(identifier), {
+		onSuccess: (data) => {
+			// // #fetching-error
+			// // To test error handling.
+			// loadingError.value = 'Some status message'
+			// loading.value = false
+			// console.log('ERROOOO')
+			// return
+
+			// Update HTML
+			molViewerStore.setMolData(data, 'mmol')
+
+			onSuccess()
+		},
+		loading: loading,
+		loadingError: loadingError,
+	})
 }
 
 // If the identifier is a SMILES, we can use rdkit-js to generate

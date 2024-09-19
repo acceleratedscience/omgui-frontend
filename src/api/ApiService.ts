@@ -66,7 +66,6 @@ export async function apiFetch(
 		if (status) status.value = 0
 		if (setStatus) setStatus(0)
 	} finally {
-		console.log(333, setLoading)
 		if (loading) loading.value = false
 		if (setLoading) setLoading(false)
 	}

@@ -116,7 +116,7 @@ async function toggleFullScreen(state: boolean) {
 // Render 3D mol using the Miew library - https://lifescience.opensource.epam.com/miew/index.html
 // Miew is not well documented, but it's the best 3D viewer we've found so far.
 // Uses WebGL and has a few nice features like displaying atom info on click, and setting the rotation center on doubleclick.
-function render3d_miew(doFullscreen = false) {
+function render3d_miew(doFullscreen: boolean = false) {
 	// This re-initializes the viewer when the molecule is changed.
 	// Not clear from the documentation, leave this here for reference.
 	// (No longer used because we use a separate container for the fullscreen mode)
@@ -139,7 +139,7 @@ function render3d_miew(doFullscreen = false) {
 				// @ts-ignore - https://github.com/epam/miew/issues/559
 				camDistance: isSmol.value ? 3 : 2,
 				resolution: 'high',
-				zooming: doFullscreen,
+				zooming: !!doFullscreen,
 				bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg.
 
 				// Settings we don't want:
@@ -218,6 +218,7 @@ function render3d_miew(doFullscreen = false) {
 	left: 0;
 	pointer-events: initial;
 	color: $black-30;
+	margin: 10px;
 }
 .container-3d:deep() .atom-info p {
 	font-size: $font-size-small;
@@ -270,7 +271,6 @@ function render3d_miew(doFullscreen = false) {
 	top: 25px;
 	left: 0;
 	pointer-events: initial;
-	color: $black-30;
 	margin: 20px;
 	color: $black-60;
 }

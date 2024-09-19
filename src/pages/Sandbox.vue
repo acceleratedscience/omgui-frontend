@@ -1,6 +1,6 @@
 <template>
 	<div style="height: 500px">
-		<MolRender3D :pdb="pdb_data" molName="TEST" />
+		<MolRender3D :data3D="pdb_data" data3DFormat="pdb" molName="TEST" />
 	</div>
 </template>
 

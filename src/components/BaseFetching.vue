@@ -26,6 +26,7 @@ const props = withDefaults(
 .fetching {
 	color: #999;
 	font-style: italic;
+	position: relative;
 }
 .fetching-err {
 	color: #d00;
@@ -33,5 +34,9 @@ const props = withDefaults(
 .fetching::after {
 	content: '';
 	animation: ellipsis 800ms infinite;
+	width: 20px;
+	position: absolute;
+	top: 0;
+	right: -20px;
 }
 </style>

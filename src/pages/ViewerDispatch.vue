@@ -6,7 +6,7 @@
 
 <template>
 	<div v-if="loadError" class="error-msg">The requested module '{{ fileStore.moduleName }}' was not found.</div>
-	<BaseFetchingFile v-else-if="fileStore.forcedLoading || (loading && !fileStore.isDir)" text="Fetching file" failText="Failed to fetch file" />
+	<BaseFetchingFile v-else-if="fileStore.forcedLoading || (loading && !fileStore.isDir)" text="Opening file" failText="Failed to open file" />
 	<component v-else-if="dynamicModule" :is="dynamicModule" /><!-- :data="fileStore.data" -->
 	<template v-else>
 		<!-- To do: show breadcrumbs when file is not found, requires some refactoring -->
@@ -114,14 +114,11 @@ async function parseRoute() {
 	const filePath: string = route.path.replace(/(^\/headless)?\/~(\/)?/, '')
 	const urlQuery: LocationQuery = route.query
 
-	// fileStore.unsetFileType()
-	console.log('parseRoute', filePath, urlQuery, router)
-
 	apiFetch(fileSystemApi.getFile(filePath, urlQuery), {
 		loading: loading,
 		onError: (err) => {
 			fileStore.setForcedLoading(false)
-			console.log('Error in getFile()', err)
+			console.error('Error in getFile()', err)
 		},
 		onSuccess: (file: File) => {
 			fileStore.setForcedLoading(false)

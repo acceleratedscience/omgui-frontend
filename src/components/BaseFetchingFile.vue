@@ -19,7 +19,7 @@
 		</div>
 
 		<div class="text-wrap">
-			<BaseFetching text="Opening file" failText="Failed to open file" />
+			<BaseFetching :text="text" :failText="failText" :error="error" />
 		</div>
 	</div>
 </template>
@@ -29,33 +29,14 @@
 import BaseFetching from '@/components/BaseFetching.vue'
 
 // Props
-withDefaults(
-	defineProps<{
-		text?: string
-		failText?: string
-		error?: boolean
-	}>(),
-	{
-		text: 'Fetching',
-		failText: 'Failed to fetch',
-		error: false,
-	},
-)
+defineProps<{
+	text?: string
+	failText?: string
+	error?: boolean
+}>()
 </script>
 
 <style lang="scss" scoped>
-.fetching {
-	color: #999;
-	font-style: italic;
-}
-.fetching-err {
-	color: #d00;
-}
-.fetching::after {
-	content: '';
-	animation: ellipsis 800ms infinite;
-}
-
 /**
  * Content centering
  */
@@ -71,7 +52,6 @@ withDefaults(
 	// border: solid 1px pink;
 }
 #center-wrap .text-wrap {
-	width: 80px;
 	text-wrap: nowrap;
 	// background: orange;
 }

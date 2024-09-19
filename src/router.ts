@@ -22,16 +22,22 @@ const routes = [
 		name: 'filebrowser',
 		component: () => import(/* webpackChunkName: 'ViewerDispatch' */ `@/pages/ViewerDispatch.vue`),
 	},
+	// {
+	// 	path: '/mol',
+	// 	name: 'mol',
+	// 	component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
+	// },
+	{
+		path: '/mol/:identifier?',
+		name: 'mol',
+		props: true,
+		component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
+	},
 	{
 		path: '/smol',
 		alias: '/mmol',
 		name: 'smol-mmol',
 		redirect: '/mol',
-	},
-	{
-		path: '/mol',
-		name: 'mol',
-		component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
 	},
 	{
 		path: '/smol/:identifier',
