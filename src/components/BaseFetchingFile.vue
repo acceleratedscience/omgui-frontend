@@ -73,6 +73,7 @@ withDefaults(
 #center-wrap .text-wrap {
 	width: 80px;
 	text-wrap: nowrap;
+	// background: orange;
 }
 
 /**
