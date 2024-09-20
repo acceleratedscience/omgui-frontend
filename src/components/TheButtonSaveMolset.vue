@@ -3,11 +3,11 @@
 		<cv-button
 			ref="$btn"
 			size="field"
-			@click="save"
 			:disabled="props.disabled && !success"
 			:class="{ loading, error, success: success }"
 			:style="styleButton"
 			:icon="error ? ErrorFilled : success ? CheckmarkFilled : null"
+			@click="onSaveClick"
 			>{{ btnText }}</cv-button
 		>
 		<select v-if="isNonJSONFile" v-model="vModelSaveType">
@@ -20,19 +20,16 @@
 
 <script setup lang="ts">
 // Vue
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 // Router
-import { useRouter, useRoute } from 'vue-router'
-const router = useRouter()
+import { useRoute } from 'vue-router'
 const route = useRoute()
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'
-import { useModalStore } from '@/stores/ModalStore'
 import { useFileStore } from '@/stores/FileStore'
 const molGridStore = useMolGridStore()
-const modalStore = useModalStore()
 const fileStore = useFileStore()
 
 // Modals
@@ -44,9 +41,6 @@ const modalSaveFile = useModalSaveFile()
 import CheckmarkFilled from '@carbon/icons-vue/es/checkmark--filled/16'
 // @ts-ignore
 import ErrorFilled from '@carbon/icons-vue/es/error--filled/16'
-
-// Utils
-import { path2FileBrowserPath } from '@/utils/helpers'
 
 // Type declarations
 import type { ComponentPublicInstance } from 'vue'
@@ -83,7 +77,7 @@ const styleButton = computed(() => (fixWidth.value ? { width: fixWidth.value + '
  */
 
 watch(vModelSaveType, (newVal) => {
-	if (newVal) save(newVal)
+	if (newVal) onSaveClick(newVal)
 	setTimeout(() => (vModelSaveType.value = ''), 1)
 })
 
@@ -91,7 +85,7 @@ watch(vModelSaveType, (newVal) => {
  * Methods
  */
 
-async function save(saveType: SaveType) {
+async function onSaveClick(saveType: SaveType) {
 	// console.log('execSave >>')
 	loading.value = true
 	fixWidth.value = $btn.value?.$el?.offsetWidth ?? null
@@ -112,6 +106,7 @@ async function save(saveType: SaveType) {
 		// console.log('<< execSave')
 		loading.value = false
 		if (submitted) {
+			molGridStore.setHasChanges(false)
 			success.value = true
 			setTimeout(() => {
 				success.value = false
