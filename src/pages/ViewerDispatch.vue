@@ -157,14 +157,15 @@ async function parseRoute() {
 
 // Load the dynamic module.
 function loadModule(moduleName: string | null) {
-	// console.log('loadModule', moduleName)
+	console.log('loadModule', moduleName)
 	loadError.value = false
 	if (!moduleName) {
 		dynamicModule.value = null
 		return
 	}
 	dynamicModule.value = defineAsyncComponent(() =>
-		import(`../viewers/${moduleName}.vue`).catch(() => {
+		import(`../viewers/${moduleName}.vue`).catch((err) => {
+			console.log(111, `../viewers/${moduleName}.vue`, err)
 			loadError.value = true
 		}),
 	)

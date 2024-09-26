@@ -23,10 +23,7 @@
 
 <script setup lang="ts">
 // Libraries
-import Miew from 'miew' // Waiting for fix, self-hosting until then - see https://github.com/epam/miew/issues/524
-// @ts-ignore
-// import Miew from '@/TEMP/miew/dist/miew.module'
-// import '@/TEMP/miew/dist/miew.min.css'
+import Miew from 'miew'
 
 // Vue
 import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue'
@@ -136,7 +133,6 @@ function render3d_miew(doFullscreen: boolean = false) {
 			settings: {
 				axes: false,
 				fps: false,
-				// @ts-ignore - https://github.com/epam/miew/issues/559
 				camDistance: isSmol.value ? 3 : 2,
 				resolution: 'high',
 				zooming: !!doFullscreen,
@@ -155,17 +151,18 @@ function render3d_miew(doFullscreen: boolean = false) {
 
 		// Initialize viewer
 		if (mv.init()) {
+			// @ts-ignore
 			mv.enableHotKeys(doFullscreen) // Prevent Miew hotkeys to interfere with our app
 			mv.run()
 		}
 
 		// Load the 3D data
 		if (props.data3DFormat == 'sdf') {
-			mv.load(props.data3D, { sourceType: 'immediate', fileType: 'sdf' })
+			mv.load(props.data3D!, { sourceType: 'immediate', fileType: 'sdf' })
 		} else if (props.data3DFormat == 'pdb') {
-			mv.load(props.data3D, { sourceType: 'immediate', fileType: 'pdb' })
+			mv.load(props.data3D!, { sourceType: 'immediate', fileType: 'pdb' })
 		} else if (props.data3DFormat == 'cif') {
-			mv.load(props.data3D, { sourceType: 'immediate', fileType: 'cif' })
+			mv.load(props.data3D!, { sourceType: 'immediate', fileType: 'cif' })
 		}
 
 		// Assign viewer to a variable so we can check if it has been initialized later.
