@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+// import domLog from '@/utils/dom-log'
 
 import FileSystemApi from '@/api/FileSystemApi'
 import MoleculesApi from '@/api/MoleculesApi'
@@ -41,6 +42,7 @@ export async function apiFetch(
 
 	try {
 		const response = await apiCall
+		const responseString = JSON.stringify(response, null, 2)
 		if (response.status === 200) {
 			// success = true
 			if (onSuccess) onSuccess(response.data)

@@ -28,6 +28,14 @@ import JsonViewer from '@/viewers/JsonViewer.vue'
 import MolViewer from '@/viewers/MolViewer.vue'
 import BaseFetchingFile from '@/components/BaseFetchingFile.vue'
 
+// Utils
+import initRDKit from '@/utils/rdkit/initRDKit'
+// import domLog from '@/utils/dom-log'
+
+// Type declarations
+import type { JSMol } from '@/utils/rdkit/tsTypes'
+type MolTypeFromRoute = 'smol' | 'mmol' | 'mol' | 'headless-smol' | 'headless-mmol' | 'headless-mol'
+
 // Props
 const props = defineProps<{
 	identifier: string
@@ -38,13 +46,7 @@ const loading = ref<boolean>(false)
 const doubleLoading = ref<boolean>(false) // Special loader for when we're fetching both smol and mmol data.
 // const loadingError = ref<boolean>(false)
 const loadingError = ref<string>('')
-const molType = ref<'smol' | 'mmol' | 'mol'>(route.matched[0].name as 'smol' | 'mmol' | 'mol')
-
-// Utils
-import initRDKit from '@/utils/rdkit/initRDKit'
-
-// Type declarations
-import type { JSMol } from '@/utils/rdkit/tsTypes'
+const molType = ref<MolTypeFromRoute>(route.matched[0].name as MolTypeFromRoute)
 
 /**
  * Logic
@@ -90,6 +92,11 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 
 	loading.value = true
 	loadingError.value = ''
+
+	// Because we get the molType from the route name,
+	// it will have "headless-" prepended when running
+	// inside an iframe.
+	molType.value = molType.value.replace(/^headless-/, '') as MolTypeFromRoute
 
 	if (molType.value == 'mol') {
 		// When molType is 'mol', we don't know if the identifier
