@@ -1,5 +1,6 @@
 <template>
-	<BaseError v-if="loadingError" :loadingError backLink="/mol" />
+	<!-- <div style="position: relative; z-index: 1000; color: green">-{{ loading }} / {{ doubleLoading }}</div> -->
+	<BaseError v-if="loadingError" :loadingError backLink="/mol" :note="loadingErrorNote" />
 	<BaseFetchingFile v-else-if="loading || doubleLoading" />
 	<template v-else-if="route.query.use == 'json'">
 		<JsonViewer :data="molViewerStore.smol" />
@@ -44,8 +45,9 @@ const props = defineProps<{
 // Definitions
 const loading = ref<boolean>(false)
 const doubleLoading = ref<boolean>(false) // Special loader for when we're fetching both smol and mmol data.
-// const loadingError = ref<boolean>(false)
 const loadingError = ref<string>('')
+const loadingErrorNote = ref<string>('')
+const loadingErrorNoteValue = 'This may be a false negative. Please try again to confirm.'
 const molType = ref<MolTypeFromRoute>(route.matched[0].name as MolTypeFromRoute)
 
 /**
@@ -53,6 +55,7 @@ const molType = ref<MolTypeFromRoute>(route.matched[0].name as MolTypeFromRoute)
  */
 
 // While waiting for the API, prepopulate the UI where possible.
+console.log(props.identifier)
 if (props.identifier.startsWith('InChI=')) {
 	// InChI --> prepopulate inchi field only.
 	molViewerStore.setSmolIdentifier('inchi', props.identifier)
@@ -92,6 +95,7 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 
 	loading.value = true
 	loadingError.value = ''
+	loadingErrorNote.value = ''
 
 	// Because we get the molType from the route name,
 	// it will have "headless-" prepended when running
@@ -105,35 +109,42 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 		// lets us maintain the loading status until both calls have
 		// completed.
 		doubleLoading.value = true
-		_getSmolData(
-			identifier,
-			() => {
+		_getSmolData(identifier, {
+			onSuccess: () => {
 				// smol - onSuccess
 				doubleLoading.value = false
 			},
-			() => {
+			onError: () => {
 				// smol - onError
-				_getMmolData(
-					identifier,
-					() => {
+				_getMmolData(identifier, {
+					onSuccess: () => {
 						// mmol - onSuccess
 						doubleLoading.value = false
 					},
-					() => {
+					onError: () => {
 						// mmol - onError
 						doubleLoading.value = false
+						loadingErrorNote.value = loadingErrorNoteValue
 					},
-				)
+				})
 			},
-		)
+		})
 	} else if (['smol', 'mol'].includes(molType.value)) {
-		_getSmolData(identifier)
+		_getSmolData(identifier, {
+			onError: () => {
+				loadingErrorNote.value = loadingErrorNoteValue
+			},
+		})
 	} else if (molType.value == 'mmol') {
-		_getMmolData(identifier)
+		_getMmolData(identifier, {
+			onError: () => {
+				loadingErrorNote.value = loadingErrorNoteValue
+			},
+		})
 	}
 }
 
-function _getSmolData(identifier: string, onSuccess: () => void = () => {}, onError: () => void = () => {}) {
+function _getSmolData(identifier: string, { onSuccess = () => {}, onError = () => {} } = {}) {
 	apiFetch(moleculesApi.getSmolData(identifier), {
 		onSuccess: (data) => {
 			// // #fetching-error
@@ -153,7 +164,7 @@ function _getSmolData(identifier: string, onSuccess: () => void = () => {}, onEr
 			molViewerStore.setMolData(data, 'smol')
 
 			if (needsVizData) {
-				molViewerStore.fetchSmolVizData(molViewerStore.inchi!)
+				molViewerStore.fetchSmolVizData(identifier)
 			}
 			onSuccess()
 		},
@@ -163,7 +174,7 @@ function _getSmolData(identifier: string, onSuccess: () => void = () => {}, onEr
 	})
 }
 
-function _getMmolData(identifier: string, onSuccess: () => void = () => {}, onError: () => void = () => {}) {
+function _getMmolData(identifier: string, { onSuccess = () => {}, onError = () => {} } = {}) {
 	apiFetch(moleculesApi.getMmolData(identifier), {
 		onSuccess: (data) => {
 			// // #fetching-error

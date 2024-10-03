@@ -42,7 +42,6 @@ export async function apiFetch(
 
 	try {
 		const response = await apiCall
-		const responseString = JSON.stringify(response, null, 2)
 		if (response.status === 200) {
 			// success = true
 			if (onSuccess) onSuccess(response.data)
