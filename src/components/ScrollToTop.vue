@@ -1,6 +1,6 @@
 <template>
 	<div id="scroll-to-top" :class="{ show, headless: mainStore.headless }" @click="scrollToTop">
-		<BaseSvgServe icon="icn-arrow-up" />
+		<BaseIcon icon="icn-arrow-up" />
 	</div>
 </template>
 
@@ -13,7 +13,7 @@ import { useMainStore } from '@/stores/MainStore'
 const mainStore = useMainStore()
 
 // Components
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 // Utils
 import { throttle } from '@/utils/helpers'

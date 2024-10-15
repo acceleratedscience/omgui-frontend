@@ -143,12 +143,12 @@
 
 					<!-- Table data -->
 					<div v-else-if="Array.isArray(val)">
-						<TheTable :data="val" :allowCopy="true" />
+						<TableData :data="val" :allowCopy="true" />
 					</div>
 
 					<!-- Value list -->
 					<div v-else>
-						<TheTable :data="val" :allowCopy="false" />
+						<TableData :data="val" :allowCopy="false" />
 					</div>
 				</div>
 			</details>
@@ -170,7 +170,7 @@ const molViewerStore = useMolViewerStore()
 const fileStore = useFileStore()
 
 // Components
-import TheTable from '@/components/TheTable.vue'
+import TableData from '@/components/TableData.vue'
 import MolViewerDataMmolMatrices from '@/components/MolViewerDataMmolMatrices.vue'
 
 /*

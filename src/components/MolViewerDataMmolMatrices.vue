@@ -12,12 +12,12 @@
 			<div class="small soft">
 				Matrix<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
 			</div>
-			<TheTable :data="matrix" :allowCopy="true" :header="false" />
+			<TableData :data="matrix" :allowCopy="true" :header="false" />
 
 			<div class="small soft vector">
 				Vector<template v-if="String(mtxName) != '_'"> - {{ mtxName }}</template>
 			</div>
-			<TheTable :data="[matrixObj.vectors[mtxName]]" :allowCopy="true" :header="false" />
+			<TableData :data="[matrixObj.vectors[mtxName]]" :allowCopy="true" :header="false" />
 		</div>
 	</div>
 </template>
@@ -28,7 +28,7 @@ import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
 
 // Components
-import TheTable from '@/components/TheTable.vue'
+import TableData from '@/components/TableData.vue'
 
 // Props
 const props = defineProps<{

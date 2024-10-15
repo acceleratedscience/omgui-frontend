@@ -55,7 +55,6 @@ const molType = ref<MolTypeFromRoute>(route.matched[0].name as MolTypeFromRoute)
  */
 
 // While waiting for the API, prepopulate the UI where possible.
-console.log(props.identifier)
 if (props.identifier.startsWith('InChI=')) {
 	// InChI --> prepopulate inchi field only.
 	molViewerStore.setSmolIdentifier('inchi', props.identifier)

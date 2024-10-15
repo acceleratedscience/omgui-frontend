@@ -23,10 +23,10 @@
 		@mouseleave="ignoreHover = false"
 		:style="styleParam"
 	>
-		<BaseSvgServe class="base-icn" :icon="props.icon" />
-		<BaseSvgServe v-if="props.iconHover" class="hover-icn" :icon="props.iconHover" />
-		<BaseSvgServe v-if="props.iconOn" class="on-icn" :icon="props.iconOn" />
-		<BaseSvgServe v-if="props.iconOnHover" class="on-hover-icn" :icon="props.iconOnHover" />
+		<BaseIcon class="base-icn" :icon="props.icon" />
+		<BaseIcon v-if="props.iconHover" class="hover-icn" :icon="props.iconHover" />
+		<BaseIcon v-if="props.iconOn" class="on-icn" :icon="props.iconOn" />
+		<BaseIcon v-if="props.iconOnHover" class="on-hover-icn" :icon="props.iconOnHover" />
 	</div>
 </template>
 
@@ -35,7 +35,7 @@
 import { ref, computed } from 'vue'
 
 // Components
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 // Type declarations
 type StyleParam = {

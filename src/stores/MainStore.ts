@@ -102,7 +102,12 @@ export const useMainStore = defineStore('mainStore', {
 
 		// Set onBlur function
 		setOnClickAnywhere(fn: (e: MouseEvent) => void) {
-			this._onClickAnywhere = fn
+			setTimeout(() => {
+				this._onClickAnywhere = fn
+			}, 0)
+		},
+		unsetOnClickAnywhere() {
+			this._onClickAnywhere = () => {}
 		},
 
 		// Set blockRouting

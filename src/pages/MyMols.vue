@@ -2,7 +2,7 @@
 	<BaseFetching v-if="loading" />
 	<template v-else>
 		<template v-if="!molViewerStore.molFromMolset">
-			<h3><BaseSvgServe icon="icn-bookmark-full" />My Molecules</h3>
+			<h3><BaseIcon icon="icn-bookmark-full" />My Molecules</h3>
 			<p v-if="loadingError" class="error-msg">Something went wrong</p>
 			<template v-else>
 				<template v-if="empty">
@@ -36,7 +36,7 @@ const molViewerStore = useMolViewerStore()
 // Components
 import MolsetViewer from '@/viewers/MolsetViewer.vue'
 import BaseFetching from '@/components/BaseFetching.vue'
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 // Definitions
 const loading = ref<boolean>(true)

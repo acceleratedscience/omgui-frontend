@@ -4,8 +4,8 @@ import { createPinia } from 'pinia'
 // Carbon
 import 'carbon-components/css/carbon-components.css'
 // import '@/assets/carbon-override-fonts.css' // Look inside this file for notes.
-import '@/assets/carbon-override.scss'
-import '@/assets/carbon-fix.css'
+import '@/assets/carbon-overrides.scss'
+import '@/assets/carbon-fixes.scss'
 import CarbonComponentsVue from '@carbon/vue'
 
 // Styles

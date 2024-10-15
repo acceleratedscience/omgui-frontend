@@ -149,6 +149,9 @@ onMounted(async () => {
 onBeforeUnmount(() => {
 	// Remove key handlers.
 	document.removeEventListener('keydown', onKeyDown)
+
+	// Remove blur listener.
+	mainStore.unsetOnClickAnywhere()
 })
 
 /**

@@ -15,8 +15,7 @@ small,
 
 // Soft text
 .soft,
-.soft a,
-.soft a.lookup {
+.soft a {
 	color: #aaa;
 }
 
@@ -61,6 +60,9 @@ a.lookup > div {
 	// text-underline-offset: 3px;
 	position: relative;
 }
+.soft a.lookup {
+	color: #aaa;
+}
 
 // Headers
 h1 {
@@ -83,33 +85,6 @@ hr {
 	background-color: $black-10;
 	border: none;
 	margin: 40px 0;
-}
-
-// Lists
-ul {
-	list-style: disc;
-	margin-inline-start: 20px;
-}
-ol {
-	list-style: decimal;
-	margin-inline-start: 20px;
-}
-ul li,
-ol li {
-	margin-bottom: 8px;
-}
-ol li {
-	padding-left: 3px;
-}
-ul.compact li,
-ol.compact li {
-	margin-bottom: 2px;
-}
-.bx--dropdown ul {
-	margin-inline-start: 0;
-}
-.bx--dropdown ul li {
-	margin-bottom: 0;
 }
 
 // Detail / Summary structures

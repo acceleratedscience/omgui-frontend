@@ -1,7 +1,7 @@
 <template>
 	<div id="title-wrap">
 		<div class="v-align">
-			<BaseSvgServe class="icn-mol" :class="{ loading: loading }" :icon="molIcon" size="large" />
+			<BaseIcon class="icn-mol" :class="{ loading: loading }" :icon="molIcon" size="large" />
 		</div>
 		<h2 id="data-name" data-val="{{ molName }}" :class="{ loading: loading }">
 			{{ capitalize(molName) }}
@@ -49,7 +49,7 @@ import OverflowMenuMol from '@/components/OverflowMenuMol.vue'
 import BaseBookmark from '@/components/BaseBookmark.vue'
 import BasePagination from '@/components/BasePagination.vue'
 import BaseIconButton from '@/components/BaseIconButton.vue'
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 // Type declarations
 import type { ComputedRef, WritableComputedRef } from 'vue'

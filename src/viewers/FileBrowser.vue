@@ -31,7 +31,7 @@
 							@click="() => fetchNextLevel(dir_hidden.path, dir_hidden.filename, level + 1, true)"
 						>
 							<div>{{ dir_hidden.filename }}</div>
-							<BaseSvgServe icon="icn-caret-right" :key="dir_hidden.filename" />
+							<BaseIcon icon="icn-caret-right" :key="dir_hidden.filename" />
 						</div>
 
 						<!-- Directories -->
@@ -44,7 +44,7 @@
 							@click="() => fetchNextLevel(dir.path, dir.filename, level + 1, true)"
 						>
 							<div>{{ dir.filename }}</div>
-							<BaseSvgServe icon="icn-caret-right" :key="dir.filename" />
+							<BaseIcon icon="icn-caret-right" :key="dir.filename" />
 						</div>
 
 						<!-- Hidden files -->
@@ -59,7 +59,7 @@
 							@click="() => previewFile(file_hidden, level + 1, true)"
 							@dblclick="openFile(file_hidden)"
 						>
-							<BaseSvgServe :icon="'icn-file-' + file_hidden._meta.fileType" :key="String(file_hidden._meta.fileType)" />
+							<BaseIcon :icon="'icn-file-' + file_hidden._meta.fileType" :key="String(file_hidden._meta.fileType)" />
 							<div>{{ file_hidden.filename }}</div>
 						</div>
 
@@ -76,7 +76,7 @@
 							@dblclick="openFile(file)"
 							:x="'icn-file-' + file._meta.fileType"
 						>
-							<BaseSvgServe :icon="'icn-file-' + file._meta.fileType" :key="String(file._meta.fileType)" />
+							<BaseIcon :icon="'icn-file-' + file._meta.fileType" :key="String(file._meta.fileType)" />
 							<div>{{ file.filename }}</div>
 						</div>
 
@@ -134,7 +134,7 @@ const fileStore = useFileStore()
 import { fileSystemApi } from '@/api/ApiService'
 
 // Components
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 // Utils
 import { prettySize, timeAgo } from '@/utils/helpers'

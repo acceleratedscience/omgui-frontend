@@ -100,7 +100,7 @@ const routes = [
 		path: '/svg/:filename',
 		name: 'svg',
 		props: true,
-		component: () => import(/* webpackChunkName: 'BaseSvgServe' */ '@/components/BaseSvgServe.vue'),
+		component: () => import(/* webpackChunkName: 'BaseIcon' */ '@/components/BaseIcon.vue'),
 	},
 	{
 		path: '/kitchensink',
