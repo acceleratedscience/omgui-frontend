@@ -50,7 +50,6 @@ const $container3dFs = ref<Element | null>(null)
 const fullscreen = ref<boolean>(false)
 let miewViewer: any = null
 let miewViewerFs: any = null
-let updateViewer: boolean = false
 
 /**
  * Computed

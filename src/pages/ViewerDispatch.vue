@@ -157,7 +157,7 @@ async function parseRoute() {
 
 // Load the dynamic module.
 function loadModule(moduleName: string | null) {
-	console.log('loadModule', moduleName)
+	// console.log('loadModule', moduleName)
 	loadError.value = false
 	if (!moduleName) {
 		dynamicModule.value = null
