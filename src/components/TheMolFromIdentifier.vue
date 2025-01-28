@@ -1,7 +1,9 @@
 <template>
-	<BaseFetching v-if="molViewerStore.loading" />
+	<!-- <div style="position: relative; z-index: 1000; color: green">-{{ loading }} / {{ doubleLoading }}</div> -->
+	<BaseError v-if="loadingError" :loadingError backLink="/mol" :note="loadingErrorNote" />
+	<BaseFetchingFile v-else-if="loading || doubleLoading" />
 	<template v-else-if="route.query.use == 'json'">
-		<JsonViewer :data="molViewerStore.mol" />
+		<JsonViewer :data="molViewerStore.smol" />
 	</template>
 	<MolViewer v-else context="identifier" :loading="loading" :loadingError="loadingError" @retryLoad="fetchMolDataByIdentifier(identifier)" />
 </template>
@@ -22,9 +24,18 @@ const molViewerStore = useMolViewerStore()
 import { apiFetch, moleculesApi } from '@/api/ApiService'
 
 // Components
+import BaseError from '@/components/BaseError.vue'
 import JsonViewer from '@/viewers/JsonViewer.vue'
 import MolViewer from '@/viewers/MolViewer.vue'
-import BaseFetching from '@/components/BaseFetching.vue'
+import BaseFetchingFile from '@/components/BaseFetchingFile.vue'
+
+// Utils
+import initRDKit from '@/utils/rdkit/initRDKit'
+// import domLog from '@/utils/dom-log'
+
+// Type declarations
+import type { JSMol } from '@/utils/rdkit/tsTypes'
+type MolTypeFromRoute = 'smol' | 'mmol' | 'mol' | 'headless-smol' | 'headless-mmol' | 'headless-mol'
 
 // Props
 const props = defineProps<{
@@ -33,14 +44,11 @@ const props = defineProps<{
 
 // Definitions
 const loading = ref<boolean>(false)
-// const loadingError = ref<boolean>(false)
+const doubleLoading = ref<boolean>(false) // Special loader for when we're fetching both smol and mmol data.
 const loadingError = ref<string>('')
-
-// Utils
-import initRDKit from '@/utils/rdkit/initRDKit'
-
-// Type declarations
-import type { JSMol } from '@/utils/rdkit/tsTypes'
+const loadingErrorNote = ref<string>('')
+const loadingErrorNoteValue = 'This may be a false negative. Please try again to confirm.'
+const molType = ref<MolTypeFromRoute>(route.matched[0].name as MolTypeFromRoute)
 
 /**
  * Logic
@@ -49,13 +57,13 @@ import type { JSMol } from '@/utils/rdkit/tsTypes'
 // While waiting for the API, prepopulate the UI where possible.
 if (props.identifier.startsWith('InChI=')) {
 	// InChI --> prepopulate inchi field only.
-	molViewerStore.setMolIdentifier('inchi', props.identifier)
-	molViewerStore.fetchMolVizData(props.identifier)
+	molViewerStore.setSmolIdentifier('inchi', props.identifier)
+	molViewerStore.fetchSmolVizData(props.identifier)
 } else {
 	// SMILES --> prepopulate other identifiers and generate the SVG.
-	// OTHER --> this won't do anything, we'll call molViewerStore.fetchMolVizData later.
+	// OTHER --> this won't do anything, we'll call molViewerStore.fetchSmolVizData later.
 	tryPrepopulateFromSmiles(props.identifier)
-	molViewerStore.fetchMolVizData(props.identifier)
+	molViewerStore.fetchSmolVizData(props.identifier)
 }
 
 fetchMolDataByIdentifier(props.identifier)
@@ -84,11 +92,59 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 	// console.log('fetchMolData', identifier)
 	if (!identifier) return
 
-	let success: boolean = false
 	loading.value = true
 	loadingError.value = ''
+	loadingErrorNote.value = ''
 
-	apiFetch(moleculesApi.getMolData(identifier), {
+	// Because we get the molType from the route name,
+	// it will have "headless-" prepended when running
+	// inside an iframe.
+	molType.value = molType.value.replace(/^headless-/, '') as MolTypeFromRoute
+
+	if (molType.value == 'mol') {
+		// When molType is 'mol', we don't know if the identifier
+		// is a smol or mmol, so we first do a smol search, then
+		// a mmol search if the smol search fails. The doubleLoading
+		// lets us maintain the loading status until both calls have
+		// completed.
+		doubleLoading.value = true
+		_getSmolData(identifier, {
+			onSuccess: () => {
+				// smol - onSuccess
+				doubleLoading.value = false
+			},
+			onError: () => {
+				// smol - onError
+				_getMmolData(identifier, {
+					onSuccess: () => {
+						// mmol - onSuccess
+						doubleLoading.value = false
+					},
+					onError: () => {
+						// mmol - onError
+						doubleLoading.value = false
+						loadingErrorNote.value = loadingErrorNoteValue
+					},
+				})
+			},
+		})
+	} else if (['smol', 'mol'].includes(molType.value)) {
+		_getSmolData(identifier, {
+			onError: () => {
+				loadingErrorNote.value = loadingErrorNoteValue
+			},
+		})
+	} else if (molType.value == 'mmol') {
+		_getMmolData(identifier, {
+			onError: () => {
+				loadingErrorNote.value = loadingErrorNoteValue
+			},
+		})
+	}
+}
+
+function _getSmolData(identifier: string, { onSuccess = () => {}, onError = () => {} } = {}) {
+	apiFetch(moleculesApi.getSmolData(identifier), {
 		onSuccess: (data) => {
 			// // #fetching-error
 			// // To test error handling.
@@ -104,18 +160,38 @@ async function fetchMolDataByIdentifier(identifier: string | null = null) {
 			const needsVizData = !molViewerStore.inchi
 
 			// Update HTML
-			molViewerStore.setMolData(data)
-			success = true
+			molViewerStore.setMolData(data, 'smol')
 
 			if (needsVizData) {
-				molViewerStore.fetchMolVizData(molViewerStore.inchi!)
+				molViewerStore.fetchSmolVizData(identifier)
 			}
+			onSuccess()
 		},
+		onError: onError,
 		loading: loading,
 		loadingError: loadingError,
 	})
+}
 
-	return success
+function _getMmolData(identifier: string, { onSuccess = () => {}, onError = () => {} } = {}) {
+	apiFetch(moleculesApi.getMmolData(identifier), {
+		onSuccess: (data) => {
+			// // #fetching-error
+			// // To test error handling.
+			// loadingError.value = 'Some status message'
+			// loading.value = false
+			// console.log('ERROOOO')
+			// return
+
+			// Update HTML
+			molViewerStore.setMolData(data, 'mmol')
+
+			onSuccess()
+		},
+		onError: onError,
+		loading: loading,
+		loadingError: loadingError,
+	})
 }
 
 // If the identifier is a SMILES, we can use rdkit-js to generate
@@ -131,9 +207,9 @@ async function tryPrepopulateFromSmiles(identifier: string) {
 
 	// Prepopulate
 	const inchi = rdkMol.get_inchi()
-	molViewerStore.setMolIdentifier('canonical_smiles', identifier) // This will trigger the SVG rendering
-	molViewerStore.setMolIdentifier('inchi', inchi)
-	molViewerStore.setMolIdentifier('inchikey', window.RDKit.get_inchikey_for_inchi(inchi))
+	molViewerStore.setSmolIdentifier('canonical_smiles', identifier) // This will trigger the SVG rendering
+	molViewerStore.setSmolIdentifier('inchi', inchi)
+	molViewerStore.setSmolIdentifier('inchikey', window.RDKit.get_inchikey_for_inchi(inchi))
 
 	// // Rendering the  3D Molecule from the frontend is
 	// // currently not possible with rdkit-js, but when it is,

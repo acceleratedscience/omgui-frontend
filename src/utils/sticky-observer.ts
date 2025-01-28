@@ -10,10 +10,12 @@ export default function useStickyObserver(selector: string) {
 	onMounted(() => {
 		const stickyElm: HTMLElement | null = document.querySelector(selector)
 		if (!stickyElm) return
-		observer = new IntersectionObserver(
-			([e]) => e.target.classList.toggle('sticky', e.intersectionRatio < 1),
-			{ rootMargin: '-1px 0px 0px 0px', threshold: [1] },
-		)
+		const computedStyle = getComputedStyle(stickyElm)
+		const top = computedStyle.top == 'auto' ? 0 : parseInt(computedStyle.top)
+		observer = new IntersectionObserver(([e]) => e.target.classList.toggle('sticky', e.intersectionRatio < 1), {
+			rootMargin: `-${top + 1}px`,
+			threshold: [1],
+		})
 		observer.observe(stickyElm)
 	})
 

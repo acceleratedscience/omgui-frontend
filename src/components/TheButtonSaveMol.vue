@@ -28,7 +28,7 @@ const modalSaveFile = useModalSaveFile()
 
 // Type declarations
 import type { ComputedRef } from 'vue'
-import type { Mol } from '@/types'
+import type { Smol } from '@/types'
 
 // Definitions
 const saving = ref<boolean>(false)
@@ -39,7 +39,7 @@ const saving = ref<boolean>(false)
 
 // Molecule is a non-JSOn file.
 const isForeignFile: ComputedRef<boolean> = computed(() => {
-	return fileStore.active && !['mol', 'molset'].includes(fileStore.fileType || '')
+	return fileStore.active && !['smol', 'molset'].includes(fileStore.fileType || '')
 })
 
 // Control the button text, either 'Save' or 'Save as...'
@@ -47,8 +47,8 @@ const saveAs: ComputedRef<boolean> = computed(() => {
 	if (molGridStore.active) {
 		// molset.json / my-mols --> Update the source.
 		if (molGridStore.context == 'json' || molGridStore.context == 'my-mols') return false
-	} else if (fileStore.fileType == 'mol') {
-		// mol.json --> Update the source.
+	} else if (fileStore.fileType == 'smol') {
+		// smol.json --> Update the source.
 		return false
 	}
 	// Everything else --> Save as...
@@ -83,24 +83,24 @@ async function onSaveClick() {
 		// Molecule inside of a molset.
 		if (molGridStore.context == 'json') {
 			// .molset.json file --> Update the JSON file.
-			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.mol as Mol, molGridStore.context)
+			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.smol as Smol, molGridStore.context)
 		} else if (molGridStore.context == 'my-mols') {
 			// My mols --> Update your working molecule set.
-			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.mol as Mol, molGridStore.context)
+			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.smol as Smol, molGridStore.context)
 		} else {
 			// Result mols / Non-JSON molset files (SDF, maybe others later) --> Display save-as modal.
 			molGridStore.setHasChanges(false) // See note on top
-			success = await modalSaveFile('mol-options', { defaultName: molViewerStore.nameSlug })
+			success = await modalSaveFile('smol', true, { defaultName: molViewerStore.nameSlug })
 			molGridStore.setHasChanges(!success)
 		}
 	} else if (!fileStore.active || isForeignFile.value) {
 		// Not a file (molecule viewer) or a foreign file --> Display save-as modal.
 		molViewerStore.setHasChanges(false) // See note on top
-		success = await modalSaveFile('mol-options', { defaultName: molViewerStore.nameSlug })
+		success = await modalSaveFile('smol', true, { defaultName: molViewerStore.nameSlug })
 		molViewerStore.setHasChanges(!success)
-	} else if (fileStore.fileType == 'mol') {
-		// .mol.json file --> Update the current JSON file.
-		success = await molViewerStore.saveMolAsJSON(fileStore.path, { newFile: false })
+	} else if (fileStore.fileType == 'smol') {
+		// .smol.json file --> Update the current JSON file.
+		success = await molViewerStore.saveSmolAsJSON(fileStore.path, { newFile: false })
 	}
 
 	// Success

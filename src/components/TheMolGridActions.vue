@@ -173,9 +173,9 @@ async function dispatchMainAction(action: string) {
 	} else if (action == 'keep selected') {
 		molGridStore.keepMols(molGridStore.sel)
 	} else if (action == 'copy to clipboard') {
-		console.log('copy to clipboard')
+		console.log('copy to clipboard') // TO DO: implement this
 	} else if (action == 'save as') {
-		modalSaveFile('molset-options')
+		modalSaveFile('molset', true)
 	}
 
 	// Reset for next use.

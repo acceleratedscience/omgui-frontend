@@ -29,9 +29,9 @@
 		@click="onClick"
 		:style="styleParam"
 	>
-		<BaseSvgServe class="base-icn" :icon="props.icon" :size="iconSize" />
-		<BaseSvgServe v-if="props.iconHover" class="hover-icn" :icon="props.iconHover" :size="iconSize" />
-		<BaseSvgServe v-if="props.iconSel" class="sel-icn" :icon="props.iconSel" :size="iconSize" />
+		<BaseIcon class="base-icn" :icon="props.icon" :size="iconSize" />
+		<BaseIcon v-if="props.iconHover" class="hover-icn" :icon="props.iconHover" :size="iconSize" />
+		<BaseIcon v-if="props.iconSel" class="sel-icn" :icon="props.iconSel" :size="iconSize" />
 	</div>
 </template>
 
@@ -40,7 +40,7 @@
 import { ref, computed } from 'vue'
 
 // Components
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 // Type declarations
 type StyleParam = {

@@ -41,9 +41,11 @@ const fileStore = useFileStore()
 import { map_fileType2DisplayFT } from '@/utils/maps'
 import { capitalize } from '@/utils/helpers'
 
+// Emits
+const emit = defineEmits(['mounted'])
+
 // Definitions
 const router = useRouter()
-const emit = defineEmits(['mounted'])
 
 /*
  * Computed

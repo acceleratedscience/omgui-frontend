@@ -1,0 +1,87 @@
+/**
+ * This file contains bug fixes and
+ * workarounds for Carbon components.
+ */
+
+//
+//
+
+// When we link a url parameter on to the current page,
+// the link will be marked with router-link-exact-active
+// causing it to be underlined and not clickable.
+a:not(.dumb).router-link-exact-active,
+a:not(.dumb).router-link-exact-active:hover {
+	color: $black;
+	text-decoration: underline;
+	pointer-events: none;
+}
+
+/**
+ * Modals
+ */
+
+// Remove focus outline from modal content.
+.bx--modal-content:focus {
+	outline: none;
+}
+
+// Fit the modals tightly in the window
+.bx--modal-container {
+	max-height: calc(100% - 40px) !important;
+}
+
+// Allow dropdowns to expand outside of the content box
+// and the dialog. The default behavior gets them cropped.
+.bx--modal-container,
+.bx--modal-content {
+	overflow: visible;
+}
+.cv-modal.scrollable .bx--modal-content {
+	overflow: auto;
+}
+
+/**
+ * Form elements
+ */
+
+// Force input height to be the size of the buttons
+// so they are aligned when appearing on the same line.
+input.bx--text-input {
+	height: 3rem;
+}
+
+// Remove dropdown transitions.
+// - - -
+// They cause scroll bars to appear and disappear when using
+// a mouse and are generall annoying because of the delay.
+.bx--dropdown {
+	transition: none;
+}
+
+// Missing support for disabled items in a dropdown, currently not supported
+.bx--dropdown--open .bx--dropdown-item[disabled]:not([disabled='false']) {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Hidden items in dropdown, currently not supported */
+.bx--dropdown--open .bx--dropdown-item[hidden]:not([hidden='false']) {
+	display: none;
+}
+
+/**
+ * Hover states
+ */
+
+// Hover states
+@media (hover: hover) {
+	// Links in carbon css don't have hover state
+	a:hover {
+		color: $blue-hover;
+	}
+
+	// Dropdowns have a too dark hover color
+	.bx--dropdown:hover {
+		background: $soft-bg-hover;
+	}
+}

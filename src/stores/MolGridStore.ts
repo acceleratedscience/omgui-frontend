@@ -70,20 +70,24 @@ const IDFR_DEFAULTS = ['name', 'isomeric_smiles', 'molecular_formula']
 const PROP_DEFAULT = ['molecular_weight']
 
 // Type declarations
-import type { Mol, Molset, MolsetApi, SearchMode } from '@/types'
+import type { Smol, Molset, MolsetApi, SearchMode } from '@/types'
 type Context = 'json' | 'sdf-file' | 'csv-file' | 'smi-file' | 'result-mols' | 'my-mols' | 'dataframe' | null
 type SaveAsJSONOptions = {
 	newFile?: boolean
+	force?: boolean
 }
 type SaveAsSDFOptions = {
 	removeInvalidMols?: boolean
 	newFile?: boolean
+	force?: boolean
 }
 type SaveAsCSVOptions = {
 	newFile?: boolean
+	force?: boolean
 }
 type SaveAsSmilesOptions = {
 	newFile?: boolean
+	force?: boolean
 }
 type State = {
 	// Context
@@ -549,7 +553,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 
 		// Replace a molecule in a .molset.json file or in my-mols.
 		// This is used when saving changes to a molecule inside a molset.
-		replaceMolInMolset(destinationPath: string, mol: Mol, context: 'json' | 'my-mols'): Promise<boolean> {
+		replaceMolInMolset(destinationPath: string, mol: Smol, context: 'json' | 'my-mols'): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(moleculesApi.replaceMolInMolset(destinationPath, mol, context, this._cacheId!), {
 					onSuccess: () => {
@@ -577,89 +581,12 @@ export const useMolGridStore = defineStore('molGridStore', {
 			})
 		},
 
-		// Export molset as a JSON (.molset.json) file.
-		saveMolsetAsJSON(destinationPath: string, { newFile = false }: SaveAsJSONOptions = {}): Promise<boolean> {
-			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolsetAsJSON(destinationPath, this._cacheId!, newFile), {
-					onSuccess: () => resolve(true),
-					onError: () => reject(true),
-				})
-			})
-		},
-
-		// Export molset as SDF (.sdf) file.
-		async saveMolsetAsSDF(destinationPath: string, options: SaveAsSDFOptions): Promise<boolean> {
-			try {
-				return await this._saveMolsetAsSDF(destinationPath, options)
-			} catch (err: any) {
-				this._maybeShowInvalidMolsModal(err, {
-					callback: this.saveMolsetAsSDF,
-					destinationPath,
-					options,
-				})
-				return Promise.resolve(false)
-			}
-		},
-		_saveMolsetAsSDF(destinationPath: string, { removeInvalidMols = false, newFile = false }: SaveAsSDFOptions = {}): Promise<boolean> {
-			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolsetAsSDF(destinationPath, this._cacheId!, removeInvalidMols, newFile), {
-					onSuccess: () => resolve(true),
-					onError: (response) => reject(response),
-				})
-			})
-		},
-
-		// Export molset as CSV (.csv) file.
-		async saveMolsetAsCSV(destinationPath: string, options: SaveAsCSVOptions = {}): Promise<boolean> {
-			try {
-				return await this._saveMolsetAsCSV(destinationPath, options)
-			} catch (err: any) {
-				this._maybeShowInvalidMolsModal(err, {
-					callback: this.saveMolsetAsCSV,
-					destinationPath,
-					options,
-				})
-				return Promise.resolve(false)
-			}
-		},
-		_saveMolsetAsCSV(destinationPath: string, { newFile = false }: SaveAsCSVOptions = {}): Promise<boolean> {
-			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolsetAsCSV(destinationPath, this._cacheId!, newFile), {
-					onSuccess: () => resolve(true),
-					onError: () => reject(true),
-				})
-			})
-		},
-
-		// Save molset as SMILES (.smi) file.
-		async saveMolsetAsSmiles(destinationPath: string, options: SaveAsSmilesOptions = {}): Promise<boolean> {
-			try {
-				console.log('@', options)
-				return await this._saveMolsetAsSmiles(destinationPath, options)
-			} catch (err: any) {
-				this._maybeShowInvalidMolsModal(err, {
-					callback: this.saveMolsetAsSmiles,
-					destinationPath,
-					options,
-				})
-				return Promise.resolve(false)
-			}
-		},
-		_saveMolsetAsSmiles(destinationPath: string, { newFile = false }: SaveAsSmilesOptions): Promise<boolean> {
-			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.saveMolsetAsSmiles(destinationPath, this._cacheId!, newFile), {
-					onSuccess: () => resolve(true),
-					onError: () => reject(true),
-				})
-			})
-		},
-
 		// When trying to save a molset to a format that requires processing by RDKit
 		// and some of the molecules can't be parsed, the API will return a 422 error
 		// with a list of invalid molecules. This list is then used to display a modal,
 		// allowing the user to try again while discarding the invalid molecules.
 		_maybeShowInvalidMolsModal(
-			err: { data: { invalidMols?: Mol[] } },
+			err: { data: { invalidMols?: Smol[] } },
 			{ callback, destinationPath, options }: { callback: Function; destinationPath: string; options: SaveAsSDFOptions },
 		) {
 			// Ignore string error messages.
@@ -669,7 +596,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 			if (data.invalidMols) {
 				console.log(`The following ${data.invalidMols.length} molecules are invalid:`) // Leave this
 				const list = data.invalidMols
-					.map((mol: Mol) => {
+					.map((mol: Smol) => {
 						if (mol) {
 							const name = mol['identifiers']['name'] ? mol['identifiers']['name'] + '<br>' : ''
 							const smiles =
@@ -726,6 +653,89 @@ export const useMolGridStore = defineStore('molGridStore', {
 		updateMolset_dataframe(dfName: string): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(dataframeApi.updateDataframe_molset(dfName, this._cacheId!), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
+		/**
+		 * Save-as functions - small molecules
+		 */
+
+		// Export molset as a JSON (.molset.json) file.
+		saveMolsetAsJSON(destinationPath: string, { newFile = false, force = false }: SaveAsJSONOptions = {}): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolsetAsJSON(destinationPath, this._cacheId!, newFile, force), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
+		// Export molset as SDF (.sdf) file.
+		async saveMolsetAsSDF(destinationPath: string, options: SaveAsSDFOptions): Promise<boolean> {
+			try {
+				return await this._saveMolsetAsSDF(destinationPath, options)
+			} catch (err: any) {
+				this._maybeShowInvalidMolsModal(err, {
+					callback: this.saveMolsetAsSDF,
+					destinationPath,
+					options,
+				})
+				return Promise.resolve(false)
+			}
+		},
+		_saveMolsetAsSDF(
+			destinationPath: string,
+			{ removeInvalidMols = false, newFile = false, force = false }: SaveAsSDFOptions = {},
+		): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolsetAsSDF(destinationPath, this._cacheId!, removeInvalidMols, newFile, force), {
+					onSuccess: () => resolve(true),
+					onError: (response) => reject(response),
+				})
+			})
+		},
+
+		// Export molset as CSV (.csv) file.
+		async saveMolsetAsCSV(destinationPath: string, options: SaveAsCSVOptions = {}): Promise<boolean> {
+			try {
+				return await this._saveMolsetAsCSV(destinationPath, options)
+			} catch (err: any) {
+				this._maybeShowInvalidMolsModal(err, {
+					callback: this.saveMolsetAsCSV,
+					destinationPath,
+					options,
+				})
+				return Promise.resolve(false)
+			}
+		},
+		_saveMolsetAsCSV(destinationPath: string, { newFile = false, force = false }: SaveAsCSVOptions = {}): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolsetAsCSV(destinationPath, this._cacheId!, newFile, force), {
+					onSuccess: () => resolve(true),
+					onError: () => reject(true),
+				})
+			})
+		},
+
+		// Save molset as SMILES (.smi) file.
+		async saveMolsetAsSmiles(destinationPath: string, options: SaveAsSmilesOptions = {}): Promise<boolean> {
+			try {
+				return await this._saveMolsetAsSmiles(destinationPath, options)
+			} catch (err: any) {
+				this._maybeShowInvalidMolsModal(err, {
+					callback: this.saveMolsetAsSmiles,
+					destinationPath,
+					options,
+				})
+				return Promise.resolve(false)
+			}
+		},
+		_saveMolsetAsSmiles(destinationPath: string, { newFile = false, force = false }: SaveAsSmilesOptions): Promise<boolean> {
+			return new Promise<boolean>((resolve, reject) => {
+				apiFetch(moleculesApi.saveMolsetAsSmiles(destinationPath, this._cacheId!, newFile, force), {
 					onSuccess: () => resolve(true),
 					onError: () => reject(true),
 				})

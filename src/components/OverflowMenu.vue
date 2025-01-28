@@ -1,22 +1,18 @@
-<template>
-	<div class="btn-wrap" :class="{ disabled }">
-		<BaseIconButton icon="icn-overflow" />
-		<select v-model="action">
-			<option value="" disabled hidden></option>
-			<option v-for="(option, i) in options" :key="i" :value="option.val">{{ option.disp }}</option>
-		</select>
-	</div>
-</template>
-
 <script setup lang="ts">
 // Vue
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted } from 'vue'
 
 // Components
 import BaseIconButton from '@/components/BaseIconButton.vue'
 
 // Type declarations
-import type { ActionOption } from '@/types'
+type ActionOption = {
+	val: string
+	disp: string
+	action: () => void
+	selected?: boolean
+	hide?: boolean
+}
 
 // Properties
 const props = defineProps<{
@@ -26,14 +22,26 @@ const props = defineProps<{
 
 // Definitions
 const action = ref<string>('')
+const enableWatcher = ref(false)
 
 /**
  * Hooks
  */
 
+onMounted(async () => {
+	// If one of the options has selected set to True, set the value to this option.
+	const selectedOption = props.options.find((option) => option.selected)
+	if (selectedOption) {
+		action.value = selectedOption.val
+	}
+	await nextTick()
+	enableWatcher.value = true
+})
+
 watch(
 	() => action.value,
 	async (newVal) => {
+		if (!enableWatcher.value) return
 		if (newVal) {
 			// Handle action
 			const selectedOption = props.options.find((option) => option.val === newVal)
@@ -49,6 +57,22 @@ watch(
 	},
 )
 </script>
+
+<!----------------------------------------------------->
+
+<template>
+	<div class="btn-wrap" :class="{ disabled }">
+		<BaseIconButton icon="icn-overflow" />
+		<select v-model="action">
+			<option value="" disabled hidden></option>
+			<option v-for="(option, i) in options" :key="i" :value="option.val" :hidden="!!option.hide">
+				{{ option.disp }}
+			</option>
+		</select>
+	</div>
+</template>
+
+<!----------------------------------------------------->
 
 <style lang="scss" scoped>
 .btn-wrap {

@@ -31,7 +31,7 @@
 							@click="() => fetchNextLevel(dir_hidden.path, dir_hidden.filename, level + 1, true)"
 						>
 							<div>{{ dir_hidden.filename }}</div>
-							<BaseSvgServe icon="icn-caret-right" :key="dir_hidden.filename" />
+							<BaseIcon icon="icn-caret-right" :key="dir_hidden.filename" />
 						</div>
 
 						<!-- Directories -->
@@ -44,7 +44,7 @@
 							@click="() => fetchNextLevel(dir.path, dir.filename, level + 1, true)"
 						>
 							<div>{{ dir.filename }}</div>
-							<BaseSvgServe icon="icn-caret-right" :key="dir.filename" />
+							<BaseIcon icon="icn-caret-right" :key="dir.filename" />
 						</div>
 
 						<!-- Hidden files -->
@@ -59,7 +59,7 @@
 							@click="() => previewFile(file_hidden, level + 1, true)"
 							@dblclick="openFile(file_hidden)"
 						>
-							<BaseSvgServe :icon="'icn-file-' + file_hidden._meta.fileType" :key="String(file_hidden._meta.fileType)" />
+							<BaseIcon :icon="'icn-file-' + file_hidden._meta.fileType" :key="String(file_hidden._meta.fileType)" />
 							<div>{{ file_hidden.filename }}</div>
 						</div>
 
@@ -76,7 +76,7 @@
 							@dblclick="openFile(file)"
 							:x="'icn-file-' + file._meta.fileType"
 						>
-							<BaseSvgServe :icon="'icn-file-' + file._meta.fileType" :key="String(file._meta.fileType)" />
+							<BaseIcon :icon="'icn-file-' + file._meta.fileType" :key="String(file._meta.fileType)" />
 							<div>{{ file.filename }}</div>
 						</div>
 
@@ -125,14 +125,16 @@ import { useRouter, useRoute } from 'vue-router'
 // Stores
 import { useMainStore } from '@/stores/MainStore'
 import { useModalStore } from '@/stores/ModalStore'
+import { useFileStore } from '@/stores/FileStore'
 const mainStore = useMainStore()
 const modalStore = useModalStore()
+const fileStore = useFileStore()
 
 // API
 import { fileSystemApi } from '@/api/ApiService'
 
 // Components
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 // Utils
 import { prettySize, timeAgo } from '@/utils/helpers'
@@ -149,6 +151,9 @@ const filePreview = ref<File | null>(null)
 const colScroll = ref<HTMLDivElement | null>(null)
 const columns = ref<HTMLDivElement[] | null>(null)
 
+// Emits
+const emit = defineEmits(['update:modelValue'])
+
 // Props
 const props = defineProps<{
 	// When the filebrowser is loaded inside the save-file modal.
@@ -156,9 +161,6 @@ const props = defineProps<{
 	// This lets us v-model a path in the save-file modal.
 	modelValue?: string
 }>()
-
-// Emits
-const emit = defineEmits(['update:modelValue'])
 
 /*
  * Computed
@@ -269,7 +271,35 @@ function hidePreviewFile() {
 }
 
 function openFile(file: File) {
-	if (!props.isModal) router.push('/~/' + file.path)
+	// You can't open files in the ModalSaveFile modal.
+	if (props.isModal) return
+
+	const fileSize = file._meta.size
+	const over3MB = fileSize && fileSize > 3000000
+	const over10MB = fileSize && fileSize > 10000000
+	const over20MB = fileSize && fileSize > 20000000
+
+	// Show warning when a file is over 3MB.
+	if (over3MB) {
+		const displaySize = over20MB ? '20 MB' : over10MB ? '10 MB' : '3 MB'
+		let message = over20MB
+			? 'It may take up to several minutes to load.'
+			: over10MB
+				? 'It may take a minute to load.'
+				: 'It may take a few seconds to load.'
+		message += ' Are you sure you want to continue?'
+
+		modalStore.confirm(message, {
+			title: `This file is over ${displaySize}`,
+			primaryBtn: 'Open',
+			onSubmit: () => {
+				fileStore.setForcedLoading(true)
+				router.push('/~/' + file.path)
+			},
+		})
+	} else {
+		router.push('/~/' + file.path)
+	}
 }
 
 // Load the next level of files and add column.

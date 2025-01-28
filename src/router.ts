@@ -22,9 +22,32 @@ const routes = [
 		name: 'filebrowser',
 		component: () => import(/* webpackChunkName: 'ViewerDispatch' */ `@/pages/ViewerDispatch.vue`),
 	},
+	// {
+	// 	path: '/mol',
+	// 	name: 'mol',
+	// 	component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
+	// },
 	{
 		path: '/mol/:identifier?',
 		name: 'mol',
+		props: true,
+		component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
+	},
+	{
+		path: '/smol',
+		alias: '/mmol',
+		name: 'smol-mmol',
+		redirect: '/mol',
+	},
+	{
+		path: '/smol/:identifier',
+		name: 'smol',
+		props: true,
+		component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
+	},
+	{
+		path: '/mmol/:identifier',
+		name: 'mmol',
 		props: true,
 		component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
 	},
@@ -77,11 +100,11 @@ const routes = [
 		path: '/svg/:filename',
 		name: 'svg',
 		props: true,
-		component: () => import(/* webpackChunkName: 'BaseSvgServe' */ '@/components/BaseSvgServe.vue'),
+		component: () => import(/* webpackChunkName: 'BaseIcon' */ '@/components/BaseIcon.vue'),
 	},
 	{
-		path: '/kitchen-sink',
-		name: 'kitchen-sink',
+		path: '/kitchensink',
+		name: 'kitchensink',
 		component: () => import(/* webpackChunkName: 'KitchenSink' */ '@/pages/KitchenSink.vue'),
 	},
 	{

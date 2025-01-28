@@ -42,7 +42,7 @@
 		@click="
 			modalStore.display(
 				'ModalSaveFile',
-				{ path: 'my_dir/sub_dir/subsub_dir', filename: 'Foobar', dataType: 'mol' },
+				{ path: 'my_dir/sub_dir/subsub_dir', filename: 'Foobar', dataType: 'smol' },
 				{
 					onSubmit: () => {
 						console.log('submitted')
@@ -73,28 +73,29 @@
 	<h4>:: Icons</h4>
 
 	<span style="color: red">
-		<a href="#"><BaseSvgServe icon="icn-file-mol" /></a>
-		<BaseSvgServe icon="icn-file-mol" />
-		<BaseSvgServe icon="icn-file-molset" />
-		<BaseSvgServe icon="icn-file-data" />
-		<BaseSvgServe icon="icn-file-text" />
-		<BaseSvgServe icon="icn-link" />
-		<BaseSvgServe icon="icn-reaction" />
-		<BaseSvgServe icon="icn-star" />
-		<BaseSvgServe icon="icn-file-run" />
-		<BaseSvgServe icon="icn-file-json" />
-		<BaseSvgServe icon="icn-file-pdf" />
-		<BaseSvgServe icon="icn-file-run" />
-		<BaseSvgServe icon="icn-file-sdf" />
-		<BaseSvgServe icon="icn-file-molset-csv" />
-		<BaseSvgServe icon="icn-file-svg" />
-		<BaseSvgServe icon="icn-file-md" />
-		<BaseSvgServe icon="icn-file-unk" />
-		<BaseSvgServe icon="icn-caret-left" />
-		<BaseSvgServe icon="icn-caret-right" />
-		<BaseSvgServe icon="icn-caret-up" />
-		<BaseSvgServe icon="icn-caret-down" />
-		<BaseSvgServe icon="icn-file-mol" size="large" />
+		<a href="#"><BaseIcon icon="icn-file-smol" /></a>
+		<BaseIcon icon="icn-file-smol" />
+		<BaseIcon icon="icn-file-mmol" />
+		<BaseIcon icon="icn-file-molset" />
+		<BaseIcon icon="icn-file-data" />
+		<BaseIcon icon="icn-file-text" />
+		<BaseIcon icon="icn-link" />
+		<BaseIcon icon="icn-reaction" />
+		<BaseIcon icon="icn-star-full" />
+		<BaseIcon icon="icn-file-run" />
+		<BaseIcon icon="icn-file-json" />
+		<BaseIcon icon="icn-file-pdf" />
+		<BaseIcon icon="icn-file-run" />
+		<BaseIcon icon="icn-file-sdf" />
+		<BaseIcon icon="icn-file-molset-csv" />
+		<BaseIcon icon="icn-file-svg" />
+		<BaseIcon icon="icn-file-md" />
+		<BaseIcon icon="icn-file-unk" />
+		<BaseIcon icon="icn-caret-left" />
+		<BaseIcon icon="icn-caret-right" />
+		<BaseIcon icon="icn-caret-up" />
+		<BaseIcon icon="icn-caret-down" />
+		<BaseIcon icon="icn-file-smol" size="large" />
 
 		<!-- Native icons -->
 		<CloseIcon />
@@ -107,31 +108,31 @@
 	<div class="icons-wrap">
 		<div style="background: #ffd">
 			Default
-			<BaseIconButton icon="icn-star" />
+			<BaseIconButton icon="icn-star-full" />
 		</div>
 		<div>
 			Soft
-			<BaseIconButton icon="icn-star" btnStyle="soft" />
+			<BaseIconButton icon="icn-star-full" btnStyle="soft" />
 		</div>
 		<div>
 			Carbon
-			<BaseIconButton icon="icn-star" btnStyle="carbon" />
+			<BaseIconButton icon="icn-star-full" btnStyle="carbon" />
 		</div>
 		<div>
 			Custom colors
-			<BaseIconButton icon="icn-star" color="green" colorHover="red" />
+			<BaseIconButton icon="icn-star-full" color="green" colorHover="red" />
 		</div>
 		<div>
 			Toggle
-			<BaseIconButton icon="icn-star" :toggle="true" />
+			<BaseIconButton icon="icn-star-full" :toggle="true" />
 		</div>
 		<div>
 			Toggle with custom color
-			<BaseIconButton icon="icn-star" :toggle="true" colorToggle="#d3bf0b" />
+			<BaseIconButton icon="icn-star-full" :toggle="true" colorToggle="#d3bf0b" />
 		</div>
 		<div>
 			Mini
-			<BaseIconButton icon="icn-star" :mini="true" />
+			<BaseIconButton icon="icn-star-full" :mini="true" />
 		</div>
 	</div>
 	<br />
@@ -140,9 +141,9 @@
 		<div class="icons-wrap">
 			<BaseIconButton icon="icn-full-screen-large" iconHover="icn-full-screen-large-hover" btnStyle="soft" icnSize="large" />
 			<BaseIconButton
-				icon="icn-star-large-outline"
-				iconHover="icn-star"
-				iconSel="icn-star"
+				icon="icn-star-full-large"
+				iconHover="icn-star-full"
+				iconSel="icn-star-full"
 				colorToggle="#d3bf0b"
 				:toggle="true"
 				icnSize="large"
@@ -185,7 +186,7 @@ import { useModalStore } from '@/stores/ModalStore'
 const modalStore = useModalStore()
 
 // Compnents
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 import BaseIconButton from '@/components/BaseIconButton.vue'
 // @ts-ignore
 import CloseIcon from '@carbon/icons-vue/es/close/16'

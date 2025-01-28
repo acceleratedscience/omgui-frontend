@@ -17,19 +17,35 @@
 						>.{{ ext }}
 					</div>
 
-					<!-- Save-as options for mol -->
-					<cv-dropdown v-if="modalOptions.dataType == 'mol'" v-model="vModelOutputTypeMol" class="dd-output-options">
-						<cv-dropdown-item v-for="(option, i) in outputTypeOptionsMol" :key="i" :value="option.val">{{
-							option.disp
-						}}</cv-dropdown-item>
-					</cv-dropdown>
+					<template v-if="modalOptions.exportOptions">
+						<!-- Save-as options for small molecule -->
+						<cv-dropdown v-if="modalOptions.dataType == 'smol'" v-model="vModelOutputExt" class="dd-output-options">
+							<cv-dropdown-item v-for="(option, i) in outputTypeOptionsSmol" :key="i" :value="option.val">{{
+								option.disp
+							}}</cv-dropdown-item>
+						</cv-dropdown>
 
-					<!-- Save-as options for molset -->
-					<cv-dropdown v-if="modalOptions.dataType == 'molset'" v-model="vModelOutputTypeMolset" class="dd-output-options">
-						<cv-dropdown-item v-for="(option, i) in outputTypeOptionsMolset" :key="i" :value="option.val">{{
-							option.disp
-						}}</cv-dropdown-item>
-					</cv-dropdown>
+						<!-- Save-as options for CIF -->
+						<cv-dropdown v-else-if="modalOptions.dataType == 'cif'" v-model="vModelOutputExt" class="dd-output-options">
+							<cv-dropdown-item v-for="(option, i) in outputTypeOptionsCIF" :key="i" :value="option.val">{{
+								option.disp
+							}}</cv-dropdown-item>
+						</cv-dropdown>
+
+						<!-- Save-as options for PDB -->
+						<cv-dropdown v-else-if="modalOptions.dataType == 'pdb'" v-model="vModelOutputExt" class="dd-output-options">
+							<cv-dropdown-item v-for="(option, i) in outputTypeOptionsPDB" :key="i" :value="option.val">{{
+								option.disp
+							}}</cv-dropdown-item>
+						</cv-dropdown>
+
+						<!-- Save-as options for molset -->
+						<cv-dropdown v-else-if="modalOptions.dataType == 'molset'" v-model="vModelOutputExt" class="dd-output-options">
+							<cv-dropdown-item v-for="(option, i) in outputTypeOptionsMolset" :key="i" :value="option.val">{{
+								option.disp
+							}}</cv-dropdown-item>
+						</cv-dropdown>
+					</template>
 				</div>
 				<FileBrowser :isModal="true" v-model="vModelPath" />
 			</div>
@@ -54,42 +70,56 @@ import FileBrowser from '@/viewers/FileBrowser.vue'
 
 // Type declarations
 import type { Ref, ComputedRef, WritableComputedRef } from 'vue'
+import type { MolFileDataType } from '@/types'
 type ModalOptions = {
 	path?: string
 	filename?: string
 
-	// Filename extension.
-	ext?: string
-	ext2?: string // Secondary file extension, eg. foo.molset.json
+	// // Filename extension.
+	// ext?: string
+	// ext2?: string // Secondary file extension, eg. foo.molset.json
 
 	// When datatype is set, the dropdown with output options is shown.
 	// Different output options are available per dataType.
 	// When dataType is set, ext & ext2 are ignored.
-	dataType?: 'mol' | 'molset' | null
+	dataType?: MolFileDataType
+
+	// Wether to show dropdown with export options or not.
+	exportOptions?: boolean
 }
-type OutputTypesMol = 'mol.json' | 'mol' | 'csv' | 'smi'
-type OutputTypesMolset = 'molset.json' | 'sdf' | 'csv' | 'smi'
+type OutputExtSmol = 'smol.json' | 'mol' | 'csv' | 'smi'
+type OutputExtMmol = 'mmol.json' | 'cif' | 'pdb'
+type OutputExtMolset = 'molset.json' | 'sdf' | 'csv' | 'smi'
+type OutputExt = OutputExtSmol | OutputExtMmol | OutputExtMolset | null
 
 // Emits
 const emit = defineEmits(['mounted']) // <--
 
 // Definitions
 const isSubmitted = ref(false) // Workaround for Carbon dialog to make ESC or X trigger the onCancel event
-const outputTypeOptionsMolset = [
-	{ val: 'molset.json', disp: 'JSON' },
-	{ val: 'sdf', disp: 'SDF' },
-	{ val: 'csv', disp: 'CSV' },
-	{ val: 'smi', disp: 'SMILES' },
-]
-const outputTypeOptionsMol = [
-	{ val: 'mol.json', disp: 'JSON' },
+const outputTypeOptionsSmol = [
+	{ val: 'smol.json', disp: 'smol.json' },
 	{ val: 'sdf', disp: 'SDF' },
 	{ val: 'csv', disp: 'CSV' },
 	{ val: 'mol', disp: 'MOL' },
 	{ val: 'smi', disp: 'SMILES' },
 ]
-const vModelOutputTypeMol: Ref<OutputTypesMol> = ref('mol.json')
-const vModelOutputTypeMolset: Ref<OutputTypesMolset> = ref('molset.json')
+const outputTypeOptionsCIF = [
+	{ val: 'mmol.json', disp: 'mmol.json' },
+	{ val: 'cif', disp: 'CIF' },
+]
+const outputTypeOptionsPDB = [
+	{ val: 'mmol.json', disp: 'mmol.json' },
+	{ val: 'pdb', disp: 'PDB' },
+	{ val: 'cif', disp: 'CIF' },
+]
+const outputTypeOptionsMolset = [
+	{ val: 'molset.json', disp: 'molset.json' },
+	{ val: 'sdf', disp: 'SDF' },
+	{ val: 'csv', disp: 'CSV' },
+	{ val: 'smi', disp: 'SMILES' },
+]
+const vModelOutputExt: Ref<OutputExt> = ref(null)
 const $ipFilename = ref<HTMLInputElement | null>(null)
 const filenameRequired: Ref<string | null> = ref(null)
 
@@ -118,16 +148,7 @@ const vModelPath: WritableComputedRef<string> = computed({
 
 // File extension
 const ext: ComputedRef<string> = computed(() => {
-	if (modalOptions.value.dataType == 'mol') {
-		return vModelOutputTypeMol.value
-	} else if (modalOptions.value.dataType == 'molset') {
-		return vModelOutputTypeMolset.value
-	} else if (modalOptions.value.ext) {
-		return (modalOptions.value.ext2 ? modalOptions.value.ext2 + '.' : '') + modalOptions.value.ext || ''
-	} else {
-		console.error('ModalSaveFile.vue: either ext or dataType must be set in the dialog options.')
-		return ''
-	}
+	return vModelOutputExt.value || ''
 })
 
 /*
@@ -138,10 +159,12 @@ onMounted(() => {
 	emit('mounted') // <--
 
 	// Set the initial value for the output dropdown.
-	if (modalOptions.value.dataType == 'mol') {
-		vModelOutputTypeMol.value = 'mol.json'
+	if (modalOptions.value.dataType == 'smol') {
+		vModelOutputExt.value = 'smol.json'
+	} else if (['cif', 'pdb'].includes(modalOptions.value.dataType as string)) {
+		vModelOutputExt.value = 'mmol.json'
 	} else if (modalOptions.value.dataType == 'molset') {
-		vModelOutputTypeMolset.value = 'molset.json'
+		vModelOutputExt.value = 'molset.json'
 	}
 
 	// Select filename content.
@@ -164,13 +187,12 @@ async function onSubmit() {
 		return
 	}
 
-	// The way how modal function data is passed via the modalStore state is a little convoluted,
-	// but this basically triggers the onSubmit function that's passed as an option to the modal.
-	// That's where destinationPath is consumed.
-	// For example:	TheButtonSaveMolset.vue -> saveAsModal -> onSubmit()
+	// Note: the onSubmit in the modalStore is set when the modal is displayed.
+	// See modal-save-file.js for example usage.
+	// Eg: modalStore.display('ModalSaveFile', {}, { onSubmit })
 	const path = vModelPath.value ? vModelPath.value + '/' : ''
 	const destinationPath: string = path + vmodelFilename.value + '.' + ext.value
-	if (modalStore.onSubmit) modalStore.onSubmit({ destinationPath, ext: ext.value })
+	if (modalStore.onSubmit) modalStore.onSubmit({ destinationPath, ext: ext.value, srcDataType: modalOptions.value.dataType })
 	isSubmitted.value = true
 }
 
