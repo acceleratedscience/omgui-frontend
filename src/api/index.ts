@@ -1,11 +1,11 @@
 import type { Ref } from 'vue'
 // import domLog from '@/utils/dom-log'
 
-import FileSystemApi from '@/api/FileSystemApi'
-import MoleculesApi from '@/api/MoleculesApi'
-import MainApi from '@/api/MainApi'
-import ResultApi from '@/api/ResultApi'
-import DataframeApi from '@/api/DataframeApi'
+import FileSystemApi from '@/api/segments/FileSystemApi'
+import MoleculesApi from '@/api/segments/MoleculesApi'
+import MainApi from '@/api/segments/MainApi'
+import ResultApi from '@/api/segments/ResultApi'
+import DataframeApi from '@/api/segments/DataframeApi'
 
 export const fileSystemApi = new FileSystemApi()
 export const moleculesApi = new MoleculesApi()

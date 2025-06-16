@@ -35,7 +35,7 @@ const molViewerStore = useMolViewerStore()
 const molGridStore = useMolGridStore()
 
 // API
-import { apiFetch, fileSystemApi } from '@/api/ApiService'
+import { apiFetch, fileSystemApi } from '@/api'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'

@@ -9,7 +9,7 @@ import { defineStore } from 'pinia'
 import { useCommandLineStore } from '@/stores/CommandLineStore'
 
 // API
-import { apiFetch, mainApi } from '@/api/ApiService'
+import { apiFetch, mainApi } from '@/api'
 
 // Utils
 import { lockScroll } from '@/utils/helpers'

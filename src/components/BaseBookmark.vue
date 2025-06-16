@@ -16,7 +16,7 @@
 import { watch, onMounted, ref } from 'vue'
 
 // API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api'
 
 // Components
 import BaseIconButtonToggle from '@/components/BaseIconButtonToggle.vue'

@@ -25,7 +25,7 @@
 import { ref, onMounted } from 'vue'
 
 // API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api'
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'

@@ -41,7 +41,7 @@ const fileStore = useFileStore()
 const modalStore = useModalStore()
 
 // API
-import { fileSystemApi } from '@/api/ApiService'
+import { fileSystemApi } from '@/api'
 
 // Components
 import BaseIconButton from '@/components/BaseIconButton.vue'

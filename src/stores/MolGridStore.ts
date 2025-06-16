@@ -57,7 +57,7 @@ const fileStore = useFileStore()
 const modalStore = useModalStore()
 
 // API
-import { apiFetch, moleculesApi, resultApi, dataframeApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi, resultApi, dataframeApi } from '@/api'
 
 // Utils
 import { query2UrlQuery } from '@/utils/helpers'

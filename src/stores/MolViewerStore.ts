@@ -8,7 +8,7 @@ import { defineStore } from 'pinia'
 import router from '@/router'
 
 // API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api'
 
 // Utils
 import { slugify, isObject } from '@/utils/helpers'

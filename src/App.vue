@@ -77,7 +77,7 @@ const commandLineStore = useCommandLineStore()
 const assistantStore = useAssistantStore()
 
 // API
-import { fileSystemApi } from '@/api/ApiService'
+import { fileSystemApi } from '@/api'
 // import webSocketClient from '@/api/WebSocketClient'// Experimental
 // webSocketClient()
 
