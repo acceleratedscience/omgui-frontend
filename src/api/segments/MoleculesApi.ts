@@ -24,7 +24,6 @@ export default class MoleculesApi extends BaseApi {
 
 	// Fetch data required for rendering a molecule - 2D: SVG, 3D: SDF
 	getSmolVizData(inchi_or_smiles: string) {
-		console.log('/get-smol-viz-data: ', inchi_or_smiles)
 		return this.apiClient.post(`/get-smol-viz-data`, { inchi_or_smiles })
 	}
 

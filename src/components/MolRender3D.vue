@@ -71,8 +71,13 @@ onMounted(() => {
 	if (hasData.value) init3DViewer()
 })
 
-// As soon as the 3D data is loaded into the store, render the 3D molecule.
-watch(() => hasData.value, init3DViewer)
+// As soon as new 3D data is loaded into the store, update the 3D molecule.
+watch(
+	() => props.data3D,
+	() => {
+		render3d_miew(false, true)
+	},
+)
 
 onBeforeUnmount(() => {
 	if (miewViewer) {
@@ -87,7 +92,6 @@ onBeforeUnmount(() => {
 
 // Render 3D molecule.
 function init3DViewer() {
-	// console.log('init3DViewer')
 	if (!$container3d.value) return
 
 	// Triggered whenever we clear the molViewerStore.
@@ -98,7 +102,6 @@ function init3DViewer() {
 		return
 	}
 
-	// console.log('init3DViewer >>> OK')
 	render3d_miew()
 }
 
@@ -113,7 +116,7 @@ async function toggleFullScreen(state: boolean) {
 // Render 3D mol using the Miew library - https://lifescience.opensource.epam.com/miew/index.html
 // Miew is not well documented, but it's the best 3D viewer we've found so far.
 // Uses WebGL and has a few nice features like displaying atom info on click, and setting the rotation center on doubleclick.
-function render3d_miew(doFullscreen: boolean = false) {
+function render3d_miew(doFullscreen: boolean = false, force: boolean = false) {
 	// This re-initializes the viewer when the molecule is changed.
 	// Not clear from the documentation, leave this here for reference.
 	// (No longer used because we use a separate container for the fullscreen mode)
@@ -122,7 +125,7 @@ function render3d_miew(doFullscreen: boolean = false) {
 
 	let mv
 
-	if ((doFullscreen && !miewViewerFs) || (!doFullscreen && !miewViewer)) {
+	if ((doFullscreen && !miewViewerFs) || (!doFullscreen && !miewViewer) || force) {
 		// Select the correct container
 		const container = doFullscreen ? $container3dFs.value : $container3d.value
 
