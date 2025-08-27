@@ -82,14 +82,16 @@ export default defineConfig(({ command, mode }) => {
 					],
 				},
 			}),
-			{
-				name: 'replace-placeholder-baseurl',
-				closeBundle() {
-					if (command === 'build' && mode === 'proxy') {
-						setDynamicBaseUrl()
-					}
-				},
-			},
+			// Deprecated: hacky proxy build
+			// - - -
+			// {
+			// 	name: 'replace-placeholder-baseurl',
+			// 	closeBundle() {
+			// 		if (command === 'build' && mode === 'proxy') {
+			// 			setDynamicBaseUrl()
+			// 		}
+			// 	},
+			// },
 		],
 		resolve: {
 			alias: {
@@ -113,7 +115,7 @@ export default defineConfig(({ command, mode }) => {
 			// Command: npm run build:proxy
 			return {
 				...commonConfig,
-				base: '/__PLACEHOLDER_BASEURL__/',
+				base: '/proxy/8024/',
 				build: {
 					outDir: 'gui-build-proxy',
 					rollupOptions: {
@@ -150,43 +152,45 @@ export default defineConfig(({ command, mode }) => {
 	}
 })
 
-// To get the proxy build to work, we have to do some hacky post-processing
-// by replacing our placeholder baseUrl with a dynamic one that includes
-// whatever port is being used in our proxy url path.
-function setDynamicBaseUrl() {
-	// A. Update the index.html file:
-	const dir = resolve(__dirname, 'gui-build-proxy')
-	const indexPath = resolve(dir, 'index.html')
-	let indexHtml = readFileSync(indexPath, 'utf-8')
+// Deprecated: hacky proxy build
+// - - -
+// // To get the proxy build to work, we have to do some hacky post-processing
+// // by replacing our placeholder baseUrl with a dynamic one that includes
+// // whatever port is being used in our proxy url path.
+// function setDynamicBaseUrl() {
+// 	// A. Update the index.html file:
+// 	const dir = resolve(__dirname, 'gui-build-proxy')
+// 	const indexPath = resolve(dir, 'index.html')
+// 	let indexHtml = readFileSync(indexPath, 'utf-8')
 
-	// 1) Make the main JS and CSS file paths relative so they
-	// can be redirected using a dynamically generated base URL.
-	indexHtml = indexHtml.replace(/\/__PLACEHOLDER_BASEURL__\//g, '')
+// 	// 1) Make the main JS and CSS file paths relative so they
+// 	// can be redirected using a dynamically generated base URL.
+// 	indexHtml = indexHtml.replace(/\/__PLACEHOLDER_BASEURL__\//g, '')
 
-	// 2) Make the RDKit path relative.
-	indexHtml = indexHtml.replace(/\/rdkit\/RDKit_minimal\.js/, 'rdkit/RDKit_minimal.js')
+// 	// 2) Make the RDKit path relative.
+// 	indexHtml = indexHtml.replace(/\/rdkit\/RDKit_minimal\.js/, 'rdkit/RDKit_minimal.js')
 
-	// 3) Activate the function that inserts the base URL tag
-	// and remove the js comments.
-	indexHtml = indexHtml.replace(/<!----/, '')
-	indexHtml = indexHtml.replace(/\/\/ .*/, '')
-	indexHtml = indexHtml.replace(/---->/, '')
-	writeFileSync(indexPath, indexHtml)
+// 	// 3) Activate the function that inserts the base URL tag
+// 	// and remove the js comments.
+// 	indexHtml = indexHtml.replace(/<!----/, '')
+// 	indexHtml = indexHtml.replace(/\/\/ .*/, '')
+// 	indexHtml = indexHtml.replace(/---->/, '')
+// 	writeFileSync(indexPath, indexHtml)
 
-	// B. Update the main JS file:
-	// 1) Find the name of the main JS file.
-	const jsFilename: string | null = indexHtml.match(/<script type="module" crossorigin src="assets\/(index-\w+.js)"><\/script>/)?.[1] ?? null
+// 	// B. Update the main JS file:
+// 	// 1) Find the name of the main JS file.
+// 	const jsFilename: string | null = indexHtml.match(/<script type="module" crossorigin src="assets\/(index-\w+.js)"><\/script>/)?.[1] ?? null
 
-	// 2) Run a find-and-replace inside the file.
-	if (jsFilename) {
-		const jsPath = resolve(dir, `assets/${jsFilename}`)
+// 	// 2) Run a find-and-replace inside the file.
+// 	if (jsFilename) {
+// 		const jsPath = resolve(dir, `assets/${jsFilename}`)
 
-		// Replace the placeholder baseUrl.
-		let jsFile = readFileSync(jsPath, 'utf-8')
-		jsFile = jsFile.replace(
-			/"\/__PLACEHOLDER_BASEURL__\/"/g,
-			'`${window.location.pathname.match(/(.*)\\/proxy\\/\\d{4}/)?.[1] ?? ""}/proxy/${window.location.pathname.match(/\\/proxy\\/(\\d{4})/)?.[1] ?? 8024}/`',
-		)
-		writeFileSync(jsPath, jsFile)
-	}
-}
+// 		// Replace the placeholder baseUrl.
+// 		let jsFile = readFileSync(jsPath, 'utf-8')
+// 		jsFile = jsFile.replace(
+// 			/"\/__PLACEHOLDER_BASEURL__\/"/g,
+// 			'`${window.location.pathname.match(/(.*)\\/proxy\\/\\d{4}/)?.[1] ?? ""}/proxy/${window.location.pathname.match(/\\/proxy\\/(\\d{4})/)?.[1] ?? 8024}/`',
+// 		)
+// 		writeFileSync(jsPath, jsFile)
+// 	}
+// }
