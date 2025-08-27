@@ -21,7 +21,7 @@ import { useMolViewerStore } from '@/stores/MolViewerStore'
 const molViewerStore = useMolViewerStore()
 
 // API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api'
 
 // Components
 import BaseError from '@/components/BaseError.vue'

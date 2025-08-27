@@ -20,7 +20,7 @@ const mainStore = useMainStore()
 const modalStore = useModalStore()
 
 // API
-import { fileSystemApi } from '@/api/ApiService'
+import { fileSystemApi } from '@/api'
 
 // Emits
 const emit = defineEmits(['mounted'])

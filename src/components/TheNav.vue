@@ -7,7 +7,7 @@
 		<div class="filler"></div>
 		<div class="items">
 			<!-- Terminal -->
-			<!-- <BaseIconButton
+			<BaseIconButton
 				v-if="commandLineStore.active"
 				icon="icn-terminal"
 				iconHover="icn-close"
@@ -22,10 +22,10 @@
 				iconSel="icn-terminal-full"
 				:sel="sel == 'cli'"
 				@click="commandLineStore.setActive(!commandLineStore.active)"
-			/> -->
+			/>
 
 			<!-- AI Assistant -->
-			<!-- <BaseIconButton
+			<BaseIconButton
 				v-if="assistantStore.active"
 				icon="icn-chat"
 				iconHover="icn-close"
@@ -40,7 +40,7 @@
 				iconSel="icn-chat-full"
 				:sel="sel == 'assistant'"
 				@click="assistantStore.setActive(!assistantStore.active)"
-			/> -->
+			/>
 
 			<!-- My mols -->
 			<router-link :to="{ name: 'my-mols' }" class="my-mols">

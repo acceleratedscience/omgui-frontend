@@ -40,7 +40,7 @@ const molViewerStore = useMolViewerStore()
 const modalStore = useModalStore()
 
 // API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'

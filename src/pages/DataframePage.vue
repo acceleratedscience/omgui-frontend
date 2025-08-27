@@ -26,7 +26,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 
 // API
-import { apiFetch, dataframeApi } from '@/api/ApiService'
+import { apiFetch, dataframeApi } from '@/api'
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'

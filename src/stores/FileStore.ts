@@ -25,7 +25,7 @@ type AddUnderscore<T> = {
 }
 
 // API
-import { apiFetch, fileSystemApi } from '@/api/ApiService'
+import { apiFetch, fileSystemApi } from '@/api'
 
 // Initial state
 function getInitialState(): State {

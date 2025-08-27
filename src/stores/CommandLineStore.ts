@@ -9,7 +9,7 @@ import { defineStore } from 'pinia'
 import { useAssistantStore } from '@/stores/AssistantStore'
 
 // API
-import { apiFetch, mainApi } from '@/api/ApiService'
+import { apiFetch, mainApi } from '@/api'
 
 // Utils
 import { lockScroll } from '@/utils/helpers'
