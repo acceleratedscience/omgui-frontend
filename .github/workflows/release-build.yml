@@ -32,4 +32,4 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: frontend-build.tar.gz
+          files: gui-build.tar.gz
