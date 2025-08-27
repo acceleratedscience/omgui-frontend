@@ -33,7 +33,7 @@ const status = ref<number | null>(null)
 
 // Props
 const props = defineProps<{
-	identifiers: string
+	cacheId: string
 }>()
 
 /**
@@ -42,8 +42,7 @@ const props = defineProps<{
 
 onMounted(() => {
 	const query = route.query
-	const identifiers = props.identifiers.split('~')
-	apiFetch(moleculesApi.getMolset_adhoc(identifiers, query), {
+	apiFetch(moleculesApi.getMolset(+props.cacheId, query), {
 		onSuccess: (data) => {
 			molGridStore.setMolset(data)
 			molGridStore.setContext(null)

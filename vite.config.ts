@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import svgLoader from 'vite-svg-loader'
 import { resolve } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
+import 'dotenv/config'
 
 /*
 
@@ -127,6 +128,7 @@ export default defineConfig(({ command, mode }) => {
 			// Command: npm run build:no-proxy
 			return {
 				...commonConfig,
+				base: process.env.VITE_BASE_URL,
 				build: {
 					outDir: 'gui-build',
 					rollupOptions: {
@@ -137,12 +139,14 @@ export default defineConfig(({ command, mode }) => {
 		} else {
 			return {
 				...commonConfig,
+				base: process.env.VITE_BASE_URL,
 			}
 		}
 	}
 
 	return {
 		...commonConfig,
+		base: process.env.VITE_BASE_URL,
 	}
 })
 

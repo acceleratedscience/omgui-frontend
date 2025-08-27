@@ -20,20 +20,21 @@
 				<cv-checkbox :label="`${mol.index!}`" :value="`${mol.index!}`" :checked="molGridStore.sel.includes(mol.index!)" />
 				<MolRender2D
 					:id="`mol-svg-${mol.index!}`"
-					:structure="molGridStore.molSmiles[i]"
-					:sub-structure="molGridStore.highlight"
+					:structure="molGridStore.molSmiles[i] || ''"
+					:sub-structure="molGridStore.highlight || ''"
 					:width="190"
 					:height="140"
 					svg-mode
 				/>
-				<BaseBookmark :mol="mol" />
-				<BaseIconButton icon="icn-smell" btnStyle="soft" @click="nothingSelected() ? previewMolecule(i) : null" />
-				<BaseIconButton
-					icon="icn-taste"
-					btnStyle="soft"
-					@click="nothingSelected() ? molViewerStore.setMolFromMolsetIndex(mol.index!) : null"
-				/>
-
+				<template v-if="molGridStore.molSmiles[i]">
+					<BaseBookmark :mol="mol" />
+					<BaseIconButton icon="icn-smell" btnStyle="soft" @click="nothingSelected() ? previewMolecule(i) : null" />
+					<BaseIconButton
+						icon="icn-taste"
+						btnStyle="soft"
+						@click="nothingSelected() ? molViewerStore.setMolFromMolsetIndex(mol.index!) : null"
+					/>
+				</template>
 				<div class="filler"></div>
 
 				<!-- prettier-ignore -->
@@ -94,6 +95,7 @@ import BaseBookmark from '@/components/BaseBookmark.vue'
 
 // Utils
 import { cleanKeys } from '@/utils/helpers'
+import { isValidMolString } from '@/utils/rdkit-helpers'
 
 // Type declarations
 type KeyHandlers = {

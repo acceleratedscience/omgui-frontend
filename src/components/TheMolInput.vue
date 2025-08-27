@@ -1,6 +1,7 @@
 <template>
 	<h3>Display any molecule</h3>
 	<br />
+	<a href="test.txt">AAA</a>
 	<cv-radio-group legendText="Search options" :hideLegend="true" :onChange="resetInput">
 		<cv-radio-button
 			v-for="({ label, val }, index) in searchOptions"
