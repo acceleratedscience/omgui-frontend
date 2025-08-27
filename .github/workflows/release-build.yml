@@ -1,0 +1,35 @@
+name: Release Frontend Build
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on new tags starting with v
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Vue app
+        run: npm run build
+
+      - name: Archive build files
+        run: tar -czvf gui-build.tar.gz gui-build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: frontend-build.tar.gz
