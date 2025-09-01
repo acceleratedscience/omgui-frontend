@@ -1,5 +1,5 @@
 <template>
-	<hr />
+	<!-- <hr /> -->
 	<h4>:: Modals</h4>
 	<button @click="modalStore.alert('Hello world')">simple alert</button>
 	&nbsp;
@@ -72,35 +72,26 @@
 	<hr />
 	<h4>:: Icons</h4>
 
+	<!-- Icon implementation -->
 	<span style="color: red">
-		<a href="#"><BaseIcon icon="icn-file-smol" /></a>
-		<BaseIcon icon="icn-file-smol" />
-		<BaseIcon icon="icn-file-mmol" />
-		<BaseIcon icon="icn-file-molset" />
-		<BaseIcon icon="icn-file-data" />
-		<BaseIcon icon="icn-file-text" />
-		<BaseIcon icon="icn-link" />
-		<BaseIcon icon="icn-reaction" />
-		<BaseIcon icon="icn-star-full" />
-		<BaseIcon icon="icn-file-run" />
-		<BaseIcon icon="icn-file-json" />
-		<BaseIcon icon="icn-file-pdf" />
-		<BaseIcon icon="icn-file-run" />
-		<BaseIcon icon="icn-file-sdf" />
-		<BaseIcon icon="icn-file-molset-csv" />
-		<BaseIcon icon="icn-file-svg" />
-		<BaseIcon icon="icn-file-md" />
-		<BaseIcon icon="icn-file-unk" />
-		<BaseIcon icon="icn-caret-left" />
-		<BaseIcon icon="icn-caret-right" />
-		<BaseIcon icon="icn-caret-up" />
-		<BaseIcon icon="icn-caret-down" />
-		<BaseIcon icon="icn-file-smol" size="large" />
+		<a href="#"><BaseIcon icon="icn-fire" /></a>
+		<BaseIcon icon="icn-fire" />
+		<BaseIcon icon="icn-fire" size="large" />
 
 		<!-- Native icons -->
 		<CloseIcon />
 		<ChevronRight />
 	</span>
+
+	<br><br><br>
+
+	<!-- Icon overview -->
+	<div id="icn-card-wrap">
+		<div v-for="(iconName, i) in iconNames" :key="i" class="icn-card">
+			<BaseIcon :icon="iconName" />
+			<div class="icon-name">{{ iconName }}</div>
+		</div>
+	</div>
 
 	<br /><br />
 	<hr />
@@ -178,9 +169,18 @@
 		<div class="swatch caution">$caution</div>
 		<div class="swatch error">$error</div>
 	</div>
+
+	<br /><br />
+	<hr />
+	<h4>:: Components</h4>
+	
+	<BaseFetchingFile />
 </template>
 
 <script setup lang="ts">
+// Vue
+import { ref, onMounted } from 'vue'
+
 // Stores
 import { useModalStore } from '@/stores/ModalStore'
 const modalStore = useModalStore()
@@ -188,10 +188,21 @@ const modalStore = useModalStore()
 // Compnents
 import BaseIcon from '@/components/BaseIcon.vue'
 import BaseIconButton from '@/components/BaseIconButton.vue'
+import BaseFetchingFile from '@/components/BaseFetchingFile.vue'
 // @ts-ignore
 import CloseIcon from '@carbon/icons-vue/es/close/16'
 // @ts-ignore
 import ChevronRight from '@carbon/icons-vue/es/chevron--right/16'
+
+// Load all icon files
+const svgs = import.meta.glob('@/assets/icons/*.svg')
+const iconNames = ref<string[]>([])
+onMounted(async () => {
+	for (const path in svgs) {
+		const name = (path.split('/').pop() || '').replace('.svg', '')
+		if (name != '_template') iconNames.value.push(name)
+	}
+})
 
 /**
  * Methods
@@ -237,6 +248,22 @@ function onOther() {
 </script>
 
 <style scoped lang="scss">
+/**
+ * Icons
+ */
+#icn-card-wrap {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	height: 1000px;
+}
+#icn-card-wrap > .icn-card {
+	display: flex;
+	gap: 0.25rem;
+	width: 200px;
+}
+
 .icons-wrap {
 	display: flex;
 	gap: 20px;

@@ -76,6 +76,7 @@ defineProps<{
 	margin: -10px;
 	border-radius: 50%;
 	position: absolute;
+	z-index: 1;
 	left: 50%;
 	top: 50%;
 	background: #eee;
@@ -90,6 +91,7 @@ defineProps<{
 	margin: -25px;
 	border-radius: 50%;
 	position: absolute;
+	z-index: 1;
 	left: 50%;
 	top: 50%;
 	border: dashed 1px $black-05;

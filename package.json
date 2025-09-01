@@ -5,11 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "run-p type-check \"build-all {@}\" --",
-		"build-all": "npm run build:proxy && npm run build:no-proxy",
-		"build:proxy": "vite build --mode proxy",
-		"build:no-proxy": "vite build --mode no-proxy",
-		"postbuild": "node scripts/postbuild.js",
+		"build": "run-p type-check build-vite",
+		"build-vite": "vite build",
 		"preview": "vite preview",
 		"test:unit": "vitest",
 		"test:e2e": "playwright test",
