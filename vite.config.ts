@@ -130,7 +130,7 @@ export default defineConfig(({ command, mode }) => {
 			// Command: npm run build:no-proxy
 			return {
 				...commonConfig,
-				base: process.env.VITE_BASE_URL,
+				// base: process.env.VITE_BASE_URL,
 				build: {
 					outDir: 'gui-build',
 					rollupOptions: {

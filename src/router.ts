@@ -137,7 +137,7 @@ const headlessRoutes = routes.map((route) => ({
 
 // Create router.
 const router = createRouter({
-	history: createWebHistory(import.meta.env.BASE_URL),
+	history: createWebHistory(import.meta.env.VITE_BASE_URL + (window as any).dynamicBaseUrl),
 	routes: [...routes, ...headlessRoutes],
 })
 
