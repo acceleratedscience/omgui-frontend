@@ -31,12 +31,7 @@ jobs:
             - name: Archive regular build files
               run: tar -czvf gui-build.tar.gz gui-build
 
-            - name: Archive /proxy/8024/ build files
-              run: tar -czvf gui-build-proxy.tar.gz gui-build-proxy
-
             - name: Create GitHub Release
               uses: softprops/action-gh-release@v1
               with:
-                  files: |
-                      gui-build.tar.gz
-                      gui-build-proxy.tar.gz
+                  files: gui-build.tar.gz
