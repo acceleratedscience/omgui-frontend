@@ -2,12 +2,10 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import svgLoader from 'vite-svg-loader'
-import { resolve } from 'path'
-import { readFileSync, writeFileSync } from 'fs'
 import 'dotenv/config'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(({ command }) => {
 	const commonConfig = {
 		plugins: [
 			vue(),
