@@ -40,7 +40,7 @@ const molViewerStore = useMolViewerStore()
 const modalStore = useModalStore()
 
 // API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api'
 
 // Components
 import BreadCrumbs from '@/components/BreadCrumbs.vue'
@@ -111,9 +111,9 @@ function _fetchMolDataFromMolset(cacheId: number | null = null, index: number) {
 	if (!cacheId) return
 	apiFetch(moleculesApi.getMolDataFromMolset(cacheId, index), {
 		onSuccess: (data) => {
-			molViewerStore.setMolData(data)
+			molViewerStore.setMolData(data, 'smol')
 			const identifier = molViewerStore.inchi || molViewerStore.smiles
-			if (identifier) molViewerStore.fetchMolVizData(identifier)
+			if (identifier) molViewerStore.fetchSmolVizData(identifier)
 		},
 		onError: (err) => {
 			console.log('Error in getMolDataFromMolset()', err)

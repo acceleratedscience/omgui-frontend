@@ -1,5 +1,5 @@
 <template>
-	<hr />
+	<!-- <hr /> -->
 	<h4>:: Modals</h4>
 	<button @click="modalStore.alert('Hello world')">simple alert</button>
 	&nbsp;
@@ -42,7 +42,7 @@
 		@click="
 			modalStore.display(
 				'ModalSaveFile',
-				{ path: 'my_dir/sub_dir/subsub_dir', filename: 'Foobar', dataType: 'mol' },
+				{ path: 'my_dir/sub_dir/subsub_dir', filename: 'Foobar', dataType: 'smol' },
 				{
 					onSubmit: () => {
 						console.log('submitted')
@@ -72,34 +72,26 @@
 	<hr />
 	<h4>:: Icons</h4>
 
+	<!-- Icon implementation -->
 	<span style="color: red">
-		<a href="#"><BaseSvgServe icon="icn-file-mol" /></a>
-		<BaseSvgServe icon="icn-file-mol" />
-		<BaseSvgServe icon="icn-file-molset" />
-		<BaseSvgServe icon="icn-file-data" />
-		<BaseSvgServe icon="icn-file-text" />
-		<BaseSvgServe icon="icn-link" />
-		<BaseSvgServe icon="icn-reaction" />
-		<BaseSvgServe icon="icn-star" />
-		<BaseSvgServe icon="icn-file-run" />
-		<BaseSvgServe icon="icn-file-json" />
-		<BaseSvgServe icon="icn-file-pdf" />
-		<BaseSvgServe icon="icn-file-run" />
-		<BaseSvgServe icon="icn-file-sdf" />
-		<BaseSvgServe icon="icn-file-molset-csv" />
-		<BaseSvgServe icon="icn-file-svg" />
-		<BaseSvgServe icon="icn-file-md" />
-		<BaseSvgServe icon="icn-file-unk" />
-		<BaseSvgServe icon="icn-caret-left" />
-		<BaseSvgServe icon="icn-caret-right" />
-		<BaseSvgServe icon="icn-caret-up" />
-		<BaseSvgServe icon="icn-caret-down" />
-		<BaseSvgServe icon="icn-file-mol" size="large" />
+		<a href="#"><BaseIcon icon="icn-fire" /></a>
+		<BaseIcon icon="icn-fire" />
+		<BaseIcon icon="icn-fire" size="large" />
 
 		<!-- Native icons -->
 		<CloseIcon />
 		<ChevronRight />
 	</span>
+
+	<br><br><br>
+
+	<!-- Icon overview -->
+	<div id="icn-card-wrap">
+		<div v-for="(iconName, i) in iconNames" :key="i" class="icn-card">
+			<BaseIcon :icon="iconName" />
+			<div class="icon-name">{{ iconName }}</div>
+		</div>
+	</div>
 
 	<br /><br />
 	<hr />
@@ -107,31 +99,31 @@
 	<div class="icons-wrap">
 		<div style="background: #ffd">
 			Default
-			<BaseIconButton icon="icn-star" />
+			<BaseIconButton icon="icn-star-full" />
 		</div>
 		<div>
 			Soft
-			<BaseIconButton icon="icn-star" btnStyle="soft" />
+			<BaseIconButton icon="icn-star-full" btnStyle="soft" />
 		</div>
 		<div>
 			Carbon
-			<BaseIconButton icon="icn-star" btnStyle="carbon" />
+			<BaseIconButton icon="icn-star-full" btnStyle="carbon" />
 		</div>
 		<div>
 			Custom colors
-			<BaseIconButton icon="icn-star" color="green" colorHover="red" />
+			<BaseIconButton icon="icn-star-full" color="green" colorHover="red" />
 		</div>
 		<div>
 			Toggle
-			<BaseIconButton icon="icn-star" :toggle="true" />
+			<BaseIconButton icon="icn-star-full" :toggle="true" />
 		</div>
 		<div>
 			Toggle with custom color
-			<BaseIconButton icon="icn-star" :toggle="true" colorToggle="#d3bf0b" />
+			<BaseIconButton icon="icn-star-full" :toggle="true" colorToggle="#d3bf0b" />
 		</div>
 		<div>
 			Mini
-			<BaseIconButton icon="icn-star" :mini="true" />
+			<BaseIconButton icon="icn-star-full" :mini="true" />
 		</div>
 	</div>
 	<br />
@@ -140,9 +132,9 @@
 		<div class="icons-wrap">
 			<BaseIconButton icon="icn-full-screen-large" iconHover="icn-full-screen-large-hover" btnStyle="soft" icnSize="large" />
 			<BaseIconButton
-				icon="icn-star-large-outline"
-				iconHover="icn-star"
-				iconSel="icn-star"
+				icon="icn-star-full-large"
+				iconHover="icn-star-full"
+				iconSel="icn-star-full"
 				colorToggle="#d3bf0b"
 				:toggle="true"
 				icnSize="large"
@@ -177,20 +169,40 @@
 		<div class="swatch caution">$caution</div>
 		<div class="swatch error">$error</div>
 	</div>
+
+	<br /><br />
+	<hr />
+	<h4>:: Components</h4>
+	
+	<BaseFetchingFile />
 </template>
 
 <script setup lang="ts">
+// Vue
+import { ref, onMounted } from 'vue'
+
 // Stores
 import { useModalStore } from '@/stores/ModalStore'
 const modalStore = useModalStore()
 
 // Compnents
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 import BaseIconButton from '@/components/BaseIconButton.vue'
+import BaseFetchingFile from '@/components/BaseFetchingFile.vue'
 // @ts-ignore
 import CloseIcon from '@carbon/icons-vue/es/close/16'
 // @ts-ignore
 import ChevronRight from '@carbon/icons-vue/es/chevron--right/16'
+
+// Load all icon files
+const svgs = import.meta.glob('@/assets/icons/*.svg')
+const iconNames = ref<string[]>([])
+onMounted(async () => {
+	for (const path in svgs) {
+		const name = (path.split('/').pop() || '').replace('.svg', '')
+		if (name != '_template') iconNames.value.push(name)
+	}
+})
 
 /**
  * Methods
@@ -236,6 +248,22 @@ function onOther() {
 </script>
 
 <style scoped lang="scss">
+/**
+ * Icons
+ */
+#icn-card-wrap {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	height: 1000px;
+}
+#icn-card-wrap > .icn-card {
+	display: flex;
+	gap: 0.25rem;
+	width: 200px;
+}
+
 .icons-wrap {
 	display: flex;
 	gap: 20px;

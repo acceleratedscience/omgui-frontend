@@ -10,7 +10,6 @@ import router from '@/router'
 
 // Stores
 import { useMainStore } from '@/stores/MainStore'
-import { useMolViewerStore } from './MolViewerStore'
 
 // Utils
 import { map_fileType2Module } from '@/utils/maps'
@@ -18,13 +17,15 @@ import { map_fileType2Module } from '@/utils/maps'
 // Type declarations
 import type { File, FileType } from '@/types'
 // The State type is just a copy of the File type but with underscored keys.
-type State = AddUnderscore<File>
+type State = AddUnderscore<File> & {
+	_forcedLoading: boolean
+}
 type AddUnderscore<T> = {
 	[P in keyof T as `_${string & P}`]: T[P]
 }
 
 // API
-import { apiFetch, fileSystemApi } from '@/api/ApiService'
+import { apiFetch, fileSystemApi } from '@/api'
 
 // Initial state
 function getInitialState(): State {
@@ -35,13 +36,18 @@ function getInitialState(): State {
 			timeEdited: null, // Timestamp in ms
 			fileType: null, // File type based on the extension, 'dir' for directories
 			ext: '',
-			ext2: '', // Secondary extension (e.g. foobar.mol.json --> mol)
+			ext2: '', // Secondary extension (e.g. foobar.smol.json --> mol)
 			errCode: null, // Error code from the API
 		},
 		_filename: '',
 		_path: '', // File path relative to the workspace
 		_pathAbsolute: '', // Absolute file path
 		_data: '', // Content of file
+		//
+		// When you open a file in the file browser, this
+		// forces the loading screen to show, even though
+		// it's disabled when moving around the file browser.
+		_forcedLoading: false,
 	}
 }
 
@@ -89,7 +95,7 @@ export const useFileStore = defineStore('fileStore', {
 			return this.__meta.ext
 		},
 
-		// The file's secondary extension (e.g. .mol.json).
+		// The file's secondary extension (e.g. .smol.json).
 		ext2(): string {
 			return this.__meta.ext2
 		},
@@ -107,13 +113,9 @@ export const useFileStore = defineStore('fileStore', {
 
 		// The final file type, which may be overridden
 		fileType(): FileType {
-			// const molViewerStore = useMolViewerStore()
 			return this.fileTypeOverride
 				? (router.currentRoute.value.query?.use?.toString() as FileType) || this.defaultFileType
 				: this.defaultFileType
-			// : molViewerStore.molFromMolset
-			// 	? 'mol'
-			// 	: this.defaultFileType
 		},
 
 		// The filename of the module we'll use to view the file.
@@ -137,11 +139,16 @@ export const useFileStore = defineStore('fileStore', {
 		active(): boolean {
 			return !!this._filename
 		},
+
+		forcedLoading(): boolean {
+			return this._forcedLoading
+		},
 	},
 	actions: {
 		// Load file or directory.
 		loadItem(file: File) {
 			if (!file) return
+			// console.log('file data:', file.data)
 			this.__meta.size = file._meta.size || null
 			this.__meta.timeCreated = file._meta.timeCreated || null
 			this.__meta.timeEdited = file._meta.timeEdited || null
@@ -166,9 +173,13 @@ export const useFileStore = defineStore('fileStore', {
 			} else {
 				const path = ['/~'].concat(this._path.split('/'))
 				path.pop()
-				console.log('>', path.join('/'))
 				router.push({ path: path.join('/') })
 			}
+		},
+
+		// Activate loading screen
+		setForcedLoading(state: boolean) {
+			this._forcedLoading = state
 		},
 
 		// Delete a file.

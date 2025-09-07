@@ -1,0 +1,141 @@
+# File Formats
+
+On top of supporting common molecular file formats like `mol`, `sdf` and `smi` for small molecules as well as `cif` and `pdb` for macromolecules, we use our own data structures that are used internally by OpenAD.
+
+-   **`smol.json`** - Small molecule data
+-   **`mmol.json`** - Macromolecule data (at this time only PDB/CIF format supported)
+-   **`molset.json`** - A set of small molecules or macromolecules
+
+> [!CAUTION]
+> Our molecule file formats are in beta. We are working on a more advanced and established data structure, which will eventually replace the data strcutured listed below. Please keep this in mind when integrating OpenAD into your workflow.
+
+<br>
+
+### 1. Small molecules: `smol.json`
+
+The small molecule data format is how the molecule viewer stores and interacts with small molecule data. When you open a `mol`, `sdf` or `smi` file, its content is converted into this format on-the-fly.
+
+In addition to molecule-related data, this format also allows us to store user-generated data like notes and labels.
+
+No visualization data is stored directly into this format, as it can easily be calculated on-the-fly based on the _InChI_ or _SMILES_ string.
+
+```jsonc
+{
+	// The main name of this molecule.
+	"name": "Foobar",
+
+	// Alternative names this molecule is know by.
+	"synonyms": ["foo", "bar"],
+
+	// Available molecular properties.
+	"properties": {
+		// molecular_weight: 1.234
+	},
+
+	// The sources of the properties.
+	// Eg. pubchem, RDKit, etc.
+	"property_sources": {
+		// molecular_weight: 'pubchem'
+	},
+
+	// Any analysis result values.
+	// See the analysis example below.
+	"analysis": [],
+
+	// Flag to indicate if the molecule data was
+	// enriched with data from PubChem.
+	"enriched": false,
+
+	// User-generated information.
+	"meta": {
+		"notes": "",
+		"labels:": [],
+	},
+}
+```
+
+An analysis example:
+
+```jsonc
+{
+	"toolkit": "RXN",
+	"function": "Predict_Retrosynthesis",
+	"smiles": "CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)O)CC2CCCC21",
+	"parameters": {
+		"max_steps": 3,
+	},
+	"results": [
+		{
+			"confidence": 0.999,
+			"reactions": [
+				"C1CCOC1 + CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21 + [Pd] --->> CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)O)CC2CCCC21",
+				"CC(=O)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21 + CCO + CCOC(=O)C(N)CCc1ccccc1 + [BH3-]C#N.[Na+] --->> CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21",
+				"CC(=O)C(=O)Cl + O=C(OCc1ccccc1)C1CC2CCCC2N1 + c1ccncc1 --->> CC(=O)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21",
+			],
+		},
+		{
+			"confidence": 0.999,
+			"reactions": [
+				"C1CCOC1 + CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21 + [Pd] --->> CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)O)CC2CCCC21",
+				"CC(=O)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21 + CCO + CCOC(=O)C(N)CCc1ccccc1 + [BH3-]C#N.[Na+] --->> CCOC(=O)C(CCc1ccccc1)NC(C)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21",
+				"CC(=O)C(=O)Cl + O=C(OCc1ccccc1)C1CC2CCCC2N1 --->> CC(=O)C(=O)N1C(C(=O)OCc2ccccc2)CC2CCCC21",
+			],
+		},
+	],
+}
+```
+
+<br>
+
+### 2. Macromolecules: `mmol.json`
+
+The macromolecule format is a more simplistic wrapper around a `cif` file. Unlike small molecules, macromolecules require that the 3D visualisation data is stored in the file, as it cannot be calculated on the fly.
+
+Hence the main purpose of this format is to be able to store user-generated data like notes and labels, as well as to provide a single format to represent different types of macromolecules.
+
+```jsonc
+{
+	// Currently we onlt have one category for macromolecules,
+	// but in the future we may want to differentiate between
+	// proteins, dna, rna, ligand, etc.
+	// This field will define what kind of data is expected
+	// in the data field, and will subsequently also define
+	// what is being displayed in the molecule viewer.
+	"molType": "mmol",
+
+	// Available data for this macromolecule
+	"data": {
+		// idcode: 12AB
+	},
+
+	// CIF data (or alternative) that is used to generate the 3D
+	// rendering of the molecule using the open source Miew viewer.
+	"data3D": "",
+
+	// Usually 'cif', however this could be any type of data that
+	// can be consumer by the Miew 3D molecule viewer we use:
+	// cif, pdb, xyz, cml, gro, ccp4, mol2, dsn6, mmtf
+	"data3DFormat": "",
+
+	// User-generated information
+	"meta": {
+		"notes": "",
+		"labels:": [],
+	},
+}
+```
+
+<br>
+
+### 3. Molecule set: `molset.json`
+
+A molecule set is nothing more than an array of small molecules or macromolecules. Both `sdf` and `smi` files are converted to this format on-the-fly.
+
+```jsonc
+[
+    { /* smol.json or mmol.json molecule */ },
+    { /* smol.json or mmol.json molecule */ },
+    { /* smol.json or mmol.json molecule */ },
+    ...
+]
+```

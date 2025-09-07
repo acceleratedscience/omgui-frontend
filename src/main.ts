@@ -4,15 +4,15 @@ import { createPinia } from 'pinia'
 // Carbon
 import 'carbon-components/css/carbon-components.css'
 // import '@/assets/carbon-override-fonts.css' // Look inside this file for notes.
-import '@/assets/carbon-override.scss'
-import '@/assets/carbon-fix.css'
+import '@/assets/carbon-overrides.scss'
+import '@/assets/carbon-fixes.scss'
 import CarbonComponentsVue from '@carbon/vue'
 
 // Styles
 import '@/assets/main.scss'
 
 // Directives
-import copyOnClick from '@/directives/copy-on-click'
+import clickToCopy from '@/directives/click-to-copy'
 
 // App
 import App from '@/App.vue'
@@ -24,6 +24,6 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(CarbonComponentsVue)
-app.directive('copy-on-click', copyOnClick)
+app.directive('click-to-copy', clickToCopy)
 
 app.mount('#app')

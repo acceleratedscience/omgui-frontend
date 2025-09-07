@@ -1,13 +1,7 @@
 <template>
-	<div class="container-3d" :class="{ fullscreen }">
-		<div class="info" v-if="fullscreen">
-			<h4 v-if="molName">{{ capitalize(molName) }}</h4>
-			<!-- <div>{{ mol.identifiers.inchi }}</div> -->
-			<!-- <div>{{ mol.identifiers.canonical_smiles }}</div> -->
-		</div>
-		<BaseIconButton v-if="fullscreen" icon="icn-close" btnStyle="soft" icnSize="large" @click="toggleFullScreen(false)" />
+	<!-- Default viewer -->
+	<div class="container-3d">
 		<BaseIconButton
-			v-else
 			icon="icn-full-screen-large"
 			iconHover="icn-full-screen-large-hover"
 			icnSize="large"
@@ -16,17 +10,23 @@
 		/>
 		<div class="viewer" ref="$container3d"></div>
 	</div>
+
+	<!-- Fullscreen viewer -->
+	<div id="container-3d-fs" class="container-3d" :class="{ show: fullscreen }">
+		<BaseIconButton icon="icn-close" btnStyle="soft" icnSize="large" @click="toggleFullScreen(false)" />
+		<div class="info">
+			<h4 v-if="molName">{{ capitalize(molName) }}</h4>
+		</div>
+		<div class="viewer" ref="$container3dFs"></div>
+	</div>
 </template>
 
 <script setup lang="ts">
 // Libraries
-// import Miew from 'miew' // Waiting for fix, self-hosting until then - see https://github.com/epam/miew/issues/524
-// @ts-ignore
-import Miew from '@/TEMP/miew/dist/miew.module'
-import '@/TEMP/miew/dist/miew.min.css'
+import Miew from 'miew'
 
 // Vue
-import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue'
 
 // Components
 import BaseIconButton from '@/components/BaseIconButton.vue'
@@ -35,15 +35,28 @@ import BaseIconButton from '@/components/BaseIconButton.vue'
 import { capitalize } from '@/utils/helpers'
 
 // Type declarations
-import type { Mol, TempMol } from '@/types'
+import type { Format3D } from '@/types'
 
 // Props
-const props = defineProps<{ mdl: string | null; molName: string | null }>()
+const props = defineProps<{
+	data3D: string | null
+	data3DFormat: Format3D
+	molName: string | null
+}>()
 
 // Definitions
 const $container3d = ref<Element | null>(null)
+const $container3dFs = ref<Element | null>(null)
 const fullscreen = ref<boolean>(false)
 let miewViewer: any = null
+let miewViewerFs: any = null
+
+/**
+ * Computed
+ */
+
+const hasData = computed(() => !!props.data3D)
+const isSmol = computed(() => props.data3DFormat == 'sdf')
 
 /**
  * Hooks
@@ -55,11 +68,16 @@ let miewViewer: any = null
 // When looking at molecule via filebrowser, the ?use=json is handler by ViewerDispatch.vue,
 // which resets molViewerStore.mdl, triggering the watcher.
 onMounted(() => {
-	if (props.mdl) init3DViewer()
+	if (hasData.value) init3DViewer()
 })
 
-// As soon as the SDF data is loaded into the store, render the 3D molecule.
-watch(() => props.mdl, init3DViewer)
+// As soon as new 3D data is loaded into the store, update the 3D molecule.
+watch(
+	() => props.data3D,
+	() => {
+		render3d_miew(false, true)
+	},
+)
 
 onBeforeUnmount(() => {
 	if (miewViewer) {
@@ -74,40 +92,56 @@ onBeforeUnmount(() => {
 
 // Render 3D molecule.
 function init3DViewer() {
-	// console.log('init3DViewer')
 	if (!$container3d.value) return
 
 	// Triggered whenever we clear the molViewerStore.
-	if (props.mdl == null) {
+	if (!hasData.value) {
 		miewViewer.term()
 		miewViewer = null
 		$container3d.value.innerHTML = ''
 		return
 	}
 
-	// console.log('init3DViewer >>> OK')
 	render3d_miew()
+}
+
+async function toggleFullScreen(state: boolean) {
+	fullscreen.value = state
+	if (state) {
+		await nextTick()
+		render3d_miew(true)
+	}
 }
 
 // Render 3D mol using the Miew library - https://lifescience.opensource.epam.com/miew/index.html
 // Miew is not well documented, but it's the best 3D viewer we've found so far.
 // Uses WebGL and has a few nice features like displaying atom info on click, and setting the rotation center on doubleclick.
-function render3d_miew(forceReInit = false) {
-	if (forceReInit) {
-		miewViewer.term()
-		miewViewer = null
-	}
-	if (!miewViewer) {
-		miewViewer = new Miew({
-			container: $container3d.value as HTMLDivElement,
+function render3d_miew(doFullscreen: boolean = false, force: boolean = false) {
+	// This re-initializes the viewer when the molecule is changed.
+	// Not clear from the documentation, leave this here for reference.
+	// (No longer used because we use a separate container for the fullscreen mode)
+	// 	miewViewer.term()
+	// 	miewViewer = null
+
+	let mv
+
+	if ((doFullscreen && !miewViewerFs) || (!doFullscreen && !miewViewer) || force) {
+		// Select the correct container
+		const container = doFullscreen ? $container3dFs.value : $container3d.value
+
+		// Create viewer
+		mv = new Miew({
+			container: container as HTMLDivElement,
 			// https://github.com/epam/miew/blob/25fea24038de937cd142049ec77b27bc1866001a/packages/lib/src/settings.js`
 			settings: {
 				axes: false,
 				fps: false,
-				camDistance: 3, // Default 2.5 tends to crop some of the molecule, depending on the shape. Eg. with penguinone.
+				camDistance: isSmol.value ? 3 : 2,
 				resolution: 'high',
-				zooming: false,
+				zooming: !!doFullscreen,
 				bg: { color: 0xf4f4f4 }, // Equivalent of $soft-bg.
+
+				// Settings we don't want:
 				// bg: { color: 0xffffff, transparent: true }, // Transparent background creates ugly edges
 				// autoRotation: -0.03, // This disables the smooth easing out when you release after rotating
 				// shadow: { // Cool but generates weird artifacts and slows down a lot
@@ -117,18 +151,30 @@ function render3d_miew(forceReInit = false) {
 				// },
 			},
 		})
-		if (miewViewer.init()) {
-			miewViewer.enableHotKeys(false) // Prevent Miew hotkeys to interfere with our app
-			miewViewer.run()
+
+		// Initialize viewer
+		if (mv.init()) {
+			// @ts-ignore
+			mv.enableHotKeys(doFullscreen) // Prevent Miew hotkeys to interfere with our app
+			mv.run()
+		}
+
+		// Load the 3D data
+		if (props.data3DFormat == 'sdf') {
+			mv.load(props.data3D!, { sourceType: 'immediate', fileType: 'sdf' })
+		} else if (props.data3DFormat == 'pdb') {
+			mv.load(props.data3D!, { sourceType: 'immediate', fileType: 'pdb' })
+		} else if (props.data3DFormat == 'cif') {
+			mv.load(props.data3D!, { sourceType: 'immediate', fileType: 'cif' })
+		}
+
+		// Assign viewer to a variable so we can check if it has been initialized later.
+		if (doFullscreen) {
+			miewViewerFs = mv
+		} else {
+			miewViewer = mv
 		}
 	}
-	miewViewer.load(props.mdl, { sourceType: 'immediate', fileType: 'sdf' })
-}
-
-async function toggleFullScreen(state: boolean) {
-	fullscreen.value = state
-	await nextTick()
-	render3d_miew(true)
 }
 </script>
 
@@ -172,6 +218,7 @@ async function toggleFullScreen(state: boolean) {
 	left: 0;
 	pointer-events: initial;
 	color: $black-30;
+	margin: 10px;
 }
 .container-3d:deep() .atom-info p {
 	font-size: $font-size-small;
@@ -181,15 +228,23 @@ async function toggleFullScreen(state: boolean) {
 /**
  * Fullscreen mode
  */
-.container-3d.fullscreen {
+#container-3d-fs {
 	position: fixed;
 	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
 	z-index: 1;
+	// display: none;
+	opacity: 0;
+	pointer-events: none;
 }
-.container-3d.fullscreen::after {
+#container-3d-fs.show {
+	display: block;
+	opacity: 1;
+	pointer-events: all;
+}
+#container-3d-fs::after {
 	content: '';
 	position: absolute;
 	top: 0;
@@ -199,7 +254,7 @@ async function toggleFullScreen(state: boolean) {
 	background: radial-gradient(transparent, $black-10);
 	pointer-events: none;
 }
-.container-3d .info {
+#container-3d-fs .info {
 	margin: 20px;
 	font-size: $font-size-small;
 	line-height: $line-height-small;
@@ -208,15 +263,14 @@ async function toggleFullScreen(state: boolean) {
 	top: 0;
 	z-index: 1;
 }
-.container-3d .info h4 {
+#container-3d-fs .info h4 {
 	margin-bottom: 4px;
 }
-.container-3d.fullscreen:deep() .atom-info {
+#container-3d-fs:deep() .atom-info {
 	position: absolute;
 	top: 25px;
 	left: 0;
 	pointer-events: initial;
-	color: $black-30;
 	margin: 20px;
 	color: $black-60;
 }

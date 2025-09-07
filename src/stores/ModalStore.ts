@@ -1,5 +1,7 @@
 /**
  * This store is responsible for controling the modal.
+ * - - -
+ * For examples on how to use the modal, see KitchenSink.vue
  */
 
 import { defineStore } from 'pinia'
@@ -199,8 +201,8 @@ export const useModalStore = defineStore('modalStore', {
 
 		// Display a confirm modal.
 		confirm(content: string, options: Record<string, any> = {}) {
-			options.primaryBtn = 'Confirm'
-			options.secondaryBtn = 'Cancel'
+			options.primaryBtn = options.primaryBtn || 'Confirm'
+			options.secondaryBtn = options.secondaryBtn || 'Cancel'
 			return this.alert(content, options)
 		},
 

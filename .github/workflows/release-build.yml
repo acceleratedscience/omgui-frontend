@@ -1,0 +1,42 @@
+name: Release Frontend Build
+
+# Trigger build on version release:
+# New tag created starting with v
+on:
+    push:
+        tags:
+            - 'v*'
+
+jobs:
+    build-and-release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '18'
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Build Vue app
+              run: npm run build
+
+            - name: Archive regular build files
+              run: tar -czvf gui-build.tar.gz gui-build
+
+            - name: Archive /proxy/8024/ build files
+              run: tar -czvf gui-build-proxy.tar.gz gui-build-proxy
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: |
+                      gui-build.tar.gz
+                      gui-build-proxy.tar.gz

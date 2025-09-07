@@ -4,7 +4,7 @@
 -->
 <template>
 	<div id="not-breadrumbs" :class="{ collapsed }">
-		<router-link v-if="backto" :to="backto" class="backto"><BaseSvgServe icon="icn-arrow-left" /> Back</router-link>
+		<router-link v-if="backto" :to="backto" class="backto"><BaseIcon icon="icn-arrow-left" /> Back</router-link>
 		<div class="filler"></div>
 		<slot></slot>
 	</div>
@@ -15,7 +15,7 @@
 import type { RouteLocation } from 'vue-router'
 
 // Components
-import BaseSvgServe from '@/components/BaseSvgServe.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 // Props
 defineProps<{

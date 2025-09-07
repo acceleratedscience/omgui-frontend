@@ -1,17 +1,16 @@
-// This service holds all api calls.
+// This is the base API class that all APIs classes extend.
 // - - -
-// Apis are loaded via loadApi() in App.vue
-// - - -
-// Modeled after:
-// https://www.vuemastery.com/courses/real-world-vue3/api-calls-with-axios (service layer)
-// https://itnext.io/vue-tricks-smart-api-module-for-vuejs-b0cae563e67b (using classes so we can pass pinia and router in SSR context)
-
-// This is for this ts file to recognize the type for process.env.NODE_ENV
-// Note types were installed as a dev dependency @types/node
+// The triple-slash directive below is meant for for TypeScript
+// to recognize the type for process.env.NODE_ENV
+// Note: types were installed as a dev dependency @types/node
+// https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html#-reference-types-
 /// <reference types="node" />
 
 // Modules
 import axios from 'axios'
+
+// Stores
+import { useMainStore } from '@/stores/MainStore'
 
 // API URL
 // - - -
@@ -72,7 +71,7 @@ class BaseApi implements BaseApiType {
 		})
 
 		if (apiName) {
-			console.log('Registered API module:', apiName)
+			// console.log('Registered API module:', apiName)
 		}
 
 		this.setupInterceptors()
@@ -185,6 +184,8 @@ class BaseApi implements BaseApiType {
 							'',
 						]
 						console.log(errorMsg.join('\n'), 'color:#d00;font-weight:bold;font-size:14px;text-transform:uppercase', '')
+						const mainStore = useMainStore()
+						mainStore.setApiOffline(true)
 					}, 0)
 				}
 			}

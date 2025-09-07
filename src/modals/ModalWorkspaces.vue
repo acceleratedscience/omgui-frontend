@@ -20,10 +20,12 @@ const mainStore = useMainStore()
 const modalStore = useModalStore()
 
 // API
-import { fileSystemApi } from '@/api/ApiService'
+import { fileSystemApi } from '@/api'
+
+// Emits
+const emit = defineEmits(['mounted'])
 
 // Definitions
-const emit = defineEmits(['mounted'])
 const allWorkspaces = ref<string[]>([' '])
 const selectedWorkspace = ref<string>(' ') // Space to avoid default text to display during load
 

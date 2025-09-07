@@ -20,33 +20,34 @@
 				<cv-checkbox :label="`${mol.index!}`" :value="`${mol.index!}`" :checked="molGridStore.sel.includes(mol.index!)" />
 				<MolRender2D
 					:id="`mol-svg-${mol.index!}`"
-					:structure="molGridStore.molSmiles[i]"
-					:sub-structure="molGridStore.highlight"
+					:structure="molGridStore.molSmiles[i] || ''"
+					:sub-structure="molGridStore.highlight || ''"
 					:width="190"
 					:height="140"
 					svg-mode
 				/>
-				<BaseBookmark :mol="mol" />
-				<BaseIconButton icon="icn-smell" btnStyle="soft" @click="nothingSelected() ? previewMolecule(i) : null" />
-				<BaseIconButton
-					icon="icn-taste"
-					btnStyle="soft"
-					@click="nothingSelected() ? molViewerStore.setMolFromMolsetIndex(mol.index!) : null"
-				/>
-
+				<template v-if="molGridStore.molSmiles[i]">
+					<BaseBookmark :mol="mol" />
+					<BaseIconButton icon="icn-smell" btnStyle="soft" @click="nothingSelected() ? previewMolecule(i) : null" />
+					<BaseIconButton
+						icon="icn-taste"
+						btnStyle="soft"
+						@click="nothingSelected() ? molViewerStore.setMolFromMolsetIndex(mol.index!) : null"
+					/>
+				</template>
 				<div class="filler"></div>
 
 				<!-- prettier-ignore -->
 				<template v-if="1">
 					<!-- Identifiers -->
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('name') && mol?.identifiers?.name" class="idfr name" title="name">{{ mol.identifiers.name }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchi') && mol?.identifiers?.inchi" class="idfr" title="InChI">{{ mol.identifiers.inchi }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchikey') && mol?.identifiers?.inchikey" class="idfr" title="InChIKey">{{ mol.identifiers.inchikey }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('isomeric_smiles') && mol?.identifiers?.isomeric_smiles" class="idfr" title="isomeric SMILES">{{ mol.identifiers.isomeric_smiles }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('canonical_smiles') && mol?.identifiers?.canonical_smiles" class="idfr" title="canonical SMILES">{{ mol.identifiers.canonical_smiles }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('smiles') && mol?.identifiers?.smiles" class="idfr" title="SMILES">{{ mol.identifiers.smiles }}</div>
-					<div v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('molecular_formula') && mol?.identifiers?.molecular_formula" class="idfr formula" title="formula">{{ mol.identifiers.molecular_formula }}</div>
-					<a v-copy-on-click="nothingSelected" v-if="molGridStore.showIdentifiers.includes('cid') && mol?.identifiers?.cid" :href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`" target="_blank" class="idfr" title="PubChem CID">{{ mol.identifiers.cid }}</a>
+					<div v-click-to-copy="nothingSelected" v-if="molGridStore.showIdentifiers.includes('name') && mol?.identifiers?.name" class="idfr name" title="name">{{ mol.identifiers.name }}</div>
+					<div v-click-to-copy="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchi') && mol?.identifiers?.inchi" class="idfr" title="InChI">{{ mol.identifiers.inchi }}</div>
+					<div v-click-to-copy="nothingSelected" v-if="molGridStore.showIdentifiers.includes('inchikey') && mol?.identifiers?.inchikey" class="idfr" title="InChIKey">{{ mol.identifiers.inchikey }}</div>
+					<div v-click-to-copy="nothingSelected" v-if="molGridStore.showIdentifiers.includes('isomeric_smiles') && mol?.identifiers?.isomeric_smiles" class="idfr" title="isomeric SMILES">{{ mol.identifiers.isomeric_smiles }}</div>
+					<div v-click-to-copy="nothingSelected" v-if="molGridStore.showIdentifiers.includes('canonical_smiles') && mol?.identifiers?.canonical_smiles" class="idfr" title="canonical SMILES">{{ mol.identifiers.canonical_smiles }}</div>
+					<div v-click-to-copy="nothingSelected" v-if="molGridStore.showIdentifiers.includes('smiles') && mol?.identifiers?.smiles" class="idfr" title="SMILES">{{ mol.identifiers.smiles }}</div>
+					<div v-click-to-copy="nothingSelected" v-if="molGridStore.showIdentifiers.includes('molecular_formula') && mol?.identifiers?.molecular_formula" class="idfr formula" title="formula">{{ mol.identifiers.molecular_formula }}</div>
+					<a v-click-to-copy="nothingSelected" v-if="molGridStore.showIdentifiers.includes('cid') && mol?.identifiers?.cid" :href="`https://pubchem.ncbi.nlm.nih.gov/compound/${mol.identifiers.cid}`" target="_blank" class="idfr" title="PubChem CID">{{ mol.identifiers.cid }}</a>
 				</template>
 
 				<!-- prettier-ignore -->
@@ -55,7 +56,7 @@
 					<template v-for="(key, i) in molGridStore.showProps" :key="i">
 						<div class="prop" :title="`${key}:\n${mol.properties[key] || mol.properties[key] === 0 ? mol.properties[key] : '-'}`">
 							<div class="key" @click="molGridStore.setSort(key)">{{ cleanKeys(key) }}</div>
-							<div v-copy-on-click="nothingSelected" class="value" :class="{ empty: !mol.properties[key] && mol.properties[key] !== 0 }">
+							<div v-click-to-copy="nothingSelected" class="value" :class="{ empty: !mol.properties[key] && mol.properties[key] !== 0 }">
 								{{ mol.properties[key] || mol.properties[key] === 0 ? mol.properties[key] : '-' }}
 							</div>
 						</div>
@@ -94,6 +95,7 @@ import BaseBookmark from '@/components/BaseBookmark.vue'
 
 // Utils
 import { cleanKeys } from '@/utils/helpers'
+import { isValidMolString } from '@/utils/rdkit-helpers'
 
 // Type declarations
 type KeyHandlers = {
@@ -149,6 +151,9 @@ onMounted(async () => {
 onBeforeUnmount(() => {
 	// Remove key handlers.
 	document.removeEventListener('keydown', onKeyDown)
+
+	// Remove blur listener.
+	mainStore.unsetOnClickAnywhere()
 })
 
 /**
@@ -205,7 +210,7 @@ function onMolClick(e: MouseEvent, i: number) {
 	lastSelectedRowIndex.value = currentItemIndex
 }
 
-// Validator that disables the copy-on-click feature when items are selected.
+// Validator that disables the click-to-copy feature when items are selected.
 function nothingSelected() {
 	return !molGridStore.hasSel
 }
@@ -456,7 +461,7 @@ const keyHandlers: KeyHandlers = {
 		pointer-events: none;
 	}
 
-	// Disable copy-on-click hover style whil selecting
+	// Disable click-to-copy hover style whil selecting
 	#mol-grid.sel-mode .click-copy:hover {
 		text-decoration: none;
 	}

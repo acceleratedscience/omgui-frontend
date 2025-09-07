@@ -16,25 +16,35 @@ type MultiMap = {
 // File types are defined in _get_file_type() in file_system.py.
 // prettier-ignore
 const _map_FileType: MultiMap = {
-	dir:    ['directory',    'FileBrowser'],
-	mdl:    ['molfile',      'MolViewer'],
-	mol:    ['molecule',     'MolViewer'],
-	molset: ['molecule set', 'MolsetViewer'],
-	sdf:	['sdf',          'MolsetViewer'],
-	json:   ['json',         'JsonViewer'],
-	data:   ['data',         'DataViewer'],
-	smi:	['smiles',       'MolsetViewer'],
-	text:   ['text',         'TextViewer'],
-	html:   ['html',         'TextViewer'], // Viewer TBD
-	img:    ['image',        'TextViewer'], // Viewer TBD
-	vid:    ['video',        'TextViewer'], // Viewer TBD
-	xml:    ['xml',          'TextViewer'], // Viewer TBD
-	pdf:    ['pdf',          'PdfViewer'],
-	svg:    ['svg',          'TextViewer'], // Viewer TBD
-	run:    ['run',          'TextViewer'], // Viewer TBD
-	rxn:    ['reaction',     'TextViewer'], // Viewer TBD
-	md:     ['markdown',     'TextViewer'], // Viewer TBD
-	unk:    ['unknown',      'UnknownViewer'],
+	dir:    ['directory',     'FileBrowser'],
+	
+	mdl:    ['molfile',       'MolViewer'],
+	pdb:	['pdb',           'MolViewer'],
+	cif:	['cif',           'MolViewer'],
+	smol:   ['small molecule','MolViewer'],
+	mol:    ['small molecule','MolViewer'], // Backward compatibility for mol.json files
+	mmol:   ['macromolecule', 'MolViewer'],
+	
+	molset: ['molecule set',  'MolsetViewer'],
+	sdf:	['sdf',           'MolsetViewer'],
+	
+	json:   ['json',          'JsonViewer'],
+	data:   ['data',          'DataViewer'],
+	smi:	['smiles',        'MolsetViewer'],
+	
+	text:   ['text',          'TextViewer'],
+	html:   ['html',          'TextViewer'], // Viewer TBD
+	img:    ['image',         'TextViewer'], // Viewer TBD
+	vid:    ['video',         'TextViewer'], // Viewer TBD
+	xml:    ['xml',           'TextViewer'], // Viewer TBD
+	svg:    ['svg',           'TextViewer'], // Viewer TBD
+	run:    ['run',           'TextViewer'], // Viewer TBD
+	rxn:    ['reaction',      'TextViewer'], // Viewer TBD
+	md:     ['markdown',      'TextViewer'], // Viewer TBD
+	
+	pdf:    ['pdf',           'PdfViewer'],
+	
+	unk:    ['unknown',       'UnknownViewer'],
 }
 
 // Splitting up the above map into two separate maps.

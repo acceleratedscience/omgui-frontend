@@ -7,7 +7,7 @@
 	<div v-if="!rdkitLoaded" class="placeholder" :style="dimensions">Loading renderer</div>
 	<div v-else-if="rdkitError" class="placeholder error-msg" :style="dimensions">RDKit<br />Error</div>
 	<div v-else-if="!isValidMolString(structure)" :title="`Cannot render structure: ${structure}`" class="placeholder error-msg" :style="dimensions">
-		Invalid<br />mol string
+		Invalid<br />identifier
 	</div>
 
 	<div v-else-if="svgMode" :class="`svg-wrap ${className}`" :style="dimensions" v-html="svg"></div>

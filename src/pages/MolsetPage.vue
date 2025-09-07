@@ -16,7 +16,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 
 // API
-import { apiFetch, moleculesApi } from '@/api/ApiService'
+import { apiFetch, moleculesApi } from '@/api'
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'
@@ -33,7 +33,7 @@ const status = ref<number | null>(null)
 
 // Props
 const props = defineProps<{
-	cacheId: string
+	identifiers: string
 }>()
 
 /**
@@ -42,7 +42,8 @@ const props = defineProps<{
 
 onMounted(() => {
 	const query = route.query
-	apiFetch(moleculesApi.getMolset(+props.cacheId, query), {
+	const identifiers = props.identifiers.split('~')
+	apiFetch(moleculesApi.getMolset_adhoc(identifiers, query), {
 		onSuccess: (data) => {
 			molGridStore.setMolset(data)
 			molGridStore.setContext(null)

@@ -5,11 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "run-p type-check \"build-all {@}\" --",
-		"build-all": "npm run build:proxy && npm run build:no-proxy",
-		"build:proxy": "vite build --mode proxy",
-		"build:no-proxy": "vite build --mode no-proxy",
-		"postbuild": "node scripts/postbuild.js",
+		"build": "run-p type-check build-vite",
+		"build-vite": "vite build",
 		"preview": "vite preview",
 		"test:unit": "vitest",
 		"test:e2e": "playwright test",
@@ -22,7 +19,8 @@
 		"@rdkit/rdkit": "^2023.9.2-1.0.0",
 		"3dmol": "^2.0.6",
 		"axios": "^1.6.7",
-		"miew": "^0.10.1",
+		"dotenv": "^17.2.1",
+		"miew": "^0.11.0",
 		"pinia": "^2.1.7",
 		"vue": "^3.3.11",
 		"vue-router": "^4.2.5"

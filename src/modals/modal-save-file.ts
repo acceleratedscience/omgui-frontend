@@ -1,12 +1,12 @@
 /**
- * This file contains different presets for the save-as
+ * This file contains different presets for the ModalSaveFile.vue
  * modal that can be reused across the application.
  *
  * Usage:
  * import { useModalSaveFile } from '@/modals'
  * const modalSaveFile = useModalSaveFile()
  *
- * modalSaveFile('molset-json')
+ * modalSaveFile('molset-json', true, { defaultName: 'foobar' })
  */
 
 // Router
@@ -21,6 +21,9 @@ import { useMolViewerStore } from '@/stores/MolViewerStore'
 // Utils
 import { path2FileBrowserPath } from '@/utils/helpers'
 
+// Type declarations
+import type { MolFileDataType } from '@/types'
+
 //
 //
 
@@ -34,92 +37,77 @@ export function useModalSaveFile() {
 	const molGridStore = useMolGridStore()
 	const molViewerStore = useMolViewerStore()
 
-	return function modalSaveFile(modalType: string, params: any = {}): Promise<boolean> {
-		if (modalType == 'molset-json') {
-			// Molset --> Save JSON file
-			return modalStore.display(
-				'ModalSaveFile',
-				{
-					path: fileStore.pathDir,
-					filename: fileStore.filenameNaked,
-					ext: 'molset.json',
-				},
-				{
-					onSubmit: ({ destinationPath }: { destinationPath: string }) => {
-						molGridStore.saveMolsetAsJSON(destinationPath)
+	return function modalSaveFile(dataType: string, exportOptions: boolean = false, params: any = {}): Promise<boolean> {
+		const filename = (fileStore.moduleName == 'MolViewer' ? fileStore.filenameNaked : params.defaultName) || 'untitled'
 
-						// Forwarding to the JSON file makes it hard to notice
-						// anything happened, so instead we forward to the file
-						// preview in the filebrowser.
-						//
-						// This would forward to the actual JSON:
-						// router.push('/~/' + destinationPath)
-						const filebrowserPath = path2FileBrowserPath(destinationPath)
-						router.push('/~/' + filebrowserPath)
-					},
-				},
-			)
-		} else if (modalType == 'molset-options') {
-			// Molset --> provide export options
-			return modalStore.display(
-				'ModalSaveFile',
-				{
-					path: fileStore.pathDir,
-					filename: fileStore.filenameNaked,
-					dataType: 'molset',
-				},
-				{
-					onSubmit: async ({ destinationPath, ext }: { destinationPath: string; ext: string }) => {
-						let success: boolean = false
-						if (ext == 'molset.json') {
-							success = await molGridStore.saveMolsetAsJSON(destinationPath, { newFile: true })
-						} else if (ext == 'sdf') {
-							success = await molGridStore.saveMolsetAsSDF(destinationPath, { newFile: true })
-						} else if (ext == 'csv') {
-							success = await molGridStore.saveMolsetAsCSV(destinationPath, { newFile: true })
-						} else if (ext == 'smi') {
-							success = await molGridStore.saveMolsetAsSmiles(destinationPath, { newFile: true })
-						}
-						if (success) {
-							const filebrowserPath = path2FileBrowserPath(destinationPath)
-							router.push('/~/' + filebrowserPath)
-						}
-					},
-				},
-			)
-		} else if (modalType == 'mol-options') {
-			// Mol --> provide export options
-			const fileStoreFilename = fileStore.moduleName == 'MolViewer' ? fileStore.filenameNaked : null
-			return modalStore.display(
-				'ModalSaveFile',
-				{
-					path: fileStore.pathDir || '',
-					filename: fileStoreFilename || params.defaultName || 'untitled',
-					dataType: 'mol',
-				},
-				{
-					onSubmit: async ({ destinationPath, ext }: { destinationPath: string; ext: string }) => {
-						let success: boolean = false
-						if (ext == 'mol.json') {
-							success = await molViewerStore.saveMolAsJSON(destinationPath, { newFile: true })
-						} else if (ext == 'sdf') {
-							success = await molViewerStore.saveMolAsSDF(destinationPath, { newFile: true })
-						} else if (ext == 'csv') {
-							success = await molViewerStore.saveMolAsCSV(destinationPath, { newFile: true })
-						} else if (ext == 'mol') {
-							success = await molViewerStore.saveMolAsMDL(destinationPath, { newFile: true })
-						} else if (ext == 'smi') {
-							success = await molViewerStore.saveMolAsSMILES(destinationPath, { newFile: true })
-						}
-						if (success) {
-							const filebrowserPath = path2FileBrowserPath(destinationPath)
-							router.push('/~/' + filebrowserPath)
-						}
-					},
-				},
-			)
+		return modalStore.display(
+			'ModalSaveFile',
+			{
+				path: fileStore.pathDir,
+				filename,
+				dataType,
+				exportOptions,
+			},
+			{ onSubmit: doSubmit },
+		)
+	}
+
+	//
+	//
+
+	// The onSubmit is called in ModalSaveFile.vue
+	async function doSubmit(
+		{ destinationPath, ext, srcDataType }: { destinationPath: string; ext: string; srcDataType: MolFileDataType },
+		force: boolean = false,
+	) {
+		try {
+			if (srcDataType == 'molset') {
+				if (ext == 'molset.json') {
+					await molGridStore.saveMolsetAsJSON(destinationPath, { newFile: true, force })
+				} else if (ext == 'sdf') {
+					await molGridStore.saveMolsetAsSDF(destinationPath, { newFile: true, force })
+				} else if (ext == 'csv') {
+					await molGridStore.saveMolsetAsCSV(destinationPath, { newFile: true, force })
+				} else if (ext == 'smi') {
+					await molGridStore.saveMolsetAsSmiles(destinationPath, { newFile: true, force })
+				}
+			} else if (srcDataType == 'smol') {
+				if (ext == 'smol.json') {
+					await molViewerStore.saveSmolAsJSON(destinationPath, { newFile: true, force })
+				} else if (ext == 'sdf') {
+					await molViewerStore.saveSmolAsSDF(destinationPath, { newFile: true, force })
+				} else if (ext == 'csv') {
+					await molViewerStore.saveSmolAsCSV(destinationPath, { newFile: true, force })
+				} else if (ext == 'mol') {
+					await molViewerStore.saveSmolAsMDL(destinationPath, { newFile: true, force })
+				} else if (ext == 'smi') {
+					await molViewerStore.saveSmolAsSMILES(destinationPath, { newFile: true, force })
+				}
+			} else if (['cif', 'pdb'].includes(srcDataType)) {
+				if (ext == 'mmol.json') {
+					await molViewerStore.saveMmolAsMmolJson(destinationPath, { newFile: true, force })
+				} else if (ext == 'cif') {
+					await molViewerStore.saveMmolAsCIF(destinationPath, { newFile: true, force })
+				} else if (ext == 'pdb') {
+					await molViewerStore.saveMmolAsPDB(destinationPath, { newFile: true, force })
+				}
+			}
+
+			const filebrowserPath = path2FileBrowserPath(destinationPath)
+			router.push('/~/' + filebrowserPath)
+		} catch (err: any) {
+			const errMsg = err?.data || 'An error occurred while saving the file.'
+			const status = err?.status
+			if (!err?.status) console.error(err)
+			if (status == 409) {
+				// If the file already exists, ask the user if they want to overwrite it.
+				modalStore.confirm(errMsg, {
+					title: 'Overwrite existing file?',
+					onSubmit: () => doSubmit({ destinationPath, ext, srcDataType }, true),
+				})
+			} else {
+				modalStore.alert(errMsg, { title: 'Error' })
+			}
 		}
-		// To shut up ts linter. This won't be reached.
-		return new Promise(() => {})
 	}
 }

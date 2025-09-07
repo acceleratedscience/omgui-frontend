@@ -10,8 +10,10 @@ const router = useRouter()
 // Stores
 import { useFileStore } from '@/stores/FileStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
+import { useModalStore } from '@/stores/ModalStore'
 const fileStore = useFileStore()
 const molViewerStore = useMolViewerStore()
+const modalStore = useModalStore()
 
 // Components
 import OverflowMenu from '@/components/OverflowMenu.vue'
@@ -21,10 +23,11 @@ import { useModalSaveFile } from '@/modals/modal-save-file'
 const modalSaveFile = useModalSaveFile()
 
 // Type declarations
-import type { ActionOption } from '@/types'
+import type { MolFileDataType, ActionOption } from '@/types'
 
 // Props
-defineProps<{
+const props = defineProps<{
+	dataType: MolFileDataType
 	disabled: boolean
 }>()
 
@@ -36,11 +39,11 @@ const overflowOptions: ActionOption[] = [
 		action: actionSaveAs,
 	},
 ]
-if (fileStore.active && fileStore.fileType == 'mol') {
+if (fileStore.active && ['smol', 'mmol', 'cif', 'pdb'].includes(fileStore.fileType as string)) {
 	overflowOptions.push({
 		val: 'delete',
 		disp: 'Delete',
-		action: actionDeleteFile,
+		action: actionDeleteFile, // Todo: Add confirmation modal
 	})
 }
 
@@ -50,13 +53,30 @@ if (fileStore.active && fileStore.fileType == 'mol') {
 
 // Save as...
 function actionSaveAs() {
-	return modalSaveFile('mol-options', { defaultName: molViewerStore.nameSlug })
+	console.log('dataType: ', props.dataType)
+
+	// smol.json
+	if (props.dataType == 'smol') return modalSaveFile('smol', true, { defaultName: molViewerStore.nameSlug })
+
+	// cif / mmol.json with cif data
+	if (props.dataType == 'cif') return modalSaveFile('cif', true, { defaultName: molViewerStore.nameSlug })
+
+	// pdb / mmol.json with pdb data
+	if (props.dataType == 'pdb') return modalSaveFile('pdb', true, { defaultName: molViewerStore.nameSlug })
+
+	console.error(`actionSaveAs() -> props.dataType "${props.dataType}" not recognized`)
 }
 
 // Delete
 async function actionDeleteFile() {
-	const success: boolean = await fileStore.deleteFile(fileStore.pathAbsolute)
-	if (success) router.push('/~/' + fileStore.pathDir)
+	modalStore.confirm('This cannot be undone.', {
+		title: 'Please confirm deletion',
+		primaryBtn: 'Delete',
+		onSubmit: async () => {
+			const success: boolean = await fileStore.deleteFile(fileStore.pathAbsolute)
+			if (success) router.push('/~/' + fileStore.pathDir)
+		},
+	})
 }
 </script>
 

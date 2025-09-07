@@ -17,7 +17,7 @@ import { onMounted } from 'vue'
 import { useModalStore } from '@/stores/ModalStore'
 const modalStore = useModalStore()
 
-// Definitions
+// Emits
 const emit = defineEmits(['mounted']) // <--
 
 /*

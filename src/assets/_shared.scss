@@ -27,11 +27,8 @@ $soft-bg: #f4f4f4; // Same background as carbon dropdowns
 $extra-soft-bg: #fafafa;
 $soft-bg-hover: #e9e9e9; // The quivalent of $soft-bg + $black-05 overlay (browser not figma), used by carbon dropdowns
 
-// $cb-ip-hover: #e5e5e5; #
-
 // Colors
 $blue: #0f62fe; // IBM Blue
-$bwlue:#2756ad; // IBM Blue
 $blue-hover: #0043ce;
 $blue-light: #3d80ff;
 $blue-30: color.mix($blue, white, 30%);
@@ -53,7 +50,7 @@ $yellow: #ffde00; // Weird bug in chrome causes ::selection with bg #fde to rend
 
 // Responsive breakpoints.
 // Should be used as max values.
-$bp-xlarge: 1800px; // The point where we snap content width to window
+$bp-xlarge: 1800px; // The point above which we limit page content width and center it
 $bp-large: 1200px;
 $bp-medium: 1000px;
 $bp-small: 700px;

@@ -1,4 +1,6 @@
 <template>
+	<ApiOffline v-if="mainStore.apiOffline" />
+
 	<!-- Dev only: toggle headless -->
 	<template v-if="!isRawPath">
 		<input
@@ -29,7 +31,12 @@
 	</template>
 
 	<!-- Load a headless module (wrapper + loader) -->
-	<div v-else-if="mainStore.headless" ref="$headlessWrap" id="headless-wrap" :class="{ 'file-browser': fileStore.isDir }">
+	<div
+		v-else-if="mainStore.headless"
+		ref="$headlessWrap"
+		id="headless-wrap"
+		:class="{ 'file-browser': fileStore.isDir && !fileStore.forcedLoading }"
+	>
 		<router-view />
 		<!-- <RouterView v-slot="{ Component }">
 			<KeepAlive>
@@ -40,7 +47,7 @@
 	</div>
 
 	<!-- Load the full application -->
-	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir }">
+	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir && !fileStore.forcedLoading }">
 		<TheNav />
 		<div id="body">
 			<router-view />
@@ -51,6 +58,8 @@
 			</RouterView> -->
 		</div>
 	</div>
+
+	<ScrollToTop />
 </template>
 
 <script setup lang="ts">
@@ -68,15 +77,17 @@ const commandLineStore = useCommandLineStore()
 const assistantStore = useAssistantStore()
 
 // API
-import { fileSystemApi } from '@/api/ApiService'
+import { fileSystemApi } from '@/api'
 // import webSocketClient from '@/api/WebSocketClient'// Experimental
 // webSocketClient()
 
 // Components
+import ApiOffline from '@/components/ApiOffline.vue'
 import TheModal from '@/components/TheModal.vue'
 import TheNav from '@/components/TheNav.vue'
 import CommandLine from '@/pages/CommandLine.vue'
 import AIAssistant from '@/pages/AIAssistant.vue'
+import ScrollToTop from '@/components/ScrollToTop.vue'
 
 // Utils
 import { debounce } from '@/utils/helpers'
@@ -198,7 +209,7 @@ header {
 	// overflow-x: hidden;
 
 	// Centered layout
-	padding: 80px;
+	padding: var(--page-margin);
 	padding-top: 40px;
 	max-width: 1360px;
 	background: #fff;
@@ -225,22 +236,18 @@ header {
  * Responsive
  */
 
+// Max-width doesn't kick in right away,
+// so we avoid side margins that are too small.
 @media (max-width: $bp-xlarge) {
 	#main-wrap {
 		max-width: none;
-		// padding-top: 80px;
 	}
 }
 
-@media (max-width: $bp-medium) {
-	#main-wrap {
-		padding: 40px;
-		// padding-top: 80px;
-	}
-}
+// The default top-padding is not synced with --page-margin
 @media (max-width: $bp-small) {
 	#main-wrap {
-		padding: 20px;
+		padding-top: 20px;
 	}
 }
 

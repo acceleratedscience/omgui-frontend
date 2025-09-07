@@ -1,0 +1,79 @@
+/**
+ * This file contains opinionated stylistic overrides
+ * to the default Carbon styles.
+ */
+
+// Links
+a {
+	text-decoration: none;
+}
+
+// Header styles
+h1,
+h2,
+h3,
+h4,
+h5 {
+	margin-top: 0;
+	margin-bottom: 10px;
+}
+h1 {
+	font-weight: 300;
+}
+h2 {
+	font-size: 28px;
+	font-weight: 600;
+}
+h3 {
+	font-size: 22px;
+	font-weight: 600;
+}
+h4 {
+	font-size: 16px;
+	font-weight: 600;
+}
+h5 {
+	font-size: 16px;
+	font-weight: 400;
+}
+
+// Text styles
+b {
+	font-weight: 600;
+}
+p {
+	font-size: $font-size;
+}
+pre {
+	font-family: 'IBM Plex Mono', monospace;
+	font-size: $font-size;
+	tab-size: 2;
+	line-height: $line-height;
+}
+
+// Lists
+ul {
+	list-style: disc;
+	margin-inline-start: 20px;
+}
+ol {
+	list-style: decimal;
+	margin-inline-start: 20px;
+}
+ul li,
+ol li {
+	margin-bottom: 8px;
+}
+ol li {
+	padding-left: 3px;
+}
+ul.compact li,
+ol.compact li {
+	margin-bottom: 2px;
+}
+.bx--dropdown ul {
+	margin-inline-start: 0;
+}
+.bx--dropdown ul li {
+	margin-bottom: 0;
+}
