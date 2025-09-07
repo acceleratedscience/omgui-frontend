@@ -2,17 +2,11 @@
 <html lang="en">
 	<head>
 		<script>
+			// Dynamically set the base URL for the application
 			const base = document.createElement('base')
-			
-			// const match = window.location.pathname.match(/^(.*)\/proxy\/(\d{4})/)
-			// const prefix = match?.[1] ?? ''
-			// const port = match?.[2] ?? 8024
-			// base.href = `${prefix}/proxy/${port}/`
-
-			const baseUrl = '/foo/'
-			base.href = baseUrl
-			window.dynamicBaseUrl = baseUrl
-
+			const baseUrl = '{{ base_url }}'
+			base.href = baseUrl // HTML links and relative paths
+			window.dynamicBaseUrl = baseUrl // Vue router links
 			document.head.insertBefore(base, document.head.firstChild)
 		</script>
 		<meta charset="UTF-8" />

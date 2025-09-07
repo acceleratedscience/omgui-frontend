@@ -34,6 +34,7 @@ export default defineConfig(({ command, mode }) => {
 		css: {
 			preprocessorOptions: {
 				scss: {
+					// Shared CSS imported into each component
 					additionalData: '@import "@/assets/_shared.scss";',
 				},
 			},
