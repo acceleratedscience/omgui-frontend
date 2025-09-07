@@ -1,4 +1,4 @@
-import BaseApi from './BaseApi'
+import BaseApi from '../BaseApi'
 
 export default class MainApi extends BaseApi {
 	constructor() {

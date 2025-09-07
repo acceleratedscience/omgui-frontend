@@ -1,4 +1,4 @@
-import BaseApi from './BaseApi'
+import BaseApi from '../BaseApi'
 
 // Type declarations
 import type { LocationQuery } from 'vue-router'
@@ -142,8 +142,13 @@ export default class MoleculesApi extends BaseApi {
 	}
 
 	// Get my working list of molecules.
-	getMolset_mymols(query: LocationQuery = {}) {
-		return this.apiClient.post('/get-molset-mymols', { query })
+	getMolset_mws(query: LocationQuery = {}) {
+		return this.apiClient.post('/get-molset-mws', { query })
+	}
+
+	// Get my working list of molecules.
+	getMolset_adhoc(identifiers: string[], query: LocationQuery = {}) {
+		return this.apiClient.post('/get-molset-adhoc', { identifiers, query })
 	}
 
 	// #endregion

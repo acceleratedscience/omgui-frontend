@@ -1,4 +1,4 @@
-import BaseApi from './BaseApi'
+import BaseApi from '../BaseApi'
 import type { LocationQuery } from 'vue-router'
 
 export default class FileSystemApi extends BaseApi {

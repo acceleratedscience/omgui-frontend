@@ -94,3 +94,11 @@ This is a sub-repository to the main [OpenAD repo]. It contains the GUI which is
 -   Update `actionSaveAs()` in `OverflowMenuMol.vue` to ensure the correct options are displayed in the overflow menu, and ensure the delete option is also included.
 
 [OpenAD repo]: https://github.com/acceleratedscience/open-ad-toolkit
+
+<!--
+
+To delete a tag, locally and then on GH:
+git tag -d <tag_name>
+git push origin --delete <tag_name>
+
+-->

@@ -1,4 +1,4 @@
-import BaseApi from './BaseApi'
+import BaseApi from '../BaseApi'
 
 // Type declarations
 import type { LocationQuery } from 'vue-router'

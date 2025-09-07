@@ -50,7 +50,7 @@ const empty = ref<boolean>(false)
 
 onMounted(() => {
 	const query = molGridStore._setUrlQuery()
-	apiFetch(moleculesApi.getMolset_mymols(query), {
+	apiFetch(moleculesApi.getMolset_mws(query), {
 		onSuccess: (data) => {
 			if (data == 'empty') {
 				empty.value = true

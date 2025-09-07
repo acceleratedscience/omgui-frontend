@@ -20,18 +20,18 @@ const routes = [
 	{
 		path: '/~/:path(.*)?',
 		name: 'filebrowser',
-		component: () => import(/* webpackChunkName: 'ViewerDispatch' */ `@/pages/ViewerDispatch.vue`),
+		component: () => import(`@/pages/ViewerDispatch.vue`),
 	},
 	// {
 	// 	path: '/mol',
 	// 	name: 'mol',
-	// 	component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
+	// 	component: () => import('@/pages/MolPage.vue'),
 	// },
 	{
 		path: '/mol/:identifier?',
 		name: 'mol',
 		props: true,
-		component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
+		component: () => import('@/pages/MolPage.vue'),
 	},
 	{
 		path: '/smol',
@@ -43,13 +43,19 @@ const routes = [
 		path: '/smol/:identifier',
 		name: 'smol',
 		props: true,
-		component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
+		component: () => import('@/pages/MolPage.vue'),
 	},
 	{
 		path: '/mmol/:identifier',
 		name: 'mmol',
 		props: true,
-		component: () => import(/* webpackChunkName: 'MolPage' */ '@/pages/MolPage.vue'),
+		component: () => import('@/pages/MolPage.vue'),
+	},
+	{
+		path: '/molset/:identifiers',
+		name: 'molset',
+		props: true,
+		component: () => import('@/pages/MolsetPage.vue'),
 	},
 	{
 		// This route doesn't serve anything... it's the previous version of /result but keeping
@@ -57,65 +63,65 @@ const routes = [
 		path: '/cache/:cacheId',
 		name: 'cache',
 		props: true,
-		component: () => import(/* webpackChunkName: 'MolsetPage' */ '@/pages/MolsetPage.vue'),
+		component: () => import('@/pages/MolsetPage-cache.vue'),
 	},
 	{
 		path: '/my-mols',
 		name: 'my-mols',
-		component: () => import(/* webpackChunkName: 'MyMols' */ '@/pages/MyMols.vue'),
+		component: () => import('@/pages/MyMols.vue'),
 	},
 	{
 		path: '/result',
 		name: 'result',
 		props: true,
-		component: () => import(/* webpackChunkName: 'ResultPage' */ '@/pages/ResultPage.vue'),
+		component: () => import('@/pages/ResultPage.vue'),
 	},
 	{
 		path: '/dataframe/:dfName',
 		name: 'dataframe',
 		props: true,
-		component: () => import(/* webpackChunkName: 'DataframePage' */ '@/pages/DataframePage.vue'),
+		component: () => import('@/pages/DataframePage.vue'),
 	},
 	{
 		path: '/dataviewer',
 		name: 'dataviewer',
-		component: () => import(/* webpackChunkName: 'DataViewer' */ '@/viewers/DataViewer.vue'),
+		component: () => import('@/viewers/DataViewer.vue'),
 	},
 	{
 		path: '/jsonviewer',
 		name: 'jsonviewer',
-		component: () => import(/* webpackChunkName: 'JsonViewer' */ '@/viewers/JsonViewer.vue'),
+		component: () => import('@/viewers/JsonViewer.vue'),
 	},
 	{
 		path: '/textviewer',
 		name: 'textviewer',
-		component: () => import(/* webpackChunkName: 'TextViewer' */ '@/viewers/TextViewer.vue'),
+		component: () => import('@/viewers/TextViewer.vue'),
 	},
 	{
 		path: '/cli',
 		name: 'cli',
-		component: () => import(/* webpackChunkName: 'CommandLine' */ '@/pages/CommandLine.vue'),
+		component: () => import('@/pages/CommandLine.vue'),
 	},
 	{
 		path: '/svg/:filename',
 		name: 'svg',
 		props: true,
-		component: () => import(/* webpackChunkName: 'BaseIcon' */ '@/components/BaseIcon.vue'),
+		component: () => import('@/components/BaseIcon.vue'),
 	},
 	{
 		path: '/kitchensink',
 		name: 'kitchensink',
-		component: () => import(/* webpackChunkName: 'KitchenSink' */ '@/pages/KitchenSink.vue'),
+		component: () => import('@/pages/KitchenSink.vue'),
 	},
 	{
 		path: '/sandbox',
 		name: 'sandbox',
-		component: () => import(/* webpackChunkName: 'Sandbox' */ '@/pages/Sandbox.vue'),
+		component: () => import('@/pages/Sandbox.vue'),
 	},
 	{
 		path: '/:pathMatch(.*)*',
 		name: 'not-found',
-		component: () => import(/* webpackChunkName: 'NotFound' */ '@/pages/NotFound.vue'),
+		component: () => import('@/pages/NotFound.vue'),
 	},
 ]
 
@@ -131,7 +137,7 @@ const headlessRoutes = routes.map((route) => ({
 
 // Create router.
 const router = createRouter({
-	history: createWebHistory(import.meta.env.BASE_URL),
+	history: createWebHistory((window as any).dynamicBaseUrl || ''),
 	routes: [...routes, ...headlessRoutes],
 })
 
