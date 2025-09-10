@@ -68,7 +68,7 @@ const routes = [
 	{
 		path: '/mws',
 		name: 'mws',
-		component: () => import('@/pages/MyMols.vue'),
+		component: () => import('@/pages/MoleculeWorkingSet.vue'),
 	},
 	{
 		path: '/result',
