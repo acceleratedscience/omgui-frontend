@@ -66,8 +66,8 @@ const routes = [
 		component: () => import('@/pages/MolsetPage-cache.vue'),
 	},
 	{
-		path: '/my-mols',
-		name: 'my-mols',
+		path: '/mws',
+		name: 'mws',
 		component: () => import('@/pages/MyMols.vue'),
 	},
 	{

@@ -56,7 +56,7 @@ onMounted(() => {
 				empty.value = true
 			} else {
 				molGridStore.setMolset(data)
-				molGridStore.setContext('my-mols')
+				molGridStore.setContext('mws')
 			}
 		},
 		onError: (err) => {

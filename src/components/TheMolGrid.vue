@@ -107,8 +107,8 @@ const $molGrid = ref<HTMLElement | null>(null)
 
 // Props
 const props = defineProps<{
-	// Cache is always cleared when leaving the molgrid,
-	// either when opening molset files or when checking my-mols.
+	// Cache is always cleared when leaving the molgrid, either
+	// when opening molset files or when checking your mws.
 	// However when a molset is opened by its cacheId (/molset/1234),
 	// then the cache is retained when opening a molecule in the molset.
 	retainCache?: boolean

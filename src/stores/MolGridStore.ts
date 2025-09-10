@@ -71,7 +71,7 @@ const PROP_DEFAULT = ['molecular_weight']
 
 // Type declarations
 import type { Smol, Molset, MolsetApi, SearchMode } from '@/types'
-type Context = 'json' | 'sdf-file' | 'csv-file' | 'smi-file' | 'result-mols' | 'my-mols' | 'dataframe' | null
+type Context = 'json' | 'sdf-file' | 'csv-file' | 'smi-file' | 'result-mols' | 'mws' | 'dataframe' | null
 type SaveAsJSONOptions = {
 	newFile?: boolean
 	force?: boolean
@@ -160,10 +160,10 @@ function getInitialState(): State {
 		//	 --> Saving changes will update the dataframe stored in memory.
 		//	 URL: /molset/123456789
 		//
-		// - my-mols:
+		// - mws:
 		//   When looking at the molecules list.
 		//   --> Saving changes will update the molecules stored in the cmd_pointer memory.
-		//   URL: /my-mols
+		//   URL: /mws
 		_context: null,
 
 		// Status
@@ -551,9 +551,9 @@ export const useMolGridStore = defineStore('molGridStore', {
 			this.removeMols(indicesToRemove)
 		},
 
-		// Replace a molecule in a .molset.json file or in my-mols.
+		// Replace a molecule in a .molset.json file or in your mws.
 		// This is used when saving changes to a molecule inside a molset.
-		replaceMolInMolset(destinationPath: string, mol: Smol, context: 'json' | 'my-mols'): Promise<boolean> {
+		replaceMolInMolset(destinationPath: string, mol: Smol, context: 'json' | 'mws'): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
 				apiFetch(moleculesApi.replaceMolInMolset(destinationPath, mol, context, this._cacheId!), {
 					onSuccess: () => {
@@ -630,9 +630,9 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// Update the molecule working list.
-		updateMolset_mymols(): Promise<boolean> {
+		updateMolset_mws(): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.updateMolset_mymols(this._cacheId!), {
+				apiFetch(moleculesApi.updateMolset_mws(this._cacheId!), {
 					onSuccess: () => resolve(true),
 					onError: () => reject(true),
 				})

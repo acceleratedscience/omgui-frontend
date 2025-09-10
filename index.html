@@ -1,22 +1,19 @@
 <!doctype html>
 <html lang="en">
 	<head>
+		<base href="/__BASE_URL__/" />
 		<script>
-			// Dynamically set the base URL for the application
-			const base = document.createElement('base')
-			const baseUrl = '{{ base_url }}'
-			base.href = baseUrl // HTML links and relative paths
+			const baseUrl = '/__BASE_URL__/'
 			window.dynamicBaseUrl = baseUrl // Vue router links
-			document.head.insertBefore(base, document.head.firstChild)
 		</script>
 		<meta charset="UTF-8" />
 		<link rel="icon" href="favicon.ico" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<script src="/rdkit/RDKit_minimal.js"></script>
-		<title>OpenAD GUI</title>
+		<script src="rdkit/RDKit_minimal.js"></script>
+		<title>OMGUI</title>
 	</head>
 	<body>
 		<div id="app"></div>
-		<script type="module" src="/src/main.ts"></script>
+		<script type="module" src="src/main.ts"></script>
 	</body>
 </html>

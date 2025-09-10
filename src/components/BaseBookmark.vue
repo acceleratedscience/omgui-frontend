@@ -6,8 +6,8 @@
 		iconHover="icn-bookmark-full"
 		iconOn="icn-bookmark-full"
 		iconOnHover="icn-bookmark-remove"
-		@toggle-on="addToMymols"
-		@toggle-off="removeFromMymols"
+		@toggle-on="addToMWS"
+		@toggle-off="removeFromMWS"
 	/>
 </template>
 
@@ -46,12 +46,12 @@ onMounted(updateStatus)
  */
 
 // Add
-async function addToMymols() {
+async function addToMWS() {
 	if (!props.mol) {
 		loadingError.value = 'x'
 		return
 	}
-	apiFetch(moleculesApi.addMolToMyMols(props.mol), {
+	apiFetch(moleculesApi.addMolToMWS(props.mol), {
 		onError: () => {
 			if (toggleBtn.value) toggleBtn.value.toggle(false, true)
 		},
@@ -61,12 +61,12 @@ async function addToMymols() {
 }
 
 // Remove
-async function removeFromMymols() {
+async function removeFromMWS() {
 	if (!props.mol) {
 		loadingError.value = 'x'
 		return
 	}
-	apiFetch(moleculesApi.removeMolFromMyMols(props.mol), {
+	apiFetch(moleculesApi.removeMolFromMWS(props.mol), {
 		onError: (data: { status: boolean }) => {
 			if (toggleBtn.value) toggleBtn.value.toggle(data.status, true)
 		},
@@ -82,7 +82,7 @@ function updateStatus() {
 	if (!props.mol || !('properties' in props.mol)) return
 
 	if (props.mol) {
-		apiFetch(moleculesApi.checkMolInMyMols(props.mol), {
+		apiFetch(moleculesApi.checkMolInMWS(props.mol), {
 			onSuccess: (data: { status: boolean }) => {
 				if (toggleBtn.value) toggleBtn.value.toggle(data.status, true)
 			},

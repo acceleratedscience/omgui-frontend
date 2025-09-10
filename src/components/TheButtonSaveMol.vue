@@ -45,8 +45,8 @@ const isForeignFile: ComputedRef<boolean> = computed(() => {
 // Control the button text, either 'Save' or 'Save as...'
 const saveAs: ComputedRef<boolean> = computed(() => {
 	if (molGridStore.active) {
-		// molset.json / my-mols --> Update the source.
-		if (molGridStore.context == 'json' || molGridStore.context == 'my-mols') return false
+		// molset.json / mws --> Update the source.
+		if (molGridStore.context == 'json' || molGridStore.context == 'mws') return false
 	} else if (fileStore.fileType == 'smol') {
 		// smol.json --> Update the source.
 		return false
@@ -84,7 +84,7 @@ async function onSaveClick() {
 		if (molGridStore.context == 'json') {
 			// .molset.json file --> Update the JSON file.
 			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.smol as Smol, molGridStore.context)
-		} else if (molGridStore.context == 'my-mols') {
+		} else if (molGridStore.context == 'mws') {
 			// My mols --> Update your working molecule set.
 			success = await molGridStore.replaceMolInMolset(fileStore.path, molViewerStore.smol as Smol, molGridStore.context)
 		} else {

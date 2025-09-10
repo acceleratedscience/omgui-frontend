@@ -47,7 +47,7 @@ import type { ComponentPublicInstance } from 'vue'
 type SaveType = 'as-molset' | 'update-original' | ''
 
 // Definitions
-const btnText = ['result-mols', 'my-mols'].includes(molGridStore.context || '') ? 'Update' : 'Save'
+const btnText = ['result-mols', 'mws'].includes(molGridStore.context || '') ? 'Update' : 'Save'
 const loading = ref<boolean>(false)
 const error = ref<boolean>(false)
 const success = ref<boolean>(false)
@@ -101,7 +101,7 @@ async function onSaveClick(saveType: SaveType) {
 		} else {
 			// Singular save button to update the source.
 			// Used everywhere else.
-			submitted = await executeSave() // --> Updates the source, either molset.json, memory or my-mols
+			submitted = await executeSave() // --> Updates the source, either molset.json, memory or mws
 		}
 		// console.log('<< execSave')
 		loading.value = false
@@ -125,8 +125,8 @@ async function onSaveClick(saveType: SaveType) {
 function executeSave(): Promise<boolean> {
 	if (molGridStore.context == 'json') {
 		return molGridStore.updateMolset()
-	} else if (molGridStore.context == 'my-mols') {
-		return molGridStore.updateMolset_mymols()
+	} else if (molGridStore.context == 'mws') {
+		return molGridStore.updateMolset_mws()
 	} else if (molGridStore.context == 'result-mols') {
 		return molGridStore.updateMolset_result()
 	} else if (molGridStore.context == 'dataframe') {

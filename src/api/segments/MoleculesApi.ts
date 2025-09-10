@@ -36,22 +36,22 @@ export default class MoleculesApi extends BaseApi {
 	///////////////////////////////////////////////////////////////
 	// #region - Manipulation
 
-	// Save molecule to my-mols.
-	addMolToMyMols(mol: Smol | TempSmol) {
-		return this.apiClient.post('/add-mol-to-mymols', { mol }) // Smol, may support mmol later
+	// Save molecule to your mws
+	addMolToMWS(mol: Smol | TempSmol) {
+		return this.apiClient.post('/add-mol-to-mws', { mol }) // Smol, may support mmol later
 	}
 
-	// Remove molecule from my-mols
-	removeMolFromMyMols(mol: Smol | TempSmol) {
-		return this.apiClient.post('/remove-mol-from-mymols', { mol }) // Smol, may support mmol later
+	// Remove molecule from your mws
+	removeMolFromMWS(mol: Smol | TempSmol) {
+		return this.apiClient.post('/remove-mol-from-mws', { mol }) // Smol, may support mmol later
 	}
 
-	// Check if a molecule is in my-mols
-	checkMolInMyMols(mol: Smol | TempSmol) {
-		return this.apiClient.post('/check-mol-in-mymols', { mol }) // Smol, may support mmol later
+	// Check if a molecule is in your mws
+	checkMolInMWS(mol: Smol | TempSmol) {
+		return this.apiClient.post('/check-mol-in-mws', { mol }) // Smol, may support mmol later
 	}
 
-	// Check if a molecule is in my-mols
+	// Check if a molecule is in your mws
 	enrichSmol(smol: Smol | TempSmol) {
 		return this.apiClient.post('/enrich-smol', { smol })
 	}
@@ -86,7 +86,7 @@ export default class MoleculesApi extends BaseApi {
 	}
 
 	// Update molset with the molecule data.
-	replaceMolInMolset(path: string, mol: Smol, context: 'json' | 'my-mols', cacheId: number) {
+	replaceMolInMolset(path: string, mol: Smol, context: 'json' | 'mws', cacheId: number) {
 		return this.apiClient.post('/replace-mol-in-molset', { path, mol, context, cacheId }) // Smol, may support mmol later
 	}
 
@@ -176,10 +176,10 @@ export default class MoleculesApi extends BaseApi {
 		return this.apiClient.post('/update-molset', { path, cacheId })
 	}
 
-	// Update my-mols molset
+	// Update mws
 	// This overrides the working list molecules stored in the cmd_pointer with the ones from the working copy.
-	updateMolset_mymols(cacheId: number) {
-		return this.apiClient.post('/update-molset-mymols', { cacheId })
+	updateMolset_mws(cacheId: number) {
+		return this.apiClient.post('/update-molset-mws', { cacheId })
 	}
 
 	// #endregion
