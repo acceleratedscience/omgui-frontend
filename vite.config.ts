@@ -43,9 +43,9 @@ export default defineConfig(({ command }) => {
 	if (command === 'build') {
 		return {
 			...commonConfig,
-			base: '/__BASE_URL__/',
+			base: '/__BASE_PATH__/',
 			build: {
-				outDir: 'gui-build',
+				// outDir: 'dist',
 				rollupOptions: {},
 			},
 		}

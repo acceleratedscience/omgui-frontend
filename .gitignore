@@ -13,9 +13,8 @@ coverage
 *.local
 .env
 
-# Build folders
-/gui-build
-/gui-build-proxy
+# Build folder
+/dist
 
 /cypress/videos/
 /cypress/screenshots/

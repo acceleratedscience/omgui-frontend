@@ -1,0 +1,1 @@
+import{h as e,i as t,v as o}from"./index-BI4Hwmrn.js";const c={xmlns:"http://www.w3.org/2000/svg",width:"16",height:"16",fill:"currentColor",viewBox:"0 0 16 16"},n=o("path",{d:"M13 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1M3 13V3h10v10z"},null,-1),r=[n];function s(a,h){return e(),t("svg",c,[...r])}const l={render:s};export{l as default,s as render};

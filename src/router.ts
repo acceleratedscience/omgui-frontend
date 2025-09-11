@@ -137,7 +137,7 @@ const headlessRoutes = routes.map((route) => ({
 
 // Create router.
 const router = createRouter({
-	history: createWebHistory((window as any).dynamicBaseUrl || ''),
+	history: createWebHistory((window as any).dynamicBasePath || ''),
 	routes: [...routes, ...headlessRoutes],
 })
 
