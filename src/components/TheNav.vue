@@ -43,8 +43,8 @@
 			/> -->
 
 			<!-- My mols -->
-			<router-link :to="{ name: 'my-mols' }" class="my-mols">
-				<BaseIconButton icon="icn-bookmark" iconHover="icn-bookmark-full" iconSel="icn-bookmark-full" :sel="sel == 'my-mols'" />
+			<router-link :to="{ name: 'mws' }" class="mws">
+				<BaseIconButton icon="icn-bookmark" iconHover="icn-bookmark-full" iconSel="icn-bookmark-full" :sel="sel == 'mws'" />
 			</router-link>
 
 			<!-- Result -->
@@ -86,7 +86,7 @@ import BaseIconButton from '@/components/BaseIconButton.vue'
 
 // Type declarations
 import type { ComputedRef } from 'vue'
-type Sel = 'dir' | 'mol' | 'result' | 'my-mols' | 'assistant' | 'cli'
+type Sel = 'dir' | 'mol' | 'result' | 'mws' | 'assistant' | 'cli'
 
 /**
  * Computed
@@ -107,8 +107,8 @@ const sel: ComputedRef<Sel | null> = computed(() => {
 		return 'mol'
 	} else if (route.name == 'result') {
 		return 'result'
-	} else if (route.name == 'my-mols') {
-		return 'my-mols'
+	} else if (route.name == 'mws') {
+		return 'mws'
 	}
 	return null
 })
@@ -230,9 +230,9 @@ nav .display::after {
 		content: 'Molecule viewer';
 	}
 
-	// My Molecules
-	nav a.my-mols:hover ~ .display::after {
-		content: 'My Molecules';
+	// Molecule working set
+	nav a.mws:hover ~ .display::after {
+		content: 'Molecule working set';
 	}
 
 	// Result

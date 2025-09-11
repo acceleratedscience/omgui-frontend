@@ -66,9 +66,9 @@ const routes = [
 		component: () => import('@/pages/MolsetPage-cache.vue'),
 	},
 	{
-		path: '/my-mols',
-		name: 'my-mols',
-		component: () => import('@/pages/MyMols.vue'),
+		path: '/mws',
+		name: 'mws',
+		component: () => import('@/pages/MoleculeWorkingSet.vue'),
 	},
 	{
 		path: '/result',
@@ -137,7 +137,7 @@ const headlessRoutes = routes.map((route) => ({
 
 // Create router.
 const router = createRouter({
-	history: createWebHistory((window as any).dynamicBaseUrl || ''),
+	history: createWebHistory((window as any).dynamicBasePath || ''),
 	routes: [...routes, ...headlessRoutes],
 })
 

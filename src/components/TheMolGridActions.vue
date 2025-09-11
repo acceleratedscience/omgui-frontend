@@ -121,7 +121,7 @@ const vmodelPagination: WritableComputedRef<number> = computed({
 
 // Save button disabled state.
 const disableSave: ComputedRef<boolean> = computed(() => {
-	if (['result-mols', 'my-mols', 'json'].includes(molGridStore.context || '')) {
+	if (['result-mols', 'mws', 'json'].includes(molGridStore.context || '')) {
 		return !molGridStore.hasChanges
 	} else {
 		return false

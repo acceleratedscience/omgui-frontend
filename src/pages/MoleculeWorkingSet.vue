@@ -2,7 +2,7 @@
 	<BaseFetching v-if="loading" />
 	<template v-else>
 		<template v-if="!molViewerStore.molFromMolset">
-			<h3><BaseIcon icon="icn-bookmark-full" />My Molecules</h3>
+			<h3><BaseIcon icon="icn-bookmark-full" />Molecule Working Set</h3>
 			<p v-if="loadingError" class="error-msg">Something went wrong</p>
 			<template v-else>
 				<template v-if="empty">
@@ -56,7 +56,7 @@ onMounted(() => {
 				empty.value = true
 			} else {
 				molGridStore.setMolset(data)
-				molGridStore.setContext('my-mols')
+				molGridStore.setContext('mws')
 			}
 		},
 		onError: (err) => {
