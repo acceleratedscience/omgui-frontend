@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "run-p type-check build-vite",
+		"build": "run-p type-check build-vite && mv dist/index-build.html dist/index.html",
 		"build-vite": "vite build",
 		"preview": "vite preview",
 		"test:unit": "vitest",
