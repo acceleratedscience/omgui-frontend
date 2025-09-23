@@ -46,7 +46,11 @@ export default defineConfig(({ command }) => {
 			base: '/__BASE_PATH__/',
 			build: {
 				// outDir: 'dist',
-				rollupOptions: {},
+				rollupOptions: {
+					input: {
+                        main: 'index-build.html',
+                    },
+				},
 			},
 		}
 	}

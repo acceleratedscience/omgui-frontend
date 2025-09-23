@@ -120,7 +120,7 @@ const isRawPath = computed(() => {
 
 // Store the name of your current workspace.
 if (fileSystemApi) {
-	fileSystemApi.getWorkspace().then((result: { data: string; status: number; statusText: string }) => {
+	fileSystemApi.getWorkspaceName().then((result: { data: string; status: number; statusText: string }) => {
 		if (result.status != 200) {
 			console.error('Failed to get workspace name:', result.statusText)
 			return

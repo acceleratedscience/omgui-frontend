@@ -1,7 +1,7 @@
 <template>
 	<nav :class="{ inverse }">
 		<div class="brand">
-			<div class="main">% OpenAD</div>
+			<div class="main">omgui</div>
 			<!-- <div class="title">Workspace</div> -->
 		</div>
 		<div class="filler"></div>

@@ -1,3 +1,5 @@
+<!-- Describe build process and post build script to rename index.html -->
+
 # OpenAD GUI
 
 _Open Accelerated Discovery Graphical User Interface_
