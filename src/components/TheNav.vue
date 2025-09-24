@@ -48,9 +48,9 @@
 			</router-link>
 
 			<!-- Result -->
-			<router-link :to="{ name: 'result' }" class="result">
+			<!-- <router-link :to="{ name: 'result' }" class="result">
 				<BaseIconButton icon="icn-result" iconHover="icn-result-full" iconSel="icn-result-full" :sel="sel == 'result'" />
-			</router-link>
+			</router-link> -->
 
 			<!-- Molecule viewer -->
 			<router-link :to="{ name: 'mol' }" class="mol-viewer">
