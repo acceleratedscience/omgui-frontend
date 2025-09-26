@@ -18,6 +18,10 @@ export const useConfigStore = defineStore('configStore', {
 	}),
 	getters: {
 		config: (state) => state._config,
+		stateless: (state) => state._config.stateless || false,
+		appName: (state) => state._config.app_name || 'omgui',
+		workspace: (state) => state._config.workspace || 'DEFAULT',
+		session: (state) => state._config.session || null,
 	},
 	actions: {
 		// Load config from the API
@@ -30,7 +34,6 @@ export const useConfigStore = defineStore('configStore', {
 					console.error('Failed to load config:', err)
 				},
 			})
-			
 		},
 	},
 })

@@ -48,7 +48,7 @@
 
 	<!-- Load the full application -->
 	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir && !fileStore.forcedLoading }">
-		<TheNav />
+		<TheNav v-if="!configStore.stateless" />
 		<div id="body">
 			<router-view />
 			<!-- <RouterView v-slot="{ Component }">
@@ -137,7 +137,7 @@ if (fileSystemApi) {
 
 onMounted(() => {
 	storeScreenWidth()
-	
+
 	// Load config from the API
 	configStore.load()
 

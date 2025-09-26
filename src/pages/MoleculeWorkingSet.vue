@@ -7,16 +7,24 @@
 			<template v-else>
 				<template v-if="empty">
 					<p>You haven't saved any molecules yet.</p>
-					<p>To add molecules to your working set, click the <BaseIcon icon="icn-bookmark" style="margin-bottom: -4px" /> bookmark icon on a molecule, or run:</p>
+					<p>
+						To add molecules to your working set, click the <BaseIcon icon="icn-bookmark" style="margin-bottom: -4px" /> bookmark icon on
+						a molecule, or run:
+					</p>
 					<code class="block">
-						import omgui<br>
-						<br>
+						import omgui<br />
+						<br />
 						omgui.add_mol(&lt;identifier&gt;)
 					</code>
 				</template>
 				<div v-else id="about-msg">
-					This is your working set of molecules, it is cleared at the end of your session.<br />
-					If you want to preserve this molecule set, you can save it to your workspace under actions.
+					<template v-if="configStore.session">
+						This is your working set of molecules.<br />
+						You're running an isolated session, so they will be cleared at the end of your session.
+					</template>
+					<template v-else>
+						This is the working set of molecules for the <strong>{{ configStore.workspace }}</strong> workspace.
+					</template>
 				</div>
 			</template>
 		</template>
@@ -34,8 +42,10 @@ import { apiFetch, moleculesApi } from '@/api'
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 const molGridStore = useMolGridStore()
 const molViewerStore = useMolViewerStore()
+const configStore = useConfigStore()
 
 // Components
 import MolsetViewer from '@/viewers/MolsetViewer.vue'

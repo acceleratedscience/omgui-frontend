@@ -17,7 +17,9 @@
 				}"
 				@click="(e) => onMolClick(e, mol.index!)"
 			>
-				<cv-checkbox :label="`${mol.index!}`" :value="`${mol.index!}`" :checked="molGridStore.sel.includes(mol.index!)" />
+				<div class="cv-checkbox-wrap">
+					<cv-checkbox :label="`${mol.index!}`" :value="`${mol.index!}`" :checked="molGridStore.sel.includes(mol.index!)" />
+				</div>
 				<MolRender2D
 					:id="`mol-svg-${mol.index!}`"
 					:structure="molGridStore.molSmiles[i] || ''"
@@ -26,15 +28,10 @@
 					:height="140"
 					svg-mode
 				/>
-				<template v-if="molGridStore.molSmiles[i]">
-					<BaseBookmark :mol="mol" />
+				<div v-if="molGridStore.molSmiles[i]" class="actions">
+					<BaseBookmark v-if="!configStore.stateless" :mol="mol" />
 					<BaseIconButton icon="icn-smell" btnStyle="soft" @click="nothingSelected() ? previewMolecule(i) : null" />
-					<BaseIconButton
-						icon="icn-taste"
-						btnStyle="soft"
-						@click="nothingSelected() ? molViewerStore.setMolFromMolsetIndex(mol.index!) : null"
-					/>
-				</template>
+				</div>
 				<div class="filler"></div>
 
 				<!-- prettier-ignore -->
@@ -81,10 +78,12 @@ import { useMainStore } from '@/stores/MainStore'
 import { useMolGridStore } from '@/stores/MolGridStore'
 import { useMolViewerStore } from '@/stores/MolViewerStore'
 import { useModalStore } from '@/stores/ModalStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 const mainStore = useMainStore()
 const molGridStore = useMolGridStore()
 const molViewerStore = useMolViewerStore()
 const modalStore = useModalStore()
+const configStore = useConfigStore()
 
 // Components
 import TheMolProps from '@/components/TheMolProps.vue'
@@ -170,9 +169,15 @@ function onMolClick(e: MouseEvent, i: number) {
 		(e.target as HTMLElement).classList.contains('key') ||
 		(e.target as HTMLElement).classList.contains('value') ||
 		(e.target as HTMLElement).classList.contains('icn-btn')
+	if (ignoreTarget) return
 
-	// console.log(2222, ignoreTarget)
-	if (!molGridStore.hasSel && ignoreTarget) return
+	// Open molecule detail when clicking on the cell, unless:
+	// - The click was on the selection checkbox
+	// - Selection mode is active
+	if (!(e.target as HTMLElement).classList.contains('cv-checkbox-wrap') && nothingSelected()) {
+		molViewerStore.setMolFromMolsetIndex(i)
+		return
+	}
 
 	// Select and focus clicked molecule.
 	molGridStore.toggleSel(i)
@@ -339,29 +344,23 @@ const keyHandlers: KeyHandlers = {
 }
 
 // Checkbox
-#mol-grid .mol .cv-checkbox {
+#mol-grid .mol .cv-checkbox-wrap {
 	position: absolute;
 	top: 3px;
 	left: 3px;
+}
+#mol-grid .mol .cv-checkbox {
 	pointer-events: none;
 }
 
-// Icons
-#mol-grid .mol .icn-btn {
+// Actions
+#mol-grid .mol .actions {
 	position: absolute;
 	top: 0;
 	right: 0;
 	z-index: 1;
-	// background: pink;
-}
-#mol-grid .mol .icn-bookmark {
-	top: 0;
-}
-#mol-grid .mol .icn-smell {
-	top: 40px;
-}
-#mol-grid .mol .icn-taste {
-	top: 80px;
+	display: flex;
+	flex-direction: column;
 }
 #mol-grid .mol .icn-btn::after {
 	content: '';
