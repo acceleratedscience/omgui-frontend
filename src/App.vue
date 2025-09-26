@@ -71,10 +71,12 @@ import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
 import { useCommandLineStore } from '@/stores/CommandLineStore'
 import { useAssistantStore } from '@/stores/AssistantStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
 const commandLineStore = useCommandLineStore()
 const assistantStore = useAssistantStore()
+const configStore = useConfigStore()
 
 // API
 import { fileSystemApi } from '@/api'
@@ -135,6 +137,9 @@ if (fileSystemApi) {
 
 onMounted(() => {
 	storeScreenWidth()
+	
+	// Load config from the API
+	configStore.load()
 
 	// Add blur handler
 	document.body.removeEventListener('click', mainStore.onClickAnywhere)

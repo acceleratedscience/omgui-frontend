@@ -1,8 +1,8 @@
 <template>
 	<nav :class="{ inverse }">
 		<div class="brand">
-			<div class="main">omgui</div>
-			<!-- <div class="title">Workspace</div> -->
+			<div class="main">{{ title }}</div>
+			<div class="title">{{ workspaceName }}</div>
 		</div>
 		<div class="filler"></div>
 		<div class="items">
@@ -78,8 +78,10 @@ const route = useRoute()
 // Stores
 import { useCommandLineStore } from '@/stores/CommandLineStore'
 import { useAssistantStore } from '@/stores/AssistantStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 const commandLineStore = useCommandLineStore()
 const assistantStore = useAssistantStore()
+const configStore = useConfigStore()
 
 // Components
 import BaseIconButton from '@/components/BaseIconButton.vue'
@@ -91,6 +93,14 @@ type Sel = 'dir' | 'mol' | 'result' | 'mws' | 'assistant' | 'cli'
 /**
  * Computed
  */
+
+const title: ComputedRef<string> = computed(() => {
+	return configStore.config.app_name || 'omgui'
+})
+const workspaceName: ComputedRef<string> = computed(() => {
+	if (configStore.config.workspace === 'DEFAULT') return ''
+	return configStore.config.workspace || ''
+})
 
 const inverse: ComputedRef<boolean> = computed(() => {
 	return commandLineStore.active || assistantStore.active
