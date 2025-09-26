@@ -58,9 +58,10 @@ const routes = [
 		component: () => import('@/pages/MolsetPage.vue'),
 	},
 	{
-		// This route doesn't serve anything... it's the previous version of /result but keeping
-		// it around for now, may be useful to edit the cached working copy molsets directly?
-		path: '/cache/:cacheId',
+		// This serves molsets directly from the cache,
+		// used when molsets are too large to pass via URL.
+		// The data is then sent via POST via post_molset_adhoc()
+		path: '/molset/id/:cacheId',
 		name: 'cache',
 		props: true,
 		component: () => import('@/pages/MolsetPage-cache.vue'),
