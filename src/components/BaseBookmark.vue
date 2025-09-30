@@ -67,8 +67,8 @@ async function removeFromMWS() {
 		return
 	}
 	apiFetch(moleculesApi.removeMolFromMWS(props.mol), {
-		onError: (data: { status: boolean }) => {
-			if (toggleBtn.value) toggleBtn.value.toggle(data.status, true)
+		onError: () => {
+			if (toggleBtn.value) toggleBtn.value.toggle(true, true)
 		},
 		loading,
 		loadingError,
@@ -83,8 +83,8 @@ function updateStatus() {
 
 	if (props.mol) {
 		apiFetch(moleculesApi.checkMolInMWS(props.mol), {
-			onSuccess: (data: { status: boolean }) => {
-				if (toggleBtn.value) toggleBtn.value.toggle(data.status, true)
+			onSuccess: (data: { present: boolean }) => {
+				if (toggleBtn.value) toggleBtn.value.toggle(data.present, true)
 			},
 		})
 	}

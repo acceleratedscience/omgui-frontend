@@ -9,7 +9,7 @@ export default class MainApi extends BaseApi {
 	//
 
 	getConfig() {
-		return this.apiClient.get('/get-config')
+		return this.apiClient.get('/config')
 	}
 
 	// Execute command.

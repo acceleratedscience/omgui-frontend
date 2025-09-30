@@ -23,13 +23,13 @@ export default class DataframeApi extends BaseApi {
 	// Get dataframe data currently stored in the magic command API.
 	//
 	getDataframe(df_name: string, query: LocationQuery = {}) {
-		return this.apiClient.post(`/get-dataframe/${df_name}`, { query })
+		return this.apiClient.post(`/dataframe/${df_name}`, { query })
 	}
 
 	// Update result molset.
 	// This overrides the result dataframe stored in memory.
 	updateDataframe_molset(df_name: string, cacheId: number) {
-		return this.apiClient.post(`/update-dataframe-molset/${df_name}`, { cacheId })
+		return this.apiClient.post(`/dataframe/update/${df_name}`, { cacheId })
 	}
 
 	// Update result data.

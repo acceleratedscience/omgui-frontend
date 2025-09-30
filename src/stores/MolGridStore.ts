@@ -209,7 +209,7 @@ function getInitialState(): State {
 export const useMolGridStore = defineStore('molGridStore', {
 	state: () => getInitialState(),
 	getters: {
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Context
 
 		context(): Context {
@@ -217,7 +217,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Status
 
 		active(): boolean {
@@ -229,7 +229,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Data
 
 		cacheId(): number | null {
@@ -256,7 +256,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Search
 
 		searchStr(): string {
@@ -269,7 +269,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Pagination
 
 		// Page number.
@@ -286,7 +286,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Sort & Filters
 
 		sort(): string {
@@ -294,7 +294,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Display
 
 		// Substring that will be highlighted in the SVG.
@@ -350,7 +350,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// #endregion
 	},
 	actions: {
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Context
 
 		setContext(context: Context) {
@@ -358,7 +358,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Status
 
 		setHasChanges(hasChanges: boolean) {
@@ -367,7 +367,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Data
 
 		// Update the molecule set with filtered data.
@@ -632,7 +632,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		// Update the molecule working list.
 		updateMolset_mws(): Promise<boolean> {
 			return new Promise<boolean>((resolve, reject) => {
-				apiFetch(moleculesApi.updateMolset_mws(this._cacheId!), {
+				apiFetch(moleculesApi.updateMws(this._cacheId!), {
 					onSuccess: () => resolve(true),
 					onError: () => reject(true),
 				})
@@ -743,7 +743,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Search
 
 		// Set search string
@@ -773,7 +773,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Pagination
 
 		// Set page
@@ -802,7 +802,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Sort & Filters
 
 		setSort(sort: string) {
@@ -830,7 +830,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Display
 
 		// Highlight substring in the SVG.
@@ -913,7 +913,7 @@ export const useMolGridStore = defineStore('molGridStore', {
 		},
 
 		// #endregion
-		///////////////////////////////////////////////////////////////
+		// ------------------------------------
 		// #region - Clearing
 
 		// Clear

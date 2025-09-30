@@ -13,13 +13,13 @@ export default class ResultApi extends BaseApi {
 
 	// Get result data currently stored in memory.
 	getResult(query: LocationQuery = {}) {
-		return this.apiClient.post('/get-result', { query })
+		return this.apiClient.post('/result', { query })
 	}
 
 	// Update result molset.
 	// This overrides the result dataframe stored in memory.
 	updateResult_molset(cacheId: number) {
-		return this.apiClient.post('/update-result-molset', { cacheId })
+		return this.apiClient.post('/result/update', { cacheId })
 	}
 
 	// Update result data.
