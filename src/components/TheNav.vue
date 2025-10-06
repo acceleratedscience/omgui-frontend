@@ -1,8 +1,8 @@
 <template>
 	<nav :class="{ inverse }">
 		<div class="brand">
-			<div class="main">omgui</div>
-			<!-- <div class="title">Workspace</div> -->
+			<div class="main">{{ configStore.appName }}</div>
+			<div class="secondary">{{ workspaceName }}</div>
 		</div>
 		<div class="filler"></div>
 		<div class="items">
@@ -78,8 +78,10 @@ const route = useRoute()
 // Stores
 import { useCommandLineStore } from '@/stores/CommandLineStore'
 import { useAssistantStore } from '@/stores/AssistantStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 const commandLineStore = useCommandLineStore()
 const assistantStore = useAssistantStore()
+const configStore = useConfigStore()
 
 // Components
 import BaseIconButton from '@/components/BaseIconButton.vue'
@@ -91,6 +93,11 @@ type Sel = 'dir' | 'mol' | 'result' | 'mws' | 'assistant' | 'cli'
 /**
  * Computed
  */
+
+const workspaceName: ComputedRef<string> = computed(() => {
+	if (configStore.workspace === 'DEFAULT') return ''
+	return configStore.workspace || ''
+})
 
 const inverse: ComputedRef<boolean> = computed(() => {
 	return commandLineStore.active || assistantStore.active
@@ -155,7 +162,7 @@ nav.inverse .icn-btn {
 nav.inverse .icn-btn.sel {
 	color: $yellow;
 }
-nav.inverse .title {
+nav.inverse .secondary {
 	color: $white-50;
 }
 nav.inverse .brand {
@@ -170,19 +177,19 @@ nav.inverse .brand {
 
 // Brand left
 nav .main,
-nav .title {
+nav .secondary {
 	font-size: 16px;
 	line-height: 40px;
 }
 nav .main {
 	font-weight: 600;
 }
-nav .title {
+nav .secondary {
 	font-weight: 300;
 	margin-left: 4px;
 	color: $black-60;
 }
-nav .title::before {
+nav .secondary::before {
 	content: '';
 	margin-right: 4px;
 }

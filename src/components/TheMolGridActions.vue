@@ -6,48 +6,61 @@
 		<!-- Search -->
 		<MolSearch />
 
+		<!-- Sort for stateless UI -->
+		<SortDropdown
+			v-if="configStore.config.stateless"
+			id="dd-sort"
+			v-model="vmodelSort"
+			:items="sortItems"
+			:disabledItems="disabledSortItems"
+			style="flex: 0 0 250px"
+		/>
+
 		<!-- Pagination -->
 		<BasePagination v-model="vmodelPagination" :total="molGridStore.pageTotal" :max="3" :disabled="molGridStore.pageTotal == 1" />
 
 		<div class="breaker-1"></div>
 		<div class="filler"></div>
 
-		<!-- Sort -->
-		<SortDropdown id="dd-sort" v-model="vmodelSort" :items="sortItems" :disabledItems="disabledSortItems" />
+		<!-- Actions only available when not stateless -->
+		<template v-if="!configStore.config.stateless">
+			<!-- Sort -->
+			<SortDropdown id="dd-sort" v-model="vmodelSort" :items="sortItems" :disabledItems="disabledSortItems" />
 
-		<!-- Selection actions -->
-		<cv-dropdown id="dd-select" v-model="selectActionsSelect" :key="forceSelectReload">
-			<cv-dropdown-item value="default" hidden>
-				<template v-if="molGridStore.hasSel"> ({{ molGridStore.sel.length }}) selected </template>
-				<template v-else>Select</template>
-			</cv-dropdown-item>
-			<cv-dropdown-item
-				v-for="(selAction, i) in selectActions"
-				:key="i"
-				:value="selAction"
-				:disabled="selAction == 'select matching' && !molGridStore.searchStr"
-			>
-				{{ selAction }}
-			</cv-dropdown-item>
-		</cv-dropdown>
+			<!-- Selection actions -->
+			<cv-dropdown id="dd-select" v-model="selectActionsSelect" :key="forceSelectReload">
+				<cv-dropdown-item value="default" hidden>
+					<template v-if="molGridStore.hasSel"> ({{ molGridStore.sel.length }}) selected </template>
+					<template v-else>Select</template>
+				</cv-dropdown-item>
+				<cv-dropdown-item
+					v-for="(selAction, i) in selectActions"
+					:key="i"
+					:value="selAction"
+					:disabled="selAction == 'select matching' && !molGridStore.searchStr"
+				>
+					{{ selAction }}
+				</cv-dropdown-item>
+			</cv-dropdown>
 
-		<div class="breaker-2"></div>
+			<div class="breaker-2"></div>
 
-		<!-- Main actions -->
-		<cv-dropdown id="dd-actions" v-model="mainActionsSelect" @change="dispatchMainAction">
-			<cv-dropdown-item value="default" hidden>Actions</cv-dropdown-item>
-			<cv-dropdown-item
-				v-for="(action, i) in mainActions"
-				:key="i"
-				:value="action"
-				:disabled="!molGridStore.hasSel && action.includes('selected')"
-			>
-				{{ action }}
-			</cv-dropdown-item>
-		</cv-dropdown>
+			<!-- Main actions -->
+			<cv-dropdown id="dd-actions" v-model="mainActionsSelect" @change="dispatchMainAction">
+				<cv-dropdown-item value="default" hidden>Actions</cv-dropdown-item>
+				<cv-dropdown-item
+					v-for="(action, i) in mainActions"
+					:key="i"
+					:value="action"
+					:disabled="!molGridStore.hasSel && action.includes('selected')"
+				>
+					{{ action }}
+				</cv-dropdown-item>
+			</cv-dropdown>
 
-		<!-- Save -->
-		<TheButtonSaveMolset :disabled="disableSave" />
+			<!-- Save -->
+			<TheButtonSaveMolset :disabled="disableSave" />
+		</template>
 	</div>
 </template>
 
@@ -61,11 +74,9 @@ const router = useRouter()
 
 // Stores
 import { useMolGridStore } from '@/stores/MolGridStore'
-import { useFileStore } from '@/stores/FileStore'
-import { useModalStore } from '@/stores/ModalStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 const molGridStore = useMolGridStore()
-const fileStore = useFileStore()
-const modalStore = useModalStore()
+const configStore = useConfigStore()
 
 // Components
 import BasePagination from '@/components/BasePagination.vue'
@@ -82,6 +93,7 @@ import useStickyObserver from '@/utils/sticky-observer'
 
 // Type declarations
 import type { ComputedRef, WritableComputedRef } from 'vue'
+import { config } from 'dotenv'
 
 // Definitions
 // const $actions = ref<HTMLElement | null>(null)

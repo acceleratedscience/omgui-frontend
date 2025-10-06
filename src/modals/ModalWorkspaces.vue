@@ -2,7 +2,7 @@
 	<cv-modal :visible="modalStore.visible" size="xs" @primary-click="onSubmit">
 		<template v-slot:title>Switch workspace</template>
 		<template v-slot:content>
-			<cv-dropdown v-model="selectedWorkspace" :items="allWorkspaces"></cv-dropdown>
+			<cv-dropdown v-model="currentWorkspace" :items="allWorkspaces"></cv-dropdown>
 		</template>
 		<template v-slot:secondary-button>Cancel</template>
 		<template v-slot:primary-button>Switch</template>
@@ -27,7 +27,7 @@ const emit = defineEmits(['mounted'])
 
 // Definitions
 const allWorkspaces = ref<string[]>([' '])
-const selectedWorkspace = ref<string>(' ') // Space to avoid default text to display during load
+const currentWorkspace = ref<string>(' ') // Space to avoid default text to display during load
 
 /**
  * Hooks
@@ -44,11 +44,11 @@ onMounted(() => {
 
 async function onSubmit() {
 	if (!fileSystemApi) return
-	const { status, statusText } = await fileSystemApi.setWorkspace(selectedWorkspace.value)
+	const { status, statusText } = await fileSystemApi.setWorkspace(currentWorkspace.value)
 	if (status !== 200) {
 		console.error(statusText)
 	} else {
-		mainStore.setWorkspace(selectedWorkspace.value)
+		mainStore.setWorkspace(currentWorkspace.value)
 		modalStore.hide()
 	}
 }
@@ -56,9 +56,9 @@ async function onSubmit() {
 async function loadWorkspaces() {
 	const data = await fetchWorkspaces()
 	if (data) {
-		const { all, active } = data
-		if (all) allWorkspaces.value = all
-		if (active) selectedWorkspace.value = active
+		const { workspaces, current_workspace } = data
+		allWorkspaces.value = workspaces || []
+		currentWorkspace.value = current_workspace || '-'
 	} else {
 		console.error('Failed to load workspaces')
 	}
