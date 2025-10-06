@@ -41,6 +41,7 @@ export default class FileSystemApi extends BaseApi {
 
 	// Open a file in its OS application
 	openFileOS(path_absolute: string = '') {
+		console.log('path_absolute', path_absolute)
 		return this.apiClient.post('/file/open-os', { path_absolute })
 	}
 
