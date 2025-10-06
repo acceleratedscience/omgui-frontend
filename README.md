@@ -89,7 +89,7 @@ npm run build
 
 <br>
 
-## Developer Guidelines
+## Developer Tips
 
 ### Adding support for new file types:
 
