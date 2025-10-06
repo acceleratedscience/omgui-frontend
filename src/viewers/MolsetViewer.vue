@@ -63,7 +63,7 @@ const props = defineProps<{
  * Logic
  */
 
-// Open molecule if ?show is set in the URL query.
+// Open molecule if ?show is set in the URL query
 parseMolFromMolsetUrlQuery()
 // molGridStore.parseUrlQuery()
 
@@ -71,7 +71,7 @@ parseMolFromMolsetUrlQuery()
  * Hooks
  */
 
-// Block any exit attempt when there are unsaved changes.
+// Block any exit attempt when there are unsaved changes
 window.onbeforeunload = function () {
 	if (molGridStore.hasChanges) return true
 	if (!props.retainCache) molGridStore.clear()
@@ -105,7 +105,7 @@ function parseMolFromMolsetUrlQuery() {
 	}
 }
 
-// Fetch a molecule from a molset.
+// Fetch a molecule from a molset
 function _fetchMolDataFromMolset(cacheId: number | null = null, index: number) {
 	// console.log('Fetch from:', cacheId)
 	if (!cacheId) return
@@ -121,7 +121,7 @@ function _fetchMolDataFromMolset(cacheId: number | null = null, index: number) {
 	})
 }
 
-// Block route change when there are unsaved changes.
+// Block route change when there are unsaved changes
 async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
 	// console.log('onBeforeExit MOLSET', molGridStore.hasChanges)
 	if (molGridStore.hasChanges) {

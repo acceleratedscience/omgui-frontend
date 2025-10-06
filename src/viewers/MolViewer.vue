@@ -172,7 +172,7 @@ async function onBeforeExit(to: RouteLocationNormalized, from: RouteLocationNorm
 		// When we're looking at a molecule from a molset, we don't
 		// do anything because MolSetViewer has its own onBeforeExit.
 		// When you enrich or edit a molecule, saving it will update
-		// the molset (either json or my-mols) which is all controlled
+		// the molset (either json or mws) which is all controlled
 		// from TheButtonSaveMol.vue.
 		next()
 	} else if (molViewerStore.hasChanges) {

@@ -1,8 +1,8 @@
 <template>
 	<nav :class="{ inverse }">
 		<div class="brand">
-			<div class="main">% OpenAD</div>
-			<!-- <div class="title">Workspace</div> -->
+			<div class="main">{{ configStore.appName }}</div>
+			<div class="secondary">{{ workspaceName }}</div>
 		</div>
 		<div class="filler"></div>
 		<div class="items">
@@ -43,14 +43,14 @@
 			/> -->
 
 			<!-- My mols -->
-			<router-link :to="{ name: 'my-mols' }" class="my-mols">
-				<BaseIconButton icon="icn-bookmark" iconHover="icn-bookmark-full" iconSel="icn-bookmark-full" :sel="sel == 'my-mols'" />
+			<router-link :to="{ name: 'mws' }" class="mws">
+				<BaseIconButton icon="icn-bookmark" iconHover="icn-bookmark-full" iconSel="icn-bookmark-full" :sel="sel == 'mws'" />
 			</router-link>
 
 			<!-- Result -->
-			<router-link :to="{ name: 'result' }" class="result">
+			<!-- <router-link :to="{ name: 'result' }" class="result">
 				<BaseIconButton icon="icn-result" iconHover="icn-result-full" iconSel="icn-result-full" :sel="sel == 'result'" />
-			</router-link>
+			</router-link> -->
 
 			<!-- Molecule viewer -->
 			<router-link :to="{ name: 'mol' }" class="mol-viewer">
@@ -78,19 +78,26 @@ const route = useRoute()
 // Stores
 import { useCommandLineStore } from '@/stores/CommandLineStore'
 import { useAssistantStore } from '@/stores/AssistantStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 const commandLineStore = useCommandLineStore()
 const assistantStore = useAssistantStore()
+const configStore = useConfigStore()
 
 // Components
 import BaseIconButton from '@/components/BaseIconButton.vue'
 
 // Type declarations
 import type { ComputedRef } from 'vue'
-type Sel = 'dir' | 'mol' | 'result' | 'my-mols' | 'assistant' | 'cli'
+type Sel = 'dir' | 'mol' | 'result' | 'mws' | 'assistant' | 'cli'
 
 /**
  * Computed
  */
+
+const workspaceName: ComputedRef<string> = computed(() => {
+	if (configStore.workspace === 'DEFAULT') return ''
+	return configStore.workspace || ''
+})
 
 const inverse: ComputedRef<boolean> = computed(() => {
 	return commandLineStore.active || assistantStore.active
@@ -107,8 +114,8 @@ const sel: ComputedRef<Sel | null> = computed(() => {
 		return 'mol'
 	} else if (route.name == 'result') {
 		return 'result'
-	} else if (route.name == 'my-mols') {
-		return 'my-mols'
+	} else if (route.name == 'mws') {
+		return 'mws'
 	}
 	return null
 })
@@ -155,7 +162,7 @@ nav.inverse .icn-btn {
 nav.inverse .icn-btn.sel {
 	color: $yellow;
 }
-nav.inverse .title {
+nav.inverse .secondary {
 	color: $white-50;
 }
 nav.inverse .brand {
@@ -170,19 +177,19 @@ nav.inverse .brand {
 
 // Brand left
 nav .main,
-nav .title {
+nav .secondary {
 	font-size: 16px;
 	line-height: 40px;
 }
 nav .main {
 	font-weight: 600;
 }
-nav .title {
+nav .secondary {
 	font-weight: 300;
 	margin-left: 4px;
 	color: $black-60;
 }
-nav .title::before {
+nav .secondary::before {
 	content: '';
 	margin-right: 4px;
 }
@@ -230,9 +237,9 @@ nav .display::after {
 		content: 'Molecule viewer';
 	}
 
-	// My Molecules
-	nav a.my-mols:hover ~ .display::after {
-		content: 'My Molecules';
+	// Molecule working set
+	nav a.mws:hover ~ .display::after {
+		content: 'Molecule working set';
 	}
 
 	// Result

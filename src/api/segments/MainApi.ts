@@ -8,6 +8,10 @@ export default class MainApi extends BaseApi {
 	//
 	//
 
+	getConfig() {
+		return this.apiClient.get('/config')
+	}
+
 	// Execute command.
 	execCommand(command: string) {
 		return this.apiClient.post('/exec-command', { command })

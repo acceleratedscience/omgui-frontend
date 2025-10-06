@@ -48,7 +48,7 @@
 
 	<!-- Load the full application -->
 	<div v-else ref="$mainWrap" id="main-wrap" :class="{ 'file-browser': fileStore.isDir && !fileStore.forcedLoading }">
-		<TheNav />
+		<TheNav v-if="!configStore.stateless" />
 		<div id="body">
 			<router-view />
 			<!-- <RouterView v-slot="{ Component }">
@@ -71,10 +71,12 @@ import { useMainStore } from '@/stores/MainStore'
 import { useFileStore } from '@/stores/FileStore'
 import { useCommandLineStore } from '@/stores/CommandLineStore'
 import { useAssistantStore } from '@/stores/AssistantStore'
+import { useConfigStore } from '@/stores/ConfigStore'
 const mainStore = useMainStore()
 const fileStore = useFileStore()
 const commandLineStore = useCommandLineStore()
 const assistantStore = useAssistantStore()
+const configStore = useConfigStore()
 
 // API
 import { fileSystemApi } from '@/api'
@@ -120,7 +122,7 @@ const isRawPath = computed(() => {
 
 // Store the name of your current workspace.
 if (fileSystemApi) {
-	fileSystemApi.getWorkspace().then((result: { data: string; status: number; statusText: string }) => {
+	fileSystemApi.getWorkspaceName().then((result: { data: string; status: number; statusText: string }) => {
 		if (result.status != 200) {
 			console.error('Failed to get workspace name:', result.statusText)
 			return
@@ -135,6 +137,9 @@ if (fileSystemApi) {
 
 onMounted(() => {
 	storeScreenWidth()
+
+	// Load config from the API
+	configStore.load()
 
 	// Add blur handler
 	document.body.removeEventListener('click', mainStore.onClickAnywhere)
