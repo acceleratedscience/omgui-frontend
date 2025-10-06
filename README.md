@@ -6,8 +6,6 @@ This repository holds the GUI frontend code for the [OMGUI] library.
 
 The OMGUI frontend is written in [Vue.js] with [Vite] as build tool, using the composition API with [TypeScript] and [SCSS]. The molecule viewer relies on [RDKit] for 2D visualization and [Miew] for rendering interactive 3D molecules. It's based on the [Carbon Design System].
 
----
-
 <br>
 
 ## Running Development Server
@@ -51,6 +49,7 @@ npm run build
 1. Publish a [new release](https://github.com/acceleratedscience/omgui-frontend/releases) on GitHub, respecting [semantic versioning](https://semver.org)
 2. The [release-build.yaml](.github/release-build.yaml) action will run the build script and store the build files as `dist.tar.gz` alongside the source code of your release. It will take 1-2 minutes to appear, you can follow the process under the [Actions](https://github.com/acceleratedscience/omgui-frontend/actions/workflows/release-build.yml) tab.
 3. In the OMGUI repo, update the `OMGUI_FRONTEND_VERSION` environment variable to the new version number (exluding the 'v' prefix) in both your `.env` and the [`.env-example`](https://github.com/acceleratedscience/omgui/blob/main/.env-example) file.
+4. OMGUI will automatically download the frontend code on the first launch, and will update it whenever a new version number has been detected. The installation process extracts the contents of `dist.tar.gz` and stored them under `/omgui/gui/client`.
 
 <br>
 
