@@ -2,15 +2,11 @@
 
 # OMGUI - Frontend
 
-### _Open-source Molecular Graphical User Interface_
+_Open-source Molecular Graphical User Interface_
 
 This repository holds the GUI frontend code for the [OMGUI] library.
 
-If you're not a developer, you don't need to be here.
-
-The OMGUI frontend is written in [Vue.js] with [Vite] as build tool, using the composition API with [TypeScript] and [SCSS].  
-The molecule viewer relies on [RDKit] for 2D visualization and [Miew] for rendering interactive 3D molecules.  
-It's based on the [Carbon Design System].
+The OMGUI frontend is written in [Vue.js] with [Vite] as build tool, using the composition API with [TypeScript] and [SCSS]. The molecule viewer relies on [RDKit] for 2D visualization and [Miew] for rendering interactive 3D molecules. It's based on the [Carbon Design System].
 
 ---
 
@@ -110,3 +106,10 @@ git tag -d <tag_name>
 git push origin --delete <tag_name>
 
 -->
+
+[Vue.js]: https://vuejs.org
+[Vite]: https://vite.dev
+[TypeScript]: https://www.typescriptlang.org
+[SCSS]: https://sass-lang.com
+[RDKit]: https://github.com/rdkit/rdkit#readme
+[Miew]: https://github.com/epam/miew#readme
