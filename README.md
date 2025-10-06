@@ -2,8 +2,6 @@
 
 # OMGUI - Frontend
 
-_Open-source Molecular Graphical User Interface_
-
 This repository holds the GUI frontend code for the [OMGUI] library.
 
 The OMGUI frontend is written in [Vue.js] with [Vite] as build tool, using the composition API with [TypeScript] and [SCSS]. The molecule viewer relies on [RDKit] for 2D visualization and [Miew] for rendering interactive 3D molecules. It's based on the [Carbon Design System].
@@ -12,43 +10,51 @@ The OMGUI frontend is written in [Vue.js] with [Vite] as build tool, using the c
 
 <br>
 
-### Getting started
+## Running Development Server
 
-#### First time initialisation
+1.  To run the frontend development server, you first need to launch the OMGUI server.
 
-## Type Support for `.vue` Imports in TS
+    ```shell
+    pip install omgui
+    ```
 
-<br>
+    ```python
+    import omgui
 
-#### Running the development version
+    omgui.launch()
+    ```
 
-1.  First we need to launch the OpenAD application.
+2.  Now launch the development server in a separate terminal.
 
-        cd <openad_path>
-        openad
-
-1.  With OpenAD running, we need to activate the GUI Flask server, so our development server can connect to the API. This will open a browser window, which you can close.
-
-        launch gui
-
-1.  Now we're ready to launch the development server in its own terminal.
-
-        cd <openad-gui_path>
-        npm run dev
-
-    > **Note:** While the development server will reflect any changes on the fly, you'll still need to restart the OpenAD application for any changes to the backend to take effect.
+    ```shell
+    npm run dev
+    ```
 
 <br>
 
-#### Creating the production build
+## How things work
 
-## Customize configuration
+### Build Process
+
+OMGUI supports a custom base path. To pull this off, the frontend build is exported with a hardcoded `__BASE_PATH__` which is replaced on the fly by the server. The base path is set in [index-build.html](index-build.html) as a `<base>` tag, which takes care of native browser URLS, and in `vite.config.ts` from where it's loaded into the Vue router, taking care of all Vue-managed links.
+
+To build locally:
+
+```shell
+npm run build
+```
 
 <br>
 
-### How things work
+### Publishing New Version
 
-#### File Browser
+1. Publish a [new release](https://github.com/acceleratedscience/omgui-frontend/releases) on GitHub, respecting [semantic versioning](https://semver.org)
+2. The [release-build.yaml](.github/release-build.yaml) action will run the build script and store the build files as `dist.tar.gz` alongside the source code of your release. It will take 1-2 minutes to appear, you can follow the process under the [Actions](https://github.com/acceleratedscience/omgui-frontend/actions/workflows/release-build.yml) tab.
+3. In the OMGUI repo, update the `OMGUI_FRONTEND_VERSION` environment variable to the new version number (exluding the 'v' prefix) in both your `.env` and the [`.env-example`](https://github.com/acceleratedscience/omgui/blob/main/.env-example) file.
+
+<br>
+
+### File Browser
 
 -   [OMGUI] - File content is read as a string by `get_file()` in `openad/gui/api/file_system_api.py` and attached to a file data object.
 -   The file data object will look something like this:
@@ -84,32 +90,24 @@ The OMGUI frontend is written in [Vue.js] with [Vite] as build tool, using the c
 
 <br>
 
-### Developer Guides
+## Developer Guidelines
 
-#### Adding support for new file types:
+### Adding support for new file types:
 
 -   [OMGUI] - Add the file extension to `_get_file_type()` in `openad/workers/file_system.py`.
 -   Add the display name and correct viewer to `_map_FileType` in `src/utils/maps.ts`
 
-#### Adding support for new molecules file types:
+### Adding support for new molecules file types:
 
 -   Update `parseRoute()` in `ViewerDispatch.vue` to ensure the filetype results into the correct loading of data into the store.
 -   Update `setMolData()` in `MolViewerStore.ts` if needed.
 -   Update `actionSaveAs()` in `OverflowMenuMol.vue` to ensure the correct options are displayed in the overflow menu, and ensure the delete option is also included.
 
 [OMGUI]: https://github.com/acceleratedscience/omgui
-
-<!--
-
-To delete a tag, locally and then on GH:
-git tag -d <tag_name>
-git push origin --delete <tag_name>
-
--->
-
 [Vue.js]: https://vuejs.org
 [Vite]: https://vite.dev
 [TypeScript]: https://www.typescriptlang.org
 [SCSS]: https://sass-lang.com
 [RDKit]: https://github.com/rdkit/rdkit#readme
 [Miew]: https://github.com/epam/miew#readme
+[Carbon Design System]: https://carbondesignsystem.com
