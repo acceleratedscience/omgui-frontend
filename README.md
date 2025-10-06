@@ -12,23 +12,23 @@ The OMGUI frontend is written in [Vue.js] with [Vite] as build tool, using the c
 
 ## Running Development Server
 
-1.  To run the frontend development server, you first need to launch the OMGUI server.
+To run the frontend development server, you first need to launch the OMGUI server.
 
-    ```shell
-    pip install omgui
-    ```
+```shell
+pip install omgui
+```
 
-    ```python
-    import omgui
+```python
+import omgui
 
-    omgui.launch()
-    ```
+omgui.launch()
+```
 
-2.  Now launch the development server in a separate terminal.
+Now launch the development server in a separate terminal.
 
-    ```shell
-    npm run dev
-    ```
+```shell
+npm run dev
+```
 
 <br>
 
