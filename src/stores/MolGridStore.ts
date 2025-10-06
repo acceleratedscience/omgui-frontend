@@ -132,7 +132,7 @@ function getInitialState(): State {
 		// The different situations in which the molgrid is loaded:
 		//
 		// - json:
-		//   A .molset.json file with our own OpenAD molecule format.
+		//   A .molset.json file with our own OMGUI molecule format.
 		//   --> Saving changes will update the JSON file.
 		//   URL: /~/path/to/results.molset.json
 		//

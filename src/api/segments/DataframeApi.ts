@@ -5,6 +5,8 @@ import type { LocationQuery } from 'vue-router'
 
 // - - -
 
+// NOTE - This is OpenAD-specific functionality yet to be integrated!
+// - - -
 // This API lets us access dataframes that are stored in the magic command API.
 // This is exclusively for Jupyter usage and storing of the dataframe happens
 // in the main OpenAD repo in /openad/openad_api.py

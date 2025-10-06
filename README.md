@@ -55,8 +55,8 @@ npm run build
 
 ### File Browser
 
--   [OMGUI] - File content is read as a string by `get_file()` in `openad/gui/api/file_system_api.py` and attached to a file data object.
--   The file data object will look something like this:
+-   [OMGUI] - File and directory information & content is read by [`_compile_filedir_obj()`](https://github.com/acceleratedscience/omgui/blob/28d2268ac974a187f511c350ec7d18a9d9f9d04b/omgui/gui/gui_services/srv_file_system.py#L145) and compiled into a data object representing the file or directory.
+-   The data object will look something like this:
 
 ```json
 {
@@ -72,19 +72,19 @@ npm run build
 	"data": "hello, world",
 	"filename": "example.txt",
 	"path": "foobar/example.txt",
-	"pathAbsolute": "/Users/johndoe/.openad/workspaces/DEFAULT/foobar/example.txt"
+	"pathAbsolute": "/Users/johndoe/.omgui/workspaces/DEFAULT/foobar/example.txt"
 }
 ```
 
 -   Depending on the file type, the `data` attribute will contain a string (for text-based files) or an object (for structured data files).
 -   Different file types (as defined by the file extension) will open in different file viewers. In `ViewerDispatch.vue` the correct viewer is loaded by `loadModule()` and then the file data is transferred into the appropriate viewer store by `parseRoute()`. To see how file extensions are mapped to the appropriate file viewer, see [below](#adding-support-for-new-file-types).
-    -   <ins>Molecule viewer:</ins> For displaying `.smol.json` files, which contain an OpenAD-native molecule object. Industry-standard molecules file formats like `.pdb` and `.mol` are translated on-the-fly and will also open in the molecule viewer.
-    -   <ins>Molecule set viewer:</ins> For displaying `molset.json` files, which contain a list of OpenAD-native molecule objects. Industry-standard molecule set files like `.sdf` or `.smi` are translated on-the-fly and will also open in the molecule set viewer.
+    -   <ins>Molecule viewer:</ins> For displaying `.smol.json` files, which contain an OMGUI-native molecule object. Industry-standard molecules file formats like `.pdb` and `.mol` are translated on-the-fly and will also open in the molecule viewer.
+    -   <ins>Molecule set viewer:</ins> For displaying `molset.json` files, which contain a list of OMGUI-native molecule objects. Industry-standard molecule set files like `.sdf` or `.smi` are translated on-the-fly and will also open in the molecule set viewer.
     -   <ins>Data viewer:</ins> For `.csv` files and Jupyter dataframes.
     -   <ins>Text viewer:</ins> For text-based files like `.txt`, `.md` and `.yml`
     -   <ins>JSON viewer:</ins> For `.json` files
     -   All other files (eg. `.pdf`) will be opened by the native application of your operating system (eg. Preview on macOS).
--   [OMGUI] - On-the-fly translation of file formats happens under `fs_attach_file_data()` in `openad/workers/file_system.py`.
+-   [OMGUI] - On-the-fly translation of file formats happens bt [`_attach_file_data()`](https://github.com/acceleratedscience/omgui/blob/28d2268ac974a187f511c350ec7d18a9d9f9d04b/omgui/gui/gui_services/srv_file_system.py#L212).
 -   The file object and its data is then consumed by `loadItem()` in the FileStore.
 
 <br>
@@ -93,7 +93,7 @@ npm run build
 
 ### Adding support for new file types:
 
--   [OMGUI] - Add the file extension to `_get_file_type()` in `openad/workers/file_system.py`.
+-   [OMGUI] - Add the file extension to [`_get_file_type()`](https://github.com/acceleratedscience/omgui/blob/28d2268ac974a187f511c350ec7d18a9d9f9d04b/omgui/gui/gui_services/srv_file_system.py#L343).
 -   Add the display name and correct viewer to `_map_FileType` in `src/utils/maps.ts`
 
 ### Adding support for new molecules file types:

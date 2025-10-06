@@ -1,13 +1,13 @@
 # File Formats
 
-On top of supporting common molecular file formats like `mol`, `sdf` and `smi` for small molecules as well as `cif` and `pdb` for macromolecules, we use our own data structures that are used internally by OpenAD.
+On top of supporting common molecular file formats like `mol`, `sdf` and `smi` for small molecules as well as `cif` and `pdb` for macromolecules, we use our own data structures that are used internally by OMGUI.
 
 -   **`smol.json`** - Small molecule data
 -   **`mmol.json`** - Macromolecule data (at this time only PDB/CIF format supported)
 -   **`molset.json`** - A set of small molecules or macromolecules
 
 > [!CAUTION]
-> Our molecule file formats are in beta. We are working on a more advanced and established data structure, which will eventually replace the data strcutured listed below. Please keep this in mind when integrating OpenAD into your workflow.
+> Our molecule file formats are in beta. We may implement a more advanced and established data structure down the line, which could replace the data strcutured listed below. Please keep this in mind when integrating OMGUI into your workflow.
 
 <br>
 

@@ -140,7 +140,7 @@ class BaseApi implements BaseApiType {
 
 	/**
 	 * When running the development server (port 5173), we need the
-	 * OpenAD server to run elsewhere in order for the API to work.
+	 * OMGUI server to run elsewhere in order for the API to work.
 	 * By default this will be on port 8024, though if we can't find
 	 * it there we'll try the next 10 ports.
 	 */
@@ -163,7 +163,7 @@ class BaseApi implements BaseApiType {
 					]
 					console.log(warnMsg.join('\n'), 'color:orange;font-weight:bold;font-size:14px;text-transform:uppercase', '')
 				} else {
-					// console.log(`The OpenAD API is available on ${API_URL()}`)
+					// console.log(`The OMGUI API is available on ${API_URL()}`)
 				}
 			} else {
 				if (this.altPort < DEFAULT_PORT + 10) {
