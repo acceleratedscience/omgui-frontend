@@ -30,9 +30,7 @@ npm run dev
 
 <br>
 
-## How things work
-
-### Build Process
+## Build Process
 
 OMGUI supports a custom base path. To pull this off, the frontend build is exported with a hardcoded `__BASE_PATH__` which is replaced on the fly by the server. The base path is set in [index-build.html](index-build.html) as a `<base>` tag, which takes care of native browser URLS, and in `vite.config.ts` from where it's loaded into the Vue router, taking care of all Vue-managed links.
 
@@ -52,6 +50,8 @@ npm run build
 4. OMGUI will automatically download the frontend code on the first launch, and will update it whenever a new version number has been detected. The installation process extracts the contents of `dist.tar.gz` and stored them under `/omgui/gui/client`.
 
 <br>
+
+## How things work
 
 ### File Browser
 
