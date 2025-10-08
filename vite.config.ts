@@ -48,8 +48,8 @@ export default defineConfig(({ command }) => {
 				// outDir: 'dist',
 				rollupOptions: {
 					input: {
-                        main: 'index-build.html',
-                    },
+						main: 'index-build.html',
+					},
 				},
 			},
 		}

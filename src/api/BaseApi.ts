@@ -16,21 +16,9 @@ import { useMainStore } from '@/stores/MainStore'
 // - - -
 // Every CLI or Jupyter Notebook runs on a different port, starting at 8024 and up.
 const DEFAULT_PORT: number = 8024
-const regEx = new RegExp(/^(.*)\/proxy\/(\d{4})/)
-const proxyPrefix: string = (window.location.pathname ?? '').match(regEx)?.[1] ?? ''
-const proxyPort: number | null = Number((window.location.pathname ?? '').match(regEx)?.[2]) ?? null
+const BASE_PATH = (window as any).dynamicBasePath
 const API_URL = (port: number = DEFAULT_PORT): string => {
-	return process.env.NODE_ENV == 'development'
-		? // When we're running the development server,
-			// we try connecting to the API on port 8024 or up.
-			`http://127.0.0.1:${port}/api/v1/`
-		: proxyPort
-			? // When we're running the server on a proxy URL, we get the
-				// port from the URL's path and include it into our API calls.
-				// See vite.config.ts for more info about the proxy URL.
-				`${proxyPrefix}/proxy/${proxyPort}/api/v1/`
-			: // For regular use, the API is just a relative path.
-				'/api/v1/'
+	return process.env.NODE_ENV == 'development' ? `http://127.0.0.1:${port}/api/v1/` : `${BASE_PATH}/api/v1/`
 }
 
 // Type declarations
