@@ -34,11 +34,6 @@ export const useConfigStore = defineStore('configStore', {
 				onSuccess: (data) => {
 					this._config = data
 					this._ready = true
-					if (data.base_path) {
-						// Update API base path if needed.
-						// mainApi.apiClient.defaults.baseURL = data.base_path
-						console.log(3333, data.base_path)
-					}
 				},
 				onError: (err) => {
 					console.error('Failed to load config:', err)
